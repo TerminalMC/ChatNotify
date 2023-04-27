@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "chat-notify",
+  "version": "${version}",
+  "name": "ChatNotify",
+  "description": "A client-side Fabric mod that adds audio and visual notifications when certain messages appear in chat.",
+  "authors": [
+    "NotRyken"
+  ],
+  "contact": {
+    "repo": "https://github.com/NotRyken/ChatNotify"
+  },
+  "license": "GPL-3.0",
+  "icon": "assets/chatnotify/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "notryken.chatnotify.client.ChatNotifyClient"
+    ],
+    "main": [
+      "notryken.chatnotify.ChatNotify"
+    ]
+  },
+  "mixins": [
+    "chatnotify.mixins.json"
+  ],
+  "accessWidener": "chatnotify.accesswidener",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

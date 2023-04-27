@@ -1,0 +1,3 @@
+accessWidener v1 named
+accessible method net/minecraft/text/Style of (Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;)Lnet/minecraft/text/Style;
+accessible field net/minecraft/text/MutableText siblings Ljava/util/List;
