@@ -1,9 +1,7 @@
 package notryken.chatnotify.mixin;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundManager;
@@ -11,6 +9,7 @@ import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.*;
+import notryken.chatnotify.config.NotifyOption;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -20,33 +19,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static notryken.chatnotify.client.ChatNotifyClient.*;
+
 @Mixin(ChatHud.class)
 public class MixinChatHud {
 
-    private MinecraftClient client = null;
-    private ClientPlayerEntity player = null;
-    private List<String> playerNameVariations = null;
-    private MutableText modifiedMessage = null;
+    private List<String> wordVariations = null;
+    private Text modifiedMessage = null;
+    private boolean messageIsModified = false;
 
 
-    /**
-     * Injected at net.minecraft.client.gui.hud.ChatHud.addMessage() (HEAD),
-     * takes the 'message' parameter and passes it to notify().
-     */
     @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At("HEAD"))
     private void addMessage(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator, boolean refresh, CallbackInfo ci)
     {
-        modifiedMessage = notify(message);
+        for(NotifyOption option : config.optionList.values())
+        {
+            if(!messageIsModified) { // Stop when one option matches (don't modify multiple times)
+                modifiedMessage = notify(message, option);
+            }
+        }
     }
 
 
-    /**
-     * If modifiedMessage is not null, passes it to
-     * net.minecraft.client.util.chatmessages.breakRenderedChatMessageLines() in
-     * net.minecraft.client.gui.hud.ChatHud.addMessage(),
-     * replacing the existing message.
-     * @param args Arguments to be modified.
-     */
     @ModifyArgs(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/ChatMessages;breakRenderedChatMessageLines(Lnet/minecraft/text/StringVisitable;ILnet/minecraft/client/font/TextRenderer;)Ljava/util/List;"))
     private void replaceMessage(Args args)
     {
@@ -57,73 +51,65 @@ public class MixinChatHud {
         modifiedMessage = null;
     }
 
-    /**
-     * Returns true if 'message' contains the player's name, surrounded by
-     * spaces. Also matches if the name is prefixed with "@", or both prefixed
-     * and suffixed with single or double quotations.
-     * @param message String to search in.
-     * @return boolean result of search.
-     */
-    private boolean msgContainsPlayerName(String message)
+    private String msgContainsStr(String msg, String str)
     {
-        if(playerNameVariations == null)
+        if(wordVariations == null)
         {
-            playerNameVariations = new ArrayList<>();
-            String playerName = player.getName().getString();
-            playerNameVariations.add(playerName);
-            playerNameVariations.add("@" + playerName);
-            playerNameVariations.add("'" + playerName + "'");
-            playerNameVariations.add('"' + playerName + '"');
+            wordVariations = new ArrayList<>();
+            wordVariations.add(str);
+            wordVariations.add("@" + str);
+            wordVariations.add("'" + str + "'");
+            wordVariations.add('"' + str + '"');
+
         }
+        String[] splitMessage = msg.split(" ");
 
-        String[] splitMessage = message.split(" ");
-
+        /* FIXME doesn't currently support checking the first part of the
+        *   message, because that is ignored by the player name check. */
         for(int i = 1; i < splitMessage.length; i++) // Ignore first part;
         {
-            for(String name : playerNameVariations)
+            for(String word : wordVariations)
             {
-                if(splitMessage[i].equalsIgnoreCase(name))
+                if(splitMessage[i].equalsIgnoreCase(word))
                 {
-                    return true;
+                    return word;
                 }
             }
         }
-        return false;
+        return null;
     }
 
-    /**
-     * Calls msgContainsStr() to check if 'message' contains the player's name,
-     * outside of the message prefix (typically the name of the player sending
-     * the message). If it does, creates and returns a new MutableText object
-     * from 'message', with added formatting. Also plays a sound to the player.
-     * @param message The unmodified Text message received by the client.
-     * @return The modified MutableText message to be displayed by the client.
-     */
-    private MutableText notify(Text message) {
+    private Text notify(Text message, NotifyOption option)
+    {
+        String matchedStr = msgContainsStr(message.getString(), option.getWord());
 
-        if(client == null)
-        {
-            client = MinecraftClient.getInstance();
-            player = client.player;
+        if (matchedStr != null) {
+            MutableText newMessage = MutableText.of(message.getContent());
+            Style style = Style.of(
+                    Optional.of(TextColor.fromRgb(option.getColor())),
+                    Optional.of(option.getBold()),
+                    Optional.of(option.getItalic()),
+                    Optional.of(option.getUnderlined()),
+                    Optional.of(option.getStrikethrough()),
+                    Optional.of(option.getObfuscated()),
+                    Optional.empty(),
+                    Optional.empty());
+            newMessage.setStyle(style);
+
+            // Required for correct display on servers.
+            List<Text> siblings = message.getSiblings();
+            newMessage.siblings.addAll(siblings);
+
+            SoundManager soundManager = client.getSoundManager();
+            soundManager.play(new PositionedSoundInstance(
+                    SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.getId(),
+                    SoundCategory.PLAYERS, 1f, 1f, SoundInstance.createRandom(),
+                    false, 0, SoundInstance.AttenuationType.NONE, 0, 0, 0,
+                    true));
+
+            messageIsModified = true;
+            return newMessage;
         }
-        if (player != null) {
-            String strMessage = message.getString();
-
-            if (msgContainsPlayerName(strMessage)) {
-                MutableText newMessage = MutableText.of(message.getContent());
-                Style style = Style.of(Optional.of(TextColor.fromRgb(16757761)), Optional.of(false), Optional.of(false), Optional.of(false), Optional.of(false), Optional.of(false), Optional.empty(), Optional.empty());
-                newMessage.setStyle(style);
-
-                // Required for correct display on servers.
-                List<Text> siblings = message.getSiblings();
-                newMessage.siblings.addAll(siblings);
-
-                SoundManager soundManager = client.getSoundManager();
-                soundManager.play(new PositionedSoundInstance(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.getId(), SoundCategory.PLAYERS, 1f, 1f, SoundInstance.createRandom(), false, 0, SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
-
-                return newMessage;
-            }
-        }
-        return null;
+        return message;
     }
 }
