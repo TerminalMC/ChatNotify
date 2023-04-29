@@ -62,7 +62,7 @@ it's in quotations "like this".
 
 #### Changing the notification color:
 - "color": The hex code of the color you want the chat message to be, e.g. 
-"FF0000" for red. Refer to https://www.rapidtables.com/web/color/RGB_Color.html
+"FF0000" for red. Refer to [this site](https://www.rapidtables.com/web/color/RGB_Color.html).
 
 #### Changing the formatting:
 - "bold", "italic", "underlined", "strikethrough", "obfuscated": Formatting 
@@ -73,7 +73,7 @@ controls. true for ON, false for OFF.
 - "sound": See below.
 
 The "sound" control is the Minecraft ID of the sound you want the notification
-to play. To find a sound, go to [insert link], or, in Minecraft with cheats on,
+to play. To find a sound, [click here](https://github.com/NotRyken/ChatNotify/blob/master/src/main/resources/assets/chatnotify/SoundList.txt), or, in Minecraft with cheats on,
 type the command /playsound, and look through the auto-complete options.
 
 The "sound" can handle both formats, so "minecraft:block.anvil.land" and
