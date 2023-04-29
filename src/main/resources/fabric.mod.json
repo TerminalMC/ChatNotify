@@ -3,7 +3,7 @@
   "id": "chat-notify",
   "version": "${version}",
   "name": "ChatNotify",
-  "description": "A client-side Fabric mod that adds audio and visual notifications when certain messages appear in chat.",
+  "description": "A client-side Fabric mod that allows you to set up audio and visual notifications for when specified words or phrases appear in chat.",
   "authors": [
     "NotRyken"
   ],

@@ -2,11 +2,14 @@ package notryken.chatnotify;
 
 import net.fabricmc.api.ModInitializer;
 
+/**
+ * Unused placeholder class.
+ */
 public class ChatNotify implements ModInitializer
 {
     @Override
     public void onInitialize()
     {
-        // Placeholder for the moment.
+        // Yay, no bugs here!.
     }
 }
