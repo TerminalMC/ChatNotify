@@ -5,12 +5,12 @@ import notryken.chatnotify.misc.Sounds;
 import java.util.Objects;
 
 /**
- * Configurable notification option including text color, text formatting
- * and sound parameters for a specified word.
+ * Configurable notification including text color, text formatting
+ * and sound parameters for a specified trigger word.
  */
-public class NotifyOption
+public class Notification
 {
-    private String word;
+    private String trigger;
     private String color;
     private boolean bold;
     private boolean italic;
@@ -21,7 +21,7 @@ public class NotifyOption
     private Sounds sound;
 
     /**
-     * @param word The string to trigger the notification.
+     * @param trigger The string to trigger the notification.
      * @param strColor The color to make the text, as ab RGB int or hex.
      *                 Defaults to white (int 16777215, hex #FFFFFF) if invalid.
      * @param bold Text format.
@@ -36,11 +36,11 @@ public class NotifyOption
      *                  Accepts the format "minecraft:category.source.sound"
      *                  as well as "CATEGORY_SOURCE_SOUND".
      */
-    public NotifyOption(String word, String strColor, boolean bold, boolean italic,
+    public Notification(String trigger, String strColor, boolean bold, boolean italic,
                         boolean underlined, boolean strikethrough,
                         boolean obfuscated, boolean playSound, String soundName)
     {
-        setWord(word);
+        setTrigger(trigger);
         setColor(parseHexInt(strColor));
         setBold(bold);
         setItalic(italic);
@@ -53,9 +53,9 @@ public class NotifyOption
 
     // Accessors.
 
-    public String getWord()
+    public String getTrigger()
     {
-        return this.word;
+        return this.trigger;
     }
 
     public String getColor()
@@ -100,9 +100,9 @@ public class NotifyOption
 
     // Mutators.
 
-    public void setWord(String word)
+    public void setTrigger(String trigger)
     {
-        this.word = Objects.requireNonNullElse(word, "");
+        this.trigger = Objects.requireNonNullElse(trigger, "");
     }
 
     public void setColor(String color)
@@ -210,12 +210,12 @@ public class NotifyOption
     }
 
     /**
-     * Used to validate a NotifyOption when it is created not using the
+     * Used to validate a Notification when it is created not using the
      * constructor, such as from a config file.
      */
     public void validate()
     {
-        setWord(getWord());
+        setTrigger(getTrigger());
         setColor(parseHexInt(getColor()));
         setBold(getBold());
         setItalic(getItalic());

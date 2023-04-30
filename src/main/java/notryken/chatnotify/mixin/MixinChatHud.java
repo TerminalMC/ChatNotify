@@ -2,7 +2,6 @@ package notryken.chatnotify.mixin;
 
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
-import net.minecraft.client.gui.screen.option.ChatOptionsScreen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundManager;
@@ -10,7 +9,7 @@ import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.*;
 import notryken.chatnotify.client.ChatNotifyClient;
-import notryken.chatnotify.config.NotifyOption;
+import notryken.chatnotify.config.Notification;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -23,8 +22,8 @@ import java.util.regex.Pattern;
 /**
  * The backbone of ChatNotify. Intercepts chat messages as they are sent to
  * the list to be displayed, checks whether they contain any words matching
- * any of the loaded NotifyOption objects, and if so, modifies the color and
- * formatting as specified by the relevant NotifyOption, and plays the
+ * any of the loaded Notification objects, and if so, modifies the color and
+ * formatting as specified by the relevant Notification, and plays the
  * specified notification sound.
  */
 @Mixin(ChatHud.class)
@@ -45,17 +44,11 @@ public class MixinChatHud {
                             int ticks, MessageIndicator indicator,
                             boolean refresh, CallbackInfo ci)
     {
-        /* Don't play sound when in Chat Options screen. When the user adjusts
-        the chat display sliders in Minecraft options, any loaded messages will
-        be refreshed and thus come through here again. This check prevents those
-        messages from being processed, and thus prevents the notification sound
-        from playing every time the user makes an adjustment. */
-        if (!(ChatNotifyClient.client.currentScreen instanceof
-                ChatOptionsScreen))
+        if (!refresh) // Only process new chat messages.
         {
             messageIsModified = false; // Reset.
-            for (NotifyOption option :
-                    ChatNotifyClient.config.getOptions().values())
+            for (Notification option :
+                    ChatNotifyClient.config.getNotifications().values())
             {
                 // Don't modify the message multiple times.
                 if (!messageIsModified) {
@@ -67,17 +60,17 @@ public class MixinChatHud {
 
 
     /**
-     * Calls msgContainsStr() with the message and the NotifyOption's word field
+     * Calls msgContainsStr() with the message and the Notification's word field
      * to check whether the user should be notified. If so, makes a modified
-     * copy of the message using the NotifyOption data and plays the relevant
+     * copy of the message using the Notification data and plays the relevant
      * notification sound.
      * @param message The chat message.
-     * @param option The NotifyOption to use.
+     * @param option The Notification to use.
      * @return The modified message.
      */
-    private Text notify(Text message, NotifyOption option)
+    private Text notify(Text message, Notification option)
     {
-        if (msgContainsStr(message.getString(), option.getWord())) {
+        if (msgContainsStr(message.getString(), option.getTrigger())) {
             MutableText newMessage = MutableText.of(message.getContent());
 
             Style style = Style.of(
@@ -125,7 +118,7 @@ public class MixinChatHud {
      */
     private boolean msgContainsStr(String msg, String str)
     {
-        String username = ChatNotifyClient.config.playerName;
+        String username = ChatNotifyClient.username;
 
         Pattern pattern = Pattern.compile(
                 "(?<!\\w)(\\W?(?i)" + str + "\\W?)(?!\\w)");

@@ -13,22 +13,20 @@ public class Config
 {
     // Whether to reload the config file when joining a world or server.
     public boolean reloadOnJoin = true;
-    public String playerName;
-    // Skip processing for messages sent by the user.
     public boolean ignoreOwnMessages = false;
-    private final Map<Integer,NotifyOption> options;
+    private final Map<Integer, Notification> notifications;
 
     public Config()
     {
-        options = new TreeMap<>();
+        notifications = new TreeMap<>();
 
         // Default notification when the user's name appears in chat.
-        options.put(0, new NotifyOption(
+        notifications.put(0, new Notification(
                 "username", "#FFC400", false, false, false, false, false, true,
                 "ENTITY_EXPERIENCE_ORB_PICKUP"));
 
         // Template notification for the user to modify.
-        options.put(1, new NotifyOption(
+        notifications.put(1, new Notification(
                 "template", "#FFFFFF", false, false, false, false, false, false,
                 "ENTITY_EXPERIENCE_ORB_PICKUP"));
     }
@@ -39,36 +37,38 @@ public class Config
      */
     public void validateOptions()
     {
-        // If option zero (player name) doesn't exist, create it.
-        if(options.get(0) == null) {
-            options.put(0, new NotifyOption(
+        // If notification zero (player name) doesn't exist, create it.
+        if(notifications.get(0) == null) {
+            notifications.put(0, new Notification(
                     "username", "FFFFFF", false, false, false, false, false,
-                    false, "default"));
+                    false, "ENTITY_EXPERIENCE_ORB_PICKUP"));
         }
 
-        for (NotifyOption o : options.values()) {
+        // All notification objects can self-validate.
+        for (Notification o : notifications.values()) {
             o.validate();
         }
     }
 
     /**
-     * Returns the option assigned to the given key, or null if no option exists
-     * for that key. Note that the username option is assigned to key 0.
+     * Returns the notification assigned to the given key, or null if none
+     * exists for that key. Note that the username notification is assigned to
+     * key 0.
      */
-    public NotifyOption getOption(int key)
+    public Notification getNotification(int key)
     {
-        return options.get(key);
+        return notifications.get(key);
     }
 
     /**
      * @return An unmodifiable view of the options map.
      */
-    public Map<Integer,NotifyOption> getOptions()
+    public Map<Integer, Notification> getNotifications()
     {
-        return Collections.unmodifiableMap(options);
+        return Collections.unmodifiableMap(notifications);
     }
 
-    // This method is not currently used.
+    // The methods below are not currently used.
     /**
      * Adds a new option. If there is already an option with the specified key,
      * will move the existing option to a lower priority. If the key is zero,
@@ -80,30 +80,35 @@ public class Config
      * @throws ChatNotifyException If there is already an option with the same
      * word as the given option, or if the key is not valid (0).
      */
-    public void addOption(int key, NotifyOption option) throws ChatNotifyException
+    public void addNotification(int key, Notification option) throws ChatNotifyException
     {
         if (key < 0) {
             throw new ChatNotifyException("Option key must be at least 0");
         }
 
-        for (NotifyOption o : options.values()) {
-            if (o.getWord().equals(option.getWord())) {
+        for (Notification o : notifications.values()) {
+            if (o.getTrigger().equals(option.getTrigger())) {
                 throw new ChatNotifyException(
                         "There is already a notify option for that word.");
             }
         }
 
-        if (key != 0 && options.containsKey(key)) {
+        if (key != 0 && notifications.containsKey(key)) {
             // Shuffle all higher-key options up one, to make space.
-            int end = options.size();
+            int end = notifications.size();
             for (int i = end; i > key; i--) {
-                options.put(i, options.get(i-1)); // Replaces existing option.
+                notifications.put(i, notifications.get(i-1)); // Replaces existing option.
             }
-            options.put(key, option); // Insert new option.
+            notifications.put(key, option); // Insert new option.
         }
         else {
             // Add to end (highest key, lowest priority).
-            options.put(options.size(), option);
+            notifications.put(notifications.size(), option);
         }
+    }
+
+    public void removeNotification(int key)
+    {
+        notifications.remove(key);
     }
 }

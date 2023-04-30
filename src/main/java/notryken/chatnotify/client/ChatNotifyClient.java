@@ -19,8 +19,10 @@ public class ChatNotifyClient implements ClientModInitializer
 {
     public static Config config;
     public static MinecraftClient client = MinecraftClient.getInstance();
+
+    public static String username;
     private static final File settingsFile =
-            new File("config", "chatnotify.json");
+            new File("config", "chat-notify.json");
     private static final Gson gson =
             new GsonBuilder().setPrettyPrinting().create();
 
@@ -44,6 +46,9 @@ public class ChatNotifyClient implements ClientModInitializer
                 config = gson.fromJson(Files.readString(settingsFile.toPath()),
                         Config.class);
                 config.validateOptions(); // Make sure all options are valid.
+                if (username != null) {
+                    config.getNotification(0).setTrigger(username);
+                }
             } catch (IOException | JsonSyntaxException e) {
                 System.err.println(e.getMessage());
 

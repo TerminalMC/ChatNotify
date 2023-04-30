@@ -40,14 +40,14 @@ public class MixinClientPlayNetworkHandler
         String username = player.getName().getString();
 
         if (ChatNotifyClient.config.reloadOnJoin ||
-                !ChatNotifyClient.config.playerName.equals(username))
+                !ChatNotifyClient.username.equals(username))
         {
             ChatNotifyClient.loadConfig();
 
-            ChatNotifyClient.config.playerName = username;
+            ChatNotifyClient.username = username;
 
             // Set the player's name in option zero (username option).
-            ChatNotifyClient.config.getOption(0).setWord(username);
+            ChatNotifyClient.config.getNotification(0).setTrigger(username);
 
             ChatNotifyClient.saveConfig();
         }
