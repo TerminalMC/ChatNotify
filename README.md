@@ -3,6 +3,9 @@ Chat Notify is a simple client-side Minecraft Fabric mod that allows the
 user to set up audio and visual notifications for when specified words or 
 phrases appear in chat.
 
+Note: Some servers (e.g. Hypixel) enforce a non-vanilla color scheme for all
+chat messages, which overrides this mod's custom coloring. I'm looking into ways
+around that, but in any case the sound should always work fine.
 ## Features
 
 #### Notify by changing the message color:
@@ -47,7 +50,7 @@ This is where you can add customized notifications. The first one (number 0) is
 for your username. You can change the color, formatting and sound options, but
 you can't remove it (if you try it will get added back automatically). If you
 don't want it, just set the color to "#FFFFFF" (white) and "playSound" to false.
-Add your own options below that.
+Add your own custom notifications below that.
 
 The number at the start of each notification block indicates its priority 
 (smaller number means higher priority). This is so that if a chat message 
@@ -88,4 +91,4 @@ fast (e.g. by multiple repeating command-blocks).
 
 Discord: Ryken#8585
 
-Public issue tracker: https://github.com/NotRyken/ChatNotify/issues
+[Public issue tracker](https://github.com/NotRyken/ChatNotify/issues)

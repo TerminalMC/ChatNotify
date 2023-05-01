@@ -40,7 +40,7 @@ public class Config
         // If notification zero (player name) doesn't exist, create it.
         if(notifications.get(0) == null) {
             notifications.put(0, new Notification(
-                    "username", "FFFFFF", false, false, false, false, false,
+                    "username", "#FFFFFF", false, false, false, false, false,
                     false, "ENTITY_EXPERIENCE_ORB_PICKUP"));
         }
 
@@ -61,7 +61,7 @@ public class Config
     }
 
     /**
-     * @return An unmodifiable view of the options map.
+     * @return An unmodifiable view of the notification map.
      */
     public Map<Integer, Notification> getNotifications()
     {
@@ -70,40 +70,42 @@ public class Config
 
     // The methods below are not currently used.
     /**
-     * Adds a new option. If there is already an option with the specified key,
-     * will move the existing option to a lower priority. If the key is zero,
-     * or greater than all existing options, the new option will be added in the
-     * lowest priority position.
-     * @param key The priority of the option (lower number is higher priority,
-     *            except for zero, which means lowest priority).
-     * @param option The option.
-     * @throws ChatNotifyException If there is already an option with the same
-     * word as the given option, or if the key is not valid (0).
+     * Adds a new notification. If there is already a notification with the
+     * specified key, will move the existing one to a lower priority. If the
+     * key is zero, or greater than all existing notifications, the new one will
+     * be added in the lowest priority position.
+     * @param key The priority of the notification (lower number is higher
+     *            priority, except for zero, which defaults to the lowest
+     *            priority, because notification zero is reserved).
+     * @param notif The notification.
+     * @throws ChatNotifyException If there is already a notification with the
+     * same trigger as the given notification, or if the key is not valid (<0).
      */
-    public void addNotification(int key, Notification option) throws ChatNotifyException
+    public void addNotification(int key, Notification notif)
+            throws ChatNotifyException
     {
         if (key < 0) {
-            throw new ChatNotifyException("Option key must be at least 0");
+            throw new ChatNotifyException("Key must be at least 0");
         }
 
         for (Notification o : notifications.values()) {
-            if (o.getTrigger().equals(option.getTrigger())) {
+            if (o.getTrigger().equals(notif.getTrigger())) {
                 throw new ChatNotifyException(
-                        "There is already a notify option for that word.");
+                        "There is already a notification for that trigger.");
             }
         }
 
         if (key != 0 && notifications.containsKey(key)) {
-            // Shuffle all higher-key options up one, to make space.
+            // Shuffle all higher-key notifications up one, to make space.
             int end = notifications.size();
             for (int i = end; i > key; i--) {
-                notifications.put(i, notifications.get(i-1)); // Replaces existing option.
+                notifications.put(i, notifications.get(i-1));
             }
-            notifications.put(key, option); // Insert new option.
+            notifications.put(key, notif); // Insert new notification.
         }
         else {
             // Add to end (highest key, lowest priority).
-            notifications.put(notifications.size(), option);
+            notifications.put(notifications.size(), notif);
         }
     }
 

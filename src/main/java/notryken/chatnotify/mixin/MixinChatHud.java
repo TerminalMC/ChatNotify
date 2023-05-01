@@ -47,12 +47,12 @@ public class MixinChatHud {
         if (!refresh) // Only process new chat messages.
         {
             messageIsModified = false; // Reset.
-            for (Notification option :
+            for (Notification notif :
                     ChatNotifyClient.config.getNotifications().values())
             {
                 // Don't modify the message multiple times.
                 if (!messageIsModified) {
-                    modifiedMessage = notify(message, option);
+                    modifiedMessage = notify(message, notif);
                 }
             }
         }
@@ -65,22 +65,22 @@ public class MixinChatHud {
      * copy of the message using the Notification data and plays the relevant
      * notification sound.
      * @param message The chat message.
-     * @param option The Notification to use.
+     * @param notif The Notification to use.
      * @return The modified message.
      */
-    private Text notify(Text message, Notification option)
+    private Text notify(Text message, Notification notif)
     {
-        if (msgContainsStr(message.getString(), option.getTrigger())) {
+        if (msgContainsStr(message.getString(), notif.getTrigger())) {
             MutableText newMessage = MutableText.of(message.getContent());
 
             Style style = Style.of(
                     Optional.of(TextColor.fromRgb(
-                            Integer.parseInt(option.getColor()))),
-                    Optional.of(option.getBold()),
-                    Optional.of(option.getItalic()),
-                    Optional.of(option.getUnderlined()),
-                    Optional.of(option.getStrikethrough()),
-                    Optional.of(option.getObfuscated()),
+                            Integer.parseInt(notif.getColor()))),
+                    Optional.of(notif.getBold()),
+                    Optional.of(notif.getItalic()),
+                    Optional.of(notif.getUnderlined()),
+                    Optional.of(notif.getStrikethrough()),
+                    Optional.of(notif.getObfuscated()),
                     Optional.empty(),
                     Optional.empty());
             newMessage.setStyle(style);
@@ -89,9 +89,9 @@ public class MixinChatHud {
             List<Text> siblings = message.getSiblings();
             newMessage.siblings.addAll(siblings);
 
-            if (option.getPlaySound()) {
+            if (notif.getPlaySound()) {
                 soundManager.play(new PositionedSoundInstance(
-                        option.getSound().getId(), SoundCategory.PLAYERS,
+                        notif.getSound().getId(), SoundCategory.PLAYERS,
                         1f, 1f, SoundInstance.createRandom(), false, 0,
                         SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
             }
@@ -104,13 +104,13 @@ public class MixinChatHud {
 
     /**
      * Uses regex pattern matching to check whether msg contains str.
-     * Specifically, matches "(?<\!\w)(\W?(?i)" + str + "\W?)(?!\w)",
-     * with two exceptions, if the message was sent by the user (starts with
-     * their in-game name). If the global config is to ignore those messages,
-     * it will simply return false. Otherwise, the subject "str" in the regex
-     * will be modified with the first occurrence of the user's in-game name
-     * removed. This is done to avoid name-matching every message sent by the
-     * user, as the 'notify when someone says my name' option defaults to true.
+     * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"},
+     * unless the message was sent by the user (starts with their in-game name).
+     * In that case, If the global config is to ignore those messages, simply
+     * returns false. Otherwise, the first instance of the user's name in the
+     * subject "str" in the regex will be removed. This is done to avoid
+     * name-matching every message sent by the user, as the username
+     * notification option always exists.
      * @param msg The message to search in.
      * @param str The string to search for.
      * @return Whether the string was found in the message, according to the
@@ -130,25 +130,17 @@ public class MixinChatHud {
                 Pattern.compile("(?<!\\w)(\\W?(?i)" + username +
                         "\\W?)(?!\\w)").matcher(msg.split(" ")[0]).find();
 
-        if (ChatNotifyClient.config.ignoreOwnMessages) {
-            // Only process the message if it is not from the user.
-            if (!ownMessage) {
-                return pattern.matcher(msg).find();
-            }
-        }
-        else {
-            if (ownMessage) {
+
+        if (ownMessage) {
+            if (!ChatNotifyClient.config.ignoreOwnMessages) {
                 /* Don't check the first word of the message (avoids
                 name-matching every message sent by the user).
                 */
                 return pattern.matcher(msg.replaceFirst(username, "")).find();
             }
-            else {
-                /* Otherwise, check the whole message (allows notification
-                when another specified player says something).
-                 */
-                return pattern.matcher(msg).find();
-            }
+        }
+        else {
+            return pattern.matcher(msg).find();
         }
         return false;
     }
@@ -168,10 +160,9 @@ public class MixinChatHud {
                             "Ljava/util/List;"))
     private void replaceMessage(Args args)
     {
-        if (modifiedMessage != null)
-        {
+        if (modifiedMessage != null) {
             args.set(0, modifiedMessage);
+            modifiedMessage = null;
         }
-        modifiedMessage = null;
     }
 }

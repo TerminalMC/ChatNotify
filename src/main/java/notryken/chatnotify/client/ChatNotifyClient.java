@@ -53,8 +53,7 @@ public class ChatNotifyClient implements ClientModInitializer
                 System.err.println(e.getMessage());
 
                 if (client.player != null) {
-                    String msg = "ChatNotify Error! @" +
-                            client.player.getName().getString() +
+                    String msg = "ChatNotify Error! @" + username +
                             "\n\nSomething went wrong reading the " +
                             "config file, so it was replaced by the current " +
                             "loaded config. This is typically caused by " +

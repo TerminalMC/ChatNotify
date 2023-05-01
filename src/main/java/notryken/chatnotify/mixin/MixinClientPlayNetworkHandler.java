@@ -15,8 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Provides the option for re-loading the config when the user joins a
  * singleplayer world or server. This is one of the earliest opportunities to
- * get the player's username, which is required for one of the notification
- * options.
+ * get the player's username, which is required for one of the notifications.
  */
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler
@@ -42,14 +41,9 @@ public class MixinClientPlayNetworkHandler
         if (ChatNotifyClient.config.reloadOnJoin ||
                 !ChatNotifyClient.username.equals(username))
         {
-            ChatNotifyClient.loadConfig();
-
             ChatNotifyClient.username = username;
 
-            // Set the player's name in option zero (username option).
-            ChatNotifyClient.config.getNotification(0).setTrigger(username);
-
-            ChatNotifyClient.saveConfig();
+            ChatNotifyClient.loadConfig();
         }
     }
 }
