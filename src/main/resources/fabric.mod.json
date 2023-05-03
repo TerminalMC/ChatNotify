@@ -10,7 +10,7 @@
   "contact": {
     "repo": "https://github.com/NotRyken/ChatNotify"
   },
-  "license": "GPL-3.0",
+  "license": "MIT",
   "icon": "assets/chatnotify/icon.png",
   "environment": "client",
   "entrypoints": {
