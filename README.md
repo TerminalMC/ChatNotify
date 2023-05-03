@@ -89,6 +89,4 @@ fast (e.g. by multiple repeating command-blocks).
 
 ## Contact
 
-Discord: Ryken#8585
-
-[Public issue tracker](https://github.com/NotRyken/ChatNotify/issues)
+[Linktree](https://linktr.ee/notryken)
