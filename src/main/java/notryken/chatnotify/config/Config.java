@@ -23,12 +23,12 @@ public class Config
         // Default notification when the user's name appears in chat.
         notifications.put(0, new Notification(
                 "username", "#FFC400", false, false, false, false, false, true,
-                "ENTITY_EXPERIENCE_ORB_PICKUP"));
+                "minecraft:entity.experience_orb.pickup"));
 
         // Template notification for the user to modify.
         notifications.put(1, new Notification(
                 "template", "#FFFFFF", false, false, false, false, false, false,
-                "ENTITY_EXPERIENCE_ORB_PICKUP"));
+                "minecraft:block.anvil.land"));
     }
 
     /**

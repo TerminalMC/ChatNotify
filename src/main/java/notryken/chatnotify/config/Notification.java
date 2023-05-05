@@ -1,6 +1,11 @@
 package notryken.chatnotify.config;
 
-import notryken.chatnotify.misc.Sounds;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
+import notryken.chatnotify.client.ChatNotifyClient;
 
 import java.util.Objects;
 
@@ -10,6 +15,8 @@ import java.util.Objects;
  */
 public class Notification
 {
+    public static final Identifier DEFAULTSOUND =
+            SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.getId();
     private String trigger;
     private String color;
     private boolean bold;
@@ -18,7 +25,7 @@ public class Notification
     private boolean strikethrough;
     private boolean obfuscated;
     private boolean playSound;
-    private Sounds sound;
+    private Identifier sound;
 
     /**
      * @param trigger The string to trigger the notification.
@@ -33,8 +40,9 @@ public class Notification
      *                  notification.
      * @param soundName The identifier of the Minecraft Sound to play as part
      *                  of the notification.
-     *                  Accepts the format "minecraft:category.source.sound"
-     *                  as well as "CATEGORY_SOURCE_SOUND".
+     *                  Accepts the formats "namespace:category.source.sound",
+     *                  and "category.source.sound" (defaults to "minecraft"
+     *                  namespace).
      */
     public Notification(String trigger, String strColor, boolean bold, boolean italic,
                         boolean underlined, boolean strikethrough,
@@ -48,7 +56,7 @@ public class Notification
         setStrikethrough(strikethrough);
         setObfuscated(obfuscated);
         setPlaySound(playSound);
-        setSound(findSound(soundName));
+        setSound(parseSound(soundName));
     }
 
     // Accessors.
@@ -93,7 +101,7 @@ public class Notification
         return this.playSound;
     }
 
-    public Sounds getSound()
+    public Identifier getSound()
     {
         return this.sound;
     }
@@ -145,10 +153,14 @@ public class Notification
         this.playSound = playSound;
     }
 
-    public void setSound(Sounds sound)
+    public void setSound(Identifier sound)
     {
-        this.sound = Objects.requireNonNullElse(sound,
-                Sounds.ENTITY_EXPERIENCE_ORB_PICKUP);
+        if (validSound(sound)) {
+            this.sound = sound;
+        }
+        else {
+            this.sound = DEFAULTSOUND;
+        }
     }
 
     // Other processing.
@@ -184,30 +196,50 @@ public class Notification
     }
 
     /**
-     * Attempts to match the given string to a Minecraft sound. Accepts the
-     * format "minecraft:category.source.sound" as well as
-     * "CATEGORY_SOURCE_SOUND".
-     * @param soundName The sound identifier.
-     * @return The matched Sounds object. Defaults to
-     * "ENTITY_EXPERIENCE_ORB_PICKUP" if no match was found.
+     * Attempts to match the given string to a Minecraft sound. Accepts format
+     * "namespace:category.source.sound" (such as "minecraft:block.anvil.land").
+     * If the "namespace:" is omitted, will default to "minecraft:".
+     * @param soundName The string representing the sound.
+     * @return The sound Identifier, or a default Identifier if the string
+     * cannot be parsed.
      */
-    public Sounds findSound(String soundName)
+    public Identifier parseSound(String soundName)
     {
-        Sounds sound;
-        try {
-            sound = Sounds.valueOf(soundName);
-        } catch (IllegalArgumentException e1) {
-            try {
-                /* Convert from "minecraft:category.source.sound" to
-                 * CATEGORY_SOURCE_SOUND */
-                soundName = soundName.split(":")[1].replace(".", "_").toUpperCase();
-                sound = Sounds.valueOf(soundName);
-            } catch (IllegalArgumentException | IndexOutOfBoundsException e2) {
-                sound = Sounds.ENTITY_EXPERIENCE_ORB_PICKUP; // Default
-            }
+        Identifier sound = Identifier.tryParse(soundName);
+
+        if (sound == null) {
+            sound = DEFAULTSOUND;
+            this.playSound = false;
         }
         return sound;
     }
+
+    /**
+     * Determines whether the specified Identifier represents a playable sound.
+     * Returns true if the check cannot be run due to the Minecraft state, or
+     * if the Identifier is valid, false otherwise.
+     * @param sound The sound Identifier.
+     * @return The boolean result of validation.
+     */
+    public boolean validSound(Identifier sound) {
+        /*
+        Uses Minecraft's internal approach to sound validation, for lack of
+        a better idea. In theory this should only equal null if it is
+        impossible to play the sound.
+         */
+        boolean valid = true;
+        if (ChatNotifyClient.client.player != null) {
+            if (new PositionedSoundInstance(sound, SoundCategory.PLAYERS,
+                    1f, 1f, SoundInstance.createRandom(), false, 0,
+                    SoundInstance.AttenuationType.NONE, 0, 0, 0, true)
+                    .getSoundSet(ChatNotifyClient.client.getSoundManager())
+                    == null) {
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
 
     /**
      * Used to validate a Notification when it is created not using the

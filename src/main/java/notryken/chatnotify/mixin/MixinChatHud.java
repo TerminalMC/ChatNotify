@@ -92,7 +92,7 @@ public class MixinChatHud {
 
             if (notif.getPlaySound() && !mute) {
                 soundManager.play(new PositionedSoundInstance(
-                        notif.getSound().getId(), SoundCategory.PLAYERS,
+                        notif.getSound(), SoundCategory.PLAYERS,
                         1f, 1f, SoundInstance.createRandom(), false, 0,
                         SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
             }

@@ -25,9 +25,6 @@ public class ChatNotifyClient implements ClientModInitializer
     private static final Gson gson =
             new GsonBuilder().setPrettyPrinting().create();
 
-    /**
-     * Loads options from the config file, or creates it with default options.
-     */
     @Override
     public void onInitializeClient()
     {
