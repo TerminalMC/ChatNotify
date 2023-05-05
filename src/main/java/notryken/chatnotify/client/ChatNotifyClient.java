@@ -19,10 +19,9 @@ public class ChatNotifyClient implements ClientModInitializer
 {
     public static Config config;
     public static MinecraftClient client = MinecraftClient.getInstance();
-
     public static String username;
     private static final File settingsFile =
-            new File("config", "chat-notify.json");
+            new File("config", "chatnotify.json");
     private static final Gson gson =
             new GsonBuilder().setPrettyPrinting().create();
 

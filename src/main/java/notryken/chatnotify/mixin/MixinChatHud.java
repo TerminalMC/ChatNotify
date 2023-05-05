@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 public class MixinChatHud {
 
     SoundManager soundManager = ChatNotifyClient.client.getSoundManager();
+    private boolean mute;
     private Text modifiedMessage = null;
     private boolean messageIsModified;
 
@@ -44,18 +45,18 @@ public class MixinChatHud {
                             int ticks, MessageIndicator indicator,
                             boolean refresh, CallbackInfo ci)
     {
-        if (!refresh) // Only process new chat messages.
-        {
-            messageIsModified = false; // Reset.
-            for (Notification notif :
-                    ChatNotifyClient.config.getNotifications().values())
-            {
-                // Don't modify the message multiple times.
-                if (!messageIsModified) {
-                    modifiedMessage = notify(message, notif);
-                }
+        if (refresh) {
+            mute = true; // Avoid repeat pinging.
+        }
+        messageIsModified = false; // Reset.
+        for (Notification notif :
+                ChatNotifyClient.config.getNotifications().values()) {
+            // Don't modify the message multiple times.
+            if (!messageIsModified) {
+                modifiedMessage = notify(message, notif);
             }
         }
+        mute = false; // Reset.
     }
 
 
@@ -89,7 +90,7 @@ public class MixinChatHud {
             List<Text> siblings = message.getSiblings();
             newMessage.siblings.addAll(siblings);
 
-            if (notif.getPlaySound()) {
+            if (notif.getPlaySound() && !mute) {
                 soundManager.play(new PositionedSoundInstance(
                         notif.getSound().getId(), SoundCategory.PLAYERS,
                         1f, 1f, SoundInstance.createRandom(), false, 0,
