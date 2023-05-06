@@ -22,64 +22,18 @@ around that, but in any case the sound should always work fine.
 
 ## Usage and Configuration
 
-### The config file:
+This mod requires [Mod Menu](https://modrinth.com/mod/modmenu) for 
+configuration (if you aren't using it already, now's a great time to start).
 
-This mod does not currently support an in-game GUI (I'm working on that), but
-you can add your own custom notifications by editing the config file,
-(located at .minecraft/config/chat-notify.json).
+With Mod Menu installed, simply go the mods list, find Chat Notify, click
+on the icon, and it's fairly self-explanatory from there. If you get stuck 
+please let me know, and I'll see if I can make it more clear.
 
-You can edit the json file using notepad, just be careful with the formatting
-or you might lose your changes.
+![](https://i.postimg.cc/Hk7pSQqT/chatnotify-modmenu-1.png)
 
-### General options:
+![](https://i.postimg.cc/fbZ6xmZ2/chatnotify-modmenu-2.png)
 
-- "reloadOnJoin": true or false, default is true. 
-
-This controls whether the mod will re-load the config file every time you join
-a world or server. Leaving it as true allows you to edit the file and apply
-your changes without having to close and re-open Minecraft.
-
-- "ignoreOwnMessages": true/false, default is false. 
-
-Make this true if you only want to be notified of other players' messages. The
-default is false because that makes it easier for you to test stuff.
-
-### Notifications (what you're actually here for):
-
-This is where you can add customized notifications. The first one (number 0) is
-for your username. You can change the color, formatting and sound options, but
-you can't remove it (if you try it will get added back automatically). If you
-don't want it, just set the color to "#FFFFFF" (white) and "playSound" to false.
-Add your own custom notifications below that.
-
-The number at the start of each notification block indicates its priority 
-(smaller number means higher priority). This is so that if a chat message 
-matches two notifications, only the higher-priority (smaller number) one will 
-control the message formatting and sound. You can't have duplicates.
-
-#### Changing the notification trigger:
-- "trigger": The word or phrase that will make the notification happen. 
-Make sure it's in quotations "like this".
-
-#### Changing the notification color:
-- "color": The hex code of the color you want the chat message to be, e.g. 
-"#FF0000" for red. Refer to [this site](https://www.color-hex.com).
-
-#### Changing the formatting:
-- "bold", "italic", "underlined", "strikethrough", "obfuscated": These are all 
-the formatting controls. true for ON, false for OFF.
-
-#### Changing the notification sound:
-- "playSound": true/false. Whether to play the notification sound.
-- "sound": See below.
-
-The "sound" option is the Minecraft ID of the sound you want the notification
-to play. To find a sound, [click here](https://github.com/NotRyken/ChatNotify/blob/master/src/main/resources/assets/chatnotify/SoundList.txt), or, in Minecraft with cheats on,
-type the command /playsound, and look through the auto-complete options.
-
-The "sound" option can handle both formats, so "minecraft:block.anvil.land" and
-"BLOCK_ANVIL_LAND" will both work fine. If you get it wrong, it will default
-to the XP sound.
+![](https://i.postimg.cc/tJ1fXztT/chatnotify-modmenu-3.png)
 
 ### Performance
 I have tried to reduce the workload wherever possible, but ultimately it still
