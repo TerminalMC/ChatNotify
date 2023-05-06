@@ -2,13 +2,15 @@
   "schemaVersion": 1,
   "id": "chat-notify",
   "version": "${version}",
-  "name": "ChatNotify",
+  "name": "Chat Notify",
   "description": "A client-side Fabric mod that allows you to set up audio and visual notifications for when specified words or phrases appear in chat.",
   "authors": [
     "NotRyken"
   ],
   "contact": {
-    "repo": "https://github.com/NotRyken/ChatNotify"
+    "homepage": "https://github.com/NotRyken/ChatNotify",
+    "sources": "https://github.com/NotRyken/ChatNotify",
+    "issues": "https://github.com/NotRyken/ChatNotify/issues"
   },
   "license": "MIT",
   "icon": "assets/chatnotify/icon.png",
@@ -19,6 +21,9 @@
     ],
     "main": [
       "notryken.chatnotify.ChatNotify"
+    ],
+    "modmenu": [
+      "notryken.chatnotify.ui.ModMenuIntegration"
     ]
   },
   "mixins": [

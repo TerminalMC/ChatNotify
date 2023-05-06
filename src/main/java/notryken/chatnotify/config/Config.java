@@ -1,34 +1,24 @@
 package notryken.chatnotify.config;
 
-import notryken.chatnotify.misc.ChatNotifyException;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * User-customizable configuration options class, with defaults.
  */
 public class Config
 {
-    // Whether to reload the config file when joining a world or server.
-    public boolean reloadOnJoin = true;
-    public boolean ignoreOwnMessages = false;
-    private final Map<Integer, Notification> notifications;
+    private String username;
+    private boolean ignoreOwnMessages = false;
+    private final List<Notification> notifications;
 
     public Config()
     {
-        notifications = new TreeMap<>();
+        notifications = new ArrayList<>();
 
         // Default notification when the user's name appears in chat.
-        notifications.put(0, new Notification(
+        notifications.add(0, new Notification(
                 "username", "#FFC400", false, false, false, false, false, true,
-                "minecraft:entity.experience_orb.pickup"));
-
-        // Template notification for the user to modify.
-        notifications.put(1, new Notification(
-                "template", "#FFFFFF", false, false, false, false, false, false,
-                "minecraft:block.anvil.land"));
+                "minecraft:entity.experience_orb.pickup", true));
     }
 
     /**
@@ -39,15 +29,20 @@ public class Config
     {
         // If notification zero (player name) doesn't exist, create it.
         if(notifications.get(0) == null) {
-            notifications.put(0, new Notification(
+            notifications.add(0, new Notification(
                     "username", "#FFFFFF", false, false, false, false, false,
-                    false, "ENTITY_EXPERIENCE_ORB_PICKUP"));
+                    false, "ENTITY_EXPERIENCE_ORB_PICKUP", true));
         }
 
         // All notification objects can self-validate.
-        for (Notification o : notifications.values()) {
+        for (Notification o : notifications) {
             o.validate();
         }
+    }
+
+    public int getNumNotifications()
+    {
+        return this.notifications.size();
     }
 
     /**
@@ -63,50 +58,55 @@ public class Config
     /**
      * @return An unmodifiable view of the notification map.
      */
-    public Map<Integer, Notification> getNotifications()
+    public List<Notification> getNotifications()
     {
-        return Collections.unmodifiableMap(notifications);
+        return Collections.unmodifiableList(notifications);
     }
 
-    // The methods below are not currently used.
-    /**
-     * Adds a new notification. If there is already a notification with the
-     * specified key, will move the existing one to a lower priority. If the
-     * key is zero, or greater than all existing notifications, the new one will
-     * be added in the lowest priority position.
-     * @param key The priority of the notification (lower number is higher
-     *            priority, except for zero, which defaults to the lowest
-     *            priority, because notification zero is reserved).
-     * @param notif The notification.
-     * @throws ChatNotifyException If there is already a notification with the
-     * same trigger as the given notification, or if the key is not valid (<0).
-     */
-    public void addNotification(int key, Notification notif)
-            throws ChatNotifyException
+    public boolean getIgnoreOwnMsg()
     {
-        if (key < 0) {
-            throw new ChatNotifyException("Key must be at least 0");
-        }
+        return ignoreOwnMessages;
+    }
 
-        for (Notification o : notifications.values()) {
-            if (o.getTrigger().equals(notif.getTrigger())) {
-                throw new ChatNotifyException(
-                        "There is already a notification for that trigger.");
+    public void setIgnoreOwnMsg(boolean newStatus)
+    {
+        ignoreOwnMessages = newStatus;
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public void setUsername(String username)
+    {
+        this.username = username;
+        reloadUsername();
+    }
+
+    public void reloadUsername()
+    {
+        notifications.get(0).setTrigger(username);
+    }
+
+
+    public void purge()
+    {
+        Notification notif;
+        Iterator<Notification> iter = notifications.iterator();
+        iter.next(); // Skip the first notification.
+        while (iter.hasNext()) {
+            notif = iter.next();
+            if (!notif.keep || notif.getTrigger().strip().equals("")) {
+                iter.remove();
             }
         }
+    }
 
-        if (key != 0 && notifications.containsKey(key)) {
-            // Shuffle all higher-key notifications up one, to make space.
-            int end = notifications.size();
-            for (int i = end; i > key; i--) {
-                notifications.put(i, notifications.get(i-1));
-            }
-            notifications.put(key, notif); // Insert new notification.
-        }
-        else {
-            // Add to end (highest key, lowest priority).
-            notifications.put(notifications.size(), notif);
-        }
+    public void addNotification()
+    {
+        notifications.add(new Notification("", "#FFFFFF", false, false, false,
+                false, false, true, "minecraft:block.anvil.land", false));
     }
 
     public void removeNotification(int key)

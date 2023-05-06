@@ -36,14 +36,7 @@ public class MixinClientPlayNetworkHandler
         /* This can only be null if Minecraft's internal onGameJoin() method
         breaks completely, which will crash the game anyway.*/
         assert player != null;
-        String username = player.getName().getString();
 
-        if (ChatNotifyClient.config.reloadOnJoin ||
-                !ChatNotifyClient.username.equals(username))
-        {
-            ChatNotifyClient.username = username;
-
-            ChatNotifyClient.loadConfig();
-        }
+        ChatNotifyClient.config.setUsername(player.getName().getString());
     }
 }

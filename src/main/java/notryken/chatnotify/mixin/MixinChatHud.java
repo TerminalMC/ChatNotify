@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static notryken.chatnotify.client.ChatNotifyClient.config;
+
 /**
  * The backbone of ChatNotify. Intercepts chat messages as they are sent to
  * the list to be displayed, checks whether they contain any words matching
@@ -33,6 +35,7 @@ public class MixinChatHud {
     private boolean mute;
     private Text modifiedMessage = null;
     private boolean messageIsModified;
+    private String username;
 
     /**
      * Intercepts chat messages as they are sent to the list to be displayed.
@@ -45,18 +48,20 @@ public class MixinChatHud {
                             int ticks, MessageIndicator indicator,
                             boolean refresh, CallbackInfo ci)
     {
-        if (refresh) {
-            mute = true; // Avoid repeat pinging.
-        }
-        messageIsModified = false; // Reset.
-        for (Notification notif :
-                ChatNotifyClient.config.getNotifications().values()) {
-            // Don't modify the message multiple times.
-            if (!messageIsModified) {
-                modifiedMessage = notify(message, notif);
+        username = config.getUsername();
+        if (username != null) { // Extra guard.
+            if (refresh) {
+                mute = true; // Avoid repeat pinging.
             }
+            messageIsModified = false; // Reset.
+            for (Notification notif : config.getNotifications()) {
+                // Don't modify the message multiple times.
+                if (!messageIsModified) {
+                    modifiedMessage = notify(message, notif);
+                }
+            }
+            mute = false; // Reset.
         }
-        mute = false; // Reset.
     }
 
 
@@ -75,8 +80,7 @@ public class MixinChatHud {
             MutableText newMessage = MutableText.of(message.getContent());
 
             Style style = Style.of(
-                    Optional.of(TextColor.fromRgb(
-                            Integer.parseInt(notif.getColor()))),
+                    Optional.of(TextColor.fromRgb(notif.getColor())),
                     Optional.of(notif.getBold()),
                     Optional.of(notif.getItalic()),
                     Optional.of(notif.getUnderlined()),
@@ -119,8 +123,6 @@ public class MixinChatHud {
      */
     private boolean msgContainsStr(String msg, String str)
     {
-        String username = ChatNotifyClient.username;
-
         Pattern pattern = Pattern.compile(
                 "(?<!\\w)(\\W?(?i)" + str + "\\W?)(?!\\w)");
 
@@ -133,7 +135,7 @@ public class MixinChatHud {
 
 
         if (ownMessage) {
-            if (!ChatNotifyClient.config.ignoreOwnMessages) {
+            if (!config.getIgnoreOwnMsg()) {
                 /* Don't check the first word of the message (avoids
                 name-matching every message sent by the user).
                 */

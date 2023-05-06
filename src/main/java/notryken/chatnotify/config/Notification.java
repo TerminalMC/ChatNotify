@@ -17,8 +17,9 @@ public class Notification
 {
     public static final Identifier DEFAULTSOUND =
             SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.getId();
+    public boolean keep; // Tracks whether the Notification has been modified.
     private String trigger;
-    private String color;
+    private int color;
     private boolean bold;
     private boolean italic;
     private boolean underlined;
@@ -43,10 +44,13 @@ public class Notification
      *                  Accepts the formats "namespace:category.source.sound",
      *                  and "category.source.sound" (defaults to "minecraft"
      *                  namespace).
+     * @param keep Whether the notification should be kept irrespective of
+     *             whether the setter methods are ever called.
      */
     public Notification(String trigger, String strColor, boolean bold, boolean italic,
                         boolean underlined, boolean strikethrough,
-                        boolean obfuscated, boolean playSound, String soundName)
+                        boolean obfuscated, boolean playSound, String soundName,
+                        boolean keep)
     {
         setTrigger(trigger);
         setColor(parseHexInt(strColor));
@@ -57,6 +61,7 @@ public class Notification
         setObfuscated(obfuscated);
         setPlaySound(playSound);
         setSound(parseSound(soundName));
+        this.keep = keep;
     }
 
     // Accessors.
@@ -66,7 +71,7 @@ public class Notification
         return this.trigger;
     }
 
-    public String getColor()
+    public int getColor()
     {
         return this.color;
     }
@@ -111,16 +116,17 @@ public class Notification
     public void setTrigger(String trigger)
     {
         this.trigger = Objects.requireNonNullElse(trigger, "");
+        keep = true;
     }
 
-    public void setColor(String color)
+    public void setColor(int color)
     {
-        int intColor = Integer.parseInt(color);
-        if (intColor < 0 || intColor > 16777215) {
-            this.color = "16777215"; // White.
+        if (color < 0 || color > 16777215) {
+            this.color = 16777215; // White.
         } else {
             this.color = color;
         }
+        keep = true;
     }
 
     public void setBold(boolean bold)
@@ -161,6 +167,7 @@ public class Notification
         else {
             this.sound = DEFAULTSOUND;
         }
+        keep = true;
     }
 
     // Other processing.
@@ -173,7 +180,7 @@ public class Notification
      * @return The validated color as an RGB int, represented by a String.
      * Defaults to white(int 16777215, hex #FFFFFF) if the input is invalid.
      */
-    public String parseHexInt(String strColor)
+    public int parseHexInt(String strColor)
     {
         int color;
         try {
@@ -192,7 +199,7 @@ public class Notification
                 }
             }
         }
-        return String.valueOf(color);
+        return color;
     }
 
     /**
@@ -248,7 +255,7 @@ public class Notification
     public void validate()
     {
         setTrigger(getTrigger());
-        setColor(parseHexInt(getColor()));
+        setColor(getColor());
         setBold(getBold());
         setItalic(getItalic());
         setUnderlined(getUnderlined());
