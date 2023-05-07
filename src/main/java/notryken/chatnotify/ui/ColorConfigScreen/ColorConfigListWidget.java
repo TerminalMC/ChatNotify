@@ -11,7 +11,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import notryken.chatnotify.config.Notification;
 import org.jetbrains.annotations.NotNull;
@@ -34,10 +33,35 @@ public class ColorConfigListWidget extends
         this.addEntry(new ConfigEntry.ColorField(width, notif, client, this));
         this.addEntry(new ConfigEntry.ColorOptionHeader(width, notif, client, this));
 
-        int[] colors = new int[]
-                {16711680, 16753920, 16776960, 32768, 255, 8388736};
-        for (int c : colors) {
-            this.addEntry(new ConfigEntry.ColorOption(width, notif, client, this, parent, c));
+        // These arrays match 1:1 for the color and its name.
+        int[] intColors = new int[]
+                {
+                        16711680,
+                        16753920,
+                        16776960,
+                        32768,
+                        255,
+                        8388736,
+                        16777215,
+                        8421504,
+                        0
+                };
+        String[] strColors = new String[]
+                {
+                        "Red",
+                        "Orange",
+                        "Yellow",
+                        "Green",
+                        "Blue",
+                        "Purple",
+                        "White",
+                        "Gray",
+                        "Black"
+                };
+
+        for (int idx = 0; idx < intColors.length; idx++) {
+            this.addEntry(new ConfigEntry.ColorOption(width, notif, client,
+                    this, parent, intColors[idx], strColors[idx]));
         }
     }
 
@@ -110,12 +134,10 @@ public class ColorConfigListWidget extends
             {
                 super(width, notif, listWidget);
 
-                this.options.add(new PressableTextWidget(width / 2 - 120, 0,
-                        240, 12, Text.literal("color-hex.com")
-                        .formatted(Formatting.BLUE)
-                        .formatted(Formatting.UNDERLINE),
-                        (button) -> openLink(client, parent),
-                        client.textRenderer));
+                this.options.add(ButtonWidget.builder(
+                                Text.literal("color-hex.com"),
+                                (button) -> openLink(client, parent))
+                        .size(80, 20).position(width / 2 - 40, 0).build());
             }
 
             private void openLink(MinecraftClient client, Screen parent)
@@ -169,25 +191,16 @@ public class ColorConfigListWidget extends
         public static class ColorOption extends ConfigEntry
         {
             ColorOption(int width, Notification notif, MinecraftClient client,
-                        ColorConfigListWidget listWidget, Screen parent, int color)
+                        ColorConfigListWidget listWidget, Screen parent,
+                        int intColor, String strColor)
             {
                 super(width, notif, listWidget);
-
-                String strColor = switch (color) {
-                    case 16711680 -> "Red";
-                    case 16753920 -> "Orange";
-                    case 16776960 -> "Yellow";
-                    case 32768 -> "Green";
-                    case 255 -> "Blue";
-                    case 8388736 -> "Purple";
-                    default -> "Super unique color (real)";
-                };
 
                 MutableText message = MutableText.of(Text.literal(strColor).
                         getContent());
 
                 Style style = Style.of(
-                        Optional.of(TextColor.fromRgb(color)),
+                        Optional.of(TextColor.fromRgb(intColor)),
                         Optional.of(false),
                         Optional.of(false),
                         Optional.of(false),
@@ -199,7 +212,7 @@ public class ColorConfigListWidget extends
 
                 this.options.add(ButtonWidget.builder(message, (button) ->
                 {
-                    notif.setColor(color);
+                    notif.setColor(intColor);
                     client.setScreen(new ColorConfigScreen(parent, notif));
                 }).size(240, 20).position(width / 2 - 120, 0).build());
             }

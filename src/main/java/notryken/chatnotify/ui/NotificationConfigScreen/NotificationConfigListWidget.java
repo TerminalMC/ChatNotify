@@ -3,6 +3,7 @@ package notryken.chatnotify.ui.NotificationConfigScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.MutableText;
@@ -12,6 +13,7 @@ import net.minecraft.text.TextColor;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.ui.ColorConfigScreen.ColorConfigScreen;
 import notryken.chatnotify.ui.SoundConfigScreen.SoundConfigScreen;
+import notryken.chatnotify.ui.TriggerConfigScreen.TriggerConfigScreen;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -22,13 +24,21 @@ public class NotificationConfigListWidget extends
         ElementListWidget<NotificationConfigListWidget.ConfigEntry>
 {
     public NotificationConfigListWidget(MinecraftClient client, int i, int j, int k, int l,
-                                        int m, Notification notif)
+                                        int m, Notification notif, Screen parent)
     {
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
 
         this.addEntry(new ConfigEntry.TriggerFieldHeader(width, notif, client, this));
-        this.addEntry(new ConfigEntry.TriggerField(width, notif, client, this));
+        this.addEntry(new ConfigEntry.TriggerConfigType(width, notif, client, parent, this));
+
+        if (notif.isKeyTrigger()) {
+            this.addEntry(new ConfigEntry.TriggerConfig(width, notif, this));
+        }
+        else {
+            this.addEntry(new ConfigEntry.TriggerField(width, notif, client, this));
+        }
+
         this.addEntry(new ConfigEntry.ColorFieldHeader(width, notif, client, this));
         this.addEntry(new ConfigEntry.ColorConfig(width, notif, this));
         this.addEntry(new ConfigEntry.FormatConfigHeader(width, notif, client, this));
@@ -37,10 +47,16 @@ public class NotificationConfigListWidget extends
         this.addEntry(new ConfigEntry.FormatConfigUnderlined(width, notif, this));
         this.addEntry(new ConfigEntry.FormatConfigStrikethrough(width, notif, this));
         this.addEntry(new ConfigEntry.FormatConfigObfuscated(width, notif, this));
-        this.addEntry(new ConfigEntry.SoundConfigHeader(width, notif, client, this));
-        this.addEntry(new ConfigEntry.SoundConfigPlay(width, notif, this));
         this.addEntry(new ConfigEntry.SoundFieldHeader(width, notif, client, this));
         this.addEntry(new ConfigEntry.SoundConfig(width, notif, this));
+    }
+
+    public void openTriggerConfig(Notification notif)
+    {
+        if (client != null) {
+            client.setScreen(
+                    new TriggerConfigScreen(client.currentScreen, notif));
+        }
     }
 
     public void openColorConfig(Notification notif)
@@ -120,12 +136,44 @@ public class NotificationConfigListWidget extends
             }
         }
 
-        public static class TriggerField extends ConfigEntry
+        public static class TriggerConfigType extends ConfigEntry
         {
+            TriggerConfigType(int width, Notification notif,
+                              MinecraftClient client, Screen parent,
+                              NotificationConfigListWidget listWidget)
+            {
+                super(width, notif, listWidget);
+                this.options.add(CyclingButtonWidget.onOffBuilder(
+                        Text.literal("Event Key"), Text.literal("Word/Phrase"))
+                                .initially(notif.isKeyTrigger())
+                                .build(this.width / 2 - 120, 0, 240, 20,
+                                        Text.literal("Type"),
+                                        (button, status) -> {
+                                    notif.setKeyTrigger(status);
+                                    client.setScreen(new NotificationConfigScreen(parent, notif));
+                                }));
+
+            }
+        }
+
+        public static class TriggerConfig extends ConfigEntry
+        {
+            TriggerConfig(int width, Notification notif,
+                          NotificationConfigListWidget listWidget)
+            {
+                super(width, notif, listWidget);
+
+                this.options.add(ButtonWidget.builder(
+                                Text.literal(notif.getTrigger()),
+                                (button) -> listWidget.openTriggerConfig(notif))
+                        .size(240, 20).position(width / 2 - 120, 0).build());
+            }
+        }
+
+        public static class TriggerField extends ConfigEntry {
             TriggerField(int width, Notification notif,
                          @NotNull MinecraftClient client,
-                         NotificationConfigListWidget listWidget)
-            {
+                         NotificationConfigListWidget listWidget) {
                 super(width, notif, listWidget);
 
                 TextFieldWidget triggerEdit = new TextFieldWidget(
@@ -138,8 +186,7 @@ public class NotificationConfigListWidget extends
                 this.options.add(triggerEdit);
             }
 
-            public void setTrigger(String trigger)
-            {
+            public void setTrigger(String trigger) {
                 this.notif.setTrigger(trigger);
             }
         }
@@ -205,7 +252,7 @@ public class NotificationConfigListWidget extends
             {
                 super(width, notif, listWidget);
                 this.options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(notif.getBold())
+                        .initially(notif.isBold())
                         .build(this.width / 2 - 120, 0, 240, 20,
                                 Text.literal("Bold"), (button, status) ->
                                         notif.setBold(status)));
@@ -219,7 +266,7 @@ public class NotificationConfigListWidget extends
             {
                 super(width, notif, listWidget);
                 this.options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(notif.getItalic())
+                        .initially(notif.isItalic())
                         .build(this.width / 2 - 120, 0, 240, 20,
                                 Text.literal("Italic"), (button, status) ->
                                         notif.setItalic(status)));
@@ -233,7 +280,7 @@ public class NotificationConfigListWidget extends
             {
                 super(width, notif, listWidget);
                 this.options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(notif.getUnderlined())
+                        .initially(notif.isUnderlined())
                         .build(this.width / 2 - 120, 0, 240, 20,
                                 Text.literal("Underlined"), (button, status) ->
                                         notif.setUnderlined(status)));
@@ -247,7 +294,7 @@ public class NotificationConfigListWidget extends
             {
                 super(width, notif, listWidget);
                 this.options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(notif.getStrikethrough())
+                        .initially(notif.isStrikethrough())
                         .build(this.width / 2 - 120, 0, 240, 20,
                                 Text.literal("Strikethrough"), (button, status) ->
                                         notif.setStrikethrough(status)));
@@ -261,37 +308,10 @@ public class NotificationConfigListWidget extends
             {
                 super(width, notif, listWidget);
                 this.options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(notif.getObfuscated())
+                        .initially(notif.isObfuscated())
                         .build(this.width / 2 - 120, 0, 240, 20,
                                 Text.literal("Obfuscated"), (button, status) ->
                                         notif.setObfuscated(status)));
-            }
-        }
-
-        public static class SoundConfigHeader extends ConfigEntry
-        {
-            SoundConfigHeader(int width, Notification notif,
-                              @NotNull MinecraftClient client,
-                              NotificationConfigListWidget listWidget)
-            {
-                super(width, notif, listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Sound Options"),
-                        client.textRenderer));
-            }
-        }
-
-        public static class SoundConfigPlay extends ConfigEntry
-        {
-            SoundConfigPlay(int width, Notification notif,
-                            NotificationConfigListWidget listWidget)
-            {
-                super(width, notif, listWidget);
-                this.options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(notif.getPlaySound())
-                        .build(this.width / 2 - 120, 288, 240, 20,
-                                Text.literal("Sound"), (button, status) ->
-                                        notif.setPlaySound(status)));
             }
         }
 

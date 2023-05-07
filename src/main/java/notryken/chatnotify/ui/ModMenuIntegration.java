@@ -49,8 +49,8 @@ public class ModMenuIntegration implements ModMenuApi
                     {
                         assert this.client != null;
                         this.client.setScreen(this.parent);
-                        config.purge();
                         config.reloadUsername();
+                        config.purge();
                     })
                     .size(240, 20).position(this.width / 2 - 120,
                             this.height - 27).build());

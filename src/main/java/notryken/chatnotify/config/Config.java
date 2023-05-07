@@ -17,8 +17,8 @@ public class Config
 
         // Default notification when the user's name appears in chat.
         notifications.add(0, new Notification(
-                "username", "#FFC400", false, false, false, false, false, true,
-                "minecraft:entity.experience_orb.pickup", true));
+                "username", false, "#FFC400", false, false, false, false,
+                false, 1f, 1f, "minecraft:entity.experience_orb.pickup", true));
     }
 
     /**
@@ -30,8 +30,8 @@ public class Config
         // If notification zero (player name) doesn't exist, create it.
         if(notifications.get(0) == null) {
             notifications.add(0, new Notification(
-                    "username", "#FFFFFF", false, false, false, false, false,
-                    false, "ENTITY_EXPERIENCE_ORB_PICKUP", true));
+                    "username", false, "#FFFFFF", false, false, false, false,
+                    false, 0f, 1f, "ENTITY_EXPERIENCE_ORB_PICKUP", true));
         }
 
         // All notification objects can self-validate.
@@ -86,7 +86,9 @@ public class Config
 
     public void reloadUsername()
     {
-        notifications.get(0).setTrigger(username);
+        Notification notif = notifications.get(0);
+        notif.setKeyTrigger(false);
+        notif.setTrigger(username == null ? "username" : username);
     }
 
 
@@ -97,7 +99,8 @@ public class Config
         iter.next(); // Skip the first notification.
         while (iter.hasNext()) {
             notif = iter.next();
-            if (!notif.keep || notif.getTrigger().strip().equals("")) {
+            if (!notif.isPersistent() || notif.getTrigger().strip().equals(""))
+            {
                 iter.remove();
             }
         }
@@ -105,8 +108,9 @@ public class Config
 
     public void addNotification()
     {
-        notifications.add(new Notification("", "#FFFFFF", false, false, false,
-                false, false, true, "minecraft:block.anvil.land", false));
+        notifications.add(new Notification("", false, "#FFFFFF", false, false,
+                false, false, false, 1f, 1f, "minecraft:block.anvil.land",
+                false));
     }
 
     public void removeNotification(int key)

@@ -76,16 +76,27 @@ public class MixinChatHud {
      */
     private Text notify(Text message, Notification notif)
     {
-        if (msgContainsStr(message.getString(), notif.getTrigger())) {
+        boolean doNotify;
+
+        if (notif.isKeyTrigger()) {
+            doNotify = ((TranslatableTextContent) message.getContent())
+                    .getKey().contains(notif.getTrigger());
+        }
+        else {
+            doNotify = msgContainsStr(message.getString(), notif.getTrigger());
+        }
+
+        if (doNotify) {
+
             MutableText newMessage = MutableText.of(message.getContent());
 
             Style style = Style.of(
                     Optional.of(TextColor.fromRgb(notif.getColor())),
-                    Optional.of(notif.getBold()),
-                    Optional.of(notif.getItalic()),
-                    Optional.of(notif.getUnderlined()),
-                    Optional.of(notif.getStrikethrough()),
-                    Optional.of(notif.getObfuscated()),
+                    Optional.of(notif.isBold()),
+                    Optional.of(notif.isItalic()),
+                    Optional.of(notif.isUnderlined()),
+                    Optional.of(notif.isStrikethrough()),
+                    Optional.of(notif.isObfuscated()),
                     Optional.empty(),
                     Optional.empty());
             newMessage.setStyle(style);
@@ -94,10 +105,12 @@ public class MixinChatHud {
             List<Text> siblings = message.getSiblings();
             newMessage.siblings.addAll(siblings);
 
-            if (notif.getPlaySound() && !mute) {
+            if (!mute) {
                 soundManager.play(new PositionedSoundInstance(
                         notif.getSound(), SoundCategory.PLAYERS,
-                        1f, 1f, SoundInstance.createRandom(), false, 0,
+                        notif.getSoundVolume(),
+                        notif.getSoundPitch(),
+                        SoundInstance.createRandom(), false, 0,
                         SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
             }
 

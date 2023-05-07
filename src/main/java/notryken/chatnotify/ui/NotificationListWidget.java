@@ -8,6 +8,7 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.ui.NotificationConfigScreen.NotificationConfigScreen;
 
 import java.util.ArrayList;
@@ -92,8 +93,13 @@ public class NotificationListWidget extends
             ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
             if (index >= 0) {
-                widgets.add(ButtonWidget.builder(Text.literal(
-                        config.getNotification(index).getTrigger()),
+                Notification notif = config.getNotification(index);
+                String label = notif.getTrigger();
+                if (notif.isKeyTrigger() && !label.equals("")) {
+                    label = "[Key] " + label;
+                }
+
+                widgets.add(ButtonWidget.builder(Text.literal(label),
                         (button) -> listWidget.openNotificationConfig(index))
                         .size(240, 20).position(width / 2 - 120, 0).build());
 

@@ -15,21 +15,24 @@ import java.util.Objects;
  */
 public class Notification
 {
-    public static final Identifier DEFAULTSOUND =
+    private static final Identifier DEFAULTSOUND =
             SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.getId();
-    public boolean keep; // Tracks whether the Notification has been modified.
     private String trigger;
+    private boolean keyTrigger;
     private int color;
     private boolean bold;
     private boolean italic;
     private boolean underlined;
     private boolean strikethrough;
     private boolean obfuscated;
-    private boolean playSound;
+    private float soundVolume;
+    private float soundPitch;
     private Identifier sound;
+    private boolean persistent;
 
     /**
      * @param trigger The string to trigger the notification.
+     * @param keyTrigger Whether the trigger is an event key.
      * @param strColor The color to make the text, as ab RGB int or hex.
      *                 Defaults to white (int 16777215, hex #FFFFFF) if invalid.
      * @param bold Text format.
@@ -37,31 +40,34 @@ public class Notification
      * @param underlined Text format.
      * @param strikethrough Text format.
      * @param obfuscated Text format.
-     * @param playSound Whether to play the specified sound as part of the
-     *                  notification.
+     * @param soundVolume Sound volume.
+     * @param soundPitch Sound pitch.
      * @param soundName The identifier of the Minecraft Sound to play as part
      *                  of the notification.
      *                  Accepts the formats "namespace:category.source.sound",
      *                  and "category.source.sound" (defaults to "minecraft"
      *                  namespace).
-     * @param keep Whether the notification should be kept irrespective of
-     *             whether the setter methods are ever called.
+     * @param persistent Whether the notification should be kept irrespective of
+     *                   whether it is ever modified.
      */
-    public Notification(String trigger, String strColor, boolean bold, boolean italic,
+    public Notification(String trigger, boolean keyTrigger,
+                        String strColor, boolean bold, boolean italic,
                         boolean underlined, boolean strikethrough,
-                        boolean obfuscated, boolean playSound, String soundName,
-                        boolean keep)
+                        boolean obfuscated, float soundVolume,
+                        float soundPitch, String soundName, boolean persistent)
     {
         setTrigger(trigger);
+        setKeyTrigger(keyTrigger);
         setColor(parseHexInt(strColor));
         setBold(bold);
         setItalic(italic);
         setUnderlined(underlined);
         setStrikethrough(strikethrough);
         setObfuscated(obfuscated);
-        setPlaySound(playSound);
+        setSoundVolume(soundVolume);
+        setSoundPitch(soundPitch);
         setSound(parseSound(soundName));
-        this.keep = keep;
+        setPersistent(persistent);
     }
 
     // Accessors.
@@ -71,39 +77,49 @@ public class Notification
         return this.trigger;
     }
 
+    public boolean isKeyTrigger()
+    {
+        return this.keyTrigger;
+    }
+
     public int getColor()
     {
         return this.color;
     }
 
-    public boolean getBold()
+    public boolean isBold()
     {
         return this.bold;
     }
 
-    public boolean getItalic()
+    public boolean isItalic()
     {
         return this.italic;
     }
 
-    public boolean getUnderlined()
+    public boolean isUnderlined()
     {
         return this.underlined;
     }
 
-    public boolean getStrikethrough()
+    public boolean isStrikethrough()
     {
         return this.strikethrough;
     }
 
-    public boolean getObfuscated()
+    public boolean isObfuscated()
     {
         return this.obfuscated;
     }
 
-    public boolean getPlaySound()
+    public float getSoundVolume()
     {
-        return this.playSound;
+        return this.soundVolume;
+    }
+
+    public float getSoundPitch()
+    {
+        return this.soundPitch;
     }
 
     public Identifier getSound()
@@ -111,12 +127,22 @@ public class Notification
         return this.sound;
     }
 
+    public boolean isPersistent()
+    {
+        return this.persistent;
+    }
+
     // Mutators.
 
     public void setTrigger(String trigger)
     {
         this.trigger = Objects.requireNonNullElse(trigger, "");
-        keep = true;
+        persistent = true;
+    }
+
+    public void setKeyTrigger(boolean keyTrigger)
+    {
+        this.keyTrigger = keyTrigger;
     }
 
     public void setColor(int color)
@@ -126,7 +152,7 @@ public class Notification
         } else {
             this.color = color;
         }
-        keep = true;
+        persistent = true;
     }
 
     public void setBold(boolean bold)
@@ -154,9 +180,22 @@ public class Notification
         this.obfuscated = obfuscated;
     }
 
-    public void setPlaySound(boolean playSound)
+    public void setSoundVolume(float soundVolume)
     {
-        this.playSound = playSound;
+        /*
+        Minecraft internally restricts the sound to between 0.0f (min) and
+        1.0f (max), so no need to repeat that check here.
+         */
+        this.soundVolume = soundVolume;
+    }
+
+    public void setSoundPitch(float soundPitch)
+    {
+        /*
+        Minecraft internally restricts the sound to between 0.5f (min) and
+        2.0f (max), so no need to repeat that check here.
+         */
+        this.soundPitch = soundPitch;
     }
 
     public void setSound(Identifier sound)
@@ -167,7 +206,12 @@ public class Notification
         else {
             this.sound = DEFAULTSOUND;
         }
-        keep = true;
+        persistent = true;
+    }
+
+    public void setPersistent(boolean persistent)
+    {
+        this.persistent = persistent;
     }
 
     // Other processing.
@@ -216,7 +260,7 @@ public class Notification
 
         if (sound == null) {
             sound = DEFAULTSOUND;
-            this.playSound = false;
+            this.soundVolume = 0;
         }
         return sound;
     }
@@ -247,7 +291,6 @@ public class Notification
         return valid;
     }
 
-
     /**
      * Used to validate a Notification when it is created not using the
      * constructor, such as from a config file.
@@ -256,12 +299,6 @@ public class Notification
     {
         setTrigger(getTrigger());
         setColor(getColor());
-        setBold(getBold());
-        setItalic(getItalic());
-        setUnderlined(getUnderlined());
-        setStrikethrough(getStrikethrough());
-        setObfuscated(getObfuscated());
-        setPlaySound(getPlaySound());
         setSound(getSound());
     }
 }
