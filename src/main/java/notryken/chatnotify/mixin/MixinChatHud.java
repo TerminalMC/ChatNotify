@@ -15,11 +15,13 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static notryken.chatnotify.client.ChatNotifyClient.config;
+import static notryken.chatnotify.client.ChatNotifyClient.lastSentMessage;
 
 /**
  * The backbone of ChatNotify. Intercepts chat messages as they are sent to
@@ -31,11 +33,10 @@ import static notryken.chatnotify.client.ChatNotifyClient.config;
 @Mixin(ChatHud.class)
 public class MixinChatHud {
 
-    SoundManager soundManager = ChatNotifyClient.client.getSoundManager();
-    private boolean mute;
+    private final SoundManager soundManager =
+            ChatNotifyClient.client.getSoundManager();
     private Text modifiedMessage = null;
-    private boolean messageIsModified;
-    private String username;
+
 
     /**
      * Intercepts chat messages as they are sent to the list to be displayed.
@@ -48,87 +49,112 @@ public class MixinChatHud {
                             int ticks, MessageIndicator indicator,
                             boolean refresh, CallbackInfo ci)
     {
-        username = config.getUsername();
-        if (username != null) { // Extra guard.
+        String username = config.getUsername();
+        if (username != null) {
+            boolean mute = false;
+            String strMsg = message.getString();
+
             if (refresh) {
-                mute = true; // Avoid repeat pinging.
+                // Avoid repeat pinging, but maintain message coloring.
+                mute = true;
             }
-            messageIsModified = false; // Reset.
-            for (Notification notif : config.getNotifications()) {
-                // Don't modify the message multiple times.
-                if (!messageIsModified) {
-                    modifiedMessage = notify(message, notif);
-                }
+
+            strMsg = preProcess(strMsg, username);
+
+            if (strMsg != null) {
+                checkNotifications(message, strMsg, mute);
             }
-            mute = false; // Reset.
         }
     }
 
 
-    /**
-     * Calls msgContainsStr() with the message and the Notification's word field
-     * to check whether the user should be notified. If so, makes a modified
-     * copy of the message using the Notification data and plays the relevant
-     * notification sound.
-     * @param message The chat message.
-     * @param notif The Notification to use.
-     * @return The modified message.
-     */
-    private Text notify(Text message, Notification notif)
+    private String preProcess(String strMsg, String username)
     {
-        boolean doNotify;
-
-        if (notif.isKeyTrigger()) {
-            doNotify = ((TranslatableTextContent) message.getContent())
-                    .getKey().contains(notif.getTrigger());
-        }
-        else {
-            doNotify = msgContainsStr(message.getString(), notif.getTrigger());
-        }
-
-        if (doNotify) {
-
-            MutableText newMessage = MutableText.of(message.getContent());
-
-            Style style = Style.of(
-                    Optional.of(TextColor.fromRgb(notif.getColor())),
-                    Optional.of(notif.isBold()),
-                    Optional.of(notif.isItalic()),
-                    Optional.of(notif.isUnderlined()),
-                    Optional.of(notif.isStrikethrough()),
-                    Optional.of(notif.isObfuscated()),
-                    Optional.empty(),
-                    Optional.empty());
-            newMessage.setStyle(style);
-
-            // Required for correct display on servers.
-            List<Text> siblings = message.getSiblings();
-            newMessage.siblings.addAll(siblings);
-
-            if (!mute) {
-                soundManager.play(new PositionedSoundInstance(
-                        notif.getSound(), SoundCategory.PLAYERS,
-                        notif.getSoundVolume(),
-                        notif.getSoundPitch(),
-                        SoundInstance.createRandom(), false, 0,
-                        SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
+        if (lastSentMessage != null) {
+            if (strMsg.contains(username) && strMsg.contains(lastSentMessage)) {
+                lastSentMessage = null;
+                if (config.getIgnoreOwnMsg()) {
+                    strMsg = null;
+                }
+                else {
+                    strMsg = strMsg.replaceFirst(username, "");
+                }
             }
-
-            messageIsModified = true;
-            return newMessage;
         }
-        return message;
+        return strMsg;
+    }
+
+
+    private void checkNotifications(Text message, String strMsg, boolean mute)
+    {
+        modifiedMessage = null; // Reset.
+        for (Notification notif : config.getNotifications()) {
+            if (modifiedMessage == null) { // Don't modify multiple times.
+                boolean doNotify;
+
+                if (notif.isKeyTrigger()) {
+                    if (message.getContent() instanceof TranslatableTextContent ttc) {
+                        doNotify = ttc.getKey().contains(notif.getTrigger());
+                    }
+                    else {
+                        doNotify = false;
+                    }
+                }
+                else {
+                    doNotify = msgContainsStr(strMsg, notif.getTrigger());
+                }
+
+                if (doNotify) {
+                    notify(message, notif, mute);
+                }
+            }
+        }
+    }
+
+
+
+    private void notify(Text message, Notification notif, boolean mute)
+    {
+        MutableText newMessage = MutableText.of(message.getContent());
+
+        Style style = Style.of(
+                Optional.of(TextColor.fromRgb(notif.getColor())),
+                Optional.of(notif.isBold()),
+                Optional.of(notif.isItalic()),
+                Optional.of(notif.isUnderlined()),
+                Optional.of(notif.isStrikethrough()),
+                Optional.of(notif.isObfuscated()),
+                Optional.empty(),
+                Optional.empty());
+
+        // Remove server-enforced formatting codes.
+        // Could possibly target the sibling that contains the trigger,
+        // and only remove the format code for that one.
+        // FIXME?
+        List<Text> siblings = message.getSiblings();
+        List<Text> newSiblings = new ArrayList<>();
+        for (Text t : siblings)
+        {
+            newSiblings.add(Text.of(TextVisitFactory.removeFormattingCodes(StringVisitable.plain(t.getString()))));
+        }
+        newMessage.siblings.addAll(newSiblings);
+
+        newMessage.setStyle(style);
+
+        if (!mute) {
+            soundManager.play(new PositionedSoundInstance(
+                    notif.getSound(), SoundCategory.PLAYERS,
+                    notif.getSoundVolume(),
+                    notif.getSoundPitch(),
+                    SoundInstance.createRandom(), false, 0,
+                    SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
+        }
+        modifiedMessage = newMessage;
     }
 
     /**
      * Uses regex pattern matching to check whether msg contains str.
-     * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"},
-     * unless the message was sent by the user (starts with their in-game name).
-     * In that case, If the global config is to ignore those messages, simply
-     * returns false. Otherwise, the first instance of the user's name in the
-     * subject "str" in the regex will be removed. This is done to avoid
-     * name-matching every message sent by the user, as the username
-     * notification option always exists.
+     * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
      * @param msg The message to search in.
      * @param str The string to search for.
      * @return Whether the string was found in the message, according to the
@@ -138,27 +164,7 @@ public class MixinChatHud {
     {
         Pattern pattern = Pattern.compile(
                 "(?<!\\w)(\\W?(?i)" + str + "\\W?)(?!\\w)");
-
-        /* Identifies a message as being sent by the user if their name appears
-        as the first word of the message.
-         */
-        boolean ownMessage =
-                Pattern.compile("(?<!\\w)(\\W?(?i)" + username +
-                        "\\W?)(?!\\w)").matcher(msg.split(" ")[0]).find();
-
-
-        if (ownMessage) {
-            if (!config.getIgnoreOwnMsg()) {
-                /* Don't check the first word of the message (avoids
-                name-matching every message sent by the user).
-                */
-                return pattern.matcher(msg.replaceFirst(username, "")).find();
-            }
-        }
-        else {
-            return pattern.matcher(msg).find();
-        }
-        return false;
+        return pattern.matcher(msg).find();
     }
 
     /**

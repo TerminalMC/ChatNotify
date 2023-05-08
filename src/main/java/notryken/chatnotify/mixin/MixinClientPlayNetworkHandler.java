@@ -39,4 +39,11 @@ public class MixinClientPlayNetworkHandler
 
         ChatNotifyClient.config.setUsername(player.getName().getString());
     }
+
+    @Inject(method = "sendChatMessage", at = @At("HEAD"))
+    public void sendChatMessage(String content, CallbackInfo ci)
+    {
+        System.out.println("sendChatMessage(" + content + ")");
+        ChatNotifyClient.lastSentMessage = content;
+    }
 }
