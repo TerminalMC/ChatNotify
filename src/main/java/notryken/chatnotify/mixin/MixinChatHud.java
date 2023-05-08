@@ -89,7 +89,7 @@ public class MixinChatHud {
     {
         modifiedMessage = null; // Reset.
         for (Notification notif : config.getNotifications()) {
-            if (modifiedMessage == null) { // Don't modify multiple times.
+            if (modifiedMessage == null && notif.enabled) {
                 boolean doNotify = false;
                 String trigger = "";
 
@@ -149,7 +149,7 @@ public class MixinChatHud {
             modifiedMessage = message;
         }
 
-        if (!mute) {
+        if (!mute && notif.getControl(2)) {
             soundManager.play(new PositionedSoundInstance(
                     notif.getSound(), SoundCategory.PLAYERS,
                     notif.soundVolume, notif.soundPitch,
