@@ -42,11 +42,11 @@ public class SoundConfigListWidget extends
                         "minecraft:entity.experience_orb.pickup",
                         "minecraft:block.anvil.land",
                         "minecraft:block.bell.use",
+                        "minecraft:block.amethyst_block.hit",
                         "minecraft:ui.button.click",
                         "minecraft:block.beacon.activate",
                         "minecraft:block.beacon.deactivate",
                         "minecraft:entity.elder_guardian.curse",
-                        "minecraft:entity.enderman.teleport",
                         "minecraft:entity.generic.explode",
                 };
         for (String s : sounds) {
