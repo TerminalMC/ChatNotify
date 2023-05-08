@@ -1,11 +1,8 @@
 # Chat Notify
-Chat Notify is a simple client-side Minecraft Fabric mod that allows the 
+Chat Notify is a client-side Minecraft Fabric mod that allows the 
 user to set up audio and visual notifications for when specified words or 
 phrases appear in chat.
 
-Note: Some servers (e.g. Hypixel) enforce a non-vanilla color scheme for all
-chat messages, which overrides this mod's custom coloring. I'm looking into ways
-around that, but in any case the sound should always work fine.
 ## Features
 
 #### Notify by changing the message color:
@@ -18,7 +15,7 @@ around that, but in any case the sound should always work fine.
 
 ![Example of custom formatting.](https://i.postimg.cc/43xgsnBz/chatnotify-customformatting.png)
 
-#### Notify by playing a Minecraft sound (see configuration options below).
+#### Notify by playing a Minecraft sound (see configuration below).
 
 ## Usage and Configuration
 
