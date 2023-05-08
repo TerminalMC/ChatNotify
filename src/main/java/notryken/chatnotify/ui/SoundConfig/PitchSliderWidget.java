@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui.SoundConfigScreen;
+package notryken.chatnotify.ui.SoundConfig;
 
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
@@ -25,14 +25,14 @@ public class PitchSliderWidget extends SliderWidget
     protected void updateMessage()
     {
         Text message = Text.literal("Pitch: ").append(
-                Text.literal(String.valueOf(notif.getSoundPitch())));
+                Text.literal(String.valueOf(notif.soundPitch)));
         this.setMessage(message);
     }
 
     @Override
     protected void applyValue()
     {
-        notif.setSoundPitch(
-                (float) (Math.round(10 * (this.value * 1.5 + 0.5)) / 10.0D));
+        notif.soundPitch =
+                (float) (Math.round(10 * (this.value * 1.5 + 0.5)) / 10.0D);
     }
 }

@@ -16,9 +16,9 @@ public class Config
         notifications = new ArrayList<>();
 
         // Default notification when the user's name appears in chat.
-        notifications.add(0, new Notification(
-                "username", false, "#FFC400", false, false, false, false,
-                false, 1f, 1f, "minecraft:entity.experience_orb.pickup", true));
+        notifications.add(0, new Notification(true, true, false, true,
+                "username", false, "#FFC400", false, false, false, false, false,
+                1f, 1f, "entity.experience_orb.pickup", true));
     }
 
     /**
@@ -29,9 +29,9 @@ public class Config
     {
         // If notification zero (player name) doesn't exist, create it.
         if(notifications.get(0) == null) {
-            notifications.add(0, new Notification(
-                    "username", false, "#FFFFFF", false, false, false, false,
-                    false, 0f, 1f, "ENTITY_EXPERIENCE_ORB_PICKUP", true));
+            notifications.add(0, new Notification(true, true, false, true,
+                    "username", false, "#FFC400", false, false, false, false,
+                    false, 1f, 1f, "entity.experience_orb.pickup", true));
         }
 
         // All notification objects can self-validate.
@@ -87,7 +87,7 @@ public class Config
     public void reloadUsername()
     {
         Notification notif = notifications.get(0);
-        notif.setKeyTrigger(false);
+        notif.setTriggerIsKey(false);
         notif.setTrigger(username == null ? "username" : username);
     }
 
@@ -99,18 +99,21 @@ public class Config
         iter.next(); // Skip the first notification.
         while (iter.hasNext()) {
             notif = iter.next();
-            if (!notif.isPersistent() || notif.getTrigger().strip().equals(""))
+            if (!notif.persistent || notif.getTrigger().strip().equals(""))
             {
                 iter.remove();
             }
+        }
+        for (Notification notif2: notifications) {
+            notif2.purgeTriggers();
         }
     }
 
     public void addNotification()
     {
-        notifications.add(new Notification("", false, "#FFFFFF", false, false,
-                false, false, false, 1f, 1f, "minecraft:block.anvil.land",
-                false));
+        notifications.add(new Notification(true, false, false, true, "", false,
+                "#FFFFFF", false, false, false, false, false, 1f, 1f,
+                "entity.experience_orb.pickup", false));
     }
 
     public void removeNotification(int key)

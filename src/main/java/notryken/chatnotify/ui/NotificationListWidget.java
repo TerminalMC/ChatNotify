@@ -9,7 +9,7 @@ import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.ui.NotificationConfigScreen.NotificationConfigScreen;
+import notryken.chatnotify.ui.NotificationConfig.NotificationConfigScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +72,7 @@ public class NotificationListWidget extends
         return super.getScrollbarPositionX() + 32;
     }
 
-    public static class NotificationEntry extends
-            ElementListWidget.Entry<NotificationListWidget.NotificationEntry>
+    public static class NotificationEntry extends Entry<NotificationEntry>
     {
         private final List<ClickableWidget> buttons;
         private final NotificationListWidget listWidget;
@@ -87,16 +86,23 @@ public class NotificationListWidget extends
             this.index = index;
         }
 
-        public static NotificationListWidget.NotificationEntry
-        create(int index, int width, NotificationListWidget listWidget)
+        public static NotificationEntry create(int index, int width,
+                                               NotificationListWidget
+                                                       listWidget)
         {
             ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
             if (index >= 0) {
                 Notification notif = config.getNotification(index);
                 String label = notif.getTrigger();
-                if (notif.isKeyTrigger() && !label.equals("")) {
+                if (notif.triggerIsKey && !label.equals("")) {
                     label = "[Key] " + label;
+                }
+                else {
+                    int numVariations = notif.getNumTriggers() - 1;
+                    if (numVariations > 0) {
+                        label = label + " (" + numVariations + " variations)";
+                    }
                 }
 
                 widgets.add(ButtonWidget.builder(Text.literal(label),

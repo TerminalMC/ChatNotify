@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui.SoundConfigScreen;
+package notryken.chatnotify.ui.SoundConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -21,24 +21,36 @@ import java.util.List;
 public class SoundConfigListWidget extends
         ElementListWidget<SoundConfigListWidget.ConfigEntry>
 {
+    private final Notification notif;
+    private final Screen parentScreen;
+
     public SoundConfigListWidget(MinecraftClient client, int i, int j, int k, int l,
-                                 int m, Notification notif, Screen parent)
+                                 int m, Notification notif, Screen parentScreen)
     {
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
+        this.notif = notif;
+        this.parentScreen = parentScreen;
 
-        this.addEntry(new ConfigEntry.SoundFieldHeader(width, notif, client, this));
-        this.addEntry(new ConfigEntry.SoundLink(width, notif, client, parent, this));
+        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Sound ID"));
+        this.addEntry(new ConfigEntry.SoundLink(width, notif, client, this));
         this.addEntry(new ConfigEntry.SoundField(width, notif, client, this));
+        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Quick Sounds"));
 
-        this.addEntry(new ConfigEntry.SoundOptionHeader(width, notif, client, this));
-
-        String[] sounds = new String[]{
-                "minecraft:entity.experience_orb.pickup",
-                "minecraft:block.anvil.land",
-                "minecraft:ui.button.click"};
+        String[] sounds = new String[]
+                {
+                        "minecraft:entity.experience_orb.pickup",
+                        "minecraft:block.anvil.land",
+                        "minecraft:block.bell.use",
+                        "minecraft:ui.button.click",
+                        "minecraft:block.beacon.activate",
+                        "minecraft:block.beacon.deactivate",
+                        "minecraft:entity.elder_guardian.curse",
+                        "minecraft:entity.enderman.teleport",
+                        "minecraft:entity.generic.explode",
+                };
         for (String s : sounds) {
-            this.addEntry(new ConfigEntry.SoundOption(width, notif, client, this, parent, s));
+            this.addEntry(new ConfigEntry.SoundOption(width, notif, this, s));
         }
 
         this.addEntry(new ConfigEntry.SoundConfigHeader(width, notif, client, this));
@@ -47,6 +59,14 @@ public class SoundConfigListWidget extends
 
         this.addEntry(new ConfigEntry.SoundTestHeader(width, notif, client, this));
         this.addEntry(new ConfigEntry.SoundTest(width, notif, client, this));
+    }
+
+    public void refreshScreen()
+    {
+        if (client != null) {
+            client.setScreen(
+                    new SoundConfigScreen(this.parentScreen, this.notif));
+        }
     }
 
     public int getRowWidth()
@@ -59,8 +79,7 @@ public class SoundConfigListWidget extends
         return super.getScrollbarPositionX() + 32;
     }
 
-    public abstract static class ConfigEntry extends
-            Entry<ConfigEntry>
+    public abstract static class ConfigEntry extends Entry<ConfigEntry>
     {
         public List<ClickableWidget> options;
         public Notification notif;
@@ -97,15 +116,16 @@ public class SoundConfigListWidget extends
             return this.options;
         }
 
-        public static class SoundFieldHeader extends ConfigEntry
+        public static class Header extends ConfigEntry
         {
-            SoundFieldHeader(int width, Notification notif,
-                             @NotNull MinecraftClient client,
-                             SoundConfigListWidget listWidget)
+            Header(int width, Notification notif,
+                   @NotNull MinecraftClient client,
+                   SoundConfigListWidget listWidget,
+                   String label)
             {
                 super(width, notif, listWidget);
                 this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Sound ID"),
+                        Text.literal(label),
                         client.textRenderer));
             }
         }
@@ -114,23 +134,23 @@ public class SoundConfigListWidget extends
         {
             SoundLink(int width, Notification notif,
                       @NotNull MinecraftClient client,
-                      Screen parent, SoundConfigListWidget listWidget)
+                      SoundConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
                 this.options.add(ButtonWidget.builder(
                         Text.literal("Sound List"),
-                        (button) -> openLink(client, parent))
+                        (button) -> openLink(client))
                         .size(80, 20).position(width / 2 - 40, 0).build());
             }
 
-            private void openLink(MinecraftClient client, Screen parent)
+            private void openLink(MinecraftClient client)
             {
                 client.setScreen(new ConfirmLinkScreen(confirmed -> {
                     if (confirmed) {
                         Util.getOperatingSystem().open("https://github.com/NotRyken/ChatNotify/blob/master/src/main/resources/assets/chatnotify/SoundList.txt");
                     }
-                    client.setScreen(new SoundConfigScreen(parent, notif));
+                    listWidget.refreshScreen();
                 }, "https://github.com/NotRyken/ChatNotify/blob/master/src/main/resources/assets/chatnotify/SoundList.txt", true));
             }
         }
@@ -159,23 +179,10 @@ public class SoundConfigListWidget extends
             }
         }
 
-        public static class SoundOptionHeader extends ConfigEntry
-        {
-            SoundOptionHeader(int width, Notification notif,
-                              @NotNull MinecraftClient client,
-                              SoundConfigListWidget listWidget)
-            {
-                super(width, notif, listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Quick Sounds"),
-                        client.textRenderer));
-            }
-        }
-
         public static class SoundOption extends ConfigEntry
         {
-            SoundOption(int width, Notification notif, MinecraftClient client,
-                        SoundConfigListWidget listWidget, Screen parent,
+            SoundOption(int width, Notification notif,
+                        SoundConfigListWidget listWidget,
                         String sound)
             {
                 super(width, notif, listWidget);
@@ -184,7 +191,7 @@ public class SoundConfigListWidget extends
                         (button) ->
                 {
                     notif.setSound(notif.parseSound(sound));
-                    client.setScreen(new SoundConfigScreen(parent, notif));
+                    listWidget.refreshScreen();
                 }).size(240, 20).position(width / 2 - 120, 0).build());
             }
         }
@@ -209,7 +216,7 @@ public class SoundConfigListWidget extends
             {
                 super(width, notif, listWidget);
                 this.options.add(new VolumeSliderWidget(width / 2 - 120, 0,
-                        240, 20, notif.getSoundVolume(), notif));
+                        240, 20, notif.soundVolume, notif));
             }
         }
 
@@ -221,7 +228,7 @@ public class SoundConfigListWidget extends
                 super(width, notif, listWidget);
                 this.options.add(new PitchSliderWidget(width / 2 - 120, 0,
                         240, 20,
-                        PitchSliderWidget.sliderValue(notif.getSoundPitch()),
+                        PitchSliderWidget.sliderValue(notif.soundPitch),
                         notif));
             }
         }
@@ -252,8 +259,8 @@ public class SoundConfigListWidget extends
                                 new PositionedSoundInstance(
                                         notif.getSound(),
                                         SoundCategory.PLAYERS,
-                                        notif.getSoundVolume(),
-                                        notif.getSoundPitch(),
+                                        notif.soundVolume,
+                                        notif.soundPitch,
                                         SoundInstance.createRandom(),
                                         false, 0,
                                         SoundInstance.AttenuationType.NONE,

@@ -7,7 +7,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import notryken.chatnotify.client.ChatNotifyClient;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Configurable notification including text color, text formatting
@@ -17,22 +17,20 @@ public class Notification
 {
     private static final Identifier DEFAULTSOUND =
             SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.getId();
-    private String trigger;
-    private boolean keyTrigger;
+    public boolean enabled;
+    private final List<Boolean> controls = new ArrayList<>();
+    private final List<String> triggers = new ArrayList<>();
+    public boolean triggerIsKey;
     private int color;
-    private boolean bold;
-    private boolean italic;
-    private boolean underlined;
-    private boolean strikethrough;
-    private boolean obfuscated;
-    private float soundVolume;
-    private float soundPitch;
+    private final List<Boolean> formatControls = new ArrayList<>();
+    public float soundVolume;
+    public float soundPitch;
     private Identifier sound;
-    private boolean persistent;
+    public boolean persistent;
 
     /**
      * @param trigger The string to trigger the notification.
-     * @param keyTrigger Whether the trigger is an event key.
+     * @param triggerIsKey Whether the trigger is an event key.
      * @param strColor The color to make the text, as ab RGB int or hex.
      *                 Defaults to white (int 16777215, hex #FFFFFF) if invalid.
      * @param bold Text format.
@@ -50,36 +48,64 @@ public class Notification
      * @param persistent Whether the notification should be kept irrespective of
      *                   whether it is ever modified.
      */
-    public Notification(String trigger, boolean keyTrigger,
+    public Notification(boolean enabled, boolean doColor, boolean doFormat,
+                        boolean doSound, String trigger, boolean triggerIsKey,
                         String strColor, boolean bold, boolean italic,
                         boolean underlined, boolean strikethrough,
                         boolean obfuscated, float soundVolume,
                         float soundPitch, String soundName, boolean persistent)
     {
+        this.enabled = enabled;
+        controls.add(doColor);
+        controls.add(doFormat);
+        controls.add(doSound);
         setTrigger(trigger);
-        setKeyTrigger(keyTrigger);
+        this.triggerIsKey = triggerIsKey;
         setColor(parseHexInt(strColor));
-        setBold(bold);
-        setItalic(italic);
-        setUnderlined(underlined);
-        setStrikethrough(strikethrough);
-        setObfuscated(obfuscated);
-        setSoundVolume(soundVolume);
-        setSoundPitch(soundPitch);
+        formatControls.add(bold);
+        formatControls.add(italic);
+        formatControls.add(underlined);
+        formatControls.add(strikethrough);
+        formatControls.add(obfuscated);
+        this.soundVolume = soundVolume;
+        this.soundPitch = soundPitch;
         setSound(parseSound(soundName));
-        setPersistent(persistent);
+        this.persistent = persistent;
     }
 
     // Accessors.
 
-    public String getTrigger()
+    /**
+     * Key -> 0:color, 1:format, 2:sound.
+     */
+    public boolean getControl(int index)
     {
-        return this.trigger;
+        return this.controls.get(index);
     }
 
-    public boolean isKeyTrigger()
+
+    public String getTrigger()
     {
-        return this.keyTrigger;
+        return this.triggers.get(0);
+    }
+
+    public String getTrigger(int index)
+    {
+        if (this.triggers.size() > index)
+        {
+            return this.triggers.get(index);
+        }
+        return null;
+    }
+
+    public Iterator<String> getTriggerIterator()
+    {
+        return this.triggers.iterator();
+    }
+
+    public int getNumTriggers()
+    {
+        return this.triggers.size();
     }
 
     public int getColor()
@@ -87,39 +113,12 @@ public class Notification
         return this.color;
     }
 
-    public boolean isBold()
+    /**
+     * Key -> 0:bold, 1:italic, 2:underlined, 3:strikethrough, 4:obfuscated.
+     */
+    public boolean getFormatControl(int index)
     {
-        return this.bold;
-    }
-
-    public boolean isItalic()
-    {
-        return this.italic;
-    }
-
-    public boolean isUnderlined()
-    {
-        return this.underlined;
-    }
-
-    public boolean isStrikethrough()
-    {
-        return this.strikethrough;
-    }
-
-    public boolean isObfuscated()
-    {
-        return this.obfuscated;
-    }
-
-    public float getSoundVolume()
-    {
-        return this.soundVolume;
-    }
-
-    public float getSoundPitch()
-    {
-        return this.soundPitch;
+        return this.formatControls.get(index);
     }
 
     public Identifier getSound()
@@ -127,22 +126,86 @@ public class Notification
         return this.sound;
     }
 
-    public boolean isPersistent()
+    // Mutators.
+
+    /**
+     * 'Smart' setter; prevents enabling if all sub-options are disabled.
+     */
+    public void setEnabled(boolean enabled)
     {
-        return this.persistent;
+        if (this.enabled || controls.contains(true)) {
+            this.enabled = enabled;
+        }
     }
 
-    // Mutators.
+    /**
+     * 'Smart' setter; disables the parent if all sibling control are disabled,
+     * and enables the parent when enabled. If the control has sub-controls,
+     * prevents enabling it if they are all disabled.
+     * Key -> 0:color, 1:format, 2:sound.
+     */
+    public void setControl(int index, boolean value)
+    {
+        if (index != 1 || controls.get(index) || formatControls.contains(true))
+        {
+            this.controls.set(index, value);
+            if (!value) {
+                if (!controls.contains(true)) {
+                    enabled = false;
+                }
+            }
+            else {
+                this.enabled = true;
+            }
+        }
+    }
 
     public void setTrigger(String trigger)
     {
-        this.trigger = Objects.requireNonNullElse(trigger, "");
+        if (this.triggers.size() > 0) {
+            this.triggers.set(0, Objects.requireNonNullElse(trigger, ""));
+        }
+        else {
+            this.triggers.add(Objects.requireNonNullElse(trigger, ""));
+        }
         persistent = true;
     }
 
-    public void setKeyTrigger(boolean keyTrigger)
+    public void setTrigger(int index, String trigger)
     {
-        this.keyTrigger = keyTrigger;
+        if (this.triggers.size() > index && trigger != null && !this.triggers.contains(trigger)) {
+            this.triggers.set(index, trigger);
+        }
+    }
+
+    public void addTrigger(String trigger)
+    {
+        if (trigger != null && !this.triggers.contains(trigger)) {
+            this.triggers.add(trigger);
+        }
+    }
+
+    public void purgeTriggers()
+    {
+        Iterator<String> iter = this.triggers.iterator();
+        iter.next();
+        while (iter.hasNext()) {
+            if (iter.next().strip().equals("")) {
+                iter.remove();
+            }
+        }
+    }
+
+    public void removeTrigger(int index)
+    {
+        if (this.triggers.size() > index) {
+            this.triggers.remove(index);
+        }
+    }
+
+    public void setTriggerIsKey(boolean triggerIsKey)
+    {
+        this.triggerIsKey = triggerIsKey;
     }
 
     public void setColor(int color)
@@ -152,50 +215,26 @@ public class Notification
         } else {
             this.color = color;
         }
+        this.controls.set(0, this.color != 16777215);
         persistent = true;
     }
 
-    public void setBold(boolean bold)
+    /**
+     * 'Smart' setter; disables the parent if all sibling options are disabled,
+     * and enables the parent when enabled.
+     * Key -> 0:bold, 1:italic, 2:underlined, 3:strikethrough, 4:obfuscated.
+     */
+    public void setFormatControl(int index, boolean value)
     {
-        this.bold = bold;
-    }
-
-    public void setItalic(boolean italic)
-    {
-        this.italic = italic;
-    }
-
-    public void setUnderlined(boolean underlined)
-    {
-        this.underlined = underlined;
-    }
-
-    public void setStrikethrough(boolean strikethrough)
-    {
-        this.strikethrough = strikethrough;
-    }
-
-    public void setObfuscated(boolean obfuscated)
-    {
-        this.obfuscated = obfuscated;
-    }
-
-    public void setSoundVolume(float soundVolume)
-    {
-        /*
-        Minecraft internally restricts the sound to between 0.0f (min) and
-        1.0f (max), so no need to repeat that check here.
-         */
-        this.soundVolume = soundVolume;
-    }
-
-    public void setSoundPitch(float soundPitch)
-    {
-        /*
-        Minecraft internally restricts the sound to between 0.5f (min) and
-        2.0f (max), so no need to repeat that check here.
-         */
-        this.soundPitch = soundPitch;
+        formatControls.set(index, value);
+        if (!value) {
+            if (!formatControls.contains(true)) {
+                setControl(1, false);
+            }
+        }
+        else {
+            setControl(1, true);
+        }
     }
 
     public void setSound(Identifier sound)
@@ -207,11 +246,6 @@ public class Notification
             this.sound = DEFAULTSOUND;
         }
         persistent = true;
-    }
-
-    public void setPersistent(boolean persistent)
-    {
-        this.persistent = persistent;
     }
 
     // Other processing.

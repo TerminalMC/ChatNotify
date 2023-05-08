@@ -2,7 +2,6 @@ package notryken.chatnotify.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
 import notryken.chatnotify.config.Config;
@@ -44,8 +43,9 @@ public class ChatNotifyClient implements ClientModInitializer
                 config.validateOptions(); // Make sure all options are valid.
                 config.setUsername(Objects.requireNonNullElse(
                         config.getUsername(), "username"));
-            } catch (IOException | JsonSyntaxException e) {
+            } catch (Exception e) {
                 System.err.println(e.getMessage());
+                config = null;
             }
         }
         if (config == null) {

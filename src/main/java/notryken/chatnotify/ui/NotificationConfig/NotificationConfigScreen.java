@@ -1,30 +1,29 @@
-package notryken.chatnotify.ui.ColorConfigScreen;
+package notryken.chatnotify.ui.NotificationConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import notryken.chatnotify.config.Notification;
 
-public class ColorConfigScreen extends GameOptionsScreen
+public class NotificationConfigScreen extends GameOptionsScreen
 {
     private final Notification notif;
+    private NotificationConfigListWidget options;
 
-    private ColorConfigListWidget options;
-
-    public ColorConfigScreen(Screen parent, Notification notif)
+    public NotificationConfigScreen(Screen parent, Notification notif)
     {
         super(parent, MinecraftClient.getInstance().options,
-                Text.literal("Notification Message Color"));
+                Text.literal("Notification Settings"));
         this.notif = notif;
     }
 
     protected void init()
     {
-        this.options = new ColorConfigListWidget(this.client, this.width,
+        this.options = new NotificationConfigListWidget(this.client, this.width,
                 this.height, 32, this.height - 32, 25, this.notif, this.parent);
         this.addSelectableChild(this.options);
 

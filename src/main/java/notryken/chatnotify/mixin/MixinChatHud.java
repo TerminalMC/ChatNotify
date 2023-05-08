@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -90,22 +90,25 @@ public class MixinChatHud {
         modifiedMessage = null; // Reset.
         for (Notification notif : config.getNotifications()) {
             if (modifiedMessage == null) { // Don't modify multiple times.
-                boolean doNotify;
+                boolean doNotify = false;
+                String trigger = "";
 
-                if (notif.isKeyTrigger()) {
+                if (notif.triggerIsKey) {
                     if (message.getContent() instanceof TranslatableTextContent ttc) {
-                        doNotify = ttc.getKey().contains(notif.getTrigger());
-                    }
-                    else {
-                        doNotify = false;
+                        trigger = notif.getTrigger();
+                        doNotify = ttc.getKey().contains(trigger);
                     }
                 }
                 else {
-                    doNotify = msgContainsStr(strMsg, notif.getTrigger());
+                    Iterator<String> iter = notif.getTriggerIterator();
+                    while (iter.hasNext() && !doNotify) {
+                        trigger = iter.next();
+                        doNotify = msgContainsStr(strMsg, trigger);
+                    }
                 }
 
                 if (doNotify) {
-                    notify(message, notif, mute);
+                    notify(message, trigger, notif, mute);
                 }
             }
         }
@@ -113,43 +116,47 @@ public class MixinChatHud {
 
 
 
-    private void notify(Text message, Notification notif, boolean mute)
+    private void notify(Text message, String trigger, Notification notif, boolean mute)
     {
-        MutableText newMessage = MutableText.of(message.getContent());
+        if (notif.getControl(0) || notif.getControl(1)) {
+            MutableText newMessage = MutableText.of(message.getContent());
 
-        Style style = Style.of(
-                Optional.of(TextColor.fromRgb(notif.getColor())),
-                Optional.of(notif.isBold()),
-                Optional.of(notif.isItalic()),
-                Optional.of(notif.isUnderlined()),
-                Optional.of(notif.isStrikethrough()),
-                Optional.of(notif.isObfuscated()),
-                Optional.empty(),
-                Optional.empty());
+            Style style = Style.of(
+                    Optional.of(TextColor.fromRgb(notif.getColor())),
+                    Optional.of(notif.getFormatControl(0)),
+                    Optional.of(notif.getFormatControl(1)),
+                    Optional.of(notif.getFormatControl(2)),
+                    Optional.of(notif.getFormatControl(3)),
+                    Optional.of(notif.getFormatControl(4)),
+                    Optional.empty(),
+                    Optional.empty());
 
-        // Remove server-enforced formatting codes.
-        // Could possibly target the sibling that contains the trigger,
-        // and only remove the format code for that one.
-        // FIXME?
-        List<Text> siblings = message.getSiblings();
-        List<Text> newSiblings = new ArrayList<>();
-        for (Text t : siblings)
-        {
-            newSiblings.add(Text.of(TextVisitFactory.removeFormattingCodes(StringVisitable.plain(t.getString()))));
+            List<Text> siblings = message.getSiblings();
+            int max = siblings.size();
+            for (int i = 0; i < max; i++) {
+                Text s = siblings.get(i);
+                if (s.getString().contains(trigger)) {
+                    siblings.set(i, Text.of(TextVisitFactory.removeFormattingCodes(StringVisitable.plain(s.getString()))));
+                }
+            }
+            newMessage.siblings.addAll(siblings);
+
+            newMessage.setStyle(style);
+
+            modifiedMessage = newMessage;
         }
-        newMessage.siblings.addAll(newSiblings);
-
-        newMessage.setStyle(style);
+        else {
+            modifiedMessage = message;
+        }
 
         if (!mute) {
             soundManager.play(new PositionedSoundInstance(
                     notif.getSound(), SoundCategory.PLAYERS,
-                    notif.getSoundVolume(),
-                    notif.getSoundPitch(),
+                    notif.soundVolume, notif.soundPitch,
                     SoundInstance.createRandom(), false, 0,
                     SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
         }
-        modifiedMessage = newMessage;
+
     }
 
     /**

@@ -11,6 +11,7 @@ import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
+import notryken.chatnotify.client.ChatNotifyClient;
 
 import static notryken.chatnotify.client.ChatNotifyClient.config;
 
@@ -51,6 +52,7 @@ public class ModMenuIntegration implements ModMenuApi
                         this.client.setScreen(this.parent);
                         config.reloadUsername();
                         config.purge();
+                        ChatNotifyClient.saveConfig();
                     })
                     .size(240, 20).position(this.width / 2 - 120,
                             this.height - 27).build());

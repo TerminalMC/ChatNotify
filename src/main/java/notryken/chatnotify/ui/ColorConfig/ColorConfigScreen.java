@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui.TriggerConfigScreen;
+package notryken.chatnotify.ui.ColorConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -9,22 +9,22 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import notryken.chatnotify.config.Notification;
 
-public class TriggerConfigScreen extends GameOptionsScreen
+public class ColorConfigScreen extends GameOptionsScreen
 {
     private final Notification notif;
 
-    private TriggerConfigListWidget options;
+    private ColorConfigListWidget options;
 
-    public TriggerConfigScreen(Screen parent, Notification notif)
+    public ColorConfigScreen(Screen parent, Notification notif)
     {
         super(parent, MinecraftClient.getInstance().options,
-                Text.literal("Notification Trigger"));
+                Text.literal("Notification Message Color"));
         this.notif = notif;
     }
 
     protected void init()
     {
-        this.options = new TriggerConfigListWidget(this.client, this.width,
+        this.options = new ColorConfigListWidget(this.client, this.width,
                 this.height, 32, this.height - 32, 25, this.notif, this.parent);
         this.addSelectableChild(this.options);
 

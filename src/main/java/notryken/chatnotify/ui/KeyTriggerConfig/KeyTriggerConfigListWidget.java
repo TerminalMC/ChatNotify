@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui.TriggerConfigScreen;
+package notryken.chatnotify.ui.KeyTriggerConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -13,35 +13,30 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TriggerConfigListWidget extends
-        ElementListWidget<TriggerConfigListWidget.ConfigEntry>
+public class KeyTriggerConfigListWidget extends
+        ElementListWidget<KeyTriggerConfigListWidget.ConfigEntry>
 {
-    public TriggerConfigListWidget(MinecraftClient client, int i, int j, int k, int l,
-                                 int m, Notification notif, Screen parent)
+    public KeyTriggerConfigListWidget(MinecraftClient client, int i, int j, int k, int l,
+                                      int m, Notification notif, Screen parent)
     {
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
 
-        if (notif.isKeyTrigger()) {
-            this.addEntry(new ConfigEntry.TriggerHeader(width, notif, client, this));
-            this.addEntry(new ConfigEntry.TriggerField(width, notif, client, this));
-            this.addEntry(new ConfigEntry.TriggerOptionHeader(width, notif, client, this));
+        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Notification Trigger Key"));
+        this.addEntry(new ConfigEntry.TriggerField(width, notif, client, this));
+        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Quick Keys"));
 
-            String[][] keys = new String[][]
-                    {
-                            {"chat.type", "Any Message"},
-                            {"commands.message.display", "Private Message"},
-                            {"multiplayer.player.joined", "Player Join"},
-                            {"multiplayer.player.left", "Player Left"},
-                            {"chat.type.advancement", "Advancement"},
-                            {"death.", "Player Died"}
-                    };
-            for (String[] key : keys) {
-                this.addEntry(new ConfigEntry.TriggerOption(width, notif, client, this, parent, key));
-            }
-        }
-        else {
-            this.addEntry(new ConfigEntry.TriggerField(width, notif, client, this));
+        String[][] keys = new String[][]
+                {
+                        {"chat.type", "Any Message"},
+                        {"commands.message.display", "Private Message"},
+                        {"multiplayer.player.joined", "Player Join"},
+                        {"multiplayer.player.left", "Player Left"},
+                        {"chat.type.advancement", "Advancement"},
+                        {"death.", "Player Died"}
+                };
+        for (String[] key : keys) {
+            this.addEntry(new ConfigEntry.TriggerOption(width, notif, client, this, parent, key));
         }
     }
 
@@ -59,10 +54,10 @@ public class TriggerConfigListWidget extends
     {
         public List<ClickableWidget> options;
         public Notification notif;
-        public TriggerConfigListWidget listWidget;
+        public KeyTriggerConfigListWidget listWidget;
         public int width;
 
-        ConfigEntry(int width, Notification notif, TriggerConfigListWidget
+        ConfigEntry(int width, Notification notif, KeyTriggerConfigListWidget
                 listWidget)
         {
             this.options = new ArrayList<>();
@@ -92,15 +87,16 @@ public class TriggerConfigListWidget extends
             return this.options;
         }
 
-        public static class TriggerHeader extends ConfigEntry
+        public static class Header extends ConfigEntry
         {
-            TriggerHeader(int width, Notification notif,
-                          @NotNull MinecraftClient client,
-                          TriggerConfigListWidget listWidget)
+            Header(int width, Notification notif,
+                   @NotNull MinecraftClient client,
+                   KeyTriggerConfigListWidget listWidget,
+                   String label)
             {
                 super(width, notif, listWidget);
                 this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Notification Trigger Key"),
+                        Text.literal(label),
                         client.textRenderer));
             }
         }
@@ -109,7 +105,7 @@ public class TriggerConfigListWidget extends
         {
             TriggerField(int width, Notification notif,
                          @NotNull MinecraftClient client,
-                         TriggerConfigListWidget listWidget)
+                         KeyTriggerConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
@@ -125,34 +121,21 @@ public class TriggerConfigListWidget extends
 
             public void setTrigger(String trigger)
             {
-                this.notif.setTrigger(trigger);
-            }
-        }
-
-        public static class TriggerOptionHeader extends ConfigEntry
-        {
-            TriggerOptionHeader(int width, Notification notif,
-                              @NotNull MinecraftClient client,
-                              TriggerConfigListWidget listWidget)
-            {
-                super(width, notif, listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Quick Keys"),
-                        client.textRenderer));
+                this.notif.setTrigger(trigger.strip());
             }
         }
 
         public static class TriggerOption extends ConfigEntry
         {
             TriggerOption(int width, Notification notif, MinecraftClient client,
-                        TriggerConfigListWidget listWidget, Screen parent, String[] key)
+                          KeyTriggerConfigListWidget listWidget, Screen parent, String[] key)
             {
                 super(width, notif, listWidget);
 
                 this.options.add(ButtonWidget.builder(Text.literal(key[1]), (button) ->
                 {
                     notif.setTrigger(key[0]);
-                    client.setScreen(new TriggerConfigScreen(parent, notif));
+                    client.setScreen(new KeyTriggerConfigScreen(parent, notif));
                 }).size(240, 20).position(width / 2 - 120, 0).build());
             }
         }

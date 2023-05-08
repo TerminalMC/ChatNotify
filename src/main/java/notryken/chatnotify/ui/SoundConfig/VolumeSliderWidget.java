@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui.SoundConfigScreen;
+package notryken.chatnotify.ui.SoundConfig;
 
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
@@ -34,6 +34,6 @@ public class VolumeSliderWidget extends SliderWidget
     @Override
     protected void applyValue()
     {
-        notif.setSoundVolume((float) roundVolume());
+        notif.soundVolume = (float) roundVolume();
     }
 }

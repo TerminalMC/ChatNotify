@@ -19,9 +19,6 @@
     "client": [
       "notryken.chatnotify.client.ChatNotifyClient"
     ],
-    "main": [
-      "notryken.chatnotify.ChatNotify"
-    ],
     "modmenu": [
       "notryken.chatnotify.ui.ModMenuIntegration"
     ]

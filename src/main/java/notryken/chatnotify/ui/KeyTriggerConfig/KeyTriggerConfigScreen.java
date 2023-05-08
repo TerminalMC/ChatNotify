@@ -1,30 +1,30 @@
-package notryken.chatnotify.ui.NotificationConfigScreen;
+package notryken.chatnotify.ui.KeyTriggerConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
-import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import notryken.chatnotify.config.Notification;
 
-public class NotificationConfigScreen extends GameOptionsScreen
+public class KeyTriggerConfigScreen extends GameOptionsScreen
 {
     private final Notification notif;
 
-    private NotificationConfigListWidget options;
+    private KeyTriggerConfigListWidget options;
 
-    public NotificationConfigScreen(Screen parent, Notification notif)
+    public KeyTriggerConfigScreen(Screen parent, Notification notif)
     {
         super(parent, MinecraftClient.getInstance().options,
-                Text.literal("Notification Settings"));
+                Text.literal("Notification Trigger"));
         this.notif = notif;
     }
 
     protected void init()
     {
-        this.options = new NotificationConfigListWidget(this.client, this.width,
+        this.options = new KeyTriggerConfigListWidget(this.client, this.width,
                 this.height, 32, this.height - 32, 25, this.notif, this.parent);
         this.addSelectableChild(this.options);
 

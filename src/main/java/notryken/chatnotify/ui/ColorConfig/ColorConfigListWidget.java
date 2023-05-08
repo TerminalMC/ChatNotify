@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui.ColorConfigScreen;
+package notryken.chatnotify.ui.ColorConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -22,16 +22,21 @@ import java.util.Optional;
 public class ColorConfigListWidget extends
         ElementListWidget<ColorConfigListWidget.ConfigEntry>
 {
+    private final Notification notif;
+    private final Screen parentScreen;
+
     public ColorConfigListWidget(MinecraftClient client, int i, int j, int k, int l,
-                                 int m, Notification notif, Screen parent)
+                                 int m, Notification notif, Screen parentScreen)
     {
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
+        this.notif = notif;
+        this.parentScreen = parentScreen;
 
-        this.addEntry(new ConfigEntry.ColorFieldHeader(width, notif, client, this));
-        this.addEntry(new ConfigEntry.HexColorLink(width, notif, client, parent, this));
+        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Hex Color"));
+        this.addEntry(new ConfigEntry.HexColorLink(width, notif, client, parentScreen, this));
         this.addEntry(new ConfigEntry.ColorField(width, notif, client, this));
-        this.addEntry(new ConfigEntry.ColorOptionHeader(width, notif, client, this));
+        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Quick Colors"));
 
         // These arrays match 1:1 for the color and its name.
         int[] intColors = new int[]
@@ -39,9 +44,12 @@ public class ColorConfigListWidget extends
                         16711680,
                         16753920,
                         16776960,
+                        65280,
                         32768,
+                        65535,
                         255,
                         8388736,
+                        16711935,
                         16777215,
                         8421504,
                         0
@@ -51,17 +59,28 @@ public class ColorConfigListWidget extends
                         "Red",
                         "Orange",
                         "Yellow",
+                        "Lime",
                         "Green",
+                        "Aqua",
                         "Blue",
                         "Purple",
+                        "Magenta",
                         "White",
                         "Gray",
                         "Black"
                 };
 
         for (int idx = 0; idx < intColors.length; idx++) {
-            this.addEntry(new ConfigEntry.ColorOption(width, notif, client,
-                    this, parent, intColors[idx], strColors[idx]));
+            this.addEntry(new ConfigEntry.ColorOption(width, notif,
+                    this, intColors[idx], strColors[idx]));
+        }
+    }
+
+    public void refreshScreen()
+    {
+        if (client != null) {
+            client.setScreen(
+                    new ColorConfigScreen(this.parentScreen, this.notif));
         }
     }
 
@@ -75,8 +94,7 @@ public class ColorConfigListWidget extends
         return super.getScrollbarPositionX() + 32;
     }
 
-    public abstract static class ConfigEntry extends
-            Entry<ConfigEntry>
+    public abstract static class ConfigEntry extends Entry<ConfigEntry>
     {
         public List<ClickableWidget> options;
         public Notification notif;
@@ -113,15 +131,16 @@ public class ColorConfigListWidget extends
             return this.options;
         }
 
-        public static class ColorFieldHeader extends ConfigEntry
+        public static class Header extends ConfigEntry
         {
-            ColorFieldHeader(int width, Notification notif,
-                              @NotNull MinecraftClient client,
-                              ColorConfigListWidget listWidget)
+            Header(int width, Notification notif,
+                   @NotNull MinecraftClient client,
+                   ColorConfigListWidget listWidget,
+                   String label)
             {
                 super(width, notif, listWidget);
                 this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Hex Color"),
+                        Text.literal(label),
                         client.textRenderer));
             }
         }
@@ -130,13 +149,13 @@ public class ColorConfigListWidget extends
         {
             HexColorLink(int width, Notification notif,
                          @NotNull MinecraftClient client,
-                         Screen parent, ColorConfigListWidget listWidget)
+                         Screen parentScreen, ColorConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
                 this.options.add(ButtonWidget.builder(
                                 Text.literal("color-hex.com"),
-                                (button) -> openLink(client, parent))
+                                (button) -> openLink(client, parentScreen))
                         .size(80, 20).position(width / 2 - 40, 0).build());
             }
 
@@ -153,11 +172,14 @@ public class ColorConfigListWidget extends
 
         public static class ColorField extends ConfigEntry
         {
+            MinecraftClient client;
+
             ColorField(int width, Notification notif,
                        @NotNull MinecraftClient client,
                        ColorConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
+                this.client = client;
 
                 TextFieldWidget colorEdit = new TextFieldWidget(
                         client.textRenderer, this.width / 2 - 120, 0, 240, 20,
@@ -172,26 +194,14 @@ public class ColorConfigListWidget extends
             public void setColor(String color)
             {
                 this.notif.setColor(this.notif.parseHexInt(color));
-            }
-        }
-
-        public static class ColorOptionHeader extends ConfigEntry
-        {
-            ColorOptionHeader(int width, Notification notif,
-                               @NotNull MinecraftClient client,
-                               ColorConfigListWidget listWidget)
-            {
-                super(width, notif, listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Quick Colors"),
-                        client.textRenderer));
+                listWidget.refreshScreen();
             }
         }
 
         public static class ColorOption extends ConfigEntry
         {
-            ColorOption(int width, Notification notif, MinecraftClient client,
-                        ColorConfigListWidget listWidget, Screen parent,
+            ColorOption(int width, Notification notif,
+                        ColorConfigListWidget listWidget,
                         int intColor, String strColor)
             {
                 super(width, notif, listWidget);
@@ -213,7 +223,7 @@ public class ColorConfigListWidget extends
                 this.options.add(ButtonWidget.builder(message, (button) ->
                 {
                     notif.setColor(intColor);
-                    client.setScreen(new ColorConfigScreen(parent, notif));
+                    listWidget.refreshScreen();
                 }).size(240, 20).position(width / 2 - 120, 0).build());
             }
         }
