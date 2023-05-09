@@ -1,5 +1,5 @@
 # Chat Notify
-Chat Notify is a client-side Minecraft Fabric mod that allows the 
+This is a client-side Minecraft Fabric mod that allows the 
 user to set up audio and visual notifications for when specified words or 
 phrases appear in chat.
 
