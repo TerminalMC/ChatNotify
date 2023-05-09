@@ -95,13 +95,21 @@ public class NotificationListWidget extends
             if (index >= 0) {
                 Notification notif = config.getNotification(index);
                 String label = notif.getTrigger();
-                if (notif.triggerIsKey && !label.equals("")) {
-                    label = "[Key] " + label;
+                if (label.equals("")) {
+                    label = "> Click to Configure <";
                 }
                 else {
-                    int numVariations = notif.getNumTriggers() - 1;
-                    if (numVariations > 0) {
-                        label = label + " (" + numVariations + " variations)";
+                    if (notif.triggerIsKey) {
+                        label = "[Key] " + label;
+                    }
+                    else {
+                        int numVariations = notif.getNumTriggers() - 1;
+                        if (numVariations == 1) {
+                            label = label + " (" + numVariations + " variation)";
+                        }
+                        else if (numVariations > 1) {
+                            label = label + " (" + numVariations + " variations)";
+                        }
                     }
                 }
 

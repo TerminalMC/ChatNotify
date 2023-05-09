@@ -129,16 +129,6 @@ public class Notification
     // Mutators.
 
     /**
-     * 'Smart' setter; prevents enabling if all sub-options are disabled.
-     */
-    public void setEnabled(boolean enabled)
-    {
-        if (this.enabled || controls.contains(true)) {
-            this.enabled = enabled;
-        }
-    }
-
-    /**
      * 'Smart' setter; disables the parent if all sibling control are disabled,
      * and enables the parent when enabled. If the control has sub-controls,
      * prevents enabling it if they are all disabled.
@@ -208,6 +198,10 @@ public class Notification
         this.triggerIsKey = triggerIsKey;
     }
 
+    /**
+     * 'Smart' setter; if color is invalid, defaults to white (16777215). If
+     * color is white, disables message coloring.
+     */
     public void setColor(int color)
     {
         if (color < 0 || color > 16777215) {

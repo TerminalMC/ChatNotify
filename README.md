@@ -5,17 +5,9 @@ phrases appear in chat.
 
 ## Features
 
-#### Notify by changing the message color:
+![](https://i.postimg.cc/JnFD0Gk5/chatnotify-readme-1.png)
 
-![Example of a colored message.](https://i.postimg.cc/y8VwNcpk/chatnotify-keywordexample.png)
-
-![Example of ignoring your own messages but still checking others.](https://i.postimg.cc/VL9x1DRx/chatnotify-ignoreownmessages.png)
-
-#### Notify by changing the message formatting:
-
-![Example of custom formatting.](https://i.postimg.cc/43xgsnBz/chatnotify-customformatting.png)
-
-#### Notify by playing a Minecraft sound (see configuration below).
+![](https://i.postimg.cc/fRH0p2RP/chatnotify-readme-2.png)
 
 ## Usage and Configuration
 
@@ -26,11 +18,17 @@ With Mod Menu installed, simply go the mods list, find Chat Notify, click
 on the icon, and it's fairly self-explanatory from there. If you get stuck 
 please let me know, and I'll see if I can make it more clear.
 
-![](https://i.postimg.cc/Hk7pSQqT/chatnotify-modmenu-1.png)
+![](https://i.postimg.cc/4NW6RN8w/chatnotify-modmenu-1.png)
 
-![](https://i.postimg.cc/fbZ6xmZ2/chatnotify-modmenu-2.png)
+![](https://i.postimg.cc/tTGPN1TR/chatnotify-modmenu-2.png)
 
-![](https://i.postimg.cc/tJ1fXztT/chatnotify-modmenu-3.png)
+![](https://i.postimg.cc/kGfbCfyD/chatnotify-modmenu-3.png)
+
+![](https://i.postimg.cc/157qY7tj/chatnotify-modmenu-4.png)
+
+![](https://i.postimg.cc/yxMzDzjG/chatnotify-modmenu-5.png)
+
+![](https://i.postimg.cc/4dKfywZm/chatnotify-modmenu-6.png)
 
 ### Performance
 I have tried to reduce the workload wherever possible, but ultimately it still

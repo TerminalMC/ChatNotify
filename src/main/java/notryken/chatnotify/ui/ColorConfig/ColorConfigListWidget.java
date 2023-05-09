@@ -41,6 +41,7 @@ public class ColorConfigListWidget extends
         // These arrays match 1:1 for the color and its name.
         int[] intColors = new int[]
                 {
+                        16777215,
                         16711680,
                         16753920,
                         16776960,
@@ -50,12 +51,12 @@ public class ColorConfigListWidget extends
                         255,
                         8388736,
                         16711935,
-                        16777215,
                         8421504,
                         0
                 };
         String[] strColors = new String[]
                 {
+                        "[No Color]",
                         "Red",
                         "Orange",
                         "Yellow",
@@ -65,7 +66,6 @@ public class ColorConfigListWidget extends
                         "Blue",
                         "Purple",
                         "Magenta",
-                        "White",
                         "Gray",
                         "Black"
                 };

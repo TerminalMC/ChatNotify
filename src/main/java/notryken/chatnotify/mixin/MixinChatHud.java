@@ -95,6 +95,7 @@ public class MixinChatHud {
 
                 if (notif.triggerIsKey) {
                     if (message.getContent() instanceof TranslatableTextContent ttc) {
+                        //System.out.println(ttc.getKey());
                         trigger = notif.getTrigger();
                         doNotify = ttc.getKey().contains(trigger);
                     }

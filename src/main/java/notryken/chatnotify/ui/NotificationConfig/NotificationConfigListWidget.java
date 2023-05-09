@@ -35,7 +35,7 @@ public class NotificationConfigListWidget extends
         this.notif = notif;
         this.parentScreen = parentScreen;
 
-        this.addEntry(new ConfigEntry.TriggerConfigHeader(width, notif, client, this));
+        this.addEntry(new ConfigEntry.GenericConfigHeader(width, notif, client, this, "Notification Trigger"));
         this.addEntry(new ConfigEntry.TriggerConfigType(width, notif, this));
 
         if (notif.triggerIsKey) {
@@ -46,15 +46,15 @@ public class NotificationConfigListWidget extends
             this.addEntry(new ConfigEntry.TriggerVariationConfig(width, notif, this));
         }
 
-        this.addEntry(new ConfigEntry.ConfigHeader(width, notif, client, this, "Message Color", 0));
+        this.addEntry(new ConfigEntry.GenericConfigHeader(width, notif, client, this, "Message Color"));
         this.addEntry(new ConfigEntry.ColorConfig(width, notif, this));
-        this.addEntry(new ConfigEntry.ConfigHeader(width, notif, client, this, "Message Format", 1));
+        this.addEntry(new ConfigEntry.GenericConfigHeader(width, notif, client, this, "Message Format"));
         this.addEntry(new ConfigEntry.FormatConfig(width, notif, this, "Bold", 0));
         this.addEntry(new ConfigEntry.FormatConfig(width, notif, this, "Italic", 1));
         this.addEntry(new ConfigEntry.FormatConfig(width, notif, this, "Underlined", 2));
         this.addEntry(new ConfigEntry.FormatConfig(width, notif, this, "Strikethrough", 3));
         this.addEntry(new ConfigEntry.FormatConfig(width, notif, this, "Obfuscated", 4));
-        this.addEntry(new ConfigEntry.ConfigHeader(width, notif, client, this, "Notification Sound", 2));
+        this.addEntry(new ConfigEntry.ControlConfigHeader(width, notif, client, this, "Notification Sound", 2));
         this.addEntry(new ConfigEntry.SoundConfig(width, notif, this));
     }
 
@@ -145,24 +145,16 @@ public class NotificationConfigListWidget extends
             return this.options;
         }
 
-        public static class TriggerConfigHeader extends ConfigEntry
+        public static class GenericConfigHeader extends ConfigEntry
         {
-            TriggerConfigHeader(int width, Notification notif,
+            GenericConfigHeader(int width, Notification notif,
                                 @NotNull MinecraftClient client,
-                                NotificationConfigListWidget listWidget)
+                                NotificationConfigListWidget listWidget,
+                                String label)
             {
                 super(width, notif, listWidget);
                 this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal("Notification Trigger"),
-                        client.textRenderer));
-                this.options.add(CyclingButtonWidget.onOffBuilder()
-                        .omitKeyText()
-                        .initially(notif.enabled)
-                        .build(this.width / 2 + 60, 0, 30, 20, Text.empty(),
-                                (button, status) -> {
-                            notif.setEnabled(status);
-                            listWidget.refreshScreen();
-                        }));
+                        Text.literal(label), client.textRenderer));
             }
         }
 
@@ -192,8 +184,15 @@ public class NotificationConfigListWidget extends
             {
                 super(width, notif, listWidget);
 
-                this.options.add(ButtonWidget.builder(
-                                Text.literal("[Key] " + notif.getTrigger()),
+                String label = notif.getTrigger();
+                if (label.equals("")) {
+                    label = "> Click to Set <";
+                }
+                else {
+                    label = "[Key] " + label;
+                }
+
+                this.options.add(ButtonWidget.builder(Text.literal(label),
                                 (button) -> listWidget.openKeyTriggerConfig())
                         .size(240, 20).position(width / 2 - 120, 0).build());
             }
@@ -238,12 +237,12 @@ public class NotificationConfigListWidget extends
             }
         }
 
-        public static class ConfigHeader extends ConfigEntry
+        public static class ControlConfigHeader extends ConfigEntry
         {
-            ConfigHeader(int width, Notification notif,
-                         @NotNull MinecraftClient client,
-                         NotificationConfigListWidget listWidget,
-                         String label, int index)
+            ControlConfigHeader(int width, Notification notif,
+                                @NotNull MinecraftClient client,
+                                NotificationConfigListWidget listWidget,
+                                String label, int index)
             {
                 super(width, notif, listWidget);
                 this.options.add(new TextWidget(width / 2 - 60, 0, 120, 20,

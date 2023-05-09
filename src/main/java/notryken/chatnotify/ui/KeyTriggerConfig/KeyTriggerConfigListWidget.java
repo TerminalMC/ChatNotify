@@ -30,10 +30,10 @@ public class KeyTriggerConfigListWidget extends
                 {
                         {"chat.type", "Any Message"},
                         {"commands.message.display", "Private Message"},
-                        {"multiplayer.player.joined", "Player Join"},
+                        {"multiplayer.player.joined", "Player Joined"},
                         {"multiplayer.player.left", "Player Left"},
                         {"chat.type.advancement", "Advancement"},
-                        {"death.", "Player Died"}
+                        {"death.", "Player/Pet Died"}
                 };
         for (String[] key : keys) {
             this.addEntry(new ConfigEntry.TriggerOption(width, notif, client, this, parent, key));
