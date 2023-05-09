@@ -22,7 +22,7 @@ please let me know, and I'll see if I can make it more clear.
 
 ![](https://i.postimg.cc/tTGPN1TR/chatnotify-modmenu-2.png)
 
-![](https://i.postimg.cc/kGfbCfyD/chatnotify-modmenu-3.png)
+![](https://i.postimg.cc/N22M78Sw/chatnotify-modmenu-3.png)
 
 ![](https://i.postimg.cc/157qY7tj/chatnotify-modmenu-4.png)
 
