@@ -34,6 +34,6 @@ public class VolumeSliderWidget extends SliderWidget
     @Override
     protected void applyValue()
     {
-        notif.soundVolume = (float) roundVolume();
+        notif.setSoundVolume((float) roundVolume());
     }
 }

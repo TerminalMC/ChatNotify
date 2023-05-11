@@ -146,6 +146,9 @@ public class Notification
             }
             else {
                 this.enabled = true;
+                if (index == 2 && this.soundVolume == 0f) {
+                    this.soundVolume = 1f;
+                }
             }
         }
     }
@@ -229,6 +232,15 @@ public class Notification
         else {
             setControl(1, true);
         }
+    }
+
+    /**
+     * 'Smart' setter; if soundVolume is 0, disables sound. Else, enables sound.
+     */
+    public void setSoundVolume(float soundVolume)
+    {
+        this.soundVolume = soundVolume;
+        this.controls.set(2, soundVolume != 0f);
     }
 
     public void setSound(Identifier sound)
