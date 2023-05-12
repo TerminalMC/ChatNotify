@@ -24,22 +24,26 @@ public class SoundConfigListWidget extends
     private final Notification notif;
     private final Screen parentScreen;
 
-    public SoundConfigListWidget(MinecraftClient client, int i, int j, int k, int l,
-                                 int m, Notification notif, Screen parentScreen)
+    public SoundConfigListWidget(MinecraftClient client, int i, int j, int k,
+                                 int l, int m, Notification notif,
+                                 Screen parentScreen)
     {
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
         this.notif = notif;
         this.parentScreen = parentScreen;
 
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Sound ID"));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "Sound ID"));
         this.addEntry(new ConfigEntry.SoundLink(width, notif, client, this));
         this.addEntry(new ConfigEntry.SoundField(width, notif, client, this));
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Sound Options"));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "Sound Options"));
         this.addEntry(new ConfigEntry.SoundConfigVolume(width, notif, this));
         this.addEntry(new ConfigEntry.SoundConfigPitch(width, notif, this));
         this.addEntry(new ConfigEntry.SoundTest(width, notif, this));
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Quick Sounds"));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "Quick Sounds"));
 
         String[] sounds = new String[]
                 {

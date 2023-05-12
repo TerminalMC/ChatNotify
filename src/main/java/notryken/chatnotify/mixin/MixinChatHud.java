@@ -1,5 +1,6 @@
 package notryken.chatnotify.mixin;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -8,7 +9,6 @@ import net.minecraft.client.sound.SoundManager;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.*;
-import notryken.chatnotify.client.ChatNotifyClient;
 import notryken.chatnotify.config.Notification;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -26,20 +26,21 @@ import static notryken.chatnotify.client.ChatNotifyClient.lastSentMessage;
 /**
  * The backbone of ChatNotify. Intercepts chat messages as they are sent to
  * the list to be displayed, checks whether they contain any words matching
- * any of the loaded Notification objects, and if so, modifies the color and
- * formatting as specified by the relevant Notification, and plays the
+ * any of the loaded Notification objects' triggers, and if so, modifies the
+ * color and formatting as specified by the relevant Notification, and plays the
  * specified notification sound.
  */
 @Mixin(ChatHud.class)
 public class MixinChatHud {
 
     private final SoundManager soundManager =
-            ChatNotifyClient.client.getSoundManager();
+            MinecraftClient.getInstance().getSoundManager();
     private Text modifiedMessage = null;
 
 
     /**
-     * Intercepts chat messages as they are sent to the list to be displayed.
+     * Intercepts chat messages as they are sent to the list to be displayed,
+     * and starts the notification process.
      */
     @Inject(method = "addMessage(Lnet/minecraft/text/Text;" +
             "Lnet/minecraft/network/message/MessageSignatureData;" +
@@ -67,13 +68,23 @@ public class MixinChatHud {
         }
     }
 
-
+    /**
+     * Modifies the message based on whether it matches the user's last sent
+     * message, and whether the user's own messages are to be ignored.
+     * @param strMsg The original message.
+     * @param username The user's in-game name.
+     * @return The processed message.
+     */
     private String preProcess(String strMsg, String username)
     {
         if (lastSentMessage != null) {
+            /*
+            This check is considered to adequately determine whether the message
+            was sent by the user.
+             */
             if (strMsg.contains(username) && strMsg.contains(lastSentMessage)) {
                 lastSentMessage = null;
-                if (config.getIgnoreOwnMsg()) {
+                if (config.ignoreOwnMessages) {
                     strMsg = null;
                 }
                 else {
@@ -84,17 +95,24 @@ public class MixinChatHud {
         return strMsg;
     }
 
-
+    /**
+     * Checks all triggers of all enabled notifications to determine whether
+     * the message should trigger a notification, calling doNotify() if so.
+     * @param message The original message.
+     * @param strMsg The processed message.
+     * @param mute Whether the notification sound should be ignored.
+     */
     private void checkNotifications(Text message, String strMsg, boolean mute)
     {
         modifiedMessage = null; // Reset.
-        for (Notification notif : config.getNotifications()) {
+        for (Notification notif : config.getNotifs()) {
             if (modifiedMessage == null && notif.enabled) {
                 boolean doNotify = false;
                 String trigger = "";
 
                 if (notif.triggerIsKey) {
-                    if (message.getContent() instanceof TranslatableTextContent ttc) {
+                    if (message.getContent() instanceof
+                            TranslatableTextContent ttc) {
                         //System.out.println(ttc.getKey());
                         trigger = notif.getTrigger();
                         doNotify = ttc.getKey().contains(trigger);
@@ -115,9 +133,30 @@ public class MixinChatHud {
         }
     }
 
+    /**
+     * Uses regex pattern matching to check whether msg contains str.
+     * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
+     * @param msg The message to search in.
+     * @param str The string to search for.
+     * @return Whether the string was found in the message, according to the
+     * regex matching.
+     */
+    private boolean msgContainsStr(String msg, String str)
+    {
+        Pattern pattern = Pattern.compile(
+                "(?<!\\w)(\\W?(?i)" + str + "\\W?)(?!\\w)");
+        return pattern.matcher(msg).find();
+    }
 
-
-    private void notify(Text message, String trigger, Notification notif, boolean mute)
+    /**
+     * Notifies the user based on the specified notification's configuration.
+     * @param message The original message.
+     * @param trigger The String that triggered the notification.
+     * @param notif The notification.
+     * @param mute Whether the notification sound should be ignored.
+     */
+    private void notify(Text message, String trigger, Notification notif,
+                        boolean mute)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
             MutableText newMessage = MutableText.of(message.getContent());
@@ -137,7 +176,9 @@ public class MixinChatHud {
             for (int i = 0; i < max; i++) {
                 Text s = siblings.get(i);
                 if (s.getString().contains(trigger)) {
-                    siblings.set(i, Text.of(TextVisitFactory.removeFormattingCodes(StringVisitable.plain(s.getString()))));
+                    siblings.set(i,
+                            Text.of(TextVisitFactory.removeFormattingCodes(
+                                    StringVisitable.plain(s.getString()))));
                 }
             }
             newMessage.siblings.addAll(siblings);
@@ -158,21 +199,6 @@ public class MixinChatHud {
                     SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
         }
 
-    }
-
-    /**
-     * Uses regex pattern matching to check whether msg contains str.
-     * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
-     * @param msg The message to search in.
-     * @param str The string to search for.
-     * @return Whether the string was found in the message, according to the
-     * regex matching.
-     */
-    private boolean msgContainsStr(String msg, String str)
-    {
-        Pattern pattern = Pattern.compile(
-                "(?<!\\w)(\\W?(?i)" + str + "\\W?)(?!\\w)");
-        return pattern.matcher(msg).find();
     }
 
     /**

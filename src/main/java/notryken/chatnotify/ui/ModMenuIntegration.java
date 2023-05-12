@@ -35,14 +35,14 @@ public class ModMenuIntegration implements ModMenuApi
         protected void init()
         {
             this.addDrawableChild(CyclingButtonWidget.onOffBuilder()
-                    .initially(config.getIgnoreOwnMsg()).build(
+                    .initially(config.ignoreOwnMessages).build(
                             this.width / 2 - 120, 32, 240, 20,
                             Text.literal("Ignore Your Own Messages"),
                             (button, status) ->
-                                    config.setIgnoreOwnMsg(status)));
+                                    config.ignoreOwnMessages = status));
 
-            this.list = new NotificationListWidget(this.client, this.width,
-                    this.height, 64, this.height - 32, 25);
+            this.list = new NotificationListWidget(this.client, this.parent,
+                    this.width, this.height, 64, this.height - 32, 25);
             this.addSelectableChild(this.list);
 
             this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
@@ -50,7 +50,7 @@ public class ModMenuIntegration implements ModMenuApi
                     {
                         assert this.client != null;
                         this.client.setScreen(this.parent);
-                        config.reloadUsername();
+                        config.refreshUsernameNotif();
                         config.purge();
                         ChatNotifyClient.saveConfig();
                     })

@@ -1,17 +1,17 @@
 package notryken.chatnotify.config;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
-import notryken.chatnotify.client.ChatNotifyClient;
 
 import java.util.*;
 
 /**
- * Configurable notification including text color, text formatting
- * and sound parameters for a specified trigger word.
+ * Configurable notification including text color, text formatting and sound
+ * parameters for a set of trigger words.
  */
 public class Notification
 {
@@ -29,19 +29,19 @@ public class Notification
     public boolean persistent;
 
     /**
-     * @param trigger The string to trigger the notification.
+     * @param trigger The primary string to trigger the notification.
      * @param triggerIsKey Whether the trigger is an event key.
-     * @param strColor The color to make the text, as ab RGB int or hex.
+     * @param strColor The color to make the text, as an RGB int or hex.
      *                 Defaults to white (int 16777215, hex #FFFFFF) if invalid.
      * @param bold Text format.
      * @param italic Text format.
      * @param underlined Text format.
      * @param strikethrough Text format.
      * @param obfuscated Text format.
-     * @param soundVolume Sound volume.
-     * @param soundPitch Sound pitch.
-     * @param soundName The identifier of the Minecraft Sound to play as part
-     *                  of the notification.
+     * @param soundVolume Sound volume in the range 0.0 to 1.0.
+     * @param soundPitch Sound pitch in the range 0.5 to 2.0.
+     * @param soundName The identifier of the Minecraft Sound for the
+     *                  notification to play.
      *                  Accepts the formats "namespace:category.source.sound",
      *                  and "category.source.sound" (defaults to "minecraft"
      *                  namespace).
@@ -76,51 +76,72 @@ public class Notification
     // Accessors.
 
     /**
-     * Key -> 0:color, 1:format, 2:sound.
+     * @param index The control index (0:color, 1:format, 2:sound).
+     * @return The value of the control.
      */
     public boolean getControl(int index)
     {
         return this.controls.get(index);
     }
 
-
+    /**
+     * @return The primary trigger for the notification.
+     */
     public String getTrigger()
     {
         return this.triggers.get(0);
     }
 
+    /**
+     * @param index The index of the trigger.
+     * @return The trigger at the specified index if it exists, else null.
+     */
     public String getTrigger(int index)
     {
-        if (this.triggers.size() > index)
+        if (index > 0 && index < this.triggers.size())
         {
             return this.triggers.get(index);
         }
         return null;
     }
 
-    public Iterator<String> getTriggerIterator()
-    {
-        return this.triggers.iterator();
-    }
-
+    /**
+     * @return The total number of triggers.
+     */
     public int getNumTriggers()
     {
         return this.triggers.size();
     }
 
+    /**
+     * @return An iterator over the notification's triggers.
+     */
+    public Iterator<String> getTriggerIterator()
+    {
+        return this.triggers.iterator();
+    }
+
+    /**
+     * @return The RGB int color used by the notification.
+     */
     public int getColor()
     {
         return this.color;
     }
 
     /**
-     * Key -> 0:bold, 1:italic, 2:underlined, 3:strikethrough, 4:obfuscated.
+     * @param index The format control index (0:bold, 1:italic, 2:underlined,
+     *              3:strikethrough, 4:obfuscated).
+     * @return The value of the format control.
      */
     public boolean getFormatControl(int index)
     {
         return this.formatControls.get(index);
     }
 
+    /**
+     * @return The Identifier of the notification's sound.
+     */
     public Identifier getSound()
     {
         return this.sound;
@@ -132,7 +153,8 @@ public class Notification
      * 'Smart' setter; disables the parent if all sibling control are disabled,
      * and enables the parent when enabled. If the control has sub-controls,
      * prevents enabling it if they are all disabled.
-     * Key -> 0:color, 1:format, 2:sound.
+     * @param index The index of the control (0:color, 1:format, 2:sound).
+     * @param value The value to set the control to.
      */
     public void setControl(int index, boolean value)
     {
@@ -146,6 +168,7 @@ public class Notification
             }
             else {
                 this.enabled = true;
+                // If sound is turned on and volume is off, set volume to 1.
                 if (index == 2 && this.soundVolume == 0f) {
                     this.soundVolume = 1f;
                 }
@@ -153,6 +176,11 @@ public class Notification
         }
     }
 
+    /**
+     * Sets the primary trigger of the notification. Also makes the notification
+     * persistent.
+     * @param trigger The String to trigger the notification.
+     */
     public void setTrigger(String trigger)
     {
         if (this.triggers.size() > 0) {
@@ -164,46 +192,47 @@ public class Notification
         persistent = true;
     }
 
+    /**
+     * Sets the trigger at the specified index to the specified value, if the
+     * index is valid and the notification does not already contain the trigger.
+     * @param index The index of the trigger to set.
+     * @param trigger The new trigger String.
+     */
     public void setTrigger(int index, String trigger)
     {
-        if (this.triggers.size() > index && trigger != null && !this.triggers.contains(trigger)) {
+        if (index >= 0 && index < this.triggers.size() &&
+                !this.triggers.contains(trigger)) {
             this.triggers.set(index, trigger);
         }
     }
 
+    /**
+     * Adds the specified trigger, if the notification does not already contain
+     * it.
+     * @param trigger The trigger String to add.
+     */
     public void addTrigger(String trigger)
     {
-        if (trigger != null && !this.triggers.contains(trigger)) {
+        if (!this.triggers.contains(trigger)) {
             this.triggers.add(trigger);
         }
     }
 
-    public void purgeTriggers()
+    /**
+     * Removes the trigger at the specified index, if the index is not 0 and
+     * not out of range.
+     * @param index The index of the trigger to remove.
+     */
+    public void removeTriggerVariation(int index)
     {
-        Iterator<String> iter = this.triggers.iterator();
-        iter.next();
-        while (iter.hasNext()) {
-            if (iter.next().strip().equals("")) {
-                iter.remove();
-            }
-        }
-    }
-
-    public void removeTrigger(int index)
-    {
-        if (this.triggers.size() > index) {
+        if (index > 0 && index < this.triggers.size()) {
             this.triggers.remove(index);
         }
     }
 
-    public void setTriggerIsKey(boolean triggerIsKey)
-    {
-        this.triggerIsKey = triggerIsKey;
-    }
-
     /**
      * 'Smart' setter; if color is invalid, defaults to white (16777215). If
-     * color is white, disables message coloring.
+     * color is white, disables message coloring, else enables message coloring.
      */
     public void setColor(int color)
     {
@@ -212,14 +241,15 @@ public class Notification
         } else {
             this.color = color;
         }
-        this.controls.set(0, this.color != 16777215);
-        persistent = true;
+        setControl(0, this.color != 16777215);
     }
 
     /**
-     * 'Smart' setter; disables the parent if all sibling options are disabled,
-     * and enables the parent when enabled.
-     * Key -> 0:bold, 1:italic, 2:underlined, 3:strikethrough, 4:obfuscated.
+     * 'Smart' setter; disables the parent control if all sibling options are
+     * disabled, and enables the parent control when enabled.
+     * @param index The index of the format control (0:bold, 1:italic,
+     *              2:underlined, 3:strikethrough, 4:obfuscated).
+     * @param value The value to set the format control to.
      */
     public void setFormatControl(int index, boolean value)
     {
@@ -236,33 +266,60 @@ public class Notification
 
     /**
      * 'Smart' setter; if soundVolume is 0, disables sound. Else, enables sound.
+     * @param soundVolume The notification sound volume between 0.0 and 1.0
+     *                    inclusive.
      */
     public void setSoundVolume(float soundVolume)
     {
         this.soundVolume = soundVolume;
-        this.controls.set(2, soundVolume != 0f);
+        setControl(2, soundVolume != 0f);
     }
 
+    /**
+     * 'Smart' setter; if the specified sound is invalid, uses a default.
+     * Additionally, enables sound.
+     * @param sound The Identifier of the sound.
+     */
     public void setSound(Identifier sound)
     {
-        if (validSound(sound)) {
-            this.sound = sound;
-        }
-        else {
-            this.sound = DEFAULTSOUND;
-        }
-        persistent = true;
+        this.sound = validSound(sound) ? sound : DEFAULTSOUND;
+        setControl(2, true);
     }
 
     // Other processing.
+
+    /**
+     * Used to validate a Notification when it is created not using the
+     * constructor, such as from a config file.
+     */
+    public void validate()
+    {
+        setTrigger(getTrigger());
+        setColor(getColor());
+        setSound(getSound());
+    }
+
+    /**
+     * Removes all empty non-primary triggers.
+     */
+    public void purgeTriggers()
+    {
+        Iterator<String> iter = this.triggers.iterator();
+        iter.next(); // Skip the primary trigger.
+        while (iter.hasNext()) {
+            if (iter.next().strip().equals("")) {
+                iter.remove();
+            }
+        }
+    }
 
     /**
      * Parses and validates a string representing an RGB int or hex color.
      * Can handle regular int colors such as "16711680", and both expressions
      * of hex color ("#FF0000" and "FF0000").
      * @param strColor The RGB int or hex color to parse.
-     * @return The validated color as an RGB int, represented by a String.
-     * Defaults to white(int 16777215, hex #FFFFFF) if the input is invalid.
+     * @return The validated color as an RGB int.
+     * Defaults to white (int 16777215, hex #FFFFFF) if the input is invalid.
      */
     public int parseHexInt(String strColor)
     {
@@ -272,13 +329,13 @@ public class Notification
             color = Integer.parseInt(strColor);
         } catch (NumberFormatException e1) {
             try {
-                // Hex with leading hash.
-                color = Integer.parseInt(strColor.split("#")[1], 16);
-            } catch (NumberFormatException | IndexOutOfBoundsException e2) {
+                // Hex without leading hash.
+                color = Integer.parseInt(strColor, 16);
+            } catch (NumberFormatException e2) {
                 try {
-                    // Hex without leading hash.
-                    color = Integer.parseInt(strColor, 16);
-                } catch (NumberFormatException e3) {
+                    // Hex with leading hash.
+                    color = Integer.parseInt(strColor.split("#")[1], 16);
+                } catch (NumberFormatException | IndexOutOfBoundsException e3) {
                     color = 16777215; // White.
                 }
             }
@@ -300,7 +357,6 @@ public class Notification
 
         if (sound == null) {
             sound = DEFAULTSOUND;
-            this.soundVolume = 0;
         }
         return sound;
     }
@@ -315,30 +371,18 @@ public class Notification
     public boolean validSound(Identifier sound) {
         /*
         Uses Minecraft's internal approach to sound validation, for lack of
-        a better idea. In theory this should only equal null if it is
-        impossible to play the sound.
+        a better idea.
          */
+        MinecraftClient client = MinecraftClient.getInstance();
         boolean valid = true;
-        if (ChatNotifyClient.client.player != null) {
+        if (client.player != null) {
             if (new PositionedSoundInstance(sound, SoundCategory.PLAYERS,
                     1f, 1f, SoundInstance.createRandom(), false, 0,
                     SoundInstance.AttenuationType.NONE, 0, 0, 0, true)
-                    .getSoundSet(ChatNotifyClient.client.getSoundManager())
-                    == null) {
+                    .getSoundSet(client.getSoundManager()) == null) {
                 valid = false;
             }
         }
         return valid;
-    }
-
-    /**
-     * Used to validate a Notification when it is created not using the
-     * constructor, such as from a config file.
-     */
-    public void validate()
-    {
-        setTrigger(getTrigger());
-        setColor(getColor());
-        setSound(getSound());
     }
 }

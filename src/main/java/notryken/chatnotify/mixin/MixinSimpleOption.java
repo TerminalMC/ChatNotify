@@ -14,9 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Increases the maximum value of the chat height focused slider.
- */
 @Mixin(SimpleOption.class)
 public class MixinSimpleOption
 {
@@ -36,6 +33,9 @@ public class MixinSimpleOption
     private
     Codec<Double> codec;
 
+    /**
+     * Increases the maximum value of the chat height focused slider.
+     */
     @Inject(at = @At("RETURN"), method = "<init>*")
     private void init(CallbackInfo ci)
     {

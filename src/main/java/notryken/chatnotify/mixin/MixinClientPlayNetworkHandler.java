@@ -12,11 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Provides the option for re-loading the config when the user joins a
- * singleplayer world or server. This is one of the earliest opportunities to
- * get the player's username, which is required for one of the notifications.
- */
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler
 {
@@ -36,14 +31,17 @@ public class MixinClientPlayNetworkHandler
         /* This can only be null if Minecraft's internal onGameJoin() method
         breaks completely, which will crash the game anyway.*/
         assert player != null;
-
         ChatNotifyClient.config.setUsername(player.getName().getString());
     }
 
+    /**
+     * Injects into ClientPlayNetworkHandler.sendChatMessage(), which handles
+     * outgoing messages from the client. This allows the mod to track which
+     * messages are sent by the user.
+     */
     @Inject(method = "sendChatMessage", at = @At("HEAD"))
     public void sendChatMessage(String content, CallbackInfo ci)
     {
-        System.out.println("sendChatMessage(" + content + ")");
         ChatNotifyClient.lastSentMessage = content;
     }
 }

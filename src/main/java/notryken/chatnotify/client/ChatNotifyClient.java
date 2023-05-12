@@ -3,13 +3,11 @@ package notryken.chatnotify.client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.MinecraftClient;
 import notryken.chatnotify.config.Config;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Objects;
 
 /**
  * Manages config file creation/loading.
@@ -17,7 +15,6 @@ import java.util.Objects;
 public class ChatNotifyClient implements ClientModInitializer
 {
     public static Config config;
-    public static MinecraftClient client = MinecraftClient.getInstance();
     public static String lastSentMessage;
     private static final File settingsFile =
             new File("config", "chatnotify.json");
@@ -31,8 +28,10 @@ public class ChatNotifyClient implements ClientModInitializer
     }
 
     /**
-     * Loads config from file, or creates the file and loads default values if
-     * it does not exist.
+     * If the config file exists and is readable, loads the config from it,
+     * correcting any invalid fields. If it exists but is unreadable, creates a
+     * new config with defaults. If it does not exist, creates it with defaults.
+     * Finally, saves the validated config to the file.
      */
     public static void loadConfig()
     {
@@ -40,10 +39,8 @@ public class ChatNotifyClient implements ClientModInitializer
             try {
                 config = gson.fromJson(Files.readString(settingsFile.toPath()),
                         Config.class);
-                config.validateOptions(); // Make sure all options are valid.
-                config.setUsername(Objects.requireNonNullElse(
-                        config.getUsername(), "username"));
-            } catch (Exception e) {
+                config.validate();
+            } catch (Exception e) { // Catching Exception to cover all bases.
                 System.err.println(e.getMessage());
                 config = null;
             }
@@ -55,7 +52,8 @@ public class ChatNotifyClient implements ClientModInitializer
     }
 
     /**
-     * Saves the current config options to a file, overwriting if it exists.
+     * Attempts to write the current config options to a file,overwriting if it
+     * already exists.
      */
     public static void saveConfig()
     {

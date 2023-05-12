@@ -22,9 +22,12 @@ public class KeyTriggerConfigListWidget extends
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
 
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Notification Trigger Key"));
-        this.addEntry(new ConfigEntry.TriggerField(width, notif, client, this));
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Quick Keys"));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "Notification Trigger Key"));
+        this.addEntry(new ConfigEntry.TriggerField(
+                width, notif, client, this));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "Quick Keys"));
 
         String[][] keys = new String[][]
                 {
@@ -36,7 +39,8 @@ public class KeyTriggerConfigListWidget extends
                         {"death.", "Player/Pet Died"}
                 };
         for (String[] key : keys) {
-            this.addEntry(new ConfigEntry.TriggerOption(width, notif, client, this, parent, key));
+            this.addEntry(new ConfigEntry.TriggerOption(
+                    width, notif, client, this, parent, key));
         }
     }
 
@@ -128,12 +132,13 @@ public class KeyTriggerConfigListWidget extends
         public static class TriggerOption extends ConfigEntry
         {
             TriggerOption(int width, Notification notif, MinecraftClient client,
-                          KeyTriggerConfigListWidget listWidget, Screen parent, String[] key)
+                          KeyTriggerConfigListWidget listWidget, Screen parent,
+                          String[] key)
             {
                 super(width, notif, listWidget);
 
-                this.options.add(ButtonWidget.builder(Text.literal(key[1]), (button) ->
-                {
+                this.options.add(ButtonWidget.builder(Text.literal(key[1]),
+                        (button) -> {
                     notif.setTrigger(key[0]);
                     client.setScreen(new KeyTriggerConfigScreen(parent, notif));
                 }).size(240, 20).position(width / 2 - 120, 0).build());

@@ -8,9 +8,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static notryken.chatnotify.client.ChatNotifyClient.saveConfig;
 
-/**
- * Provides the option to save the config when the game is closed.
- */
 @Mixin(MinecraftClient.class)
 public class MixinMinecraftClient {
 

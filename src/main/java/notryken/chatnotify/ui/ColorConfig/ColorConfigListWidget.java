@@ -25,18 +25,23 @@ public class ColorConfigListWidget extends
     private final Notification notif;
     private final Screen parentScreen;
 
-    public ColorConfigListWidget(MinecraftClient client, int i, int j, int k, int l,
-                                 int m, Notification notif, Screen parentScreen)
+    public ColorConfigListWidget(MinecraftClient client, int i, int j, int k,
+                                 int l, int m, Notification notif,
+                                 Screen parentScreen)
     {
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
         this.notif = notif;
         this.parentScreen = parentScreen;
 
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Hex Color"));
-        this.addEntry(new ConfigEntry.HexColorLink(width, notif, client, parentScreen, this));
-        this.addEntry(new ConfigEntry.ColorField(width, notif, client, this));
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Quick Colors"));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "Hex Color"));
+        this.addEntry(new ConfigEntry.HexColorLink(
+                width, notif, client, parentScreen, this));
+        this.addEntry(new ConfigEntry.ColorField(
+                width, notif, client, this));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "Quick Colors"));
 
         // These arrays match 1:1 for the color and its name.
         int[] intColors = new int[]
@@ -163,7 +168,8 @@ public class ColorConfigListWidget extends
             {
                 client.setScreen(new ConfirmLinkScreen(confirmed -> {
                     if (confirmed) {
-                        Util.getOperatingSystem().open("https://www.color-hex.com/");
+                        Util.getOperatingSystem().open(
+                                "https://www.color-hex.com/");
                     }
                     client.setScreen(new ColorConfigScreen(parent, notif));
                 }, "https://www.color-hex.com/", true));

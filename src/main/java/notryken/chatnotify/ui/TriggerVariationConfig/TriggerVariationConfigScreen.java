@@ -23,8 +23,8 @@ public class TriggerVariationConfigScreen extends GameOptionsScreen
 
     protected void init()
     {
-        this.options = new TriggerVariationConfigListWidget(this.client, this.width,
-                this.height, 32, this.height - 32, 25, this.notif);
+        this.options = new TriggerVariationConfigListWidget(this.client,
+                this.width, this.height, 32, this.height - 32, 25, this.notif);
         this.addSelectableChild(this.options);
 
         this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,

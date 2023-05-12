@@ -22,30 +22,38 @@ public class TriggerVariationConfigListWidget extends
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
 
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "Use this if you want the notification to also be triggered by variations of the main word."));
-        this.addEntry(new ConfigEntry.Header(width, notif, client, this, "(Not CaSe-SeNsItIvE)"));
+        this.addEntry(new ConfigEntry.Header(width, notif, client, this,
+                "Use this if you want the notification to also be triggered " +
+                        "by variations of the main word."));
+        this.addEntry(new ConfigEntry.Header(
+                width, notif, client, this, "(Not CaSe-SeNsItIvE)"));
 
         for (int idx = 1; idx < notif.getNumTriggers(); idx ++) {
-            this.addEntry(new ConfigEntry.TriggerVariationField(width, notif, client, this, idx));
+            this.addEntry(new ConfigEntry.TriggerVariationField(
+                    width, notif, client, this, idx));
         }
-        this.addEntry(new ConfigEntry.TriggerVariationField(width, notif, client, this, -1));
+        this.addEntry(new ConfigEntry.TriggerVariationField(
+                width, notif, client, this, -1));
     }
 
     public void addTriggerVariation(Notification notif)
     {
-        List<TriggerVariationConfigListWidget.ConfigEntry> entries = this.children();
+        List<TriggerVariationConfigListWidget.ConfigEntry> entries =
+                this.children();
 
         int size = notif.getNumTriggers();
         notif.addTrigger("");
 
-        entries.add(size + 1, new ConfigEntry.TriggerVariationField(width, notif, client, this, size));
+        entries.add(size + 1, new ConfigEntry.TriggerVariationField(
+                width, notif, client, this, size));
     }
 
     public void removeTriggerVariation(Notification notif, int index)
     {
-        List<TriggerVariationConfigListWidget.ConfigEntry> entries = this.children();
+        List<TriggerVariationConfigListWidget.ConfigEntry> entries =
+                this.children();
 
-        notif.removeTrigger(index);
+        notif.removeTriggerVariation(index);
 
         entries.remove(index + 1); // Offset from headers.
     }
@@ -67,8 +75,8 @@ public class TriggerVariationConfigListWidget extends
         public TriggerVariationConfigListWidget listWidget;
         public int width;
 
-        ConfigEntry(int width, Notification notif, TriggerVariationConfigListWidget
-                listWidget)
+        ConfigEntry(int width, Notification notif,
+                    TriggerVariationConfigListWidget listWidget)
         {
             this.options = new ArrayList<>();
             this.notif = notif;
@@ -125,28 +133,31 @@ public class TriggerVariationConfigListWidget extends
 
                 if (index >= 0) {
                     TextFieldWidget triggerEdit = new TextFieldWidget(
-                            client.textRenderer, this.width / 2 - 120, 0, 240, 20,
-                            Text.literal("Notification Trigger"));
+                            client.textRenderer, this.width / 2 - 120, 0, 240,
+                            20, Text.literal("Notification Trigger"));
                     triggerEdit.setMaxLength(120);
                     triggerEdit.setText(this.notif.getTrigger(index));
-                    triggerEdit.setChangedListener(this::setTrigger);
+                    triggerEdit.setChangedListener(this::setTriggerVariation);
 
                     this.options.add(triggerEdit);
 
                     this.options.add(ButtonWidget.builder(Text.literal("X"),
-                                    (button) -> listWidget.removeTriggerVariation(notif, index))
+                                    (button) ->
+                                            listWidget.removeTriggerVariation(
+                                                    notif, index))
                             .size(20, 20).position(width / 2 + 120 + 5, 0)
                             .build());
                 }
                 else {
                     this.options.add(ButtonWidget.builder(Text.literal("+"),
-                                    (button) -> listWidget.addTriggerVariation(notif)).size(240, 20)
+                                    (button) -> listWidget.addTriggerVariation(
+                                            notif)).size(240, 20)
                             .position(width / 2 - 120, 0)
                             .build());
                 }
             }
 
-            public void setTrigger(String trigger)
+            public void setTriggerVariation(String trigger)
             {
                 this.notif.setTrigger(this.index, trigger.strip());
             }
