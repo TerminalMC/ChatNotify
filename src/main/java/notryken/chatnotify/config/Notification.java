@@ -61,7 +61,7 @@ public class Notification
         controls.add(doSound);
         setTrigger(trigger);
         this.triggerIsKey = triggerIsKey;
-        setColor(parseHexInt(strColor));
+        setColor(parseColor(strColor));
         formatControls.add(bold);
         formatControls.add(italic);
         formatControls.add(underlined);
@@ -321,7 +321,7 @@ public class Notification
      * @return The validated color as an RGB int.
      * Defaults to white (int 16777215, hex #FFFFFF) if the input is invalid.
      */
-    public int parseHexInt(String strColor)
+    public int parseColor(String strColor)
     {
         int color;
         try {

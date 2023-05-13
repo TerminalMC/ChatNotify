@@ -199,7 +199,7 @@ public class ColorConfigListWidget extends
 
             public void setColor(String color)
             {
-                this.notif.setColor(this.notif.parseHexInt(color));
+                this.notif.setColor(this.notif.parseColor(color));
                 listWidget.refreshScreen();
             }
         }
@@ -215,7 +215,7 @@ public class ColorConfigListWidget extends
                 MutableText message = MutableText.of(Text.literal(strColor).
                         getContent());
 
-                Style style = Style.of(
+                message.setStyle(Style.of(
                         Optional.of(TextColor.fromRgb(intColor)),
                         Optional.of(false),
                         Optional.of(false),
@@ -223,8 +223,7 @@ public class ColorConfigListWidget extends
                         Optional.of(false),
                         Optional.of(false),
                         Optional.empty(),
-                        Optional.empty());
-                message.setStyle(style);
+                        Optional.empty()));
 
                 this.options.add(ButtonWidget.builder(message, (button) ->
                 {

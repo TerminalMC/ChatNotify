@@ -52,18 +52,12 @@ public class MixinChatHud {
     {
         String username = config.getUsername();
         if (username != null) {
-            boolean mute = false;
             String strMsg = message.getString();
-
-            if (refresh) {
-                // Avoid repeat pinging, but maintain message coloring.
-                mute = true;
-            }
 
             strMsg = preProcess(strMsg, username);
 
             if (strMsg != null) {
-                checkNotifications(message, strMsg, mute);
+                checkNotifications(message, strMsg, refresh);
             }
         }
     }

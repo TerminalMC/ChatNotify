@@ -279,21 +279,26 @@ public class NotificationConfigListWidget extends
             {
                 super(width, notif, listWidget);
 
-                MutableText message = MutableText.of(Text.literal(
-                        Integer.toHexString(notif.getColor())).getContent());
+                int color = notif.getColor();
+                MutableText message;
 
-                Style style = Style.of(
-                        Optional.of(TextColor.fromRgb(notif.getColor())),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.empty(),
-                        Optional.empty());
-                message.setStyle(style);
+                if (color == 16777215) {
+                    message = Text.literal("[No Color]");
+                }
+                else {
+                    message = MutableText.of(Text.literal(
+                            Integer.toHexString(color)).getContent());
 
-
+                    message.setStyle(Style.of(
+                            Optional.of(TextColor.fromRgb(notif.getColor())),
+                            Optional.of(false),
+                            Optional.of(false),
+                            Optional.of(false),
+                            Optional.of(false),
+                            Optional.of(false),
+                            Optional.empty(),
+                            Optional.empty()));
+                }
                 this.options.add(ButtonWidget.builder(message,
                         (button) -> listWidget.openColorConfig())
                         .size(240, 20).position(width / 2 - 120, 0).build());
