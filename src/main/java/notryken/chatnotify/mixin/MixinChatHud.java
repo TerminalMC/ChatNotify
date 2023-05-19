@@ -52,8 +52,8 @@ public class MixinChatHud {
     {
         String username = config.getUsername();
         if (username != null) {
-            String strMsg = message.getString();
 
+            String strMsg = TextVisitFactory.removeFormattingCodes(message);
             strMsg = preProcess(strMsg, username);
 
             if (strMsg != null) {
@@ -116,12 +116,11 @@ public class MixinChatHud {
                 }
                 else {
                     for (Iterator<String> iter2 = notif.getTriggerIterator();
-                         iter2.hasNext();)
+                         iter2.hasNext() && modifiedMessage == null;)
                     {
                         String trigger = iter2.next();
                         if (msgContainsStr(strMsg, trigger)) {
                             notify(message, trigger, false, notif, mute);
-                            break;
                         }
                     }
                 }
@@ -166,9 +165,6 @@ public class MixinChatHud {
                     Optional.of(notif.getFormatControl(4)),
                     Optional.empty(),
                     Optional.empty());
-
-            //System.out.println("# incoming content: " + message.getContent());
-            System.out.println("# incoming siblings: " + message.getSiblings());
 
             System.out.println("#########");
 
@@ -242,31 +238,17 @@ public class MixinChatHud {
                     }
                     else {
                         System.out.println("-B3");
-                        if (msgContent instanceof LiteralTextContent) {
-                            System.out.println("### message is class LiteralTextContent");
-                        } else if (msgContent instanceof NbtTextContent) {
-                            System.out.println("### message is class NbtTextContent");
-                        } else if (msgContent instanceof ScoreTextContent) {
-                            System.out.println("### message is class ScoreTextContent");
-                        } else if (msgContent instanceof SelectorTextContent) {
-                            System.out.println("### message is class SelectorTextContent");
-                        } else if (msgContent instanceof KeybindTextContent) {
-                            System.out.println("### message is class KeybindTextContent");
-                        } else {
-                            System.out.println("### message is class idkwth");
-                        }
                         newMessage.setStyle(style);
                     }
                 }
                 else {
                     System.out.println("-B2");
+
+                    //printTree(message, 0);
+
                     partialHighlight(siblings, trigger, style);
                 }
             }
-
-
-            //System.out.println("# outgoing content: " + newMessage.getContent());
-            System.out.println("# outgoing siblings: " + newMessage.getSiblings());
 
             modifiedMessage = newMessage;
         }
@@ -284,35 +266,76 @@ public class MixinChatHud {
 
     }
 
-    private void partialHighlight(List<Text> siblings, String trigger, Style style)
+    private void printTree(Text message, int depth)
     {
+        depth++;
+        StringBuilder indent = new StringBuilder();
+        indent.append(">   ".repeat(depth));
+        System.out.println(indent + "Content: " + message.getContent());
+        System.out.println(indent + "Style : " + message.getStyle());
+        System.out.println(indent + "Siblings: ");
+        for (Text t : message.getSiblings())
+        {
+            printTree(t, depth);
+        }
+    }
+
+    private int partialHighlight(List<Text> siblings, String trigger, Style style)
+    {
+        int retVal = -1;
+
         for (int i = 0; i < siblings.size(); i++) {
 
             Text sibling = siblings.get(i);
+            String str = sibling.getString();
+            String lowerStr = str.toLowerCase();
+            int start = lowerStr.indexOf(trigger.toLowerCase());
 
-            if (!sibling.getSiblings().isEmpty()) {
-                partialHighlight(sibling.getSiblings(), trigger, style);
-            }
-            else {
-                String str = sibling.getString();
-                String lowerStr = str.toLowerCase();
-                int start = lowerStr.indexOf(trigger.toLowerCase());
+            if (start != -1)
+            {
+                // if the sibling has sub-siblings, recurse through them.
+                if (!sibling.getSiblings().isEmpty()) {
+                    retVal = partialHighlight(sibling.getSiblings(), trigger, style);
+                }
 
-                if (start != -1) {
+                /*
+                If the style has not been changed (if no sub-siblings, or they
+                do not contain the match).
+                 */
+                if (retVal == -1 &&
+                        sibling.getContent() instanceof LiteralTextContent ltc)
+                {
+
+                    List<Text> subSiblings = sibling.getSiblings();
+
+                    String tempStr = ltc.toString();
+                    String str1 = tempStr.substring(8, tempStr.length() - 1); // Remove 'literal{}'
+
+                    subSiblings.add(0, Text.literal(str1.substring(start + trigger.length())).setStyle(sibling.getStyle()));
+                    subSiblings.add(0, Text.literal(str1.substring(start, start + trigger.length())).setStyle(style));
+                    subSiblings.add(0, Text.literal(str1.substring(0, start)).setStyle(sibling.getStyle()));
+
+                    MutableText mt = MutableText.of(TextContent.EMPTY);
+                    mt.siblings.addAll(sibling.getSiblings());
+                    siblings.set(i, mt);
+
+                    retVal = 0;
+                }
+
+                // If both the above fail.
+                if (retVal == -1) {
+                    System.out.println(">>>>> adjusting <<<<<<");
                     siblings.remove(i);
                     siblings.add(i, Text.literal(str.substring(start + trigger.length())).setStyle(sibling.getStyle()));
                     siblings.add(i, Text.literal(str.substring(start, start + trigger.length())).setStyle(style));
                     siblings.add(i, Text.literal(str.substring(0, start)).setStyle(sibling.getStyle()));
-                    i = siblings.size(); // Exit condition
+                    retVal = 0;
                 }
-            }
 
-            /*
-            FIXME this still doesn't work properly in that on some servers highly-formatted
-             messages will not be partially recolored. I'm not entirely sure why that is, but
-             honestly I don't really care at this point.
-             */
+                return retVal;
+            }
         }
+        return retVal;
     }
 
 
