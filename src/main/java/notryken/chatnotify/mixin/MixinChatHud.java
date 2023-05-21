@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -168,81 +169,178 @@ public class MixinChatHud {
 
             System.out.println("#########");
 
-            if (keyTrigger) {
-                System.out.println("-A1");
+            if (keyTrigger)
+            {
+                System.out.println("-A1 (is keyTrigger)");
+
                 newMessage.setStyle(style);
             }
-            else {
-                System.out.println("-B1");
+            else
+            {
+                System.out.println("-B1 (not keyTrigger)");
+
                 List<Text> siblings = newMessage.getSiblings();
 
-                if (siblings.isEmpty()) {
-                    System.out.println("-A2");
-                    TextContent msgContent = newMessage.getContent();
-                    if (msgContent instanceof TranslatableTextContent ttc &&
-                            ttc.getKey().equals("chat.type.text"))
-                    {
-                        System.out.println("-A3");
+                if (siblings.isEmpty())
+                {
+                    System.out.println("-A2 (no siblings)");
 
+                    TextContent msgContent = newMessage.getContent();
+
+                    if (msgContent instanceof TranslatableTextContent ttc)
+                    {
+                        System.out.println("-A3 (is TTC)");
                         Object[] args = ttc.getArgs();
 
-                        if (args.length == 2) {
-                            System.out.println("-A4");
+                        if (ttc.getKey().equals("chat.type.text"))
+                        {
+                            System.out.println("-A4 (is chat.type.text)");
 
-                            boolean done = false;
-
-                            if (args[0] instanceof Text argText)
+                            // All chat.type.text messages should have 2 args.
+                            if (args.length == 2)
                             {
-                                System.out.println("-A5");
-                                if (argText.getString().equalsIgnoreCase(trigger))
+                                System.out.println("-A5 (2 args)");
+
+                                boolean done = false;
+
+                                for (int i = 0; i < args.length && !done; i++)
                                 {
-                                    System.out.println("-A6A");
+                                    if (args[i] instanceof Text argText)
+                                    {
+                                        System.out.println("#### Original tree of arg " + i);
+                                        printTree(argText, 0);
+
+                                        MutableText mt = Text.empty();
+                                        mt.siblings.add(argText);
+                                        done = partialHighlight(mt.siblings, trigger, style) == 0;
+                                        if (mt.siblings.size() == 1) {
+                                            args[i] = mt.siblings.get(0);
+                                        }
+                                        else {
+                                            args[i] = mt;
+                                        }
+
+                                        System.out.println("#### Modified tree of arg " + i);
+                                        printTree((Text) args[i], 0);
+                                    }
+                                }
+                                newMessage = MutableText.of(
+                                                new TranslatableTextContent(
+                                                        ttc.getKey(), ttc.getFallback(), args))
+                                        .setStyle(newMessage.getStyle());
+
+                                /*boolean done = false;
+
+                                if (args[0] instanceof Text argText &&
+                                        argText.getString().equalsIgnoreCase(trigger))
+                                {
+                                    System.out.println("-A6 (arg 0 is trigger)");
+
                                     args[0] = argText.copy().fillStyle(style);
                                     done = true;
                                     newMessage = MutableText.of(new TranslatableTextContent(ttc.getKey(), ttc.getFallback(), args));
                                 }
-                                else {
-                                    System.out.println("-B6A");
-                                }
-                            }
-                            if (!done && args[1] instanceof Text argText)
-                            {
-                                System.out.println("-B5");
-                                if (argText.getString().equalsIgnoreCase(trigger))
+                                if (!done && args[1] instanceof Text argText)
                                 {
-                                    System.out.println("-A6B");
-                                    args[1] = argText.copy().setStyle(style);
-                                }
-                                else
-                                {
-                                    System.out.println("-B6B");
-                                    siblings.add(argText);
-                                    partialHighlight(siblings, trigger, style);
+                                    System.out.println("-B6 (arg 0 not trigger)");
 
-                                    MutableText mt = Text.empty();
-                                    mt.siblings.addAll(siblings);
-                                    args[1] = mt;
+                                    if (argText.getString().equalsIgnoreCase(trigger))
+                                    {
+                                        System.out.println("-A7 (arg 1 is trigger)");
+
+                                        args[1] = argText.copy().setStyle(style);
+                                    }
+                                    else
+                                    {
+                                        System.out.println("-B7 (arg 1 not trigger, but may contain)");
+
+                                        siblings.add(argText);
+                                        partialHighlight(siblings, trigger, style);
+
+                                        MutableText mt = Text.empty();
+                                        mt.siblings.addAll(siblings);
+                                        args[1] = mt;
+                                    }
+                                    newMessage = MutableText.of(new TranslatableTextContent(ttc.getKey(), ttc.getFallback(), args));
+                                    done = true;
                                 }
-                                newMessage = MutableText.of(new TranslatableTextContent(ttc.getKey(), ttc.getFallback(), args));
-                                done = true;
-                            }
-                            if (!done) {
-                                System.out.println("-C5");
-                                newMessage.setStyle(style);
+                                if (!done)
+                                {
+                                    System.out.println("-C6 (neither arg 1 was trigger nor arg 2 was or contained trigger");
+
+                                    newMessage.setStyle(style);
+                                }*/
                             }
                         }
+
                         else {
-                            System.out.println("-B4");
-                            newMessage.setStyle(style);
+                            System.out.println("-B4 (not chat.type.text, actually " + ttc.getKey() + ")");
+
+                            System.out.println("\n# original content: " + newMessage.getContent());
+                            System.out.println("\n# original string: " + newMessage.getString());
+                            System.out.println("\n# original style: " + newMessage.getStyle());
+
+                            /*
+                            So this is ok, there is a bug in that the formatting
+                             applied to an arg extends to text past that, e.g.
+                             if "player1" is a trigger, then
+                             "player1 was slain by player2" would be fully
+                             colored to the 'player1' notif, whereas for
+                             "player2 was slain by player1", only the 'player1'
+                             would be colored.
+                             */
+
+                            System.out.println("# args count: " + args.length);
+
+                            boolean done = false;
+
+                            for (int i = 0; i < args.length && !done; i++)
+                            {
+                                if (args[i] instanceof Text argText)
+                                {
+                                    System.out.println("#### Original tree of arg " + i);
+                                    printTree(argText, 0);
+
+                                    MutableText mt = Text.empty();
+                                    mt.siblings.add(argText);
+                                    done = partialHighlight(mt.siblings, trigger, style) == 0;
+                                    if (mt.siblings.size() == 1) {
+                                        args[i] = mt.siblings.get(0);
+                                    }
+                                    else {
+                                        args[i] = mt;
+                                    }
+
+                                    System.out.println("#### Modified tree of arg " + i);
+                                    printTree((Text) args[i], 0);
+                                }
+                            }
+                            newMessage = MutableText.of(
+                                    new TranslatableTextContent(
+                                            ttc.getKey(), ttc.getFallback(), args))
+                                    .setStyle(newMessage.getStyle());
+
+
+                            System.out.println("\n# final content: " + newMessage.getContent());
+                            System.out.println("\n# final string: " + newMessage.getString());
+                            System.out.println("\n# final style: " + newMessage.getStyle());
+
+                            /*if (!done) {
+                                newMessage.setStyle(style);
+                            }*/
                         }
                     }
                     else {
-                        System.out.println("-B3");
-                        newMessage.setStyle(style);
+                        System.out.println("-B3 (not TTC)");
+
+                        siblings.add(newMessage);
+                        partialHighlight(siblings, trigger, style);
+
+                        //newMessage.setStyle(style);
                     }
                 }
                 else {
-                    System.out.println("-B2");
+                    System.out.println("-B2 (has siblings)");
 
                     //printTree(message, 0);
 
@@ -298,33 +396,76 @@ public class MixinChatHud {
                     retVal = partialHighlight(sibling.getSiblings(), trigger, style);
                 }
 
-                /*
-                If the style has not been changed (if no sub-siblings, or they
-                do not contain the match).
-                 */
+
+                // If the style has not been changed (if no sub-siblings, or they
+                // do not contain the match).
                 if (retVal == -1 &&
                         sibling.getContent() instanceof LiteralTextContent ltc)
                 {
+                    /*
+                    This uses 0-insertion to deal with the case of the trigger
+                    being contained in the sibling somehow without being
+                    contained in it's sub-siblings (assumes that the render
+                    order is content then siblings).
+                     */
+
+                    // FIXME we're losing the siblings after the added ones duh
+
+                    /*
+                    subSibling.setStyle(sibling.getStyle()) overrides sibling format
+
+                     */
 
                     List<Text> subSiblings = sibling.getSiblings();
+                    subSiblings.replaceAll(text -> fixFormat((MutableText) text, sibling.getStyle()));
 
                     String tempStr = ltc.toString();
                     String str1 = tempStr.substring(8, tempStr.length() - 1); // Remove 'literal{}'
 
-                    subSiblings.add(0, Text.literal(str1.substring(start + trigger.length())).setStyle(sibling.getStyle()));
-                    subSiblings.add(0, Text.literal(str1.substring(start, start + trigger.length())).setStyle(style));
-                    subSiblings.add(0, Text.literal(str1.substring(0, start)).setStyle(sibling.getStyle()));
+                    //List<Text> subTexts = new ArrayList<>();
 
-                    MutableText mt = MutableText.of(TextContent.EMPTY);
-                    mt.siblings.addAll(sibling.getSiblings());
-                    siblings.set(i, mt);
+                    // do the substring thingy on the basis of the ints rather than the string results
+
+                    String subStr3 = str1.substring(start + trigger.length());
+                    if (!subStr3.equals("")) {
+                        subSiblings.add(0, Text.literal(subStr3).setStyle(sibling.getStyle()));
+                    }
+
+                    String subStr2 = str1.substring(start, start + trigger.length());
+                    subSiblings.add(0, Text.literal(subStr2).setStyle(style
+                            .withClickEvent(sibling.getStyle().getClickEvent())
+                            .withHoverEvent(sibling.getStyle().getHoverEvent())
+                            .withInsertion(sibling.getStyle().getInsertion()))); // originally setStyle(style)
+
+                    String subStr1 = str1.substring(0, start);
+                    if (!subStr1.equals("")) {
+                        subSiblings.add(0, Text.literal(subStr1).setStyle(sibling.getStyle()));
+                    }
+
+
+                    /*subSiblings.add(0, Text.literal(subStr3).setStyle(sibling.getStyle()));
+                    subSiblings.add(0, Text.literal(subStr2).setStyle(style));
+                    subSiblings.add(0, Text.literal(subStr1).setStyle(sibling.getStyle()));*/
+
+                    if (subSiblings.size() == 1) {
+                        siblings.set(i, subSiblings.get(0));
+                    }
+                    else {
+                        //MutableText mt = MutableText.of(TextContent.EMPTY).setStyle(sibling.getStyle());
+                        MutableText mt = MutableText.of(TextContent.EMPTY);
+
+                        mt.siblings.addAll(subSiblings);
+                        //mt.siblings.addAll(sibling.getSiblings());
+
+                        siblings.set(i, mt);
+                    }
 
                     retVal = 0;
                 }
 
                 // If both the above fail.
                 if (retVal == -1) {
-                    System.out.println(">>>>> adjusting <<<<<<");
+                    System.out.println(">>>>> aaaaaaahhhhhhhhh <<<<<<");
                     siblings.remove(i);
                     siblings.add(i, Text.literal(str.substring(start + trigger.length())).setStyle(sibling.getStyle()));
                     siblings.add(i, Text.literal(str.substring(start, start + trigger.length())).setStyle(style));
@@ -336,6 +477,33 @@ public class MixinChatHud {
             }
         }
         return retVal;
+    }
+
+
+    /**
+     * Replaces the null fields of the text's format with the corresponding
+     * fields of its parent.
+     */
+    private MutableText fixFormat(MutableText text, Style parentStyle)
+    {
+        Style style = text.getStyle();
+        if (text.getStyle().getColor() == null) {
+            style = style.withColor(parentStyle.getColor());
+        }
+        if (text.getStyle().getClickEvent() == null) {
+            style = style.withClickEvent(parentStyle.getClickEvent());
+        }
+        if (text.getStyle().getHoverEvent() == null) {
+            style = style.withHoverEvent(parentStyle.getHoverEvent());
+        }
+        if (text.getStyle().getInsertion() == null) {
+            style = style.withInsertion(parentStyle.getInsertion());
+        }
+        if (text.getStyle().getFont() == null) {
+            style = style.withFont(parentStyle.getFont());
+        }
+        text.setStyle(style);
+        return text;
     }
 
 
