@@ -5,6 +5,7 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 
 import java.util.*;
@@ -21,7 +22,7 @@ public class Notification
     private final List<Boolean> controls = new ArrayList<>();
     private final List<String> triggers = new ArrayList<>();
     public boolean triggerIsKey;
-    private int color;
+    private TextColor color;
     private final List<Boolean> formatControls = new ArrayList<>();
     public float soundVolume;
     public float soundPitch;
@@ -130,9 +131,9 @@ public class Notification
     }
 
     /**
-     * @return The RGB int color used by the notification.
+     * @return The TextColor used by the notification.
      */
-    public int getColor()
+    public TextColor getColor()
     {
         return this.color;
     }
@@ -239,17 +240,13 @@ public class Notification
     }
 
     /**
-     * 'Smart' setter; if color is invalid, defaults to white (16777215). If
-     * color is white, disables message coloring, else enables message coloring.
+     * 'Smart' setter; If color is white, disables message coloring, else
+     * enables message coloring.
      */
-    public void setColor(int color)
+    public void setColor(TextColor color)
     {
-        if (color < 0 || color > 16777215) {
-            this.color = 16777215; // White.
-        } else {
-            this.color = color;
-        }
-        setControl(0, this.color != 16777215);
+        this.color = color;
+        setControl(0, color.getRgb() != 16777215);
     }
 
     /**
@@ -303,7 +300,6 @@ public class Notification
     public void validate()
     {
         setTrigger(getTrigger());
-        setColor(getColor());
         setSound(getSound());
     }
 
@@ -329,24 +325,12 @@ public class Notification
      * @return The validated color as an RGB int.
      * Defaults to white (int 16777215, hex #FFFFFF) if the input is invalid.
      */
-    public int parseColor(String strColor)
+    public TextColor parseColor(String strColor)
     {
-        int color;
-        try {
-            // Normal integer.
-            color = Integer.parseInt(strColor);
-        } catch (NumberFormatException e1) {
-            try {
-                // Hex without leading hash.
-                color = Integer.parseInt(strColor, 16);
-            } catch (NumberFormatException e2) {
-                try {
-                    // Hex with leading hash.
-                    color = Integer.parseInt(strColor.split("#")[1], 16);
-                } catch (NumberFormatException | IndexOutOfBoundsException e3) {
-                    color = 16777215; // White.
-                }
-            }
+        TextColor color = TextColor.parse(strColor);
+
+        if (color == null) {
+            color = TextColor.fromRgb(16777215);
         }
         return color;
     }

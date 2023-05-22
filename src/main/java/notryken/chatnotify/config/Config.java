@@ -26,14 +26,6 @@ public class Config
     // Accessors.
 
     /**
-     * @return The user's in-game name.
-     */
-    public String getUsername()
-    {
-        return username;
-    }
-
-    /**
      * @return The total number of notifications, including disabled ones.
      */
     public int getNumNotifs()

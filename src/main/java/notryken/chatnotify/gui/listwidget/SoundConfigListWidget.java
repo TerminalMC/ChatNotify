@@ -56,6 +56,15 @@ public class SoundConfigListWidget extends ConfigListWidget
     }
 
     @Override
+    public SoundConfigListWidget resize(int width, int height,
+                                        int top, int bottom)
+    {
+        assert client.currentScreen != null;
+        return new SoundConfigListWidget(client, width, height, top, bottom,
+                itemHeight, parent, title, notif);
+    }
+
+    @Override
     protected void refreshScreen()
     {
         refreshScreen(new SoundConfigListWidget(client,

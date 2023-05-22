@@ -23,8 +23,7 @@ public abstract class ConfigListWidget
 
     public ConfigListWidget(MinecraftClient client,
                             int i, int j, int k, int l, int m,
-                            Screen parent,
-                            Text title)
+                            Screen parent, Text title)
     {
         super(client, i, j, k, l, m);
         this.setRenderSelection(true);
@@ -48,6 +47,9 @@ public abstract class ConfigListWidget
     {
         return super.getScrollbarPositionX() + 32;
     }
+
+    public abstract ConfigListWidget resize(int width, int height,
+                                            int top, int bottom);
 
     protected abstract void refreshScreen();
 

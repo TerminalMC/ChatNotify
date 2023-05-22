@@ -11,7 +11,7 @@ import notryken.chatnotify.gui.listwidget.ConfigListWidget;
 
 public class ConfigScreen extends GameOptionsScreen
 {
-    private final ConfigListWidget listWidget;
+    private ConfigListWidget listWidget;
 
     public ConfigScreen(Screen parent, GameOptions gameOptions, Text title,
                         ConfigListWidget listWidget)
@@ -23,7 +23,9 @@ public class ConfigScreen extends GameOptionsScreen
     @Override
     protected void init()
     {
-        this.addSelectableChild(this.listWidget);
+        this.listWidget = this.listWidget.resize(
+                this.width, this.height, 32, this.height - 32);
+        this.addSelectableChild(listWidget);
 
         this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
                         (button) -> {

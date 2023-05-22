@@ -10,7 +10,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import notryken.chatnotify.client.ChatNotifyClient;
-import notryken.chatnotify.gui.listwidget.NotificationListWidget;
+import notryken.chatnotify.gui.listwidget.ModConfigListWidget;
 
 import static notryken.chatnotify.client.ChatNotifyClient.config;
 
@@ -24,19 +24,19 @@ public class ModMenuIntegration implements ModMenuApi
 
     public static class ModMenuOptionsScreen extends GameOptionsScreen
     {
-        private NotificationListWidget list;
+        private ModConfigListWidget list;
         public ModMenuOptionsScreen(Screen parent)
         {
             super(parent, MinecraftClient.getInstance().options,
-                    Text.literal("Chat Notify Options"));
+                    Text.literal("Chat Notify"));
         }
 
         @Override
         protected void init()
         {
-            this.list = new NotificationListWidget(this.client,
+            this.list = new ModConfigListWidget(this.client,
                     this.width, this.height, 32, this.height - 32, 25,
-                    this.parent, Text.literal("Chat Notify Options"));
+                    this.parent, Text.literal("Chat Notify"));
             this.addSelectableChild(this.list);
 
             this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
@@ -72,6 +72,5 @@ public class ModMenuIntegration implements ModMenuApi
             assert this.client != null;
             this.client.setScreen(this.parent);
         }
-
     }
 }

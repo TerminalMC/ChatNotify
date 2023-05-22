@@ -22,7 +22,6 @@ public class TriggerVariationConfigListWidget extends ConfigListWidget
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Other words to trigger the same " +
                 "notification.")));
-
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("(Not CaSe-SeNsItIvE)")));
 
@@ -32,6 +31,15 @@ public class TriggerVariationConfigListWidget extends ConfigListWidget
         }
         this.addEntry(new Entry.TriggerVariationField(
                 width, notif, client, this, -1));
+    }
+
+    @Override
+    public TriggerVariationConfigListWidget resize(int width, int height,
+                                                   int top, int bottom)
+    {
+        assert client.currentScreen != null;
+        return new TriggerVariationConfigListWidget(client, width, height, top,
+                bottom, itemHeight, parent, title, notif);
     }
 
     @Override

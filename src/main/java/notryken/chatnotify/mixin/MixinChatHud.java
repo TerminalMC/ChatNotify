@@ -174,7 +174,7 @@ public class MixinChatHud {
             MutableText newMessage = message.copy();
 
             Style style = Style.of(
-                    Optional.of(TextColor.fromRgb(notif.getColor())),
+                    Optional.of(notif.getColor()),
                     Optional.of(notif.getFormatControl(0)),
                     Optional.of(notif.getFormatControl(1)),
                     Optional.of(notif.getFormatControl(2)),

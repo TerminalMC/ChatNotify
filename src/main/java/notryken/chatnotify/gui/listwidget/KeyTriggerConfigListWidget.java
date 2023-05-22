@@ -20,7 +20,9 @@ public class KeyTriggerConfigListWidget extends ConfigListWidget
         this.notif = notif;
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Notification Trigger Key")));
+                client, Text.literal("May not work on some servers.")));
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                client, Text.literal("Trigger Key")));
         this.addEntry(new Entry.TriggerField(
                 width, notif, client, this));
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
@@ -38,6 +40,15 @@ public class KeyTriggerConfigListWidget extends ConfigListWidget
         for (String[] key : keys) {
             this.addEntry(new Entry.TriggerOption(width, notif, this, key));
         }
+    }
+
+    @Override
+    public KeyTriggerConfigListWidget resize(int width, int height,
+                                             int top, int bottom)
+    {
+        assert client.currentScreen != null;
+        return new KeyTriggerConfigListWidget(client, width, height, top,
+                bottom, itemHeight, parent, title, notif);
     }
 
     @Override

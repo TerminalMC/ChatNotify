@@ -6,7 +6,6 @@ import net.minecraft.client.gui.widget.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +57,15 @@ public class NotificationConfigListWidget extends ConfigListWidget
     }
 
     @Override
+    public NotificationConfigListWidget resize(int width, int height,
+                                               int top, int bottom)
+    {
+        assert client.currentScreen != null;
+        return new NotificationConfigListWidget(client, width, height, top,
+                bottom, itemHeight, parent, title, notif);
+    }
+
+    @Override
     protected void refreshScreen()
     {
         refreshScreen(new NotificationConfigListWidget(client,
@@ -68,56 +76,45 @@ public class NotificationConfigListWidget extends ConfigListWidget
     private void openKeyTriggerConfig()
     {
         assert client.currentScreen != null;
+        Text title = Text.literal("Notification Trigger Key");
         client.setScreen(new ConfigScreen(client.currentScreen, client.options,
-                Text.literal("Notification Trigger"),
-                new KeyTriggerConfigListWidget(client,
-                        client.currentScreen.width,
-                        client.currentScreen.height, 32,
-                        client.currentScreen.height - 32, 25,
-                        client.currentScreen,
-                        Text.literal("Notification Trigger"), this.notif)));
+                title, new KeyTriggerConfigListWidget(client,
+                client.currentScreen.width, client.currentScreen.height,
+                32, client.currentScreen.height - 32, 25,
+                client.currentScreen, title, this.notif)));
     }
 
     private void openTriggerVariationConfig()
     {
         assert client.currentScreen != null;
+        Text title = Text.literal("Notification Trigger Variations");
         client.setScreen(new ConfigScreen(client.currentScreen, client.options,
-                Text.literal("Notification Trigger Variations"),
-                new TriggerVariationConfigListWidget(client,
-                        client.currentScreen.width,
-                        client.currentScreen.height, 32,
-                        client.currentScreen.height - 32, 25,
-                        client.currentScreen,
-                        Text.literal("Notification Trigger Variations"),
-                        this.notif)));
+                title, new TriggerVariationConfigListWidget(client,
+                client.currentScreen.width, client.currentScreen.height,
+                32, client.currentScreen.height - 32, 25,
+                client.currentScreen, title, this.notif)));
     }
 
     private void openColorConfig()
     {
         assert client.currentScreen != null;
+        Text title = Text.literal("Notification Message Color");
         client.setScreen(new ConfigScreen(client.currentScreen, client.options,
-                Text.literal("Notification Message Color"),
-                new ColorConfigListWidget(client,
-                        client.currentScreen.width,
-                        client.currentScreen.height, 32,
-                        client.currentScreen.height - 32, 25,
-                        client.currentScreen,
-                        Text.literal("Notification Message Color"),
-                        this.notif)));
+                title, new ColorConfigListWidget(client,
+                client.currentScreen.width, client.currentScreen.height,
+                32, client.currentScreen.height - 32, 25,
+                client.currentScreen, title, this.notif)));
     }
 
     private void openSoundConfig()
     {
         assert client.currentScreen != null;
+        Text title = Text.literal("Notification Sound");
         client.setScreen(new ConfigScreen(client.currentScreen, client.options,
-                Text.literal("Notification Sound"),
-                new SoundConfigListWidget(client,
-                        client.currentScreen.width,
-                        client.currentScreen.height, 32,
-                        client.currentScreen.height - 32, 25,
-                        client.currentScreen,
-                        Text.literal("Notification Sound"),
-                        notif)));
+                title, new SoundConfigListWidget(client,
+                client.currentScreen.width, client.currentScreen.height,
+                32, client.currentScreen.height - 32, 25,
+                client.currentScreen, title, notif)));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry
@@ -240,18 +237,16 @@ public class NotificationConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                int color = notif.getColor();
                 MutableText message;
 
-                if (color == 16777215) {
+                if (notif.getColor().getRgb() == 16777215) {
                     message = Text.literal("[No Color]");
                 }
                 else {
-                    message = MutableText.of(Text.literal(
-                            Integer.toHexString(color)).getContent());
+                    message = Text.literal(notif.getColor().getHexCode());
 
                     message.setStyle(Style.of(
-                            Optional.of(TextColor.fromRgb(notif.getColor())),
+                            Optional.of(notif.getColor()),
                             Optional.of(false),
                             Optional.of(false),
                             Optional.of(false),

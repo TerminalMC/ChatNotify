@@ -69,9 +69,17 @@ public class ColorConfigListWidget extends ConfigListWidget
 
         for (int idx = 0; idx < intColors.length; idx++) {
             this.addEntry(new Entry.ColorOption(width, notif,
-                    this, intColors[idx], strColors[idx]));
+                    this, TextColor.fromRgb(intColors[idx]), strColors[idx]));
         }
 
+    }
+
+    @Override
+    public ColorConfigListWidget resize(int width, int height,
+                                        int top, int bottom)
+    {
+        return new ColorConfigListWidget(client, width, height, top, bottom,
+                itemHeight, parent, title, notif);
     }
 
     @Override
@@ -134,8 +142,8 @@ public class ColorConfigListWidget extends ConfigListWidget
                 TextFieldWidget colorEdit = new TextFieldWidget(
                         client.textRenderer, this.width / 2 - 120, 0, 240, 20,
                         Text.literal("Hex Color"));
-                colorEdit.setMaxLength(120);
-                colorEdit.setText(Integer.toHexString(this.notif.getColor()));
+                colorEdit.setMaxLength(7);
+                colorEdit.setText(this.notif.getColor().getHexCode());
                 colorEdit.setChangedListener(this::setColor);
 
                 this.options.add(colorEdit);
@@ -144,7 +152,6 @@ public class ColorConfigListWidget extends ConfigListWidget
             private void setColor(String color)
             {
                 this.notif.setColor(this.notif.parseColor(color));
-                listWidget.refreshScreen();
             }
         }
 
@@ -152,15 +159,14 @@ public class ColorConfigListWidget extends ConfigListWidget
         {
             ColorOption(int width, Notification notif,
                         ColorConfigListWidget listWidget,
-                        int intColor, String strColor)
+                        TextColor color, String colorName)
             {
                 super(width, notif, listWidget);
 
-                MutableText message = MutableText.of(Text.literal(strColor).
-                        getContent());
+                MutableText message = Text.literal(colorName);
 
                 message.setStyle(Style.of(
-                        Optional.of(TextColor.fromRgb(intColor)),
+                        Optional.of(color),
                         Optional.of(false),
                         Optional.of(false),
                         Optional.of(false),
@@ -171,8 +177,9 @@ public class ColorConfigListWidget extends ConfigListWidget
 
                 this.options.add(ButtonWidget.builder(message, (button) ->
                 {
-                    notif.setColor(intColor);
+                    notif.setColor(color);
                     listWidget.refreshScreen();
+
                 }).size(240, 20).position(width / 2 - 120, 0).build());
             }
         }
