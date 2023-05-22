@@ -3,9 +3,7 @@ package notryken.chatnotify.mixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import net.minecraft.text.OrderedText;
 import notryken.chatnotify.client.ChatNotifyClient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,16 +43,5 @@ public class MixinClientPlayNetworkHandler
     public void sendChatMessage(String content, CallbackInfo ci)
     {
         ChatNotifyClient.lastSentMessage = content;
-    }
-
-
-    /**
-     * Temporary fix for a death screen message bug.
-     */
-    @Inject(method = "onDeathMessage", at = @At("HEAD"))
-    public void onDeathMessage(DeathMessageS2CPacket packet, CallbackInfo ci)
-    {
-        OrderedText temp = packet.getMessage().asOrderedText();
-        temp = null;
     }
 }

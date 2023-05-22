@@ -277,47 +277,47 @@ public class MixinChatHud {
                     retVal = styleTrigger(sibling.getSiblings(), trigger, style);
                 }
 
-                if (retVal == -1 &&
-                        sibling.getContent() instanceof LiteralTextContent ltc)
+                if (retVal == -1)
                 {
-                    List<Text> subSiblings = sibling.getSiblings();
-                    subSiblings.replaceAll(text ->
-                            fixStyle((MutableText) text, sibling.getStyle()));
+                    if (sibling.getContent() instanceof LiteralTextContent ltc)
+                    {
+                        List<Text> subSiblings = sibling.getSiblings();
+                        subSiblings.replaceAll(text ->
+                                fixStyle((MutableText) text, sibling.getStyle()));
 
-                    String tempStr = ltc.toString();
-                    // Remove 'literal{}'
-                    String subStr = tempStr.substring(8, tempStr.length() - 1);
+                        String tempStr = ltc.toString();
+                        // Remove 'literal{}'
+                        String subStr = tempStr.substring(8, tempStr.length() - 1);
 
-                    if (start + trigger.length() != subStr.length()) {
-                        subSiblings.add(0, Text.literal(
-                                subStr.substring(start + trigger.length()))
-                                .setStyle(sibling.getStyle()));
+                        if (start + trigger.length() != subStr.length()) {
+                            subSiblings.add(0, Text.literal(
+                                            subStr.substring(start + trigger.length()))
+                                    .setStyle(sibling.getStyle()));
+                        }
+
+                        subSiblings.add(0, Text.literal(subStr.substring(
+                                start, start + trigger.length())).setStyle(style
+                                .withClickEvent(sibling.getStyle().getClickEvent())
+                                .withHoverEvent(sibling.getStyle().getHoverEvent())
+                                .withInsertion(sibling.getStyle().getInsertion())));
+
+                        if (start != 0) {
+                            subSiblings.add(0, Text.literal(
+                                            subStr.substring(0, start))
+                                    .setStyle(sibling.getStyle()));
+                        }
+
+                        if (subSiblings.size() == 1) {
+                            siblings.set(i, subSiblings.get(0));
+                        }
+                        else {
+                            MutableText mt = MutableText.of(TextContent.EMPTY);
+                            mt.siblings.addAll(subSiblings);
+                            siblings.set(i, mt);
+                        }
+                        retVal = 0;
                     }
-
-                    subSiblings.add(0, Text.literal(subStr.substring(
-                            start, start + trigger.length())).setStyle(style
-                            .withClickEvent(sibling.getStyle().getClickEvent())
-                            .withHoverEvent(sibling.getStyle().getHoverEvent())
-                            .withInsertion(sibling.getStyle().getInsertion())));
-
-                    if (start != 0) {
-                        subSiblings.add(0, Text.literal(
-                                subStr.substring(0, start))
-                                .setStyle(sibling.getStyle()));
-                    }
-
-                    if (subSiblings.size() == 1) {
-                        siblings.set(i, subSiblings.get(0));
-                    }
-                    else {
-                        MutableText mt = MutableText.of(TextContent.EMPTY);
-                        mt.siblings.addAll(subSiblings);
-                        siblings.set(i, mt);
-                    }
-                    retVal = 0;
                 }
-
-                // TODO handle TTC (e.g. player dies to mob)
 
                 // If all else fails.
                 if (retVal == -1) {
