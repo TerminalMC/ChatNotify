@@ -122,6 +122,14 @@ public class Notification
     }
 
     /**
+     * @return The list of triggers.
+     */
+    public List<String> getTriggers()
+    {
+        return this.triggers;
+    }
+
+    /**
      * @return The RGB int color used by the notification.
      */
     public int getColor()

@@ -8,6 +8,8 @@ import notryken.chatnotify.config.Config;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages config file creation/loading.
@@ -15,7 +17,8 @@ import java.nio.file.Files;
 public class ChatNotifyClient implements ClientModInitializer
 {
     public static Config config;
-    public static String lastSentMessage;
+    public static final List<String> recentMessages = new ArrayList<>();
+    public static final List<Long> recentMessageTimes = new ArrayList<>();
     private static final File settingsFile =
             new File("config", "chatnotify.json");
     private static final Gson gson =
