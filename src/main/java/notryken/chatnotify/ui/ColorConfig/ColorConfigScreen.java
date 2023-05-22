@@ -12,7 +12,6 @@ import notryken.chatnotify.config.Notification;
 public class ColorConfigScreen extends GameOptionsScreen
 {
     private final Notification notif;
-
     private ColorConfigListWidget options;
 
     public ColorConfigScreen(Screen parent, Notification notif)
@@ -22,6 +21,7 @@ public class ColorConfigScreen extends GameOptionsScreen
         this.notif = notif;
     }
 
+    @Override
     protected void init()
     {
         this.options = new ColorConfigListWidget(this.client, this.width,
@@ -36,6 +36,7 @@ public class ColorConfigScreen extends GameOptionsScreen
                         this.height - 27).build());
     }
 
+    @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY,
                        float delta)
     {

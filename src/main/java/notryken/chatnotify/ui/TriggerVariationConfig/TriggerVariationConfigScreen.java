@@ -21,6 +21,7 @@ public class TriggerVariationConfigScreen extends GameOptionsScreen
         this.notif = notif;
     }
 
+    @Override
     protected void init()
     {
         this.options = new TriggerVariationConfigListWidget(this.client,
@@ -38,6 +39,7 @@ public class TriggerVariationConfigScreen extends GameOptionsScreen
                         this.height - 27).build());
     }
 
+    @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY,
                        float delta)
     {

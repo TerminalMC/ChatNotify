@@ -1,32 +1,28 @@
-package notryken.chatnotify.ui.SoundConfig;
+package notryken.chatnotify.ui;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import notryken.chatnotify.config.Notification;
 
-public class SoundConfigScreen extends GameOptionsScreen
+public class ConfigScreen extends GameOptionsScreen
 {
-    private final Notification notif;
-    private SoundConfigListWidget options;
+    private final ConfigListWidget listWidget;
 
-    public SoundConfigScreen(Screen parent, Notification notif)
+    public ConfigScreen(Screen parent, GameOptions gameOptions, Text title,
+                        ConfigListWidget listWidget)
     {
-        super(parent, MinecraftClient.getInstance().options,
-                Text.literal("Notification Sound"));
-        this.notif = notif;
+        super(parent, gameOptions, title);
+        this.listWidget = listWidget;
     }
 
     @Override
     protected void init()
     {
-        this.options = new SoundConfigListWidget(this.client, this.width,
-                this.height, 32, this.height - 32, 25, this.notif, this.parent);
-        this.addSelectableChild(this.options);
+        this.addSelectableChild(this.listWidget);
 
         this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
                         (button) -> {
@@ -41,7 +37,7 @@ public class SoundConfigScreen extends GameOptionsScreen
                        float delta)
     {
         this.renderBackground(matrices);
-        this.options.render(matrices, mouseX, mouseY, delta);
+        this.listWidget.render(matrices, mouseX, mouseY, delta);
         drawCenteredTextWithShadow(matrices, this.textRenderer, this.title,
                 this.width / 2, 5, 0xffffff);
         super.render(matrices, mouseX, mouseY, delta);
