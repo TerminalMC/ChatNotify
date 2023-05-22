@@ -51,7 +51,6 @@ public class MixinClientPlayNetworkHandler
 
         for (int i = 0; i < recentMessages.size();) {
             if (recentMessageTimes.get(i) + 5000 > currentTime) {
-                System.out.println("Removed from history 1: " + recentMessages.get(i)); // FIXME remove
                 recentMessages.remove(i);
                 recentMessageTimes.remove(i);
             }

@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static notryken.chatnotify.client.ChatNotifyClient.*;
@@ -75,7 +76,6 @@ public class MixinChatHud {
                     for (int i = recentMessages.size() - 1; true; i--)
                     {
                         if (strMsg.contains(recentMessages.get(i))) {
-                            System.out.println("Removed from history 2: " + recentMessages.get(i)); // FIXME remove
                             recentMessages.remove(i);
                             recentMessageTimes.remove(i);
 
@@ -93,22 +93,22 @@ public class MixinChatHud {
                 }
             }
 
-            /*if (strMsg.contains(username) && strMsg.contains(lastSentMessage)) {
-                lastSentMessage = null;
-                if (config.ignoreOwnMessages) {
-                    strMsg = null;
-                }
-                else {
-                    strMsg = strMsg.replaceFirst(username, "");
-                }
-            }*/
+//            if (strMsg.contains(username) && strMsg.contains(lastSentMessage)) {
+//                lastSentMessage = null;
+//                if (config.ignoreOwnMessages) {
+//                    strMsg = null;
+//                }
+//                else {
+//                    strMsg = strMsg.replaceFirst(username, "");
+//                }
+//            }
         }
         return strMsg;
     }
 
     /**
      * Checks all triggers of all enabled notifications to determine whether
-     * the message should trigger a notification, calling doNotify() if so.
+     * the message should trigger a notification, calling notify() if so.
      * @param message The original message.
      * @param strMsg The processed message.
      * @param mute Whether the notification sound should be ignored.
@@ -285,8 +285,17 @@ public class MixinChatHud {
 
             Text sibling = siblings.get(i);
             String str = sibling.getString();
-            String lowerStr = str.toLowerCase();
-            int start = lowerStr.indexOf(trigger.toLowerCase());
+            //String lowerStr = str.toLowerCase();
+            //int start = lowerStr.indexOf(trigger.toLowerCase());
+
+            int start;
+            Matcher matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" + trigger + "\\W?)(?!\\w)").matcher(str);
+            if (matcher.find()) {
+                start = matcher.start();
+            }
+            else {
+                start = -1;
+            }
 
             if (start != -1)
             {
