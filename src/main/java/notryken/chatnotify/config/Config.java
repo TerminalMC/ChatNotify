@@ -150,10 +150,13 @@ public class Config
                     false, 1f, 1f, DEFAULTSOUND, true));
         }
 
-        // All notification objects can self-validate.
+        /* Notifications self-validate, but need to preserve the state of
+        the primary notification. */
+        boolean nameOn = notifications.get(0).enabled;
         for (Notification n : notifications) {
             n.validate();
         }
+        notifications.get(0).enabled = nameOn;
     }
 
     /**

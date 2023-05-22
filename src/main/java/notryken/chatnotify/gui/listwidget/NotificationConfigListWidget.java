@@ -1,182 +1,143 @@
-package notryken.chatnotify.ui.NotificationConfig;
+package notryken.chatnotify.gui.listwidget;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.ui.ColorConfig.ColorConfigScreen;
-import notryken.chatnotify.ui.SoundConfig.SoundConfigScreen;
-import notryken.chatnotify.ui.KeyTriggerConfig.KeyTriggerConfigScreen;
-import notryken.chatnotify.ui.TriggerVariationConfig.TriggerVariationConfigScreen;
+import notryken.chatnotify.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class NotificationConfigListWidget extends
-        ElementListWidget<NotificationConfigListWidget.ConfigEntry>
+public class NotificationConfigListWidget extends ConfigListWidget
 {
     private final Notification notif;
-    private final Screen parentScreen;
 
-    public NotificationConfigListWidget(MinecraftClient client, int i, int j,
-                                        int k, int l, int m, Notification notif,
-                                        Screen parentScreen)
+    public NotificationConfigListWidget(MinecraftClient client,
+                                        int i, int j, int k, int l, int m,
+                                        Screen parent, Text title,
+                                        Notification notif)
     {
-        super(client, i, j, k, l, m);
-        this.setRenderSelection(true);
+        super(client, i, j, k, l, m, parent, title);
         this.notif = notif;
-        this.parentScreen = parentScreen;
 
-        this.addEntry(new ConfigEntry.GenericConfigHeader(
-                width, notif, client, this, "Notification Trigger"));
-        this.addEntry(new ConfigEntry.TriggerConfigType(width, notif, this));
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                client, Text.literal("Notification Trigger")));
+        this.addEntry(new Entry.TriggerConfigType(width, notif, this));
 
         if (notif.triggerIsKey) {
-            this.addEntry(new ConfigEntry.KeyTriggerConfig(width, notif, this));
+            this.addEntry(new Entry.KeyTriggerConfig(width, notif, this));
         }
         else {
-            this.addEntry(new ConfigEntry.TriggerField(
-                    width, notif, client, this));
-            this.addEntry(new ConfigEntry.TriggerVariationConfig(
-                    width, notif, this));
+            this.addEntry(new Entry.TriggerField(width, notif, client, this));
+            this.addEntry(new Entry.TriggerVariationConfig(width, notif, this));
         }
 
-        this.addEntry(new ConfigEntry.GenericConfigHeader(
-                width, notif, client, this, "Message Color"));
-        this.addEntry(new ConfigEntry.ColorConfig(width, notif, this));
-        this.addEntry(new ConfigEntry.GenericConfigHeader(
-                width, notif, client, this, "Message Format"));
-        this.addEntry(new ConfigEntry.FormatConfig(
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                client, Text.literal("Message Color")));
+        this.addEntry(new Entry.ColorConfig(width, notif, this));
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                client, Text.literal("Message Format")));
+        this.addEntry(new Entry.FormatConfig(
                 width, notif, this, "Bold", 0));
-        this.addEntry(new ConfigEntry.FormatConfig(
+        this.addEntry(new Entry.FormatConfig(
                 width, notif, this, "Italic", 1));
-        this.addEntry(new ConfigEntry.FormatConfig(
+        this.addEntry(new Entry.FormatConfig(
                 width, notif, this, "Underlined", 2));
-        this.addEntry(new ConfigEntry.FormatConfig(
+        this.addEntry(new Entry.FormatConfig(
                 width, notif, this, "Strikethrough", 3));
-        this.addEntry(new ConfigEntry.FormatConfig(
+        this.addEntry(new Entry.FormatConfig(
                 width, notif, this, "Obfuscated", 4));
-        this.addEntry(new ConfigEntry.ControlConfigHeader(
+        this.addEntry(new Entry.ControlConfigHeader(
                 width, notif, client, this, "Notification Sound", 2));
-        this.addEntry(new ConfigEntry.SoundConfig(width, notif, this));
+        this.addEntry(new Entry.SoundConfig(width, notif, this));
     }
 
-    public void refreshScreen()
+    @Override
+    protected void refreshScreen()
     {
-        if (client != null) {
-            client.setScreen(new NotificationConfigScreen(
-                    this.parentScreen, this.notif));
-        }
+        refreshScreen(new NotificationConfigListWidget(client,
+                this.width, this.height, this.top, this.bottom, this.itemHeight,
+                this.parent, this.title, this.notif));
     }
 
-    public void openKeyTriggerConfig()
+    private void openKeyTriggerConfig()
     {
-        if (client != null) {
-            client.setScreen(new KeyTriggerConfigScreen(
-                    client.currentScreen, this.notif));
-        }
+        assert client.currentScreen != null;
+        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+                Text.literal("Notification Trigger"),
+                new KeyTriggerConfigListWidget(client,
+                        client.currentScreen.width,
+                        client.currentScreen.height, 32,
+                        client.currentScreen.height - 32, 25,
+                        client.currentScreen,
+                        Text.literal("Notification Trigger"), this.notif)));
     }
 
-    public void openTriggerVariationConfig()
+    private void openTriggerVariationConfig()
     {
-        if (client != null) {
-            client.setScreen(new TriggerVariationConfigScreen(
-                    client.currentScreen, this.notif));
-        }
+        assert client.currentScreen != null;
+        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+                Text.literal("Notification Trigger Variations"),
+                new TriggerVariationConfigListWidget(client,
+                        client.currentScreen.width,
+                        client.currentScreen.height, 32,
+                        client.currentScreen.height - 32, 25,
+                        client.currentScreen,
+                        Text.literal("Notification Trigger Variations"),
+                        this.notif)));
     }
 
-    public void openColorConfig()
+    private void openColorConfig()
     {
-        if (client != null) {
-            client.setScreen(new ColorConfigScreen(
-                    client.currentScreen, this.notif));
-        }
+        assert client.currentScreen != null;
+        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+                Text.literal("Notification Message Color"),
+                new ColorConfigListWidget(client,
+                        client.currentScreen.width,
+                        client.currentScreen.height, 32,
+                        client.currentScreen.height - 32, 25,
+                        client.currentScreen,
+                        Text.literal("Notification Message Color"),
+                        this.notif)));
     }
 
-    public void openSoundConfig()
+    private void openSoundConfig()
     {
-        if (client != null) {
-            client.setScreen(new SoundConfigScreen(
-                    client.currentScreen, this.notif));
-        }
+        assert client.currentScreen != null;
+        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+                Text.literal("Notification Sound"),
+                new SoundConfigListWidget(client,
+                        client.currentScreen.width,
+                        client.currentScreen.height, 32,
+                        client.currentScreen.height - 32, 25,
+                        client.currentScreen,
+                        Text.literal("Notification Sound"),
+                        notif)));
     }
 
-    public int getRowWidth()
+    private abstract static class Entry extends ConfigListWidget.Entry
     {
-        return 300;
-    }
+        public final Notification notif;
 
-    protected int getScrollbarPositionX()
-    {
-        return super.getScrollbarPositionX() + 32;
-    }
-
-    public abstract static class ConfigEntry extends Entry<ConfigEntry>
-    {
-        public List<ClickableWidget> options;
-        public Notification notif;
-        public NotificationConfigListWidget listWidget;
-        public int width;
-
-        ConfigEntry(int width, Notification notif, NotificationConfigListWidget
-                listWidget)
+        Entry(int width, Notification notif,
+              NotificationConfigListWidget listWidget)
         {
-            this.options = new ArrayList<>();
+            super(width, listWidget);
             this.notif = notif;
-            this.listWidget = listWidget;
-            this.width = width;
         }
 
-        public void render(MatrixStack matrices, int index, int y, int x,
-                           int entryWidth, int entryHeight,
-                           int mouseX, int mouseY,
-                           boolean hovered, float tickDelta)
-        {
-            this.options.forEach((button) -> {
-                button.setY(y);
-                button.render(matrices, mouseX, mouseY, tickDelta);
-            });
-        }
-
-        public List<? extends Element> children()
-        {
-            return this.options;
-        }
-
-        public List<? extends Selectable> selectableChildren()
-        {
-            return this.options;
-        }
-
-        public static class GenericConfigHeader extends ConfigEntry
-        {
-            GenericConfigHeader(int width, Notification notif,
-                                @NotNull MinecraftClient client,
-                                NotificationConfigListWidget listWidget,
-                                String label)
-            {
-                super(width, notif, listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        Text.literal(label), client.textRenderer));
-            }
-        }
-
-        public static class TriggerConfigType extends ConfigEntry
+        private static class TriggerConfigType extends Entry
         {
             TriggerConfigType(int width, Notification notif,
                               NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
-                this.options.add(CyclingButtonWidget.onOffBuilder(
+                options.add(CyclingButtonWidget.onOffBuilder(
                         Text.literal("Event Key"), Text.literal("Word/Phrase"))
                                 .initially(notif.triggerIsKey)
                                 .build(this.width / 2 - 120, 0, 240, 20,
@@ -185,11 +146,10 @@ public class NotificationConfigListWidget extends
                                     notif.triggerIsKey = status;
                                     listWidget.refreshScreen();
                                 }));
-
             }
         }
 
-        public static class KeyTriggerConfig extends ConfigEntry
+        private static class KeyTriggerConfig extends Entry
         {
             KeyTriggerConfig(int width, Notification notif,
                              NotificationConfigListWidget listWidget)
@@ -204,13 +164,13 @@ public class NotificationConfigListWidget extends
                     label = "[Key] " + label;
                 }
 
-                this.options.add(ButtonWidget.builder(Text.literal(label),
+                options.add(ButtonWidget.builder(Text.literal(label),
                                 (button) -> listWidget.openKeyTriggerConfig())
                         .size(240, 20).position(width / 2 - 120, 0).build());
             }
         }
 
-        public static class TriggerField extends ConfigEntry {
+        private static class TriggerField extends Entry {
             TriggerField(int width, Notification notif,
                          @NotNull MinecraftClient client,
                          NotificationConfigListWidget listWidget) {
@@ -223,24 +183,25 @@ public class NotificationConfigListWidget extends
                 triggerEdit.setText(this.notif.getTrigger());
                 triggerEdit.setChangedListener(this::setTrigger);
 
-                this.options.add(triggerEdit);
+                options.add(triggerEdit);
             }
 
-            public void setTrigger(String trigger) {
-                this.notif.setTrigger(trigger.strip());
+            private void setTrigger(String trigger)
+            {
+                notif.setTrigger(trigger.strip());
             }
         }
 
-        public static class TriggerVariationConfig extends ConfigEntry
+        private static class TriggerVariationConfig extends Entry
         {
             TriggerVariationConfig(int width, Notification notif,
                                    NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                this.options.add(ButtonWidget.builder(
-                                Text.literal("Trigger Variations (" +
-                                        (notif.getNumTriggers() - 1) + ")"),
+                options.add(ButtonWidget.builder(
+                        Text.literal("Trigger Variations (" +
+                                (notif.getNumTriggers() - 1) + ")"),
                                 (button) -> {
                                     if (notif.getTrigger() != null &&
                                             !notif.getTrigger().equals("")) {
@@ -250,7 +211,7 @@ public class NotificationConfigListWidget extends
             }
         }
 
-        public static class ControlConfigHeader extends ConfigEntry
+        private static class ControlConfigHeader extends Entry
         {
             ControlConfigHeader(int width, Notification notif,
                                 @NotNull MinecraftClient client,
@@ -258,10 +219,10 @@ public class NotificationConfigListWidget extends
                                 String label, int index)
             {
                 super(width, notif, listWidget);
-                this.options.add(new TextWidget(width / 2 - 60, 0, 120, 20,
+                options.add(new TextWidget(width / 2 - 60, 0, 120, 20,
                         Text.literal(label),
                         client.textRenderer));
-                this.options.add(CyclingButtonWidget.onOffBuilder()
+                options.add(CyclingButtonWidget.onOffBuilder()
                         .omitKeyText()
                         .initially(notif.getControl(index))
                         .build(this.width / 2 + 60, 0, 25, 20, Text.empty(),
@@ -272,7 +233,7 @@ public class NotificationConfigListWidget extends
             }
         }
 
-        public static class ColorConfig extends ConfigEntry
+        private static class ColorConfig extends Entry
         {
             ColorConfig(int width, Notification notif,
                         NotificationConfigListWidget listWidget)
@@ -299,20 +260,20 @@ public class NotificationConfigListWidget extends
                             Optional.empty(),
                             Optional.empty()));
                 }
-                this.options.add(ButtonWidget.builder(message,
-                        (button) -> listWidget.openColorConfig())
+                options.add(ButtonWidget.builder(message,
+                                (button) -> listWidget.openColorConfig())
                         .size(240, 20).position(width / 2 - 120, 0).build());
             }
         }
 
-        public static class FormatConfig extends ConfigEntry
+        private static class FormatConfig extends Entry
         {
             FormatConfig(int width, Notification notif,
                          NotificationConfigListWidget listWidget, String label,
                          int index)
             {
                 super(width, notif, listWidget);
-                this.options.add(CyclingButtonWidget.onOffBuilder()
+                options.add(CyclingButtonWidget.onOffBuilder()
                         .initially(notif.getFormatControl(index))
                         .build(this.width / 2 - 120, 0, 240, 20,
                                 Text.literal(label), (button, status) -> {
@@ -322,14 +283,14 @@ public class NotificationConfigListWidget extends
             }
         }
 
-        public static class SoundConfig extends ConfigEntry
+        private static class SoundConfig extends Entry
         {
             SoundConfig(int width, Notification notif,
                         NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                this.options.add(ButtonWidget.builder(
+                options.add(ButtonWidget.builder(
                         Text.literal(notif.getSound().toString()),
                         (button) -> listWidget.openSoundConfig())
                         .size(240, 20).position(width / 2 - 120, 0).build());

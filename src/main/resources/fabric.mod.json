@@ -20,7 +20,7 @@
       "notryken.chatnotify.client.ChatNotifyClient"
     ],
     "modmenu": [
-      "notryken.chatnotify.ui.ModMenuIntegration"
+      "notryken.chatnotify.gui.screen.ModMenuIntegration"
     ]
   },
   "mixins": [

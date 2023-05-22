@@ -1,5 +1,4 @@
-package notryken.chatnotify.ui;
-
+package notryken.chatnotify.gui.screen;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
@@ -7,11 +6,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import notryken.chatnotify.client.ChatNotifyClient;
+import notryken.chatnotify.gui.listwidget.NotificationListWidget;
 
 import static notryken.chatnotify.client.ChatNotifyClient.config;
 
@@ -35,15 +34,9 @@ public class ModMenuIntegration implements ModMenuApi
         @Override
         protected void init()
         {
-            this.addDrawableChild(CyclingButtonWidget.onOffBuilder()
-                    .initially(config.ignoreOwnMessages).build(
-                            this.width / 2 - 120, 32, 240, 20,
-                            Text.literal("Ignore Your Own Messages"),
-                            (button, status) ->
-                                    config.ignoreOwnMessages = status));
-
-            this.list = new NotificationListWidget(this.client, this.parent,
-                    this.width, this.height, 64, this.height - 32, 25);
+            this.list = new NotificationListWidget(this.client,
+                    this.width, this.height, 32, this.height - 32, 25,
+                    this.parent, Text.literal("Chat Notify Options"));
             this.addSelectableChild(this.list);
 
             this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,

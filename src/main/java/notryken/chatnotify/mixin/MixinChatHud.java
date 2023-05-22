@@ -285,13 +285,14 @@ public class MixinChatHud {
 
             Text sibling = siblings.get(i);
             String str = sibling.getString();
-            //String lowerStr = str.toLowerCase();
-            //int start = lowerStr.indexOf(trigger.toLowerCase());
 
             int start;
             Matcher matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" + trigger + "\\W?)(?!\\w)").matcher(str);
             if (matcher.find()) {
                 start = matcher.start();
+                if (start > 0) {
+                    start = str.substring(matcher.start()).toLowerCase().indexOf(trigger.toLowerCase()) + matcher.start();
+                }
             }
             else {
                 start = -1;
@@ -413,9 +414,9 @@ public class MixinChatHud {
 //        depth++;
 //        StringBuilder indent = new StringBuilder();
 //        indent.append(">   ".repeat(depth));
-////        System.out.println(indent + "Content: " + message.getContent());
-////        System.out.println(indent + "Style : " + message.getStyle());
-////        System.out.println(indent + "Siblings: ");
+////        //System.out.println(indent + "Content: " + message.getContent());
+////        //System.out.println(indent + "Style : " + message.getStyle());
+////        //System.out.println(indent + "Siblings: ");
 //        for (Text t : message.getSiblings())
 //        {
 //            printTree(t, depth);

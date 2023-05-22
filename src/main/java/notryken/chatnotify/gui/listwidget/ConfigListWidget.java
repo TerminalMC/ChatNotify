@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui;
+package notryken.chatnotify.gui.listwidget;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -6,9 +6,10 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
+import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import notryken.chatnotify.config.Notification;
+import notryken.chatnotify.gui.screen.ConfigScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,24 +17,26 @@ import java.util.List;
 public abstract class ConfigListWidget
         extends ElementListWidget<ConfigListWidget.Entry>
 {
-    private final Screen parent;
-    private final Text title;
+    public final MinecraftClient client;
+    public final Screen parent;
+    public final Text title;
 
-    public ConfigListWidget(MinecraftClient minecraftClient,
+    public ConfigListWidget(MinecraftClient client,
                             int i, int j, int k, int l, int m,
                             Screen parent,
-                            Text title,
-                            Notification notif)
+                            Text title)
     {
-        super(minecraftClient, i, j, k, l, m);
+        super(client, i, j, k, l, m);
         this.setRenderSelection(true);
+        this.client = client;
         this.parent = parent;
         this.title = title;
     }
 
-    public void refreshScreen()
+    public void refreshScreen(ConfigListWidget listWidget)
     {
-        client.setScreen(new ConfigScreen(this.parent, MinecraftClient.getInstance().options, this.title, this));
+        client.setScreen(new ConfigScreen(this.parent, client.options,
+                this.title, listWidget));
     }
 
     public int getRowWidth()
@@ -46,17 +49,17 @@ public abstract class ConfigListWidget
         return super.getScrollbarPositionX() + 32;
     }
 
+    protected abstract void refreshScreen();
+
     public abstract static class Entry extends ElementListWidget.Entry<Entry>
     {
         public List<ClickableWidget> options;
-        public Notification notif;
         public ConfigListWidget listWidget;
         public int width;
 
-        Entry(int width, Notification notif, ConfigListWidget listWidget)
+        public Entry(int width, ConfigListWidget listWidget)
         {
             this.options = new ArrayList<>();
-            this.notif = notif;
             this.listWidget = listWidget;
             this.width = width;
         }
@@ -80,6 +83,15 @@ public abstract class ConfigListWidget
         public List<? extends Selectable> selectableChildren()
         {
             return this.options;
+        }
+
+        public static class Header extends Entry {
+            public Header(int width, ConfigListWidget listWidget,
+                          MinecraftClient client, Text label) {
+                super(width, listWidget);
+                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
+                        label, client.textRenderer));
+            }
         }
     }
 }

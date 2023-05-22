@@ -1,4 +1,4 @@
-package notryken.chatnotify.ui.SoundConfig;
+package notryken.chatnotify.gui.sliderwidget;
 
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
