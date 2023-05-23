@@ -12,6 +12,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static notryken.chatnotify.client.ChatNotifyClient.recentMessageTimes;
+import static notryken.chatnotify.client.ChatNotifyClient.recentMessages;
+
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler
 {
@@ -42,6 +45,21 @@ public class MixinClientPlayNetworkHandler
     @Inject(method = "sendChatMessage", at = @At("HEAD"))
     public void sendChatMessage(String content, CallbackInfo ci)
     {
-        ChatNotifyClient.lastSentMessage = content;
+        long currentTime = System.currentTimeMillis();
+
+        // Remove old messages if sent more than 5 seconds ago.
+
+        for (int i = 0; i < recentMessages.size();) {
+            if (recentMessageTimes.get(i) + 5000 > currentTime) {
+                System.out.println("Removed from history 1: " + recentMessages.get(i)); // FIXME remove
+                recentMessages.remove(i);
+                recentMessageTimes.remove(i);
+            }
+            else {
+                i++;
+            }
+        }
+        recentMessages.add(content);
+        recentMessageTimes.add(currentTime);
     }
 }

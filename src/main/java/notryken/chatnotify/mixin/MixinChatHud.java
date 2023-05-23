@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static notryken.chatnotify.client.ChatNotifyClient.config;
-import static notryken.chatnotify.client.ChatNotifyClient.lastSentMessage;
+import static notryken.chatnotify.client.ChatNotifyClient.*;
 
 /**
  * The backbone of ChatNotify. Intercepts chat messages as they are sent to
@@ -50,15 +49,12 @@ public class MixinChatHud {
                             int ticks, MessageIndicator indicator,
                             boolean refresh, CallbackInfo ci)
     {
-        String username = config.getUsername();
-        if (username != null) {
-            String strMsg = message.getString();
+        String strMsg = message.getString();
 
-            strMsg = preProcess(strMsg, username);
+        strMsg = preProcess(strMsg);
 
-            if (strMsg != null) {
-                checkNotifications(message, strMsg, refresh);
-            }
+        if (strMsg != null) {
+            checkNotifications(message, strMsg, refresh);
         }
     }
 
@@ -66,17 +62,39 @@ public class MixinChatHud {
      * Modifies the message based on whether it matches the user's last sent
      * message, and whether the user's own messages are to be ignored.
      * @param strMsg The original message.
-     * @param username The user's in-game name.
      * @return The processed message.
      */
-    private String preProcess(String strMsg, String username)
+    private String preProcess(String strMsg)
     {
-        if (lastSentMessage != null) {
+        if (!recentMessages.isEmpty()) {
             /*
             This check is considered to adequately determine whether the message
             was sent by the user.
              */
-            if (strMsg.contains(username) && strMsg.contains(lastSentMessage)) {
+            for (String username : config.getNotif(0).getTriggers()) {
+                if (strMsg.contains(username)) { //  && !recentMessages.isEmpty() Second value prevents errors when spamming (or does it?)
+                    for (int i = recentMessages.size() - 1; true; i--)
+                    {
+                        if (strMsg.contains(recentMessages.get(i))) {
+                            System.out.println("Removed from history 2: " + recentMessages.get(i)); // FIXME remove
+                            recentMessages.remove(i);
+                            recentMessageTimes.remove(i);
+
+                            if (config.ignoreOwnMessages) {
+                                strMsg = null;
+                            }
+                            else {
+                                strMsg = strMsg.replaceFirst(username, "");
+                            }
+
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            /*if (strMsg.contains(username) && strMsg.contains(lastSentMessage)) {
                 lastSentMessage = null;
                 if (config.ignoreOwnMessages) {
                     strMsg = null;
@@ -84,7 +102,7 @@ public class MixinChatHud {
                 else {
                     strMsg = strMsg.replaceFirst(username, "");
                 }
-            }
+            }*/
         }
         return strMsg;
     }
