@@ -192,7 +192,21 @@ public class MixinChatHud {
 
             if (message.getSiblings().isEmpty())
             {
+                System.out.println("## no-sibling message");
+
+                System.out.println("## content: " + message.getContent());
+
+                /*
+                FIXME so basically here on servers that don't use siblings,
+                 there's still a way to set style of sub-parts of the message
+                 but I have no idea how to access it.
+                 */
+
+                //System.out.println("## 2ndSiblings: " + message.getContent());
+
                 String str = message.getString();
+                Style originalStyle = message.getStyle();
+                System.out.println("## original style: " + originalStyle);
 
                 newMessage = Text.empty();
                 List<Text> siblings = newMessage.getSiblings();
@@ -207,9 +221,11 @@ public class MixinChatHud {
                 String subStr3 = str.substring(start + trigger.length());
 
                 MutableText subText1 = Text.literal(subStr1);
+                //subText1.setStyle(originalStyle);
                 MutableText subText2 = Text.literal(subStr2);
                 subText2.setStyle(style);
                 MutableText subText3 = Text.literal(subStr3);
+                //subText3.setStyle(originalStyle);
 
                 System.out.println("## sub1: " + subText1);
                 System.out.println("## sub2: " + subText2);
