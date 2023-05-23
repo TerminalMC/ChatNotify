@@ -1,5 +1,6 @@
 package notryken.chatnotify.mixin;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -196,6 +198,9 @@ public class MixinChatHud {
 
                 System.out.println("## content: " + message.getContent());
 
+                newMessage = Text.empty();
+                List<Text> siblings = newMessage.getSiblings();
+
                 /*
                 FIXME so basically here on servers that don't use siblings,
                  there's still a way to set style of sub-parts of the message
@@ -205,11 +210,24 @@ public class MixinChatHud {
                 //System.out.println("## 2ndSiblings: " + message.getContent());
 
                 String str = message.getString();
-                Style originalStyle = message.getStyle();
-                System.out.println("## original style: " + originalStyle);
+                //Style originalStyle = message.getStyle();
+                //System.out.println("## original style: " + originalStyle);
 
-                newMessage = Text.empty();
-                List<Text> siblings = newMessage.getSiblings();
+                if (message.getContent() instanceof TranslatableTextContent ttc)
+                {
+                    System.out.println("## is ttc");
+
+                    System.out.println("## ttc args: " + Arrays.toString(ttc.getArgs()));
+                    System.out.println("## ttc args length: " + ttc.getArgs().length);
+                    if (ttc.getArgs().length == 1) {
+                        MutableText mt = Text.empty();
+                        mt.getSiblings().add((Text) ttc.getArg(0));
+                        System.out.println("## ttc args text: " + mt.getSiblings());
+                        // So this works, then we need to pass this mt into the with-siblings processor
+                    }
+                }
+
+
 
                 int start = str.indexOf(trigger);
 
