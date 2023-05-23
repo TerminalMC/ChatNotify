@@ -165,7 +165,7 @@ public class MixinChatHud {
                     Optional.empty(),
                     Optional.empty());
 
-            List<Text> siblings = message.getSiblings();
+            /*List<Text> siblings = message.getSiblings();
             int i = 0;
             boolean done = false;
             while (i < siblings.size() && !done) {
@@ -177,11 +177,124 @@ public class MixinChatHud {
                                     StringVisitable.plain(str))));
                 }
                 i++;
+            }*/
+
+            /*
+            FIXME this is late-night proof-of-concept code, so very messy and
+             inefficient.
+             */
+
+            /*
+            TODO ayy it works!
+             */
+
+            boolean siblingsModified = false;
+
+            if (message.getSiblings().isEmpty())
+            {
+                String str = message.getString();
+
+                newMessage = Text.empty();
+                List<Text> siblings = newMessage.getSiblings();
+
+                int start = str.indexOf(trigger);
+
+                siblingsModified = true;
+                System.out.println("## original str: " + str);
+
+                String subStr1 = str.substring(0, start);
+                String subStr2 = str.substring(start, start + trigger.length());
+                String subStr3 = str.substring(start + trigger.length());
+
+                MutableText subText1 = Text.literal(subStr1);
+                MutableText subText2 = Text.literal(subStr2);
+                subText2.setStyle(style);
+                MutableText subText3 = Text.literal(subStr3);
+
+                System.out.println("## sub1: " + subText1);
+                System.out.println("## sub2: " + subText2);
+                System.out.println("## sub3: " + subText3);
+
+                siblings.add(0, subText3);
+                siblings.add(0, subText2);
+                siblings.add(0, subText1);
+            }
+            else
+            {
+                /*
+                This block only works on servers like Hypixel, MineHut etc. that
+                use message siblings.
+                 */
+                List<Text> siblings = message.getSiblings();
+                System.out.println("## style: " + message.getStyle());
+                for (Text sibling : siblings) {
+                    System.out.println("## sibling x: " + sibling);
+                }
+                for (int i = 0; i < siblings.size(); i++) {
+                    System.out.println("## sibling " + i + ": " + siblings.get(i));
+                    Text sibling = siblings.get(i);
+                    String str = sibling.getString();
+                    int start = str.indexOf(trigger);
+                    if (start != -1) {
+                        siblingsModified = true;
+                        System.out.println("## original str: " + str);
+
+                        String subStr1 = str.substring(0, start);
+                        String subStr2 = str.substring(start, start + trigger.length());
+                        String subStr3 = str.substring(start + trigger.length());
+
+                        MutableText subText1 = Text.literal(subStr1);
+                        subText1.setStyle(sibling.getStyle());
+                        MutableText subText2 = Text.literal(subStr2);
+                        subText2.setStyle(style);
+                        MutableText subText3 = Text.literal(subStr3);
+                        subText3.setStyle(sibling.getStyle());
+
+                        System.out.println("## sub1: " + subText1);
+                        System.out.println("## sub2: " + subText2);
+                        System.out.println("## sub3: " + subText3);
+
+                        siblings.remove(i);
+                        siblings.add(i, subText3);
+                        siblings.add(i, subText2);
+                        siblings.add(i, subText1);
+
+                        /*StringBuilder formatCodes = new StringBuilder();
+                        char[] strArr = str.toCharArray();
+                        for (int j = 0; j < start; j++) {
+                            if (strArr[j] == '§') {
+                                j++;
+                                if (strArr[j] == 'r') {
+                                    formatCodes = new StringBuilder();
+                                }
+                                else {
+                                    formatCodes.append('§');
+                                    formatCodes.append(strArr[j]);
+                                }
+                            }
+                        }
+                        System.out.println("## formatCodes: " + formatCodes);
+                        if (!formatCodes.isEmpty()) {
+                            StringBuilder modStr = new StringBuilder(str);
+                            modStr.insert(start, "§r");
+                            modStr.insert(start + 2 + str.length(), formatCodes);
+                            str = modStr.toString();
+                        }
+                        System.out.println("## final str: " + str);
+                        MutableText text = Text.literal(str);
+                        text.setStyle(style);
+                        System.out.println("## final text: " + text);
+                        siblings.set(i, text);*/
+
+                        i = siblings.size(); // Exit condition
+                    }
+                }
+                newMessage.siblings.addAll(siblings);
             }
 
-            newMessage.siblings.addAll(siblings);
-
-            newMessage.setStyle(style);
+            if (!siblingsModified) {
+                newMessage.setStyle(style);
+            }
 
             modifiedMessage = newMessage;
         }
