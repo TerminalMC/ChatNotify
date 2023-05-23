@@ -37,17 +37,17 @@ public class TriggerVariationConfigListWidget extends ConfigListWidget
     public TriggerVariationConfigListWidget resize(int width, int height,
                                                    int top, int bottom)
     {
-        assert client.currentScreen != null;
-        return new TriggerVariationConfigListWidget(client, width, height, top,
-                bottom, itemHeight, parent, title, notif);
+        TriggerVariationConfigListWidget listWidget =
+                new TriggerVariationConfigListWidget(client, width, height,
+                        top, bottom, itemHeight, parent, title, notif);
+        listWidget.setScrollAmount(this.getScrollAmount());
+        return listWidget;
     }
 
     @Override
     protected void refreshScreen()
     {
-        refreshScreen(new TriggerVariationConfigListWidget(client,
-                this.width, this.height, this.top, this.bottom, this.itemHeight,
-                this.parent, this.title, this.notif));
+        refreshScreen(this);
     }
 
     private void addTriggerVariation(Notification notif)

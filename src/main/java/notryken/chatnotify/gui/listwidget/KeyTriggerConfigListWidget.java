@@ -46,17 +46,17 @@ public class KeyTriggerConfigListWidget extends ConfigListWidget
     public KeyTriggerConfigListWidget resize(int width, int height,
                                              int top, int bottom)
     {
-        assert client.currentScreen != null;
-        return new KeyTriggerConfigListWidget(client, width, height, top,
-                bottom, itemHeight, parent, title, notif);
+        KeyTriggerConfigListWidget listWidget =
+                new KeyTriggerConfigListWidget(client, width, height, top,
+                        bottom, itemHeight, parent, title, notif);
+        listWidget.setScrollAmount(this.getScrollAmount());
+        return listWidget;
     }
 
     @Override
     protected void refreshScreen()
     {
-        refreshScreen(new KeyTriggerConfigListWidget(client,
-                this.width, this.height, this.top, this.bottom, this.itemHeight,
-                this.parent, this.title, this.notif));
+        refreshScreen(this);
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry

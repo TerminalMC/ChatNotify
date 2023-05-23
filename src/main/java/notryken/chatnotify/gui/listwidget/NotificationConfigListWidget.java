@@ -60,17 +60,17 @@ public class NotificationConfigListWidget extends ConfigListWidget
     public NotificationConfigListWidget resize(int width, int height,
                                                int top, int bottom)
     {
-        assert client.currentScreen != null;
-        return new NotificationConfigListWidget(client, width, height, top,
-                bottom, itemHeight, parent, title, notif);
+        NotificationConfigListWidget listWidget =
+                new NotificationConfigListWidget(client, width, height, top,
+                        bottom, itemHeight, parent, title, notif);
+        listWidget.setScrollAmount(this.getScrollAmount());
+        return listWidget;
     }
 
     @Override
     protected void refreshScreen()
     {
-        refreshScreen(new NotificationConfigListWidget(client,
-                this.width, this.height, this.top, this.bottom, this.itemHeight,
-                this.parent, this.title, this.notif));
+        refreshScreen(this);
     }
 
     private void openKeyTriggerConfig()

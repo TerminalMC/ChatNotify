@@ -39,9 +39,11 @@ public class ModConfigListWidget extends ConfigListWidget
     public ModConfigListWidget resize(int width, int height,
                                       int top, int bottom)
     {
-        assert client.currentScreen != null;
-        return new ModConfigListWidget(client, width, height, top, bottom,
-                itemHeight, parent, title);
+        ModConfigListWidget listWidget =
+                new ModConfigListWidget(client, width, height, top, bottom,
+                        itemHeight, parent, title);
+        listWidget.setScrollAmount(this.getScrollAmount());
+        return listWidget;
     }
 
     @Override

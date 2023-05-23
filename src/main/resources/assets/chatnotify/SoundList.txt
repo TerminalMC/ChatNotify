@@ -547,7 +547,6 @@ entity.goat.milk
 entity.goat.prepare_ram
 entity.goat.ram_impact
 entity.goat.horn_break
-item.goat_horn.play
 entity.goat.screaming.ambient
 entity.goat.screaming.death
 entity.goat.screaming.eat

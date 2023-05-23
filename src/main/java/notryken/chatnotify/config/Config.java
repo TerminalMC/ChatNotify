@@ -7,7 +7,7 @@ import java.util.*;
  */
 public class Config
 {
-    public static final String DEFAULTSOUND = "entity.experience_orb.pickup";
+    public static final String DEFAULTSOUND = "entity.arrow.hit_player";
     public boolean ignoreOwnMessages = false;
     private String username = null;
     private final List<Notification> notifications = new ArrayList<>();

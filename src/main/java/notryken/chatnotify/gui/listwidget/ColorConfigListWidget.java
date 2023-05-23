@@ -39,11 +39,15 @@ public class ColorConfigListWidget extends ConfigListWidget
         int[] intColors = new int[]
                 {
                         16777215,
+                        10027008,
                         16711680,
                         16753920,
+                        16761856,
                         16776960,
                         65280,
                         32768,
+                        19456,
+                        2142890,
                         65535,
                         255,
                         8388736,
@@ -54,12 +58,16 @@ public class ColorConfigListWidget extends ConfigListWidget
         String[] strColors = new String[]
                 {
                         "[No Color]",
+                        "Dark Red",
                         "Red",
                         "Orange",
+                        "Gold",
                         "Yellow",
                         "Lime",
                         "Green",
+                        "Dark Green",
                         "Aqua",
+                        "Cyan",
                         "Blue",
                         "Purple",
                         "Magenta",
@@ -78,16 +86,17 @@ public class ColorConfigListWidget extends ConfigListWidget
     public ColorConfigListWidget resize(int width, int height,
                                         int top, int bottom)
     {
-        return new ColorConfigListWidget(client, width, height, top, bottom,
-                itemHeight, parent, title, notif);
+        ColorConfigListWidget listWidget =
+                new ColorConfigListWidget(client, width, height, top, bottom,
+                        itemHeight, parent, title, notif);
+        listWidget.setScrollAmount(this.getScrollAmount());
+        return listWidget;
     }
 
     @Override
     protected void refreshScreen()
     {
-        refreshScreen(new ColorConfigListWidget(client,
-                this.width, this.height, this.top, this.bottom, this.itemHeight,
-                this.parent, this.title, this.notif));
+        refreshScreen(this);
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry
