@@ -1,6 +1,5 @@
 package notryken.chatnotify.mixin;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
@@ -16,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -101,29 +99,31 @@ public class MixinChatHud {
     private void checkNotifications(Text message, String strMsg, boolean mute)
     {
         modifiedMessage = null; // Reset.
-        for (Notification notif : config.getNotifs()) {
-            if (modifiedMessage == null && notif.enabled) {
-                boolean doNotify = false;
-                String trigger = "";
-
-                if (notif.triggerIsKey) {
-                    if (message.getContent() instanceof
-                            TranslatableTextContent ttc) {
-                        //System.out.println(ttc.getKey());
-                        trigger = notif.getTrigger();
-                        doNotify = ttc.getKey().contains(trigger);
+        Notification notif;
+        for (Iterator<Notification> iter1 = config.getNotifs().iterator();
+             iter1.hasNext() && modifiedMessage == null;)
+        {
+            notif = iter1.next();
+            if (notif.enabled)
+            {
+                if (notif.triggerIsKey && message.getContent() instanceof
+                        TranslatableTextContent ttc)
+                {
+                    String trigger = notif.getTrigger();
+                    if (ttc.getKey().contains(trigger)) {
+                        notify(message, trigger, true, notif, mute);
                     }
                 }
                 else {
-                    Iterator<String> iter = notif.getTriggerIterator();
-                    while (iter.hasNext() && !doNotify) {
-                        trigger = iter.next();
-                        doNotify = msgContainsStr(strMsg, trigger);
+                    for (Iterator<String> iter2 = notif.getTriggerIterator();
+                         iter2.hasNext();)
+                    {
+                        String trigger = iter2.next();
+                        if (msgContainsStr(strMsg, trigger)) {
+                            notify(message, trigger, false, notif, mute);
+                            break;
+                        }
                     }
-                }
-
-                if (doNotify) {
-                    notify(message, trigger, notif, mute);
                 }
             }
         }
@@ -151,11 +151,11 @@ public class MixinChatHud {
      * @param notif The notification.
      * @param mute Whether the notification sound should be ignored.
      */
-    private void notify(Text message, String trigger, Notification notif,
-                        boolean mute)
+    private void notify(Text message, String trigger, boolean keyTrigger,
+                        Notification notif, boolean mute)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
-            MutableText newMessage = MutableText.of(message.getContent());
+            MutableText newMessage = message.copy();
 
             Style style = Style.of(
                     Optional.of(TextColor.fromRgb(notif.getColor())),
@@ -167,168 +167,106 @@ public class MixinChatHud {
                     Optional.empty(),
                     Optional.empty());
 
-            /*List<Text> siblings = message.getSiblings();
-            int i = 0;
-            boolean done = false;
-            while (i < siblings.size() && !done) {
-                String str = siblings.get(i).getString();
-                if (str.contains(trigger)) {
-                    done = true;
-                    siblings.set(i,
-                            Text.of(TextVisitFactory.removeFormattingCodes(
-                                    StringVisitable.plain(str))));
-                }
-                i++;
-            }*/
+            //System.out.println("# incoming content: " + message.getContent());
+            System.out.println("# incoming siblings: " + message.getSiblings());
 
-            /*
-            FIXME this is late-night proof-of-concept code, so very messy and
-             inefficient.
-             */
+            System.out.println("#########");
 
-            /*
-            TODO ayy it works!
-             */
-
-            boolean siblingsModified = false;
-
-            if (message.getSiblings().isEmpty())
-            {
-                System.out.println("## no-sibling message");
-
-                System.out.println("## content: " + message.getContent());
-
-                newMessage = Text.empty();
-                List<Text> siblings = newMessage.getSiblings();
-
-                /*
-                FIXME so basically here on servers that don't use siblings,
-                 there's still a way to set style of sub-parts of the message
-                 but I have no idea how to access it.
-                 */
-
-                //System.out.println("## 2ndSiblings: " + message.getContent());
-
-                String str = message.getString();
-                //Style originalStyle = message.getStyle();
-                //System.out.println("## original style: " + originalStyle);
-
-                if (message.getContent() instanceof TranslatableTextContent ttc)
-                {
-                    System.out.println("## is ttc");
-
-                    System.out.println("## ttc args: " + Arrays.toString(ttc.getArgs()));
-                    System.out.println("## ttc args length: " + ttc.getArgs().length);
-                    if (ttc.getArgs().length == 1) {
-                        MutableText mt = Text.empty();
-                        mt.getSiblings().add((Text) ttc.getArg(0));
-                        System.out.println("## ttc args text: " + mt.getSiblings());
-                        // So this works, then we need to pass this mt into the with-siblings processor
-                    }
-                }
-
-
-
-                int start = str.indexOf(trigger);
-
-                siblingsModified = true;
-                System.out.println("## original str: " + str);
-
-                String subStr1 = str.substring(0, start);
-                String subStr2 = str.substring(start, start + trigger.length());
-                String subStr3 = str.substring(start + trigger.length());
-
-                MutableText subText1 = Text.literal(subStr1);
-                //subText1.setStyle(originalStyle);
-                MutableText subText2 = Text.literal(subStr2);
-                subText2.setStyle(style);
-                MutableText subText3 = Text.literal(subStr3);
-                //subText3.setStyle(originalStyle);
-
-                System.out.println("## sub1: " + subText1);
-                System.out.println("## sub2: " + subText2);
-                System.out.println("## sub3: " + subText3);
-
-                siblings.add(0, subText3);
-                siblings.add(0, subText2);
-                siblings.add(0, subText1);
-            }
-            else
-            {
-                /*
-                This block only works on servers like Hypixel, MineHut etc. that
-                use message siblings.
-                 */
-                List<Text> siblings = message.getSiblings();
-                System.out.println("## style: " + message.getStyle());
-                for (Text sibling : siblings) {
-                    System.out.println("## sibling x: " + sibling);
-                }
-                for (int i = 0; i < siblings.size(); i++) {
-                    System.out.println("## sibling " + i + ": " + siblings.get(i));
-                    Text sibling = siblings.get(i);
-                    String str = sibling.getString();
-                    int start = str.indexOf(trigger);
-                    if (start != -1) {
-                        siblingsModified = true;
-                        System.out.println("## original str: " + str);
-
-                        String subStr1 = str.substring(0, start);
-                        String subStr2 = str.substring(start, start + trigger.length());
-                        String subStr3 = str.substring(start + trigger.length());
-
-                        MutableText subText1 = Text.literal(subStr1);
-                        subText1.setStyle(sibling.getStyle());
-                        MutableText subText2 = Text.literal(subStr2);
-                        subText2.setStyle(style);
-                        MutableText subText3 = Text.literal(subStr3);
-                        subText3.setStyle(sibling.getStyle());
-
-                        System.out.println("## sub1: " + subText1);
-                        System.out.println("## sub2: " + subText2);
-                        System.out.println("## sub3: " + subText3);
-
-                        siblings.remove(i);
-                        siblings.add(i, subText3);
-                        siblings.add(i, subText2);
-                        siblings.add(i, subText1);
-
-                        /*StringBuilder formatCodes = new StringBuilder();
-                        char[] strArr = str.toCharArray();
-                        for (int j = 0; j < start; j++) {
-                            if (strArr[j] == '§') {
-                                j++;
-                                if (strArr[j] == 'r') {
-                                    formatCodes = new StringBuilder();
-                                }
-                                else {
-                                    formatCodes.append('§');
-                                    formatCodes.append(strArr[j]);
-                                }
-                            }
-                        }
-                        System.out.println("## formatCodes: " + formatCodes);
-                        if (!formatCodes.isEmpty()) {
-                            StringBuilder modStr = new StringBuilder(str);
-                            modStr.insert(start, "§r");
-                            modStr.insert(start + 2 + str.length(), formatCodes);
-                            str = modStr.toString();
-                        }
-                        System.out.println("## final str: " + str);
-                        MutableText text = Text.literal(str);
-                        text.setStyle(style);
-                        System.out.println("## final text: " + text);
-                        siblings.set(i, text);*/
-
-                        i = siblings.size(); // Exit condition
-                    }
-                }
-                newMessage.siblings.addAll(siblings);
-            }
-
-            if (!siblingsModified) {
+            if (keyTrigger) {
+                System.out.println("-A1");
                 newMessage.setStyle(style);
             }
+            else {
+                System.out.println("-B1");
+                List<Text> siblings = newMessage.getSiblings();
+
+                if (siblings.isEmpty()) {
+                    System.out.println("-A2");
+                    TextContent msgContent = newMessage.getContent();
+                    if (msgContent instanceof TranslatableTextContent ttc &&
+                            ttc.getKey().equals("chat.type.text"))
+                    {
+                        System.out.println("-A3");
+
+                        Object[] args = ttc.getArgs();
+
+                        if (args.length == 2) {
+                            System.out.println("-A4");
+
+                            boolean done = false;
+
+                            if (args[0] instanceof Text argText)
+                            {
+                                System.out.println("-A5");
+                                if (argText.getString().equalsIgnoreCase(trigger))
+                                {
+                                    System.out.println("-A6A");
+                                    args[0] = argText.copy().fillStyle(style);
+                                    done = true;
+                                    newMessage = MutableText.of(new TranslatableTextContent(ttc.getKey(), ttc.getFallback(), args));
+                                }
+                                else {
+                                    System.out.println("-B6A");
+                                }
+                            }
+                            if (!done && args[1] instanceof Text argText)
+                            {
+                                System.out.println("-B5");
+                                if (argText.getString().equalsIgnoreCase(trigger))
+                                {
+                                    System.out.println("-A6B");
+                                    args[1] = argText.copy().setStyle(style);
+                                }
+                                else
+                                {
+                                    System.out.println("-B6B");
+                                    siblings.add(argText);
+                                    partialHighlight(siblings, trigger, style);
+
+                                    MutableText mt = Text.empty();
+                                    mt.siblings.addAll(siblings);
+                                    args[1] = mt;
+                                }
+                                newMessage = MutableText.of(new TranslatableTextContent(ttc.getKey(), ttc.getFallback(), args));
+                                done = true;
+                            }
+                            if (!done) {
+                                System.out.println("-C5");
+                                newMessage.setStyle(style);
+                            }
+                        }
+                        else {
+                            System.out.println("-B4");
+                            newMessage.setStyle(style);
+                        }
+                    }
+                    else {
+                        System.out.println("-B3");
+                        if (msgContent instanceof LiteralTextContent) {
+                            System.out.println("### message is class LiteralTextContent");
+                        } else if (msgContent instanceof NbtTextContent) {
+                            System.out.println("### message is class NbtTextContent");
+                        } else if (msgContent instanceof ScoreTextContent) {
+                            System.out.println("### message is class ScoreTextContent");
+                        } else if (msgContent instanceof SelectorTextContent) {
+                            System.out.println("### message is class SelectorTextContent");
+                        } else if (msgContent instanceof KeybindTextContent) {
+                            System.out.println("### message is class KeybindTextContent");
+                        } else {
+                            System.out.println("### message is class idkwth");
+                        }
+                        newMessage.setStyle(style);
+                    }
+                }
+                else {
+                    System.out.println("-B2");
+                    partialHighlight(siblings, trigger, style);
+                }
+            }
+
+
+            //System.out.println("# outgoing content: " + newMessage.getContent());
+            System.out.println("# outgoing siblings: " + newMessage.getSiblings());
 
             modifiedMessage = newMessage;
         }
@@ -345,6 +283,38 @@ public class MixinChatHud {
         }
 
     }
+
+    private void partialHighlight(List<Text> siblings, String trigger, Style style)
+    {
+        for (int i = 0; i < siblings.size(); i++) {
+
+            Text sibling = siblings.get(i);
+
+            if (!sibling.getSiblings().isEmpty()) {
+                partialHighlight(sibling.getSiblings(), trigger, style);
+            }
+            else {
+                String str = sibling.getString();
+                String lowerStr = str.toLowerCase();
+                int start = lowerStr.indexOf(trigger.toLowerCase());
+
+                if (start != -1) {
+                    siblings.remove(i);
+                    siblings.add(i, Text.literal(str.substring(start + trigger.length())).setStyle(sibling.getStyle()));
+                    siblings.add(i, Text.literal(str.substring(start, start + trigger.length())).setStyle(style));
+                    siblings.add(i, Text.literal(str.substring(0, start)).setStyle(sibling.getStyle()));
+                    i = siblings.size(); // Exit condition
+                }
+            }
+
+            /*
+            FIXME this still doesn't work properly in that on some servers highly-formatted
+             messages will not be partially recolored. I'm not entirely sure why that is, but
+             honestly I don't really care at this point.
+             */
+        }
+    }
+
 
     /**
      * If the current chat message has been modified, replaces the existing
