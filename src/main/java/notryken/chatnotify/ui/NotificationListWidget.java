@@ -54,21 +54,15 @@ public class NotificationListWidget extends
 
     public void addNotification()
     {
-        List<NotificationEntry> entries = this.children();
-
-        int size = config.getNumNotifs();
         config.addNotif();
-
-        entries.add(size, NotificationEntry.create(size, this.width, this));
+        refreshScreen();
     }
 
     public void removeNotification(int index)
     {
-        List<NotificationEntry> entries = this.children();
-
-        config.removeNotif(index);
-
-        entries.remove(index);
+        if (config.removeNotif(index) == 0) {
+            refreshScreen();
+        }
     }
 
     public void openNotificationConfig(int index)

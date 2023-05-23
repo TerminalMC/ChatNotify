@@ -166,15 +166,19 @@ public class MixinChatHud {
                     Optional.empty());
 
             List<Text> siblings = message.getSiblings();
-            int max = siblings.size();
-            for (int i = 0; i < max; i++) {
-                Text s = siblings.get(i);
-                if (s.getString().contains(trigger)) {
+            int i = 0;
+            boolean done = false;
+            while (i < siblings.size() && !done) {
+                String str = siblings.get(i).getString();
+                if (str.contains(trigger)) {
+                    done = true;
                     siblings.set(i,
                             Text.of(TextVisitFactory.removeFormattingCodes(
-                                    StringVisitable.plain(s.getString()))));
+                                    StringVisitable.plain(str))));
                 }
+                i++;
             }
+
             newMessage.siblings.addAll(siblings);
 
             newMessage.setStyle(style);

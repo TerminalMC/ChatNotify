@@ -98,12 +98,15 @@ public class Config
      * Removes the notification at the specified index, if it exists. Will not
      * remove the notification at index 0.
      * @param index The index of the notification.
+     * @return 0 if the operation was successful, -1 otherwise.
      */
-    public void removeNotif(int index)
+    public int removeNotif(int index)
     {
-        if (index != 0) {
+        if (index > 0 && index < notifications.size()) {
             notifications.remove(index);
+            return 0;
         }
+        return -1;
     }
 
     /**
