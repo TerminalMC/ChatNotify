@@ -8,19 +8,34 @@ import java.util.*;
 public class Config
 {
     public static final String DEFAULTSOUND = "entity.arrow.hit_player";
-    public boolean ignoreOwnMessages = false;
-    private String username = null;
-    private final List<Notification> notifications = new ArrayList<>();
+    public static final Notification DEFAULTNOTIF =
+            new Notification(true, true, false, true, "username", false,
+                    "#FFC400", false, false, false, false, false, 1f, 1f,
+                    DEFAULTSOUND, true);
+    public boolean ignoreOwnMessages;
+    private String username;
+    private final List<Notification> notifications;
 
     /**
      * Initialises the config with minimum default values.
      */
     public Config()
     {
-        // Default notification when the user's name appears in chat.
-        notifications.add(0, new Notification(true, true, false, true,
-                "username", false, "#FFC400", false, false, false, false, false,
-                1f, 1f, DEFAULTSOUND, true));
+        ignoreOwnMessages = false;
+        username = null;
+        notifications = new ArrayList<>();
+        notifications.add(0, DEFAULTNOTIF);
+    }
+
+    /**
+     * Initializes the config with specified values.
+     */
+    Config(boolean ignoreOwnMessages, String username,
+                  ArrayList<Notification> notifications)
+    {
+        this.ignoreOwnMessages = ignoreOwnMessages;
+        this.username = username;
+        this.notifications = notifications;
     }
 
     // Accessors.
@@ -128,28 +143,6 @@ public class Config
     }
 
     // Other processing.
-
-    /**
-     * Ensures that the loaded config is valid and complete, fixing it if it
-     * is not.
-     */
-    public void validate()
-    {
-        // If notification zero (player name) doesn't exist, create it.
-        if (notifications.get(0) == null) {
-            notifications.add(0, new Notification(true, true, false, true,
-                    username, false, "#FFC400", false, false, false, false,
-                    false, 1f, 1f, DEFAULTSOUND, true));
-        }
-
-        /* Notifications self-validate, but need to preserve the state of
-        the primary notification. */
-        boolean nameOn = notifications.get(0).enabled;
-        for (Notification n : notifications) {
-            n.validate();
-        }
-        notifications.get(0).enabled = nameOn;
-    }
 
     /**
      * Removes all non-persistent notifications with empty primary triggers,

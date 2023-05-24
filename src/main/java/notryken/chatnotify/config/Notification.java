@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 
@@ -17,60 +16,68 @@ import java.util.*;
 public class Notification
 {
     private static final Identifier DEFAULTSOUND =
-            SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.getId();
+            Identifier.tryParse(Config.DEFAULTSOUND);
     public boolean enabled;
-    private final List<Boolean> controls = new ArrayList<>();
-    private final List<String> triggers = new ArrayList<>();
+    private final List<Boolean> controls;
+    private final List<String> triggers;
     public boolean triggerIsKey;
     private TextColor color;
-    private final List<Boolean> formatControls = new ArrayList<>();
+    private final List<Boolean> formatControls;
     public float soundVolume;
     public float soundPitch;
     private Identifier sound;
     public boolean persistent;
 
     /**
-     * @param trigger The primary string to trigger the notification.
-     * @param triggerIsKey Whether the trigger is an event key.
-     * @param strColor The color to make the text, as an RGB int or hex.
-     *                 Defaults to white (int 16777215, hex #FFFFFF) if invalid.
-     * @param bold Text format.
-     * @param italic Text format.
-     * @param underlined Text format.
-     * @param strikethrough Text format.
-     * @param obfuscated Text format.
-     * @param soundVolume Sound volume in the range 0.0 to 1.0.
-     * @param soundPitch Sound pitch in the range 0.5 to 2.0.
-     * @param soundName The identifier of the Minecraft Sound for the
-     *                  notification to play.
-     *                  Accepts the formats "namespace:category.source.sound",
-     *                  and "category.source.sound" (defaults to "minecraft"
-     *                  namespace).
-     * @param persistent Whether the notification should be kept irrespective of
-     *                   whether it is ever modified.
+     * Validated.
      */
-    public Notification(boolean enabled, boolean doColor, boolean doFormat,
-                        boolean doSound, String trigger, boolean triggerIsKey,
-                        String strColor, boolean bold, boolean italic,
-                        boolean underlined, boolean strikethrough,
-                        boolean obfuscated, float soundVolume,
-                        float soundPitch, String soundName, boolean persistent)
+    Notification(boolean enabled, boolean doColor, boolean doFormat,
+                 boolean doSound, String trigger, boolean triggerIsKey,
+                 String strColor, boolean bold, boolean italic,
+                 boolean underlined, boolean strikethrough, boolean obfuscated,
+                 float soundVolume, float soundPitch, String soundName,
+                 boolean persistent)
     {
+        this.controls = new ArrayList<>();
+        this.triggers = new ArrayList<>();
+        this.formatControls = new ArrayList<>();
+
         this.enabled = enabled;
-        controls.add(doColor);
-        controls.add(doFormat);
-        controls.add(doSound);
+        setControl(0, doColor);
+        setControl(1, doFormat);
+        setControl(2, doSound);
         setTrigger(trigger);
         this.triggerIsKey = triggerIsKey;
         setColor(parseColor(strColor));
-        formatControls.add(bold);
-        formatControls.add(italic);
-        formatControls.add(underlined);
-        formatControls.add(strikethrough);
-        formatControls.add(obfuscated);
+        setFormatControl(0, bold);
+        setFormatControl(1, italic);
+        setFormatControl(2, underlined);
+        setFormatControl(3, strikethrough);
+        setFormatControl(4, obfuscated);
         this.soundVolume = soundVolume;
         this.soundPitch = soundPitch;
         setSound(parseSound(soundName));
+        this.persistent = persistent;
+    }
+
+    /**
+     * Not validated.
+     */
+    Notification(boolean enabled, ArrayList<Boolean> controls,
+                 ArrayList<String> triggers, boolean triggerIsKey,
+                 TextColor color, ArrayList<Boolean> formatControls,
+                 float soundVolume, float soundPitch, Identifier sound,
+                 boolean persistent)
+    {
+        this.enabled = enabled;
+        this.controls = controls;
+        this.triggers = triggers;
+        this.triggerIsKey = triggerIsKey;
+        this.color = color;
+        this.formatControls = formatControls;
+        this.soundVolume = soundVolume;
+        this.soundPitch = soundPitch;
+        this.sound = sound;
         this.persistent = persistent;
     }
 
@@ -294,16 +301,6 @@ public class Notification
     // Other processing.
 
     /**
-     * Used to validate a Notification when it is created not using the
-     * constructor, such as from a config file.
-     */
-    public void validate()
-    {
-        setTrigger(getTrigger());
-        setSound(getSound());
-    }
-
-    /**
      * Removes all empty non-primary triggers.
      */
     public void purgeTriggers()
@@ -319,18 +316,34 @@ public class Notification
 
     /**
      * Parses and validates a string representing an RGB int or hex color.
-     * Can handle regular int colors such as "16711680", and both expressions
-     * of hex color ("#FF0000" and "FF0000").
+     * Can handle int format e.g. "16711680", and hex format e.g. "#FF0000".
      * @param strColor The RGB int or hex color to parse.
-     * @return The validated color as an RGB int.
+     * @return The validated TextColor.
      * Defaults to white (int 16777215, hex #FFFFFF) if the input is invalid.
      */
     public TextColor parseColor(String strColor)
     {
-        TextColor color = TextColor.parse(strColor);
+        TextColor color;
 
-        if (color == null) {
-            color = TextColor.fromRgb(16777215);
+        if (strColor.startsWith("#")) {
+            color = TextColor.parse(strColor);
+            if (color == null) {
+                color = TextColor.fromRgb(16777215);
+            }
+        }
+        else {
+            try {
+                int intColor = Integer.parseInt(strColor);
+                if (intColor > 0 && intColor <= 16777215) {
+                    color = TextColor.fromRgb(intColor);
+                }
+                else {
+                    color = TextColor.fromRgb(16777215);
+                }
+            }
+            catch (NumberFormatException e) {
+                color = TextColor.fromRgb(16777215);
+            }
         }
         return color;
     }

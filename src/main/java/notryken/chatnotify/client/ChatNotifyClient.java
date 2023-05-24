@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.api.ClientModInitializer;
 import notryken.chatnotify.config.Config;
+import notryken.chatnotify.config.ConfigDeserializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +22,10 @@ public class ChatNotifyClient implements ClientModInitializer
     public static final List<Long> recentMessageTimes = new ArrayList<>();
     private static final File settingsFile =
             new File("config", "chatnotify.json");
-    private static final Gson gson =
-            new GsonBuilder().setPrettyPrinting().create();
+
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Config.class, new ConfigDeserializer())
+            .setPrettyPrinting().create();
 
     @Override
     public void onInitializeClient()
@@ -42,7 +45,6 @@ public class ChatNotifyClient implements ClientModInitializer
             try {
                 config = gson.fromJson(Files.readString(settingsFile.toPath()),
                         Config.class);
-                config.validate();
             } catch (Exception e) { // Catching Exception to cover all bases.
                 System.err.println(e.getMessage());
                 config = null;
