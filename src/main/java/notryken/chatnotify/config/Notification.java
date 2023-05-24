@@ -18,11 +18,11 @@ public class Notification
     private static final Identifier DEFAULTSOUND =
             Identifier.tryParse(Config.DEFAULTSOUND);
     public boolean enabled;
-    private final List<Boolean> controls;
-    private final List<String> triggers;
+    private final ArrayList<Boolean> controls;
+    private final ArrayList<String> triggers;
     public boolean triggerIsKey;
     private TextColor color;
-    private final List<Boolean> formatControls;
+    private final ArrayList<Boolean> formatControls;
     public float soundVolume;
     public float soundPitch;
     private Identifier sound;
@@ -38,9 +38,10 @@ public class Notification
                  float soundVolume, float soundPitch, String soundName,
                  boolean persistent)
     {
-        this.controls = new ArrayList<>();
+        this.controls = new ArrayList<>(Arrays.asList(true, true, true));
         this.triggers = new ArrayList<>();
-        this.formatControls = new ArrayList<>();
+        this.formatControls =
+                new ArrayList<>(Arrays.asList(true, true, true, true, true));
 
         this.enabled = enabled;
         setControl(0, doColor);

@@ -14,7 +14,7 @@ public class Config
                     DEFAULTSOUND, true);
     public boolean ignoreOwnMessages;
     private String username;
-    private final List<Notification> notifications;
+    private final ArrayList<Notification> notifications;
 
     /**
      * Initialises the config with minimum default values.

@@ -143,8 +143,20 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
         }
         catch (JsonParseException | NullPointerException |
                UnsupportedOperationException | IllegalStateException e) {
-            color = TextColor.fromRgb(16777215);
-            formatControls.set(0, false); // Turn color off.
+            try {
+                int colorInt = jsonObject.get("color").getAsInt();
+                if (colorInt < 0 || colorInt > 16777215) {
+                    throw new JsonParseException("Color int out of range");
+                }
+                color = TextColor.fromRgb(colorInt);
+            }
+            catch (JsonParseException | NullPointerException |
+                   UnsupportedOperationException | IllegalStateException |
+                   NumberFormatException e2)
+            {
+                color = TextColor.fromRgb(16777215);
+                formatControls.set(0, false); // Turn color off.
+            }
         }
 
         return new Notification(enabled, controls, triggers, triggerIsKey,
