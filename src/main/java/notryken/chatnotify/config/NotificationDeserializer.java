@@ -113,7 +113,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             JsonObject colorObj = jsonObject.get("sound").getAsJsonObject();
             String namespace = colorObj.get("field_13353").getAsString();
             String identifier = colorObj.get("field_13355").getAsString();
-            sound = Identifier.tryParse(namespace + identifier);
+            sound = Identifier.tryParse(namespace + ":" + identifier);
             if (sound == null) {
                 sound = Identifier.tryParse("entity.arrow.hit_player");
             }

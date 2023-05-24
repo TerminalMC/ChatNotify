@@ -50,7 +50,8 @@ public class MixinChatHud {
                             int ticks, MessageIndicator indicator,
                             boolean refresh, CallbackInfo ci)
     {
-        String strMsg = TextVisitFactory.removeFormattingCodes(message);
+        String strMsg =
+                TextVisitFactory.removeFormattingCodes(message).toLowerCase();
         strMsg = preProcess(strMsg);
 
         if (strMsg != null) {
@@ -72,8 +73,8 @@ public class MixinChatHud {
             was sent by the user.
              */
             for (String username : config.getNotif(0).getTriggers()) {
-                if (strMsg.contains(username)) { //  && !recentMessages.isEmpty() Second value prevents errors when spamming (or does it?)
-                    for (int i = recentMessages.size() - 1; true; i--)
+                if (strMsg.contains(username.toLowerCase())) {
+                    for (int i = 0; i < recentMessages.size(); i++)
                     {
                         if (strMsg.contains(recentMessages.get(i))) {
                             recentMessages.remove(i);
@@ -83,7 +84,8 @@ public class MixinChatHud {
                                 strMsg = null;
                             }
                             else {
-                                strMsg = strMsg.replaceFirst(username, "");
+                                strMsg = strMsg.replaceFirst(
+                                        username.toLowerCase(), "");
                             }
 
                             break;
@@ -92,16 +94,6 @@ public class MixinChatHud {
                     break;
                 }
             }
-
-//            if (strMsg.contains(username) && strMsg.contains(lastSentMessage)) {
-//                lastSentMessage = null;
-//                if (config.ignoreOwnMessages) {
-//                    strMsg = null;
-//                }
-//                else {
-//                    strMsg = strMsg.replaceFirst(username, "");
-//                }
-//            }
         }
         return strMsg;
     }
@@ -121,14 +113,15 @@ public class MixinChatHud {
              iter1.hasNext() && modifiedMessage == null;)
         {
             notif = iter1.next();
-            if (notif.enabled)
-            {
-                if (notif.triggerIsKey && message.getContent() instanceof
-                        TranslatableTextContent ttc)
-                {
-                    String trigger = notif.getTrigger();
-                    if (ttc.getKey().contains(trigger)) {
-                        notify(message, trigger, true, notif, mute);
+            if (notif.enabled) {
+                if (notif.triggerIsKey) {
+                    if (message.getContent() instanceof
+                            TranslatableTextContent ttc)
+                    {
+                        String trigger = notif.getTrigger();
+                        if (ttc.getKey().contains(trigger)) {
+                            notify(message, trigger, true, notif, mute);
+                        }
                     }
                 }
                 else {
@@ -281,13 +274,16 @@ public class MixinChatHud {
     {
         int retVal = -1;
 
+        Pattern pattern =
+                Pattern.compile("(?<!\\w)(\\W?(?i)" + trigger + "\\W?)(?!\\w)");
+
         for (int i = 0; i < siblings.size(); i++) {
 
             Text sibling = siblings.get(i);
             String str = sibling.getString();
 
             int start;
-            Matcher matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" + trigger + "\\W?)(?!\\w)").matcher(str);
+            Matcher matcher = pattern.matcher(str);
             if (matcher.find()) {
                 start = matcher.start();
                 if (start > 0) {

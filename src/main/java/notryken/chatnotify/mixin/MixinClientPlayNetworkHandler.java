@@ -50,7 +50,7 @@ public class MixinClientPlayNetworkHandler
         // Remove old messages if sent more than 5 seconds ago.
 
         for (int i = 0; i < recentMessages.size();) {
-            if (recentMessageTimes.get(i) + 5000 > currentTime) {
+            if (recentMessageTimes.get(i) + 5000 < currentTime) {
                 recentMessages.remove(i);
                 recentMessageTimes.remove(i);
             }
