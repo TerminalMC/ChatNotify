@@ -73,22 +73,18 @@ public class MixinChatHud {
             was sent by the user.
              */
             for (String username : config.getNotif(0).getTriggers()) {
-                int nameStart = strMsg.indexOf(username.toLowerCase());
+                int nameStart = msgContainsStr(strMsg, username.toLowerCase());
                 if (nameStart >= 0) {
-                    String subMsg =
-                            strMsg.substring(nameStart + username.length());
+                    strMsg = strMsg.substring(0, nameStart + 1) +
+                            strMsg.substring(nameStart + 1 + username.length());
                     for (int i = 0; i < recentMessages.size(); i++)
                     {
-                        if (subMsg.contains(recentMessages.get(i))) {
+                        if (strMsg.contains(recentMessages.get(i))) {
                             recentMessages.remove(i);
                             recentMessageTimes.remove(i);
 
                             if (config.ignoreOwnMessages) {
                                 strMsg = null;
-                            }
-                            else {
-                                strMsg = strMsg.replaceFirst(
-                                        username.toLowerCase(), "");
                             }
 
                             break;
@@ -132,7 +128,7 @@ public class MixinChatHud {
                          iter2.hasNext() && modifiedMessage == null;)
                     {
                         String trigger = iter2.next();
-                        if (msgContainsStr(strMsg, trigger)) {
+                        if (msgContainsStr(strMsg, trigger) >= 0) {
                             notify(message, trigger, false, notif, mute);
                         }
                     }
@@ -146,14 +142,16 @@ public class MixinChatHud {
      * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
      * @param msg The message to search in.
      * @param str The string to search for.
-     * @return Whether the string was found in the message, according to the
-     * regex matching.
+     * @return The index of the start of str in msg, or -1 if not found.
      */
-    private boolean msgContainsStr(String msg, String str)
+    private int msgContainsStr(String msg, String str)
     {
-        Pattern pattern = Pattern.compile(
-                "(?<!\\w)(\\W?(?i)" + str + "\\W?)(?!\\w)");
-        return pattern.matcher(msg).find();
+        Matcher matcher = Pattern.compile(
+                "(?<!\\w)(\\W?(?i)" + str + "\\W?)(?!\\w)").matcher(msg);
+        if (matcher.find()) {
+            return matcher.start();
+        }
+        return -1;
     }
 
     /**
