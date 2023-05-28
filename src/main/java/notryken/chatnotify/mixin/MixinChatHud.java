@@ -73,10 +73,13 @@ public class MixinChatHud {
             was sent by the user.
              */
             for (String username : config.getNotif(0).getTriggers()) {
-                if (strMsg.contains(username.toLowerCase())) {
+                int nameStart = strMsg.indexOf(username.toLowerCase());
+                if (nameStart >= 0) {
+                    String subMsg =
+                            strMsg.substring(nameStart + username.length());
                     for (int i = 0; i < recentMessages.size(); i++)
                     {
-                        if (strMsg.contains(recentMessages.get(i))) {
+                        if (subMsg.contains(recentMessages.get(i))) {
                             recentMessages.remove(i);
                             recentMessageTimes.remove(i);
 
