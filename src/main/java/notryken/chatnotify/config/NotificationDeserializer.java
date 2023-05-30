@@ -38,7 +38,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             enabled = jsonObject.get("enabled").getAsBoolean();
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             return null;
         }
 
@@ -52,7 +53,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             }
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             return null;
         }
 
@@ -61,9 +63,13 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             for (JsonElement je : triggerArray) {
                 triggers.add(je.getAsString());
             }
+            if (triggers.size() == 0) {
+                throw new JsonParseException("Empty trigger array.");
+            }
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             return null;
         }
 
@@ -71,7 +77,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             triggerIsKey = jsonObject.get("triggerIsKey").getAsBoolean();
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             return null;
         }
 
@@ -87,7 +94,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             }
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             return null;
         }
 
@@ -96,7 +104,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
         }
         catch (JsonParseException | NullPointerException |
                UnsupportedOperationException | IllegalStateException |
-               NumberFormatException e) {
+               NumberFormatException e)
+        {
             return null;
         }
 
@@ -105,7 +114,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
         }
         catch (JsonParseException | NullPointerException |
                UnsupportedOperationException | IllegalStateException |
-               NumberFormatException e) {
+               NumberFormatException e)
+        {
             return null;
         }
 
@@ -114,7 +124,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             String namespace = colorObj.get("field_13353").getAsString();
             String identifier = colorObj.get("field_13355").getAsString();
             sound = Identifier.tryParse(namespace + ":" + identifier);
-            if (sound == null) {
+            if (sound == null)
+            {
                 sound = Identifier.tryParse("entity.arrow.hit_player");
             }
         }
@@ -127,7 +138,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             persistent = jsonObject.get("persistent").getAsBoolean();
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             return null;
         }
 
@@ -142,7 +154,8 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             color = TextColor.fromRgb(colorInt);
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             try {
                 int colorInt = jsonObject.get("color").getAsInt();
                 if (colorInt < 0 || colorInt > 16777215) {

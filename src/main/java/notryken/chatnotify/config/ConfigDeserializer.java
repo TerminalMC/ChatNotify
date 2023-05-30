@@ -28,7 +28,8 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
                     jsonObject.get("ignoreOwnMessages").getAsBoolean();
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             ignoreOwnMessages = false;
         }
 
@@ -36,7 +37,8 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
             username = jsonObject.get("username").getAsString();
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             username = null;
         }
 
@@ -55,9 +57,14 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
                     notifications.add(notif);
                 }
             }
+
+            if (notifications.size() == 0) {
+                throw new JsonParseException("Empty notification array.");
+            }
         }
         catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
+               UnsupportedOperationException | IllegalStateException e)
+        {
             notifications.add(Config.DEFAULTNOTIF);
         }
 

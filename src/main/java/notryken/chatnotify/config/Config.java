@@ -12,6 +12,7 @@ public class Config
             new Notification(true, true, false, true, "username", false,
                     "#FFC400", false, false, false, false, false, 1f, 1f,
                     DEFAULTSOUND, true);
+
     public boolean ignoreOwnMessages;
     private String username;
     private final ArrayList<Notification> notifications;
@@ -31,7 +32,7 @@ public class Config
      * Initializes the config with specified values.
      */
     Config(boolean ignoreOwnMessages, String username,
-                  ArrayList<Notification> notifications)
+           ArrayList<Notification> notifications)
     {
         this.ignoreOwnMessages = ignoreOwnMessages;
         this.username = username;

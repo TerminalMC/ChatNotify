@@ -8,6 +8,7 @@
   "client": [
     "MixinChatHud",
     "MixinClientPlayNetworkHandler",
+    "MixinMessageHandler",
     "MixinMinecraftClient",
     "MixinSimpleOption"
   ],
