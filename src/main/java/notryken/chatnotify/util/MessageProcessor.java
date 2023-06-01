@@ -7,7 +7,9 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.*;
 import notryken.chatnotify.config.Notification;
 
-import java.util.Iterator;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -40,6 +42,8 @@ public class MessageProcessor
         return (modifiedMessage == null ? message : modifiedMessage);
     }
 
+
+
     /**
      * Modifies the message based on whether it is identified as being sent by
      * the user, and whether such messages are to be ignored.
@@ -51,11 +55,11 @@ public class MessageProcessor
         if (!recentMessages.isEmpty()) {
             // Check each username trigger to allow for nicknames.
             for (String username : config.getNotif(0).getTriggers()) {
-                int nameStart = strContainsStr(strMsg, username);
-                if (nameStart >= 0) {
+                int[] match = msgContainsStr(strMsg, username);
+                if (match != null) {
                     // Avoid username matching recent message content.
-                    strMsg = strMsg.substring(0, nameStart + 1) +
-                            strMsg.substring(nameStart + 1 + username.length());
+                    strMsg = strMsg.substring(0, match[0]) +
+                            strMsg.substring(match[1]);
                     for (int i = 0; i < recentMessages.size(); i++) {
                         if (strMsg.contains(recentMessages.get(i))) {
                             recentMessages.remove(i);
@@ -82,31 +86,29 @@ public class MessageProcessor
      */
     private static void tryNotify(Text message, String strMsg)
     {
-        Notification notif;
-        for (Iterator<Notification> iter1 = config.getNotifs().iterator();
-             iter1.hasNext() && modifiedMessage == null;)
-        {
-            notif = iter1.next();
+        for (Notification notif : config.getNotifs()) {
             if (notif.enabled) {
                 if (notif.triggerIsKey) {
                     if (message.getContent() instanceof
-                            TranslatableTextContent ttc)
-                    {
+                            TranslatableTextContent ttc) {
                         if (ttc.getKey().contains(notif.getTrigger())) {
                             playSound(notif);
                             modifiedMessage = simpleRestyle(message, notif);
+                            break;
                         }
                     }
-                }
-                else {
-                    for (Iterator<String> iter2 = notif.getTriggerIterator();
-                         iter2.hasNext() && modifiedMessage == null;)
+                } else {
+                    for (String trigger : notif.getTriggers())
                     {
-                        String trigger = iter2.next();
-                        if (strContainsStr(strMsg, trigger) >= 0) {
+                        if (msgContainsStr(strMsg, trigger) != null) {
+                            playSound(notif);
                             modifiedMessage =
                                     complexRestyle(message, trigger, notif);
+                            break;
                         }
+                    }
+                    if (modifiedMessage != null) {
+                        break;
                     }
                 }
             }
@@ -118,17 +120,17 @@ public class MessageProcessor
      * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
      * @param msg The message to search in.
      * @param str The string to search for.
-     * @return The index of the start of str in msg, or -1 if not found.
+     * @return An integer array [start,end] of str in msg, or null if not found.
      */
-    private static int strContainsStr(String msg, String str)
+    private static int[] msgContainsStr(String msg, String str)
     {
         Matcher matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" +
                 Pattern.quote(str) + "\\W?)(?!\\w)", Pattern.CASE_INSENSITIVE)
                 .matcher(msg);
         if (matcher.find()) {
-            return matcher.start();
+            return new int[]{matcher.start(), matcher.end()};
         }
-        return -1;
+        return null;
     }
 
     private static void playSound(Notification notif)
@@ -143,243 +145,129 @@ public class MessageProcessor
         }
     }
 
+    private static Style getStyle(Notification notif)
+    {
+        return Style.of(
+                Optional.of(notif.getColor()),
+                Optional.of(notif.getFormatControl(0)),
+                Optional.of(notif.getFormatControl(1)),
+                Optional.of(notif.getFormatControl(2)),
+                Optional.of(notif.getFormatControl(3)),
+                Optional.of(notif.getFormatControl(4)),
+                Optional.empty(),
+                Optional.empty());
+    }
+
     private static Text simpleRestyle(Text message, Notification notif)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
-            return message.copy().setStyle(Style.of(
-                    Optional.of(notif.getColor()),
-                    Optional.of(notif.getFormatControl(0)),
-                    Optional.of(notif.getFormatControl(1)),
-                    Optional.of(notif.getFormatControl(2)),
-                    Optional.of(notif.getFormatControl(3)),
-                    Optional.of(notif.getFormatControl(4)),
-                    Optional.empty(),
-                    Optional.empty()));
+            return message.copy().setStyle(getStyle(notif));
         }
-        return null;
+        return message;
     }
 
-    private static Text complexRestyle(Text message,
+
+    private static Text complexRestyle(Text oldMessage,
                                        String trigger,
                                        Notification notif)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
-            MutableText newMessage = message.copy();
-
-            Style newStyle = Style.of(
-                    Optional.of(notif.getColor()),
-                    Optional.of(notif.getFormatControl(0)),
-                    Optional.of(notif.getFormatControl(1)),
-                    Optional.of(notif.getFormatControl(2)),
-                    Optional.of(notif.getFormatControl(3)),
-                    Optional.of(notif.getFormatControl(4)),
-                    Optional.empty(),
-                    Optional.empty());
-
-            System.out.println("-B1 (not keyTrigger)");
-
-            List<Text> siblings = newMessage.getSiblings();
-
-            if (siblings.isEmpty()) {
-                System.out.println("-A2 (no siblings)");
-
-                TextContent msgContent = newMessage.getContent();
-
-                if (msgContent instanceof TranslatableTextContent ttc) {
-                    System.out.println("-A3 (is TTC)");
-
-                    Object[] args = ttc.getArgs();
-                    boolean done = false;
-
-                    for (int i = 0; i < args.length && !done; i++)
-                    {
-                        if (args[i] instanceof Text argText)
-                        {
-                            System.out.println("Initial " + i);
-                            printTree(argText, 0);
-
-                            MutableText mt = Text.empty();
-                            mt.siblings.add(argText);
-                            done = styleTrigger(mt.siblings, trigger,
-                                    newStyle) == 0;
-                            if (mt.siblings.size() == 1) {
-                                args[i] = mt.siblings.get(0);
-                            }
-                            else {
-                                args[i] = mt;
-                            }
-
-                            System.out.println("Final " + i);
-                            printTree((Text) args[i], 0);
-                        }
-                    }
-                    if (done) {
-                        newMessage = MutableText.of(
-                                        new TranslatableTextContent(
-                                                ttc.getKey(),
-                                                ttc.getFallback(),
-                                                args))
-                                .setStyle(newMessage.getStyle());
-                    }
-                    else {
-                        newMessage.setStyle(newStyle);
-                    }
-                }
-                else {
-                    System.out.println("-B3 (not TTC)");
-
-                    siblings.add(newMessage);
-                    styleTrigger(siblings, trigger, newStyle);
-                    if (siblings.size() == 1) {
-                        newMessage = (MutableText) siblings.get(0);
-                    }
-                }
-            }
-            else {
-                System.out.println("-B2 (has siblings)");
-
-                Text original = newMessage.copy();
-
-                System.out.println("before:");
-                printTree(message, 0);
-
-                    /* Possible error here, giving styleTrigger() the
-                    siblings but not the text content. Not sure if it's a
-                    problem. */
-                styleTrigger(siblings, trigger, newStyle);
-
-                System.out.println("after:");
-                printTree(message, 0);
-
-                if (newMessage.equals(original)) {
-                    System.out.println("original and modified are " +
-                            "equal");
-                }
-                else {
-                    System.out.println("original and modified are not" +
-                            " equal");
-                }
-            }
-            return newMessage;
+            MutableText message = oldMessage.copy();
+            return processText(message, trigger, getStyle(notif));
         }
-        return null;
+        return oldMessage;
     }
 
-    /**
-     * Attempts to format the first occurrence of the given trigger according
-     * to the given style, without breaking everything (touch wood).
-     * @param siblings List of Text objects representing siblings of a Text
-     *                 message
-     * @param trigger The trigger string
-     * @param style The style to use
-     * @return 0 if successful, -1 otherwise.
-     */
-    private static int styleTrigger(List<Text> siblings, String trigger, Style style)
+    private static MutableText processText(MutableText message,
+                                           String trigger, Style style)
     {
-        int retVal = -1;
-
-        Pattern pattern = Pattern.compile("(?<!\\w)(\\W?(?i)" +
-                Pattern.quote(trigger) + "\\W?)(?!\\w)",
-                Pattern.CASE_INSENSITIVE);
-
-        for (int i = 0; i < siblings.size(); i++) {
-
-            Text sibling = siblings.get(i);
-            String str = sibling.getString();
-
-            int start;
-            Matcher matcher = pattern.matcher(str);
-            if (matcher.find()) {
-                start = matcher.start();
-                if (start > 0) {
-                    start = str.substring(matcher.start()).toLowerCase()
-                            .indexOf(trigger.toLowerCase()) + matcher.start();
+        if (message.getContent() instanceof LiteralTextContent)
+        {
+            message = processLiteralTc(message, trigger, style);
+        }
+        else if (message.getContent() instanceof TranslatableTextContent ttc)
+        {
+            Object[] args = ttc.getArgs();
+            for (int i = 0; i < ttc.getArgs().length; i++) {
+                if (args[i] instanceof Text argText) {
+                    args[i] = processText(argText.copy(), trigger, style);
                 }
             }
-            else {
-                start = -1;
-            }
-
-            if (start != -1)
-            {
-                if (!sibling.getSiblings().isEmpty()) {
-                    retVal = styleTrigger(sibling.getSiblings(), trigger, style);
-                }
-
-                if (retVal == -1)
-                {
-                    if (sibling.getContent() instanceof LiteralTextContent ltc)
-                    {
-                        List<Text> subSiblings = sibling.getSiblings();
-                        subSiblings.replaceAll(text ->
-                                fixStyle((MutableText) text, sibling.getStyle()));
-
-                        String tempStr = ltc.toString();
-                        // Remove 'literal{}'
-                        String subStr = tempStr.substring(8, tempStr.length() - 1);
-
-                        if (start + trigger.length() != subStr.length()) {
-                            subSiblings.add(0, Text.literal(
-                                            subStr.substring(start + trigger.length()))
-                                    .setStyle(sibling.getStyle()));
-                        }
-
-                        subSiblings.add(0, Text.literal(subStr.substring(
-                                start, start + trigger.length())).setStyle(style
-                                .withClickEvent(sibling.getStyle().getClickEvent())
-                                .withHoverEvent(sibling.getStyle().getHoverEvent())
-                                .withInsertion(sibling.getStyle().getInsertion())));
-
-                        if (start != 0) {
-                            subSiblings.add(0, Text.literal(
-                                            subStr.substring(0, start))
-                                    .setStyle(sibling.getStyle()));
-                        }
-
-                        if (subSiblings.size() == 1) {
-                            siblings.set(i, subSiblings.get(0));
-                        }
-                        else {
-                            MutableText mt = MutableText.of(TextContent.EMPTY);
-                            mt.siblings.addAll(subSiblings);
-                            siblings.set(i, mt);
-                        }
-                        retVal = 0;
-                    }
-                }
-
-                // If all else fails.
-                if (retVal == -1) {
-                    //System.out.println("Recursion and LTC fix failed.");
-
-                    siblings.remove(i);
-
-                    if (start + trigger.length() != str.length()) {
-                        siblings.add(i, Text.literal(
-                                        str.substring(start + trigger.length()))
-                                .setStyle(sibling.getStyle()));
-                    }
-
-                    siblings.add(i, Text.literal(str.substring(
-                            start, start + trigger.length())).setStyle(style
-                            .withClickEvent(sibling.getStyle().getClickEvent())
-                            .withHoverEvent(sibling.getStyle().getHoverEvent())
-                            .withInsertion(sibling.getStyle().getInsertion())));
-
-                    if (start != 0) {
-                        siblings.add(i, Text.literal(str.substring(0, start))
-                                .setStyle(sibling.getStyle()));
-                    }
-
-                    retVal = 0;
-                }
-
-                return retVal;
+            message = MutableText.of(new TranslatableTextContent(
+                    ttc.getKey(), ttc.getFallback(), args));
+        }
+        else
+        {
+            List<Text> siblings = message.getSiblings();
+            for (int i = 0; i < siblings.size(); i++) {
+                siblings.set(i,
+                        processText(siblings.get(i).copy(), trigger, style));
             }
         }
-        return retVal;
+        return message;
     }
 
+    private static MutableText processLiteralTc(MutableText message,
+                                                String trigger, Style style)
+    {
+        if (message.getContent() instanceof LiteralTextContent ltc)
+        {
+            List<Text> siblings = message.getSiblings();
+
+            Style oldStyle = message.getStyle();
+            siblings.replaceAll(text -> fixStyle((MutableText) text, oldStyle));
+
+            String msgStr = removeFormatCodes(ltc.string());
+
+            int[] match = msgContainsStr(msgStr, trigger);
+            if (match != null) {
+                if (match[1] != msgStr.length()) {
+                    siblings.add(0, Text.literal(
+                                    msgStr.substring(match[1]))
+                            .setStyle(message.getStyle()));
+                }
+
+                siblings.add(0, Text.literal(msgStr.substring(
+                        match[0], match[1])).setStyle(style
+                        .withClickEvent(message.getStyle().getClickEvent())
+                        .withHoverEvent(message.getStyle().getHoverEvent())
+                        .withInsertion(message.getStyle().getInsertion())));
+
+                if (match[0] != 0) {
+                    siblings.add(0, Text.literal(
+                                    msgStr.substring(0, match[0]))
+                            .setStyle(message.getStyle()));
+                }
+
+                if (siblings.size() == 1) {
+                    message = siblings.get(0).copy();
+                }
+                else {
+                    MutableText newMessage = MutableText.of(TextContent.EMPTY);
+                    newMessage.siblings.addAll(siblings);
+                    message = newMessage;
+                }
+            }
+        }
+        return message;
+    }
+
+
+    private static String removeFormatCodes(String string)
+    {
+        char[] charArray = string.toCharArray();
+        StringBuilder cleanString = new StringBuilder();
+
+        for (int i = 0; i < charArray.length; i++) {
+            if (charArray[i] == '§') {
+                i++; // Skip
+            }
+            else {
+                cleanString.append(charArray[i]);
+            }
+        }
+        return cleanString.toString();
+    }
 
     /**
      * Replaces the null fields of the text's Style with the corresponding
@@ -411,17 +299,99 @@ public class MessageProcessor
         return text;
     }
 
-    private static void printTree(Text message, int depth)
+    // Message analysis methods
+
+    private static void analyseMessage(Text message)
+    {
+        try (PrintWriter pw = new PrintWriter(
+                String.valueOf(System.currentTimeMillis())))
+        {
+            pw.println("=======================================\n\n\n\n");
+
+            analyseText(pw, message, 0);
+
+            pw.println("\n\n\n\n=======================================");
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void analyseText(PrintWriter pw, Text message, int depth)
     {
         depth++;
         StringBuilder indent = new StringBuilder();
-        indent.append(">   ".repeat(depth));
-        System.out.println(indent + "Content: " + message.getContent());
-        System.out.println(indent + "Style : " + message.getStyle());
-        System.out.println(indent + "Siblings: ");
-        for (Text t : message.getSiblings())
-        {
-            printTree(t, depth);
+        indent.append(">>  ".repeat(depth));
+
+        pw.println(indent + "-------------------------------------------\n\n");
+
+        pw.println(indent + "message: " + message);
+        pw.println(indent + "getString(): " + message.getString());
+        pw.println(indent + "getContent(): " + message.getContent());
+        pw.println(indent + "getStyle(): " + message.getStyle());
+        pw.println(indent + "sibling count: " + message.getSiblings().size());
+
+        if (message.getContent() instanceof TranslatableTextContent ttc) {
+            pw.println(indent + "is TTC");
+            analyseTranslatableTc(pw, ttc, depth);
         }
+        else if (message.getContent() instanceof LiteralTextContent ltc) {
+            pw.println(indent + "is LTC");
+            analyseLiteralTc(pw, ltc, depth);
+        }
+        if (message.getSiblings().size() != 0) {
+            pw.println(indent + "analysing siblings");
+            for (Text sibling : message.getSiblings()) {
+                analyseText(pw, sibling, depth);
+            }
+        }
+
+        pw.println(indent + "\n\n-------------------------------------------");
+    }
+
+    private static void analyseTranslatableTc(PrintWriter pw,
+                                              TranslatableTextContent ttc,
+                                              int depth)
+    {
+        depth++;
+        StringBuilder indent = new StringBuilder();
+        indent.append(">>  ".repeat(depth));
+
+        pw.println(indent + "-------------------------------------------\n\n");
+
+        pw.println(indent + "ttc: " + ttc);
+        pw.println(indent + "toString(): " + ttc.toString());
+        pw.println(indent + "getKey(): " + ttc.getKey());
+        pw.println(indent + "args Count: " + ttc.getArgs().length);
+        pw.println(indent + "getArgs(): " + Arrays.toString(ttc.getArgs()));
+
+        for (int i = 0; i < ttc.getArgs().length; i++) {
+            if (ttc.getArgs()[i] instanceof Text argText) {
+                analyseText(pw, argText, depth);
+            }
+            else {
+                pw.println(indent + "arg " + ttc.getArgs()[i] + " not" +
+                        " Text");
+            }
+        }
+
+        pw.println(indent + "\n\n-------------------------------------------");
+    }
+
+    private static void analyseLiteralTc(PrintWriter pw,
+                                         LiteralTextContent ltc,
+                                         int depth)
+    {
+        depth++;
+        StringBuilder indent = new StringBuilder();
+        indent.append(">>  ".repeat(depth));
+
+        pw.println(indent + "-------------------------------------------\n\n");
+
+        pw.println(indent + "ltc: " + ltc);
+        pw.println(indent + "toString(): " + ltc.toString());
+        pw.println(indent + "string(): " + ltc.string());
+
+        pw.println(indent + "\n\n-------------------------------------------");
     }
 }

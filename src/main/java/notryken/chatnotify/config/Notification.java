@@ -123,14 +123,6 @@ public class Notification
     }
 
     /**
-     * @return An iterator over the notification's triggers.
-     */
-    public Iterator<String> getTriggerIterator()
-    {
-        return this.triggers.iterator();
-    }
-
-    /**
      * @return The list of triggers.
      */
     public List<String> getTriggers()
