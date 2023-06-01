@@ -10,8 +10,6 @@ import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 public class NotificationConfigListWidget extends ConfigListWidget
 {
     private final Notification notif;
@@ -29,16 +27,41 @@ public class NotificationConfigListWidget extends ConfigListWidget
         this.addEntry(new Entry.TriggerConfigType(width, notif, this));
 
         if (notif.triggerIsKey) {
-            this.addEntry(new Entry.KeyTriggerConfig(width, notif, this));
+            this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                    client, Text.literal("May not work on some servers.")));
+            this.addEntry(new Entry.TriggerField(width, notif, client,
+                    this, 0));
+            this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                    client, Text.literal("Quick Keys")));
+
+            String[][] keys =
+                    {
+                            {"chat.type", "Any Message"},
+                            {"commands.message.display", "Private Message"},
+                            {"multiplayer.player.joined", "Player Joined"},
+                            {"multiplayer.player.left", "Player Left"},
+                            {"chat.type.advancement", "Advancement"},
+                            {"death.", "Player/Pet Died"}
+                    };
+            for (String[] key : keys) {
+                this.addEntry(new Entry.TriggerOption(width, notif, this, key));
+            }
         }
         else {
-            this.addEntry(new Entry.TriggerField(width, notif, client, this));
-            this.addEntry(new Entry.TriggerVariationConfig(width, notif, this));
+            for (int p = 0; p < notif.getTriggers().size(); p++) {
+                this.addEntry(new Entry.TriggerField(width, notif, client,
+                        this, p));
+            }
+            this.addEntry(new Entry.TriggerField(width, notif, client,
+                    this, -1));
         }
 
+        this.addEntry(new Entry.ControlConfigHeader(
+                width, notif, client, this, "Notification Sound", 2));
+        this.addEntry(new Entry.SoundConfigButton(width, notif, this));
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Message Color")));
-        this.addEntry(new Entry.ColorConfig(width, notif, this));
+        this.addEntry(new Entry.ColorConfigButton(width, notif, this));
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Message Format")));
         this.addEntry(new Entry.FormatConfig(
@@ -51,9 +74,9 @@ public class NotificationConfigListWidget extends ConfigListWidget
                 width, notif, this, "Strikethrough", 3));
         this.addEntry(new Entry.FormatConfig(
                 width, notif, this, "Obfuscated", 4));
-        this.addEntry(new Entry.ControlConfigHeader(
-                width, notif, client, this, "Notification Sound", 2));
-        this.addEntry(new Entry.SoundConfig(width, notif, this));
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                client, Text.literal("Advanced Settings")));
+        this.addEntry(new Entry.AdvancedConfigButton(width, notif, this));
     }
 
     @Override
@@ -73,28 +96,6 @@ public class NotificationConfigListWidget extends ConfigListWidget
         refreshScreen(this);
     }
 
-    private void openKeyTriggerConfig()
-    {
-        assert client.currentScreen != null;
-        Text title = Text.literal("Notification Trigger Key");
-        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
-                title, new KeyTriggerConfigListWidget(client,
-                client.currentScreen.width, client.currentScreen.height,
-                32, client.currentScreen.height - 32, 25,
-                client.currentScreen, title, this.notif)));
-    }
-
-    private void openTriggerVariationConfig()
-    {
-        assert client.currentScreen != null;
-        Text title = Text.literal("Notification Trigger Variations");
-        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
-                title, new TriggerVariationConfigListWidget(client,
-                client.currentScreen.width, client.currentScreen.height,
-                32, client.currentScreen.height - 32, 25,
-                client.currentScreen, title, this.notif)));
-    }
-
     private void openColorConfig()
     {
         assert client.currentScreen != null;
@@ -112,6 +113,17 @@ public class NotificationConfigListWidget extends ConfigListWidget
         Text title = Text.literal("Notification Sound");
         client.setScreen(new ConfigScreen(client.currentScreen, client.options,
                 title, new SoundConfigListWidget(client,
+                client.currentScreen.width, client.currentScreen.height,
+                32, client.currentScreen.height - 32, 25,
+                client.currentScreen, title, notif)));
+    }
+
+    private void openAdvancedConfig()
+    {
+        assert client.currentScreen != null;
+        Text title = Text.literal("Advanced Options");
+        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+                title, new AdvancedConfigListWidget(client,
                 client.currentScreen.width, client.currentScreen.height,
                 32, client.currentScreen.height - 32, 25,
                 client.currentScreen, title, notif)));
@@ -146,65 +158,84 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class KeyTriggerConfig extends Entry
+        private static class TriggerField extends Entry
         {
-            KeyTriggerConfig(int width, Notification notif,
-                             NotificationConfigListWidget listWidget)
-            {
-                super(width, notif, listWidget);
+            int index;
 
-                String label = notif.getTrigger();
-                if (label.equals("")) {
-                    label = "> Click to Set <";
-                }
-                else {
-                    label = "[Key] " + label;
-                }
-
-                options.add(ButtonWidget.builder(Text.literal(label),
-                                (button) -> listWidget.openKeyTriggerConfig())
-                        .size(240, 20).position(width / 2 - 120, 0).build());
-            }
-        }
-
-        private static class TriggerField extends Entry {
             TriggerField(int width, Notification notif,
                          @NotNull MinecraftClient client,
-                         NotificationConfigListWidget listWidget) {
+                         NotificationConfigListWidget listWidget,
+                         int index)
+            {
                 super(width, notif, listWidget);
+                this.index = index;
 
-                TextFieldWidget triggerEdit = new TextFieldWidget(
-                        client.textRenderer, this.width / 2 - 120, 0, 240, 20,
-                        Text.literal("Notification Trigger"));
-                triggerEdit.setMaxLength(120);
-                triggerEdit.setText(this.notif.getTrigger());
-                triggerEdit.setChangedListener(this::setTrigger);
+                if (index >= 0) {
+                    TextFieldWidget triggerEdit = new TextFieldWidget(
+                            client.textRenderer, this.width / 2 - 120, 0, 240,
+                            20, Text.literal("Notification Trigger"));
+                    triggerEdit.setMaxLength(120);
+                    triggerEdit.setText(this.notif.getTrigger(index));
+                    triggerEdit.setChangedListener(this::setTrigger);
 
-                options.add(triggerEdit);
+                    this.options.add(triggerEdit);
+
+                    if (index != 0) {
+                        options.add(ButtonWidget.builder(Text.literal("X"),
+                                        (button) -> {
+                                            notif.removeTrigger(index);
+                                            listWidget.refreshScreen();
+                                        })
+                                .size(25, 20).position(width / 2 + 120 + 5, 0)
+                                .build());
+                    }
+                }
+                else {
+                    options.add(ButtonWidget.builder(Text.literal("+"),
+                                    (button) -> {
+                                        notif.addTrigger("");
+                                        listWidget.refreshScreen();
+                                    })
+                            .size(240, 20)
+                            .position(width / 2 - 120, 0)
+                            .build());
+                }
             }
 
             private void setTrigger(String trigger)
             {
-                notif.setTrigger(trigger.strip());
+                notif.setTrigger(index, trigger.strip());
             }
         }
 
-        private static class TriggerVariationConfig extends Entry
+        private static class TriggerOption extends Entry
         {
-            TriggerVariationConfig(int width, Notification notif,
-                                   NotificationConfigListWidget listWidget)
+            TriggerOption(int width, Notification notif,
+                          NotificationConfigListWidget listWidget, String[] key)
+            {
+                super(width, notif, listWidget);
+
+                options.add(ButtonWidget.builder(Text.literal(key[1]),
+                        (button) -> {
+                            notif.setTrigger(key[0]);
+                            listWidget.refreshScreen();
+                        }).size(240, 20).position(width / 2 - 120, 0).build());
+            }
+        }
+
+        private static class SoundConfigButton extends Entry
+        {
+            SoundConfigButton(int width, Notification notif,
+                              NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
                 options.add(ButtonWidget.builder(
-                        Text.literal("Trigger Variations (" +
-                                (notif.getNumTriggers() - 1) + ")"),
-                                (button) -> {
-                                    if (notif.getTrigger() != null &&
-                                            !notif.getTrigger().equals("")) {
-                                        listWidget.openTriggerVariationConfig();
-                                    }})
-                        .size(240, 20).position(width / 2 - 120, 0).build());
+                                Text.literal(notif.getSound().toString()),
+                                (button) -> listWidget.openSoundConfig())
+                        .size(240, 20)
+                        .position(width / 2 - 120, 0)
+                        .build());
             }
         }
 
@@ -230,10 +261,10 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class ColorConfig extends Entry
+        private static class ColorConfigButton extends Entry
         {
-            ColorConfig(int width, Notification notif,
-                        NotificationConfigListWidget listWidget)
+            ColorConfigButton(int width, Notification notif,
+                              NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
@@ -245,19 +276,13 @@ public class NotificationConfigListWidget extends ConfigListWidget
                 else {
                     message = Text.literal(notif.getColor().getHexCode());
 
-                    message.setStyle(Style.of(
-                            Optional.of(notif.getColor()),
-                            Optional.of(false),
-                            Optional.of(false),
-                            Optional.of(false),
-                            Optional.of(false),
-                            Optional.of(false),
-                            Optional.empty(),
-                            Optional.empty()));
+                    message.setStyle(Style.EMPTY.withColor(notif.getColor()));
                 }
                 options.add(ButtonWidget.builder(message,
                                 (button) -> listWidget.openColorConfig())
-                        .size(240, 20).position(width / 2 - 120, 0).build());
+                        .size(240, 20)
+                        .position(width / 2 - 120, 0)
+                        .build());
             }
         }
 
@@ -278,17 +303,19 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class SoundConfig extends Entry
+        private static class AdvancedConfigButton extends Entry
         {
-            SoundConfig(int width, Notification notif,
-                        NotificationConfigListWidget listWidget)
+            AdvancedConfigButton(int width, Notification notif,
+                                 NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
                 options.add(ButtonWidget.builder(
-                        Text.literal(notif.getSound().toString()),
-                        (button) -> listWidget.openSoundConfig())
-                        .size(240, 20).position(width / 2 - 120, 0).build());
+                        Text.literal("Enter at Your Own Risk"),
+                                (button) -> listWidget.openAdvancedConfig())
+                        .size(240, 20)
+                        .position(width / 2 - 120, 0)
+                        .build());
             }
         }
     }

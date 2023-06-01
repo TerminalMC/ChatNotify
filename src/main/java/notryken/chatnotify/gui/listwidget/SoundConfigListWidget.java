@@ -34,108 +34,114 @@ public class SoundConfigListWidget extends ConfigListWidget
         this.addEntry(new Entry.SoundConfigVolume(width, notif, this));
         this.addEntry(new Entry.SoundConfigPitch(width, notif, this));
         this.addEntry(new Entry.SoundTest(width, notif, this));
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Quick Sounds")));
 
-        String[] sounds = new String[]
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
+                client, Text.literal("Noteblock Sounds")));
+        String[][] noteblockSounds =
                 {
-                        "entity.arrow.hit_player",
-                        "entity.allay.item_thrown",
-                        "item.trident.return",
-                        "block.bell.use",
-                        "block.amethyst_block.hit",
-                        "block.amethyst_cluster.place",
-                        "entity.iron_golem.repair",
-                        "block.anvil.land",
-                        "item.shield.block",
-                        "item.shield.break",
-                        "ui.button.click",
-                        "entity.player.death",
+                        {"block.note_block.banjo", "Banjo"},
+                        {"block.note_block.bass", "Bass"},
+                        {"block.note_block.basedrum", "Bass Drum"},
+                        {"block.note_block.bell", "Bell"},
+                        {"block.note_block.bit", "Bit"},
+                        {"block.note_block.chime", "Chime"},
+                        {"block.note_block.cow_bell", "Cow Bell"},
+                        {"block.note_block.didgeridoo", "Didgeridoo"},
+                        {"block.note_block.flute", "Flute"},
+                        {"block.note_block.guitar", "Guitar"},
+                        {"block.note_block.harp", "Harp"},
+                        {"block.note_block.hat", "Hat"},
+                        {"block.note_block.iron_xylophone", "Iron Xylophone"},
+                        {"block.note_block.pling", "Pling"},
+                        {"block.note_block.snare", "Snare"},
+                        {"block.note_block.xylophone", "Xylophone"},
                 };
-        for (String s : sounds) {
-            this.addEntry(new Entry.SoundOption(width, notif, this, s));
+        for (String[] s : noteblockSounds) {
+            this.addEntry(new Entry.SoundOption(width, notif, this, s[0],
+                    s[1]));
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Power/Portal Sounds")));
-
-        String[] powerSounds = new String[]
+        String[][] powerSounds = new String[][]
                 {
-                        "block.beacon.activate",
-                        "block.beacon.deactivate",
-                        "block.beacon.power_select",
-                        "block.conduit.activate",
-                        "block.conduit.deactivate",
-                        "block.end_portal_frame.fill",
-                        "block.portal.travel",
-                        "block.portal.trigger",
-                        "entity.elder_guardian.curse",
-                        "entity.evoker.prepare_summon",
-                        "entity.zombie_villager.converted"
+                        {"block.beacon.activate", "Beacon Activate"},
+                        {"block.beacon.deactivate", "Beacon Deactivate"},
+                        {"block.beacon.power_select", "Beacon Power Select"},
+                        {"block.conduit.activate", "Conduit Activate"},
+                        {"block.conduit.deactivate", "Conduit Deactivate"},
+                        {"block.end_portal_frame.fill", "End Portal Eye"},
+                        {"block.portal.travel", "Portal Travel"},
+                        {"block.portal.trigger", "Portal Trigger"},
+                        {"entity.enderman.teleport", "Teleport"},
+                        {"item.trident.return", "Trident Return"},
+                        {"entity.elder_guardian.curse", "Elder Guardian Curse"},
+                        {"entity.warden.sonic_boom", "Warden Sonic Boom"},
+                        {"entity.evoker.cast_spell", "Evoker Cast Spell"},
+                        {"entity.evoker.prepare_summon", "Evoker Summon"},
+                        {"entity.evoker.prepare_attack", "Evoker Attack"},
+                        {"entity.zombie_villager.converted", "Villager Cured"},
                 };
-
-        for (String s : powerSounds) {
-            this.addEntry(new Entry.SoundOption(width, notif, this, s));
+        for (String[] s : powerSounds) {
+            this.addEntry(new Entry.SoundOption(width, notif, this, s[0],
+                    s[1]));
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Explosion Sounds")));
-
-        String[] explosionSounds = new String[]
+        String[][] explosionSounds = new String[][]
                 {
-                        "entity.tnt.primed",
-                        "entity.generic.explode",
-                        "entity.lightning_bolt.thunder",
-                        "item.firecharge.use",
-                        "block.fire.extinguish",
-                        "entity.firework_rocket.blast",
-                        "entity.firework_rocket.large_blast",
-                        "entity.firework_rocket.twinkle"
+                        {"entity.tnt.primed", "TNT Ignite"},
+                        {"entity.generic.explode", "TNT Explode"},
+                        {"entity.lightning_bolt.thunder", "Thunder"},
+                        {"item.firecharge.use", "Fire Charge"},
+                        {"block.fire.extinguish", "Fire Extinguish"},
+                        {"entity.firework_rocket.blast", "Firework 1"},
+                        {"entity.firework_rocket.large_blast", "Firework 2"},
+                        {"entity.firework_rocket.twinkle", "Firework 3"},
                 };
-
-        for (String s : explosionSounds) {
-            this.addEntry(new Entry.SoundOption(width, notif, this, s));
+        for (String[] s : explosionSounds) {
+            this.addEntry(new Entry.SoundOption(width, notif, this, s[0],
+                    s[1]));
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Noteblock Sounds")));
-
-        String[] noteblockSounds = new String[]
+                client, Text.literal("Illager Sounds")));
+        String[][] villagerSounds = new String[][]
                 {
-                        "block.note_block.basedrum",
-                        "block.note_block.bass",
-                        "block.note_block.bell",
-                        "block.note_block.chime",
-                        "block.note_block.flute",
-                        "block.note_block.guitar",
-                        "block.note_block.harp",
-                        "block.note_block.hat",
-                        "block.note_block.pling",
-                        "block.note_block.snare",
-                        "block.note_block.xylophone",
-                        "block.note_block.iron_xylophone",
-                        "block.note_block.cow_bell",
-                        "block.note_block.didgeridoo",
-                        "block.note_block.bit",
-                        "block.note_block.banjo"
-                };
+                        {"entity.villager.ambient", "Villager"},
+                        {"entity.villager.yes", "Villager Yes"},
+                        {"entity.villager.no", "Villager No"},
+                        {"entity.villager.trade", "Villager Trade"},
+                        {"entity.pillager.ambient", "Pillager"},
+                        {"entity.vindicator.ambient", "Vindicator"},
+                        {"entity.evoker.ambient", "Evoker"},
 
-        for (String s : noteblockSounds) {
-            this.addEntry(new Entry.SoundOption(width, notif, this, s));
+                };
+        for (String[] s : villagerSounds) {
+            this.addEntry(new Entry.SoundOption(width, notif, this, s[0],
+                    s[1]));
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Villager Sounds")));
-
-        String[] villagerSounds = new String[]
+                client, Text.literal("Misc Sounds")));
+        String[][] miscSounds = new String[][]
                 {
-                        "entity.villager.no",
-                        "entity.villager.trade",
-                        "entity.villager.yes"
+                        {"entity.arrow.hit_player", "Arrow Hit"},
+                        {"block.bell.use", "Bell"},
+                        {"block.amethyst_block.hit", "Amethyst 1"},
+                        {"block.amethyst_cluster.place", "Amethyst 2"},
+                        {"entity.allay.item_thrown", "Allay Throw"},
+                        {"entity.iron_golem.repair", "Iron Repair"},
+                        {"block.anvil.land", "Anvil Land"},
+                        {"item.shield.block", "Shield Block"},
+                        {"item.shield.break", "Shield Break"},
+                        {"entity.player.death", "Player Death"},
+                        {"ui.button.click", "UI Button Click"},
                 };
-
-        for (String s : villagerSounds) {
-            this.addEntry(new Entry.SoundOption(width, notif, this, s));
+        for (String[] s : miscSounds) {
+            this.addEntry(new Entry.SoundOption(width, notif, this, s[0],
+                    s[1]));
         }
     }
 
@@ -194,10 +200,14 @@ public class SoundConfigListWidget extends ConfigListWidget
             {
                 client.setScreen(new ConfirmLinkScreen(confirmed -> {
                     if (confirmed) {
-                        Util.getOperatingSystem().open("https://github.com/NotRyken/ChatNotify/blob/master/src/main/resources/assets/chatnotify/SoundList.txt");
+                        Util.getOperatingSystem().open("https://github.com/" +
+                                "NotRyken/ChatNotify/blob/master/src/main/" +
+                                "resources/assets/chatnotify/SoundList.txt");
                     }
                     listWidget.refreshScreen();
-                }, "https://github.com/NotRyken/ChatNotify/blob/master/src/main/resources/assets/chatnotify/SoundList.txt", true));
+                }, "https://github.com/NotRyken/ChatNotify/blob/master/src/" +
+                        "main/resources/assets/chatnotify/SoundList.txt",
+                        true));
             }
         }
 
@@ -266,11 +276,11 @@ public class SoundConfigListWidget extends ConfigListWidget
         {
             SoundOption(int width, Notification notif,
                         SoundConfigListWidget listWidget,
-                        String sound)
+                        String sound, String soundName)
             {
                 super(width, notif, listWidget);
 
-                options.add(ButtonWidget.builder(Text.literal(sound),
+                options.add(ButtonWidget.builder(Text.literal(soundName),
                         (button) ->
                 {
                     notif.setSound(notif.parseSound(sound));

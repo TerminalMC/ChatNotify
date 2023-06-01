@@ -31,6 +31,9 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
         float soundPitch;
         Identifier sound;
         boolean persistent;
+        boolean regexEnabled;
+        ArrayList<String> exclusionTriggers = new ArrayList<>();
+        ArrayList<String> responseMessages = new ArrayList<>();
 
         // Unchanged since v1.2.0-beta.8
 
@@ -172,8 +175,50 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             }
         }
 
+        try {
+            regexEnabled = jsonObject.get("regexEnabled").getAsBoolean();
+        }
+        catch (JsonParseException | NullPointerException |
+               UnsupportedOperationException | IllegalStateException e)
+        {
+            regexEnabled = false;
+        }
+
+        try {
+            JsonArray exclusionTriggerArray =
+                    jsonObject.get("exclusionTriggers").getAsJsonArray();
+            for (JsonElement je : exclusionTriggerArray) {
+                exclusionTriggers.add(je.getAsString());
+            }
+            if (exclusionTriggers.size() == 0) {
+                throw new JsonParseException("Empty exclusion trigger array.");
+            }
+        }
+        catch (JsonParseException | NullPointerException |
+               UnsupportedOperationException | IllegalStateException e)
+        {
+            // Default to empty array.
+        }
+
+        try {
+            JsonArray responseMessageArray =
+                    jsonObject.get("responseMessages").getAsJsonArray();
+            for (JsonElement je : responseMessageArray) {
+                responseMessages.add(je.getAsString());
+            }
+            if (responseMessages.size() == 0) {
+                throw new JsonParseException("Empty response message array.");
+            }
+        }
+        catch (JsonParseException | NullPointerException |
+               UnsupportedOperationException | IllegalStateException e)
+        {
+            // Default to empty array.
+        }
+
+
         return new Notification(enabled, controls, triggers, triggerIsKey,
                 color, formatControls, soundVolume, soundPitch, sound,
-                persistent);
+                persistent, regexEnabled, exclusionTriggers, responseMessages);
     }
 }

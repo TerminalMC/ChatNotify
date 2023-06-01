@@ -1,6 +1,8 @@
 package notryken.chatnotify.util;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundCategory;
@@ -11,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,8 +43,6 @@ public class MessageProcessor
         return (modifiedMessage == null ? message : modifiedMessage);
     }
 
-
-
     /**
      * Modifies the message based on whether it is identified as being sent by
      * the user, and whether such messages are to be ignored.
@@ -55,7 +54,7 @@ public class MessageProcessor
         if (!recentMessages.isEmpty()) {
             // Check each username trigger to allow for nicknames.
             for (String username : config.getNotif(0).getTriggers()) {
-                int[] match = msgContainsStr(strMsg, username);
+                int[] match = msgContainsStr(strMsg, username, true);
                 if (match != null) {
                     // Avoid username matching recent message content.
                     strMsg = strMsg.substring(0, match[0]) +
@@ -94,17 +93,33 @@ public class MessageProcessor
                         if (ttc.getKey().contains(notif.getTrigger())) {
                             playSound(notif);
                             modifiedMessage = simpleRestyle(message, notif);
+                            sendResponseMessages(notif);
                             break;
                         }
                     }
                 } else {
                     for (String trigger : notif.getTriggers())
                     {
-                        if (msgContainsStr(strMsg, trigger) != null) {
-                            playSound(notif);
-                            modifiedMessage =
-                                    complexRestyle(message, trigger, notif);
-                            break;
+                        if (msgContainsStr(strMsg, trigger,
+                                !notif.regexEnabled) != null)
+                        {
+                            boolean exclude = false;
+                            for (String et : notif.getExclusionTriggers()) {
+                                if (msgContainsStr(strMsg, et,
+                                        !notif.regexEnabled) != null)
+                                {
+                                    exclude = true;
+                                    break;
+                                }
+                            }
+                            if (!exclude)
+                            {
+                                playSound(notif);
+                                modifiedMessage =
+                                        complexRestyle(message, trigger, notif);
+                                sendResponseMessages(notif);
+                                break;
+                            }
                         }
                     }
                     if (modifiedMessage != null) {
@@ -115,18 +130,36 @@ public class MessageProcessor
         }
     }
 
+    private static void sendResponseMessages(Notification notif)
+    {
+        for (String response : notif.getResponseMessages())
+        {
+            Screen oldScreen = MinecraftClient.getInstance()
+                    .currentScreen;
+            MinecraftClient.getInstance().setScreen(
+                    new ChatScreen(response));
+            if (MinecraftClient.getInstance().currentScreen
+                    instanceof ChatScreen cs)
+            {
+                cs.sendMessage(response, true);
+            }
+            MinecraftClient.getInstance().setScreen(oldScreen);
+        }
+    }
+
     /**
      * Uses regex pattern matching to check whether msg contains str.
      * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
      * @param msg The message to search in.
      * @param str The string to search for.
+     * @param quote Whether to wrap str in Pattern.quote() when compiling.
      * @return An integer array [start,end] of str in msg, or null if not found.
      */
-    private static int[] msgContainsStr(String msg, String str)
+    private static int[] msgContainsStr(String msg, String str, boolean quote)
     {
-        Matcher matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" +
-                Pattern.quote(str) + "\\W?)(?!\\w)", Pattern.CASE_INSENSITIVE)
-                .matcher(msg);
+        Matcher matcher = Pattern.compile(
+                "(?<!\\w)(\\W?(?i)" + (quote ? Pattern.quote(str) : str) +
+                        "\\W?)(?!\\w)", Pattern.CASE_INSENSITIVE).matcher(msg);
         if (matcher.find()) {
             return new int[]{matcher.start(), matcher.end()};
         }
@@ -147,16 +180,30 @@ public class MessageProcessor
 
     private static Style getStyle(Notification notif)
     {
-        return Style.of(
-                Optional.of(notif.getColor()),
-                Optional.of(notif.getFormatControl(0)),
-                Optional.of(notif.getFormatControl(1)),
-                Optional.of(notif.getFormatControl(2)),
-                Optional.of(notif.getFormatControl(3)),
-                Optional.of(notif.getFormatControl(4)),
-                Optional.empty(),
-                Optional.empty());
+        Style style = Style.EMPTY;
+
+        if (!notif.getColor().equals(TextColor.fromRgb(16777215))) {
+            style = style.withColor(notif.getColor());
+        }
+        if (notif.getFormatControl(0)) {
+            style = style.withBold(true);
+        }
+        if (notif.getFormatControl(1)) {
+            style = style.withItalic(true);
+        }
+        if (notif.getFormatControl(2)) {
+            style = style.withUnderline(true);
+        }
+        if (notif.getFormatControl(3)) {
+            style = style.withStrikethrough(true);
+        }
+        if (notif.getFormatControl(4)) {
+            style = style.withObfuscated(true);
+        }
+        return style;
     }
+
+    // TODO restyle should fill style rather than overriding it
 
     private static Text simpleRestyle(Text message, Notification notif)
     {
@@ -219,7 +266,7 @@ public class MessageProcessor
 
             String msgStr = removeFormatCodes(ltc.string());
 
-            int[] match = msgContainsStr(msgStr, trigger);
+            int[] match = msgContainsStr(msgStr, trigger, true);
             if (match != null) {
                 if (match[1] != msgStr.length()) {
                     siblings.add(0, Text.literal(

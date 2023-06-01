@@ -13,8 +13,6 @@ import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 public class ColorConfigListWidget extends ConfigListWidget
 {
     public Notification notif;
@@ -174,15 +172,7 @@ public class ColorConfigListWidget extends ConfigListWidget
 
                 MutableText message = Text.literal(colorName);
 
-                message.setStyle(Style.of(
-                        Optional.of(color),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.of(false),
-                        Optional.empty(),
-                        Optional.empty()));
+                message.setStyle(Style.EMPTY.withColor(color));
 
                 this.options.add(ButtonWidget.builder(message, (button) ->
                 {

@@ -164,6 +164,8 @@ public class Config
         }
         for (Notification notif2: notifications) {
             notif2.purgeTriggers();
+            notif2.purgeExclusionTriggers();
+            notif2.purgeResponseMessages();
         }
     }
 }

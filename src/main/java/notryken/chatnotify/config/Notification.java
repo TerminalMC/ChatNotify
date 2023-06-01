@@ -27,6 +27,9 @@ public class Notification
     public float soundPitch;
     private Identifier sound;
     public boolean persistent;
+    public boolean regexEnabled;
+    private final ArrayList<String> exclusionTriggers;
+    private final ArrayList<String> responseMessages;
 
     /**
      * Validated.
@@ -59,6 +62,9 @@ public class Notification
         this.soundPitch = soundPitch;
         setSound(parseSound(soundName));
         this.persistent = persistent;
+        regexEnabled = false;
+        exclusionTriggers = new ArrayList<>();
+        responseMessages = new ArrayList<>();
     }
 
     /**
@@ -68,7 +74,9 @@ public class Notification
                  ArrayList<String> triggers, boolean triggerIsKey,
                  TextColor color, ArrayList<Boolean> formatControls,
                  float soundVolume, float soundPitch, Identifier sound,
-                 boolean persistent)
+                 boolean persistent, boolean regexEnabled,
+                 ArrayList<String> exclusionTriggers,
+                 ArrayList<String> responseMessages)
     {
         this.enabled = enabled;
         this.controls = controls;
@@ -80,6 +88,9 @@ public class Notification
         this.soundPitch = soundPitch;
         this.sound = sound;
         this.persistent = persistent;
+        this.regexEnabled = regexEnabled;
+        this.exclusionTriggers = exclusionTriggers;
+        this.responseMessages = responseMessages;
     }
 
     // Accessors.
@@ -107,19 +118,11 @@ public class Notification
      */
     public String getTrigger(int index)
     {
-        if (index > 0 && index < this.triggers.size())
+        if (index >= 0 && index < this.triggers.size())
         {
             return this.triggers.get(index);
         }
         return null;
-    }
-
-    /**
-     * @return The total number of triggers.
-     */
-    public int getNumTriggers()
-    {
-        return this.triggers.size();
     }
 
     /**
@@ -154,6 +157,49 @@ public class Notification
     public Identifier getSound()
     {
         return this.sound;
+    }
+
+
+    /**
+     * @param index The index of the exclusion trigger.
+     * @return The trigger at the specified index if it exists, else null.
+     */
+    public String getExclusionTrigger(int index)
+    {
+        if (index >= 0 && index < this.exclusionTriggers.size())
+        {
+            return this.exclusionTriggers.get(index);
+        }
+        return null;
+    }
+
+    /**
+     * @return The list of exclusion triggers.
+     */
+    public List<String> getExclusionTriggers()
+    {
+        return this.exclusionTriggers;
+    }
+
+    /**
+     * @param index The index of the response message.
+     * @return The message at the specified index if it exists, else null.
+     */
+    public String getResponseMessage(int index)
+    {
+        if (index >= 0 && index < this.responseMessages.size())
+        {
+            return this.responseMessages.get(index);
+        }
+        return null;
+    }
+
+    /**
+     * @return The list of response messages.
+     */
+    public List<String> getResponseMessages()
+    {
+        return this.responseMessages;
     }
 
     // Mutators.
@@ -232,7 +278,7 @@ public class Notification
      * not out of range.
      * @param index The index of the trigger to remove.
      */
-    public void removeTriggerVariation(int index)
+    public void removeTrigger(int index)
     {
         if (index > 0 && index < this.triggers.size()) {
             this.triggers.remove(index);
@@ -291,6 +337,84 @@ public class Notification
         setControl(2, true);
     }
 
+    /**
+     * Sets the exclusion trigger at the specified index to the specified
+     * value, if the index is valid and the notification does not already
+     * contain the exclusion trigger.
+     * @param index The index of the trigger to set.
+     * @param exclusionTrigger The new exclusion trigger String.
+     */
+    public void setExclusionTrigger(int index, String exclusionTrigger)
+    {
+        if (index >= 0 && index < this.exclusionTriggers.size() &&
+                !this.exclusionTriggers.contains(exclusionTrigger)) {
+            this.exclusionTriggers.set(index, exclusionTrigger);
+        }
+    }
+
+    /**
+     * Adds the specified exclusion trigger, if the notification does not
+     * already contain it.
+     * @param exclusionTrigger The exclusion trigger String to add.
+     */
+    public void addExclusionTrigger(String exclusionTrigger)
+    {
+        if (!this.exclusionTriggers.contains(exclusionTrigger)) {
+            this.exclusionTriggers.add(exclusionTrigger);
+        }
+    }
+
+    /**
+     * Removes the exclusion trigger at the specified index, if the index is
+     * not out of range.
+     * @param index The index of the exclusion trigger to remove.
+     */
+    public void removeExclusionTrigger(int index)
+    {
+        if (index >= 0 && index < this.exclusionTriggers.size()) {
+            this.exclusionTriggers.remove(index);
+        }
+    }
+
+    /**
+     * Sets the response message at the specified index to the specified
+     * value, if the index is valid and the notification does not already
+     * contain the response message.
+     * @param index The index of the trigger to set.
+     * @param responseMessage The new response message String.
+     */
+    public void setResponseMessage(int index, String responseMessage)
+    {
+        if (index >= 0 && index < this.responseMessages.size() &&
+                !this.responseMessages.contains(responseMessage)) {
+            this.responseMessages.set(index, responseMessage);
+        }
+    }
+
+    /**
+     * Adds the specified response message, if the notification does not
+     * already contain it.
+     * @param responseMessage The response message String to add.
+     */
+    public void addResponseMessage(String responseMessage)
+    {
+        if (!this.responseMessages.contains(responseMessage)) {
+            this.responseMessages.add(responseMessage);
+        }
+    }
+
+    /**
+     * Removes the response message at the specified index, if the index is
+     * not out of range.
+     * @param index The index of the response message to remove.
+     */
+    public void removeResponseMessage(int index)
+    {
+        if (index >= 0 && index < this.responseMessages.size()) {
+            this.responseMessages.remove(index);
+        }
+    }
+
     // Other processing.
 
     /**
@@ -305,6 +429,22 @@ public class Notification
                 iter.remove();
             }
         }
+    }
+
+    /**
+     * Removes all empty exclusion triggers.
+     */
+    public void purgeExclusionTriggers()
+    {
+        this.exclusionTriggers.removeIf(s -> s.strip().equals(""));
+    }
+
+    /**
+     * Removes all empty response messages.
+     */
+    public void purgeResponseMessages()
+    {
+        this.responseMessages.removeIf(s -> s.strip().equals(""));
     }
 
     /**

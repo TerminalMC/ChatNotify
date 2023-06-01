@@ -5,10 +5,14 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.gui.screen.ModMenuIntegration;
+
+import java.util.Optional;
 
 import static notryken.chatnotify.client.ChatNotifyClient.config;
 
@@ -130,7 +134,7 @@ public class ModConfigListWidget extends ConfigListWidget
                             label = "[Key] " + label;
                         }
                         else {
-                            int numVariations = notif.getNumTriggers() - 1;
+                            int numVariations = notif.getTriggers().size() - 1;
                             if (numVariations == 1) {
                                 label = label + " (" + numVariations +
                                         " variation)";
@@ -142,7 +146,18 @@ public class ModConfigListWidget extends ConfigListWidget
                         }
                     }
 
-                    options.add(ButtonWidget.builder(Text.literal(label),
+                    MutableText labelText = Text.literal(label).setStyle(
+                            Style.of(
+                                    Optional.of(notif.getColor()),
+                                    Optional.of(notif.getFormatControl(0)),
+                                    Optional.of(notif.getFormatControl(1)),
+                                    Optional.of(notif.getFormatControl(2)),
+                                    Optional.of(notif.getFormatControl(3)),
+                                    Optional.of(notif.getFormatControl(4)),
+                                    Optional.empty(),
+                                    Optional.empty()));
+
+                    options.add(ButtonWidget.builder(labelText,
                                     (button) -> listWidget
                                             .openNotificationConfig(index))
                             .size(240, 20).position(width / 2 - 120, 0).build());
