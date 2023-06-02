@@ -167,7 +167,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
 
         private static class TriggerField extends Entry
         {
-            int index;
+            final int index;
 
             TriggerField(int width, Notification notif,
                          @NotNull MinecraftClient client,

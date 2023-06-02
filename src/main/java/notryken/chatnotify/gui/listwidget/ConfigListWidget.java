@@ -57,9 +57,9 @@ public abstract class ConfigListWidget
 
     public abstract static class Entry extends ElementListWidget.Entry<Entry>
     {
-        public List<ClickableWidget> options;
-        public ConfigListWidget listWidget;
-        public int width;
+        public final List<ClickableWidget> options;
+        public final ConfigListWidget listWidget;
+        public final int width;
 
         public Entry(int width, ConfigListWidget listWidget)
         {

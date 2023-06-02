@@ -18,7 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static notryken.chatnotify.client.ChatNotifyClient.*;
-import static notryken.chatnotify.client.ChatNotifyClient.config;
 
 public class MessageProcessor
 {
@@ -36,9 +35,6 @@ public class MessageProcessor
 
         String plainMsg = TextVisitFactory.removeFormattingCodes(message);
         String processedMsg = preProcess(plainMsg);
-
-        System.out.println("plain: " + plainMsg);
-        System.out.println("processed: " + processedMsg);
 
         if (processedMsg != null) {
             tryNotify(message, plainMsg, processedMsg);

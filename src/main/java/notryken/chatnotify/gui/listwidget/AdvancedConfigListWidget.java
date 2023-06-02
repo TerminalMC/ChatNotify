@@ -119,7 +119,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget
 
         private static class ExclusionTriggerField extends Entry
         {
-            int index;
+            final int index;
 
             ExclusionTriggerField(int width, Notification notif,
                                   @NotNull MinecraftClient client,
@@ -169,7 +169,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget
 
         private static class ResponseMessageField extends Entry
         {
-            int index;
+            final int index;
 
             ResponseMessageField(int width, Notification notif,
                                  @NotNull MinecraftClient client,

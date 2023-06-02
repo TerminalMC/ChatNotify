@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ColorConfigListWidget extends ConfigListWidget
 {
-    public Notification notif;
+    public final Notification notif;
 
     public ColorConfigListWidget(MinecraftClient client, int width, int height,
                                  int top, int bottom, int itemHeight,
