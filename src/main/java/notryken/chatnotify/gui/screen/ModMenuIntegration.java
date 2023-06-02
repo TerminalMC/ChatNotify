@@ -40,16 +40,16 @@ public class ModMenuIntegration implements ModMenuApi
             this.addSelectableChild(this.list);
 
             this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
-                    (button) ->
-                    {
-                        config.refreshUsernameNotif();
-                        config.purge();
-                        ChatNotifyClient.saveConfig();
-                        assert this.client != null;
-                        this.client.setScreen(this.parent);
-                    })
-                    .size(240, 20).position(this.width / 2 - 120,
-                            this.height - 27).build());
+                            (button) -> {
+                config.refreshUsernameNotif();
+                config.purge();
+                ChatNotifyClient.saveConfig();
+                assert this.client != null;
+                this.client.setScreen(this.parent);
+            })
+                    .size(240, 20)
+                    .position(this.width / 2 - 120, this.height - 27)
+                    .build());
         }
 
         @Override

@@ -3,6 +3,7 @@ package notryken.chatnotify.gui.listwidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
@@ -18,17 +19,18 @@ public class SoundConfigListWidget extends ConfigListWidget
 {
     private final Notification notif;
 
-    public SoundConfigListWidget(MinecraftClient client,
-                                 int i, int j, int k, int l, int m,
+    public SoundConfigListWidget(MinecraftClient client, int width, int height,
+                                 int top, int bottom, int itemHeight,
                                  Screen parent, Text title, Notification notif)
     {
-        super(client, i, j, k, l, m, parent, title);
+        super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Sound ID")));
         this.addEntry(new Entry.SoundLink(width, notif, client, this));
         this.addEntry(new Entry.SoundField(width, notif, client, this));
+
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Sound Options")));
         this.addEntry(new Entry.SoundConfigVolume(width, notif, this));
@@ -149,9 +151,8 @@ public class SoundConfigListWidget extends ConfigListWidget
     public SoundConfigListWidget resize(int width, int height,
                                         int top, int bottom)
     {
-        SoundConfigListWidget listWidget =
-                new SoundConfigListWidget(client, width, height, top, bottom,
-                        itemHeight, parent, title, notif);
+        SoundConfigListWidget listWidget = new SoundConfigListWidget(client,
+                width, height, top, bottom, itemHeight, parent, title, notif);
         listWidget.setScrollAmount(this.getScrollAmount());
         return listWidget;
     }
@@ -191,9 +192,16 @@ public class SoundConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                options.add(ButtonWidget.builder(Text.literal("Sound List"),
-                        (button) -> openLink(client))
-                        .size(80, 20).position(width / 2 - 40, 0).build());
+                ButtonWidget linkButton = ButtonWidget.builder(
+                        Text.literal("Sound List"),
+                                (button) -> openLink(client))
+                        .size(80, 20)
+                        .position(width / 2 - 40, 0)
+                        .build();
+                linkButton.setTooltip(Tooltip.of(Text.literal("Probably " +
+                        "opens a webpage with a list of Minecraft sounds.")));
+
+                options.add(linkButton);
             }
 
             private void openLink(MinecraftClient client)
@@ -256,14 +264,14 @@ public class SoundConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                TextFieldWidget triggerEdit = new TextFieldWidget(
+                TextFieldWidget soundField = new TextFieldWidget(
                         client.textRenderer, this.width / 2 - 120, 0, 240, 20,
                         Text.literal("Notification Sound"));
-                triggerEdit.setMaxLength(120);
-                triggerEdit.setText(this.notif.getSound().toString());
-                triggerEdit.setChangedListener(this::setSound);
+                soundField.setMaxLength(120);
+                soundField.setText(this.notif.getSound().toString());
+                soundField.setChangedListener(this::setSound);
 
-                options.add(triggerEdit);
+                options.add(soundField);
             }
 
             private void setSound(String sound)
@@ -281,12 +289,14 @@ public class SoundConfigListWidget extends ConfigListWidget
                 super(width, notif, listWidget);
 
                 options.add(ButtonWidget.builder(Text.literal(soundName),
-                        (button) ->
-                {
+                        (button) -> {
                     notif.setSound(notif.parseSound(sound));
                     listWidget.refreshScreen();
                     listWidget.playNotifSound();
-                }).size(240, 20).position(width / 2 - 120, 0).build());
+                })
+                        .size(240, 20)
+                        .position(width / 2 - 120, 0)
+                        .build());
             }
         }
     }

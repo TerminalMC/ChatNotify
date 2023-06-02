@@ -157,8 +157,7 @@ public class Config
         iter.next(); // Skip the first notification.
         while (iter.hasNext()) {
             notif = iter.next();
-            if (!notif.persistent || notif.getTrigger().strip().equals(""))
-            {
+            if (notif.getTrigger().strip().equals("") && !notif.persistent) {
                 iter.remove();
             }
         }

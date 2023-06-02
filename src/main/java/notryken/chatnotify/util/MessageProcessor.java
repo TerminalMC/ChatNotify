@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,11 +34,14 @@ public class MessageProcessor
     {
         modifiedMessage = null;
 
-        String strMsg =
-                preProcess(TextVisitFactory.removeFormattingCodes(message));
+        String plainMsg = TextVisitFactory.removeFormattingCodes(message);
+        String processedMsg = preProcess(plainMsg);
 
-        if (strMsg != null) {
-            tryNotify(message, strMsg);
+        System.out.println("plain: " + plainMsg);
+        System.out.println("processed: " + processedMsg);
+
+        if (processedMsg != null) {
+            tryNotify(message, plainMsg, processedMsg);
         }
 
         return (modifiedMessage == null ? message : modifiedMessage);
@@ -54,7 +58,7 @@ public class MessageProcessor
         if (!recentMessages.isEmpty()) {
             // Check each username trigger to allow for nicknames.
             for (String username : config.getNotif(0).getTriggers()) {
-                int[] match = msgContainsStr(strMsg, username, true);
+                int[] match = msgContainsStr(strMsg, username, false);
                 if (match != null) {
                     // Avoid username matching recent message content.
                     strMsg = strMsg.substring(0, match[0]) +
@@ -81,9 +85,11 @@ public class MessageProcessor
      * specified message. If one matches, modifies the message according to
      * the corresponding notification and plays the notification's sound.
      * @param message The original message.
-     * @param strMsg The processed message.
+     * @param plainMsg The message string, stripped of format codes.
+     * @param processedMsg The processed version of plainMsg.
      */
-    private static void tryNotify(Text message, String strMsg)
+    private static void tryNotify(Text message, String plainMsg,
+                                  String processedMsg)
     {
         for (Notification notif : config.getNotifs()) {
             if (notif.enabled) {
@@ -100,25 +106,47 @@ public class MessageProcessor
                 } else {
                     for (String trigger : notif.getTriggers())
                     {
-                        if (msgContainsStr(strMsg, trigger,
-                                !notif.regexEnabled) != null)
-                        {
-                            boolean exclude = false;
-                            for (String et : notif.getExclusionTriggers()) {
-                                if (msgContainsStr(strMsg, et,
-                                        !notif.regexEnabled) != null)
-                                {
-                                    exclude = true;
+                        if (notif.regexEnabled) {
+                            if (msgContainsStr(plainMsg, trigger, true) != null)
+                            {
+                                boolean exclude = false;
+                                for (String et : notif.getExclusionTriggers()) {
+                                    if (msgContainsStr(plainMsg, et, true)
+                                            != null)
+                                    {
+                                        exclude = true;
+                                        break;
+                                    }
+                                }
+                                if (!exclude) {
+                                    playSound(notif);
+                                    modifiedMessage =
+                                            simpleRestyle(message, notif);
+                                    sendResponseMessages(notif);
                                     break;
                                 }
                             }
-                            if (!exclude)
+                        }
+                        else {
+                            if (msgContainsStr(processedMsg, trigger, false)
+                                    != null)
                             {
-                                playSound(notif);
-                                modifiedMessage =
-                                        complexRestyle(message, trigger, notif);
-                                sendResponseMessages(notif);
-                                break;
+                                boolean exclude = false;
+                                for (String et : notif.getExclusionTriggers()) {
+                                    if (msgContainsStr(processedMsg, et, false)
+                                            != null)
+                                    {
+                                        exclude = true;
+                                        break;
+                                    }
+                                }
+                                if (!exclude) {
+                                    playSound(notif);
+                                    modifiedMessage = complexRestyle(message,
+                                            trigger, notif);
+                                    sendResponseMessages(notif);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -134,10 +162,8 @@ public class MessageProcessor
     {
         for (String response : notif.getResponseMessages())
         {
-            Screen oldScreen = MinecraftClient.getInstance()
-                    .currentScreen;
-            MinecraftClient.getInstance().setScreen(
-                    new ChatScreen(response));
+            Screen oldScreen = MinecraftClient.getInstance().currentScreen;
+            MinecraftClient.getInstance().setScreen(new ChatScreen(response));
             if (MinecraftClient.getInstance().currentScreen
                     instanceof ChatScreen cs)
             {
@@ -150,16 +176,25 @@ public class MessageProcessor
     /**
      * Uses regex pattern matching to check whether msg contains str.
      * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
+     * If strIsRegex is true, considers str to be a complete regular expression.
      * @param msg The message to search in.
      * @param str The string to search for.
-     * @param quote Whether to wrap str in Pattern.quote() when compiling.
+     * @param strIsRegex Whether to wrap str in the regex
+     *                   {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"} when
+     *                   compiling.
      * @return An integer array [start,end] of str in msg, or null if not found.
      */
-    private static int[] msgContainsStr(String msg, String str, boolean quote)
+    private static int[] msgContainsStr(String msg, String str,
+                                        boolean strIsRegex)
     {
-        Matcher matcher = Pattern.compile(
-                "(?<!\\w)(\\W?(?i)" + (quote ? Pattern.quote(str) : str) +
-                        "\\W?)(?!\\w)", Pattern.CASE_INSENSITIVE).matcher(msg);
+        Matcher matcher;
+        if (strIsRegex) {
+            matcher = Pattern.compile(str).matcher(msg);
+        }
+        else {
+            matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" + Pattern.quote(str) +
+                    "\\W?)(?!\\w)", Pattern.CASE_INSENSITIVE).matcher(msg);
+        }
         if (matcher.find()) {
             return new int[]{matcher.start(), matcher.end()};
         }
@@ -180,35 +215,22 @@ public class MessageProcessor
 
     private static Style getStyle(Notification notif)
     {
-        Style style = Style.EMPTY;
-
-        if (!notif.getColor().equals(TextColor.fromRgb(16777215))) {
-            style = style.withColor(notif.getColor());
-        }
-        if (notif.getFormatControl(0)) {
-            style = style.withBold(true);
-        }
-        if (notif.getFormatControl(1)) {
-            style = style.withItalic(true);
-        }
-        if (notif.getFormatControl(2)) {
-            style = style.withUnderline(true);
-        }
-        if (notif.getFormatControl(3)) {
-            style = style.withStrikethrough(true);
-        }
-        if (notif.getFormatControl(4)) {
-            style = style.withObfuscated(true);
-        }
-        return style;
+        return Style.of(
+                Optional.of(notif.getColor()),
+                Optional.of(notif.getFormatControl(0)),
+                Optional.of(notif.getFormatControl(1)),
+                Optional.of(notif.getFormatControl(2)),
+                Optional.of(notif.getFormatControl(3)),
+                Optional.of(notif.getFormatControl(4)),
+                Optional.empty(),
+                Optional.empty());
     }
-
-    // TODO restyle should fill style rather than overriding it
 
     private static Text simpleRestyle(Text message, Notification notif)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
-            return message.copy().setStyle(getStyle(notif));
+            return message.copy().setStyle(applyStyle(message.getStyle(),
+                    getStyle(notif)));
         }
         return message;
     }
@@ -262,11 +284,12 @@ public class MessageProcessor
             List<Text> siblings = message.getSiblings();
 
             Style oldStyle = message.getStyle();
-            siblings.replaceAll(text -> fixStyle((MutableText) text, oldStyle));
+            siblings.replaceAll(text ->
+                    ((MutableText) text).setStyle(fixStyle(oldStyle, style)));
 
             String msgStr = removeFormatCodes(ltc.string());
 
-            int[] match = msgContainsStr(msgStr, trigger, true);
+            int[] match = msgContainsStr(msgStr, trigger, false);
             if (match != null) {
                 if (match[1] != msgStr.length()) {
                     siblings.add(0, Text.literal(
@@ -299,7 +322,6 @@ public class MessageProcessor
         return message;
     }
 
-
     private static String removeFormatCodes(String string)
     {
         char[] charArray = string.toCharArray();
@@ -317,33 +339,84 @@ public class MessageProcessor
     }
 
     /**
-     * Replaces the null fields of the text's Style with the corresponding
-     * fields of the specified Style, excluding text format (bold, italic etc).
-     * @param text The Text to fix
-     * @param style The Style to pull from
-     * @return The given Text, with null Style values replaced with the given
-     * Style's values.
+     * For each non-null (or true) field of newStyle, overrides the
+     * corresponding oldStyle field, returning the result. Note: if the color
+     * of newStyle is 16777215 (white) it is considered null.
+     * @param oldStyle The style to apply to.
+     * @param newStyle The style to apply.
+     * @return oldStyle, with newStyle applied.
      */
-    private static MutableText fixStyle(MutableText text, Style style)
+    private static Style applyStyle(Style oldStyle, Style newStyle)
     {
-        Style newStyle = text.getStyle();
-        if (text.getStyle().getColor() == null) {
-            newStyle = newStyle.withColor(style.getColor());
+        Style result = oldStyle
+                .withBold((newStyle.isBold() ||
+                        oldStyle.isBold()))
+                .withItalic((newStyle.isItalic() ||
+                        oldStyle.isItalic()))
+                .withUnderline((newStyle.isUnderlined() ||
+                        oldStyle.isUnderlined()))
+                .withStrikethrough((newStyle.isStrikethrough() ||
+                        oldStyle.isStrikethrough()))
+                .withObfuscated((newStyle.isObfuscated() ||
+                        oldStyle.isObfuscated()));
+        if (newStyle.getColor() != null &&
+                !newStyle.getColor().equals(TextColor.fromRgb(16777215)))
+        {
+            result = result.withColor(newStyle.getColor());
         }
-        if (text.getStyle().getClickEvent() == null) {
-            newStyle = newStyle.withClickEvent(style.getClickEvent());
+        if (newStyle.getClickEvent() != null) {
+            result = result.withClickEvent(newStyle.getClickEvent());
         }
-        if (text.getStyle().getHoverEvent() == null) {
-            newStyle = newStyle.withHoverEvent(style.getHoverEvent());
+        if (newStyle.getHoverEvent() != null) {
+            result = result.withHoverEvent(newStyle.getHoverEvent());
         }
-        if (text.getStyle().getInsertion() == null) {
-            newStyle = newStyle.withInsertion(style.getInsertion());
+        if (newStyle.getHoverEvent() != null) {
+            result = result.withInsertion(newStyle.getInsertion());
         }
-        if (text.getStyle().getFont() == null) {
-            newStyle = newStyle.withFont(style.getFont());
+        if (newStyle.getFont() != null) {
+            result = result.withFont(newStyle.getFont());
         }
-        text.setStyle(newStyle);
-        return text;
+        return result;
+    }
+
+
+    /**
+     * Replaces the null (or false) fields of oldStyle with the corresponding
+     * fields of newStyle.
+     * @param oldStyle The style to fix.
+     * @param newStyle The style to pull from.
+     * @return oldStyle, with null/false fields replaced with the corresponding
+     * newStyle field.
+     */
+    private static Style fixStyle(Style oldStyle, Style newStyle)
+    {
+        Style result = oldStyle
+                .withBold((oldStyle.isBold() ||
+                        newStyle.isBold()))
+                .withItalic((oldStyle.isItalic() ||
+                        newStyle.isItalic()))
+                .withUnderline((oldStyle.isUnderlined() ||
+                        newStyle.isUnderlined()))
+                .withStrikethrough((oldStyle.isStrikethrough() ||
+                        newStyle.isStrikethrough()))
+                .withObfuscated((oldStyle.isObfuscated() ||
+                        newStyle.isObfuscated()));
+        if (oldStyle.getColor() == null) {
+            result = result.withColor(newStyle.getColor());
+        }
+        if (oldStyle.getClickEvent() == null) {
+            result = result.withClickEvent(newStyle.getClickEvent());
+        }
+        if (oldStyle.getHoverEvent() == null) {
+            result = result.withHoverEvent(newStyle.getHoverEvent());
+        }
+        if (oldStyle.getInsertion() == null) {
+            result = result.withInsertion(newStyle.getInsertion());
+        }
+        if (oldStyle.getFont() == null) {
+            result = result.withFont(newStyle.getFont());
+        }
+        return result;
     }
 
     // Message analysis methods

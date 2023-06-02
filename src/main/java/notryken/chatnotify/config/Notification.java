@@ -232,8 +232,7 @@ public class Notification
     }
 
     /**
-     * Sets the primary trigger of the notification. Also makes the notification
-     * persistent.
+     * Sets the primary trigger of the notification.
      * @param trigger The String to trigger the notification.
      */
     public void setTrigger(String trigger)
@@ -244,7 +243,6 @@ public class Notification
         else {
             this.triggers.add(Objects.requireNonNullElse(trigger, ""));
         }
-        persistent = true;
     }
 
     /**
@@ -287,17 +285,19 @@ public class Notification
 
     /**
      * 'Smart' setter; If color is white, disables message coloring, else
-     * enables message coloring.
+     * enables message coloring. Makes the notification persistent.
      */
     public void setColor(TextColor color)
     {
         this.color = color;
         setControl(0, color.getRgb() != 16777215);
+        persistent = true;
     }
 
     /**
      * 'Smart' setter; disables the parent control if all sibling options are
-     * disabled, and enables the parent control when enabled.
+     * disabled, and enables the parent control when enabled. If value is true,
+     * makes the notification persistent.
      * @param index The index of the format control (0:bold, 1:italic,
      *              2:underlined, 3:strikethrough, 4:obfuscated).
      * @param value The value to set the format control to.
@@ -305,13 +305,14 @@ public class Notification
     public void setFormatControl(int index, boolean value)
     {
         formatControls.set(index, value);
-        if (!value) {
+        if (value) {
+            setControl(1, true);
+            persistent = true;
+        }
+        else {
             if (!formatControls.contains(true)) {
                 setControl(1, false);
             }
-        }
-        else {
-            setControl(1, true);
         }
     }
 
@@ -328,13 +329,14 @@ public class Notification
 
     /**
      * 'Smart' setter; if the specified sound is invalid, uses a default.
-     * Additionally, enables sound.
+     * Additionally, enables sound and makes the notification persistent.
      * @param sound The Identifier of the sound.
      */
     public void setSound(Identifier sound)
     {
         this.sound = validSound(sound) ? sound : DEFAULTSOUND;
         setControl(2, true);
+        persistent = true;
     }
 
     /**

@@ -2,6 +2,7 @@ package notryken.chatnotify.gui.listwidget;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -18,24 +19,27 @@ import static notryken.chatnotify.client.ChatNotifyClient.config;
 
 public class ModConfigListWidget extends ConfigListWidget
 {
-    public ModConfigListWidget(MinecraftClient client,
-                               int i, int j, int k, int l, int m,
+    public ModConfigListWidget(MinecraftClient client, int width, int height,
+                               int top, int bottom, int itemHeight,
                                Screen parent, Text title)
     {
-        super(client, i, j, k, l, m, parent, title);
+        super(client, width, height, top, bottom, itemHeight, parent, title);
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
                 client, Text.literal("Options")));
+
         this.addEntry(new Entry.IgnoreToggle(this.width, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Text.literal("Notifications")));
+                client, Text.literal("Notifications"),
+                Text.literal("Notifications are processed in sequential " +
+                        "order as displayed below. No more than one " +
+                        "notification can activate at a time.")));
 
         int max = config.getNumNotifs();
         for (int idx = 0; idx < max; idx++) {
             this.addEntry(new Entry.NotifButton(this.width, this, idx));
         }
-
         this.addEntry(new Entry.NotifButton(this.width, this, -1));
     }
 
@@ -43,9 +47,8 @@ public class ModConfigListWidget extends ConfigListWidget
     public ModConfigListWidget resize(int width, int height,
                                       int top, int bottom)
     {
-        ModConfigListWidget listWidget =
-                new ModConfigListWidget(client, width, height, top, bottom,
-                        itemHeight, parent, title);
+        ModConfigListWidget listWidget = new ModConfigListWidget(client,
+                width, height, top, bottom, itemHeight, parent, title);
         listWidget.setScrollAmount(this.getScrollAmount());
         return listWidget;
     }
@@ -108,12 +111,17 @@ public class ModConfigListWidget extends ConfigListWidget
             {
                 super(width, listWidget, -1);
 
-                options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(config.ignoreOwnMessages).build(
-                                this.width / 2 - 120, 32, 240, 20,
+                CyclingButtonWidget<Boolean> ignoreButton =
+                        CyclingButtonWidget.onOffBuilder()
+                        .initially(config.ignoreOwnMessages)
+                        .build(this.width / 2 - 120, 32, 240, 20,
                                 Text.literal("Ignore Your Own Messages"),
                                 (button, status) ->
-                                        config.ignoreOwnMessages = status));
+                                        config.ignoreOwnMessages = status);
+                ignoreButton.setTooltip(Tooltip.of(Text.literal("Allows" +
+                        "/Prevents notifications from activating when YOU " +
+                        "send a message.")));
+                options.add(ignoreButton);
             }
         }
 
@@ -134,20 +142,18 @@ public class ModConfigListWidget extends ConfigListWidget
                             label = "[Key] " + label;
                         }
                         else {
-                            int numVariations = notif.getTriggers().size() - 1;
-                            if (numVariations == 1) {
-                                label = label + " (" + numVariations +
-                                        " variation)";
+                            StringBuilder builder = new StringBuilder(label);
+                            for (int i = 1; i < notif.getTriggers().size(); i++)
+                            {
+                                builder.append(", ");
+                                builder.append(notif.getTrigger(i));
                             }
-                            else if (numVariations > 1) {
-                                label = label + " (" + numVariations +
-                                        " variations)";
-                            }
+                            label = builder.toString();
                         }
                     }
 
-                    MutableText labelText = Text.literal(label).setStyle(
-                            Style.of(
+                    MutableText labelText = Text.literal(label)
+                            .setStyle(Style.of(
                                     Optional.of(notif.getColor()),
                                     Optional.of(notif.getFormatControl(0)),
                                     Optional.of(notif.getFormatControl(1)),
@@ -157,10 +163,11 @@ public class ModConfigListWidget extends ConfigListWidget
                                     Optional.empty(),
                                     Optional.empty()));
 
-                    options.add(ButtonWidget.builder(labelText,
-                                    (button) -> listWidget
-                                            .openNotificationConfig(index))
-                            .size(240, 20).position(width / 2 - 120, 0).build());
+                    options.add(ButtonWidget.builder(labelText, (button) ->
+                                    listWidget.openNotificationConfig(index))
+                            .size(240, 20)
+                            .position(width / 2 - 120, 0)
+                            .build());
 
                     if (index == 0) {
                         options.add(CyclingButtonWidget.onOffBuilder()
@@ -172,28 +179,31 @@ public class ModConfigListWidget extends ConfigListWidget
                     }
                     else {
                         options.add(ButtonWidget.builder(Text.literal("⬆"),
-                                        (button) -> listWidget
-                                                .moveNotifUp(index))
-                                .size(12, 20).position(width / 2 - 120 - 29, 0)
+                                        (button) ->
+                                                listWidget.moveNotifUp(index))
+                                .size(12, 20)
+                                .position(width / 2 - 120 - 29, 0)
                                 .build());
 
                         options.add(ButtonWidget.builder(Text.literal("⬇"),
-                                        (button) -> listWidget
-                                                .moveNotifDown(index))
-                                .size(12, 20).position(width / 2 - 120 - 17, 0)
+                                        (button) ->
+                                                listWidget.moveNotifDown(index))
+                                .size(12, 20)
+                                .position(width / 2 - 120 - 17, 0)
                                 .build());
 
                         options.add(ButtonWidget.builder(Text.literal("X"),
                                         (button) -> listWidget
                                                 .removeNotification(index))
-                                .size(25, 20).position(width / 2 + 120 + 5, 0)
+                                .size(25, 20)
+                                .position(width / 2 + 120 + 5, 0)
                                 .build());
                     }
                 }
                 else {
                     options.add(ButtonWidget.builder(Text.literal("+"),
-                                    (button) -> listWidget
-                                            .addNotification()).size(240, 20)
+                                    (button) -> listWidget.addNotification())
+                            .size(240, 20)
                             .position(width / 2 - 120, 0)
                             .build());
                 }

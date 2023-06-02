@@ -3,6 +3,7 @@ package notryken.chatnotify.gui.listwidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -17,21 +18,19 @@ public class ColorConfigListWidget extends ConfigListWidget
 {
     public Notification notif;
 
-    public ColorConfigListWidget(MinecraftClient client,
-                                 int i, int j, int k, int l, int m,
+    public ColorConfigListWidget(MinecraftClient client, int width, int height,
+                                 int top, int bottom, int itemHeight,
                                  Screen parent, Text title, Notification notif)
     {
-        super(client, i, j, k, l, m, parent, title);
+        super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Hex Color")));
-        this.addEntry(new Entry.HexColorLink(
-                width, notif, client, parent, this));
-        this.addEntry(new Entry.ColorField(
-                width, notif, client, this));
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Quick Colors")));
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                Text.literal("Hex Color")));
+        this.addEntry(new Entry.ColorLink(width, notif, client, parent, this));
+        this.addEntry(new Entry.ColorField(width, notif, client, this));
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                Text.literal("Quick Colors")));
 
         // These arrays match 1:1 for the color and its name.
         int[] intColors = new int[]
@@ -74,8 +73,8 @@ public class ColorConfigListWidget extends ConfigListWidget
                 };
 
         for (int idx = 0; idx < intColors.length; idx++) {
-            this.addEntry(new Entry.ColorOption(width, notif,
-                    this, TextColor.fromRgb(intColors[idx]), strColors[idx]));
+            this.addEntry(new Entry.ColorOption(width, notif, this,
+                    TextColor.fromRgb(intColors[idx]), strColors[idx]));
         }
 
     }
@@ -84,9 +83,8 @@ public class ColorConfigListWidget extends ConfigListWidget
     public ColorConfigListWidget resize(int width, int height,
                                         int top, int bottom)
     {
-        ColorConfigListWidget listWidget =
-                new ColorConfigListWidget(client, width, height, top, bottom,
-                        itemHeight, parent, title, notif);
+        ColorConfigListWidget listWidget = new ColorConfigListWidget(client,
+                width, height, top, bottom, itemHeight, parent, title, notif);
         listWidget.setScrollAmount(this.getScrollAmount());
         return listWidget;
     }
@@ -107,19 +105,24 @@ public class ColorConfigListWidget extends ConfigListWidget
             this.notif = notif;
         }
 
-        private static class HexColorLink extends Entry
+        private static class ColorLink extends Entry
         {
-            HexColorLink(int width, Notification notif,
-                         @NotNull MinecraftClient client,
-                         Screen parentScreen, ColorConfigListWidget listWidget)
+            ColorLink(int width, Notification notif,
+                      @NotNull MinecraftClient client,
+                      Screen parentScreen, ColorConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                this.options.add(ButtonWidget.builder(
-                                Text.literal("color-hex.com"),
-                                (button) -> openLink(client, parentScreen,
-                                        listWidget))
-                        .size(80, 20).position(width / 2 - 40, 0).build());
+                ButtonWidget linkButton = ButtonWidget.builder(
+                        Text.literal("color-hex.com"), (button) -> openLink(
+                                client, parentScreen, listWidget))
+                        .size(80, 20)
+                        .position(width / 2 - 40, 0)
+                        .build();
+                linkButton.setTooltip(Tooltip.of(Text.literal("Probably " +
+                        "opens a webpage with hex color selection.")));
+
+                this.options.add(linkButton);
             }
 
             private void openLink(MinecraftClient client, Screen parent,
@@ -174,12 +177,13 @@ public class ColorConfigListWidget extends ConfigListWidget
 
                 message.setStyle(Style.EMPTY.withColor(color));
 
-                this.options.add(ButtonWidget.builder(message, (button) ->
-                {
+                this.options.add(ButtonWidget.builder(message, (button) -> {
                     notif.setColor(color);
                     listWidget.refreshScreen();
-
-                }).size(240, 20).position(width / 2 - 120, 0).build());
+                })
+                        .size(240, 20)
+                        .position(width / 2 - 120, 0)
+                        .build());
             }
         }
     }

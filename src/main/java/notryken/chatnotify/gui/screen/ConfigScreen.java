@@ -29,10 +29,12 @@ public class ConfigScreen extends GameOptionsScreen
 
         this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
                         (button) -> {
-                            assert this.client != null;
-                            this.client.setScreen(this.parent); })
-                .size(240, 20).position(this.width / 2 - 120,
-                        this.height - 27).build());
+            assert this.client != null;
+            this.client.setScreen(this.parent);
+        })
+                .size(240, 20)
+                .position(this.width / 2 - 120, this.height - 27)
+                .build());
     }
 
     @Override

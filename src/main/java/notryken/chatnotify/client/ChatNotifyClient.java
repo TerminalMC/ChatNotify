@@ -57,16 +57,32 @@ public class ChatNotifyClient implements ClientModInitializer
     }
 
     /**
-     * Attempts to write the current config options to a file,overwriting if it
-     * already exists.
+     * Deletes the existing config file if it exists. Then, writes the current
+     * config to a new config file.
      */
     public static void saveConfig()
     {
-        assert !settingsFile.exists() || (settingsFile.delete());
         try {
             Files.writeString(settingsFile.toPath(), gson.toJson(config));
         } catch (IOException | SecurityException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Deletes the existing config file if it exists.
+     */
+    public static void deleteConfigFile()
+    {
+        if (settingsFile.exists()) {
+            try {
+                if (!settingsFile.delete()) {
+                    throw new IOException("Unable to delete config file.");
+                }
+            }
+            catch (IOException | SecurityException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -15,24 +15,28 @@ public class NotificationConfigListWidget extends ConfigListWidget
     private final Notification notif;
 
     public NotificationConfigListWidget(MinecraftClient client,
-                                        int i, int j, int k, int l, int m,
+                                        int width, int height,
+                                        int top, int bottom, int itemHeight,
                                         Screen parent, Text title,
                                         Notification notif)
     {
-        super(client, i, j, k, l, m, parent, title);
+        super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Notification Trigger")));
+                client, Text.literal("Notification Trigger"), Text.literal(
+                        "A trigger is a case-insensitive word or series of " +
+                                "words that, if detected in a chat message, " +
+                                "will activate the notification.")));
         this.addEntry(new Entry.TriggerConfigType(width, notif, this));
 
         if (notif.triggerIsKey) {
-            this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                    client, Text.literal("May not work on some servers.")));
-            this.addEntry(new Entry.TriggerField(width, notif, client,
-                    this, 0));
-            this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                    client, Text.literal("Quick Keys")));
+            this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                    Text.literal("May not work on some servers.")));
+            this.addEntry(new Entry.TriggerField(width, notif, client, this,
+                    0));
+            this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                    Text.literal("Quick Keys")));
 
             String[][] keys =
                     {
@@ -48,34 +52,37 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
         else {
-            for (int p = 0; p < notif.getTriggers().size(); p++) {
-                this.addEntry(new Entry.TriggerField(width, notif, client,
-                        this, p));
+            for (int i = 0; i < notif.getTriggers().size(); i++) {
+                this.addEntry(new Entry.TriggerField(width, notif, client, this,
+                        i));
             }
-            this.addEntry(new Entry.TriggerField(width, notif, client,
-                    this, -1));
+            this.addEntry(new Entry.TriggerField(width, notif, client, this,
+                    -1));
         }
 
-        this.addEntry(new Entry.ControlConfigHeader(
-                width, notif, client, this, "Notification Sound", 2));
+        this.addEntry(new Entry.ControlConfigHeader(width, notif, client, this,
+                "Notification Sound", 2));
         this.addEntry(new Entry.SoundConfigButton(width, notif, this));
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Message Color")));
+
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                Text.literal("Message Color")));
         this.addEntry(new Entry.ColorConfigButton(width, notif, this));
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Message Format")));
-        this.addEntry(new Entry.FormatConfig(
+
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                Text.literal("Message Format")));
+        this.addEntry(new Entry.FormatConfigOption(
                 width, notif, this, "Bold", 0));
-        this.addEntry(new Entry.FormatConfig(
+        this.addEntry(new Entry.FormatConfigOption(
                 width, notif, this, "Italic", 1));
-        this.addEntry(new Entry.FormatConfig(
+        this.addEntry(new Entry.FormatConfigOption(
                 width, notif, this, "Underlined", 2));
-        this.addEntry(new Entry.FormatConfig(
+        this.addEntry(new Entry.FormatConfigOption(
                 width, notif, this, "Strikethrough", 3));
-        this.addEntry(new Entry.FormatConfig(
+        this.addEntry(new Entry.FormatConfigOption(
                 width, notif, this, "Obfuscated", 4));
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Advanced Settings")));
+
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                Text.literal("Advanced Settings")));
         this.addEntry(new Entry.AdvancedConfigButton(width, notif, this));
     }
 
@@ -164,8 +171,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
 
             TriggerField(int width, Notification notif,
                          @NotNull MinecraftClient client,
-                         NotificationConfigListWidget listWidget,
-                         int index)
+                         NotificationConfigListWidget listWidget, int index)
             {
                 super(width, notif, listWidget);
                 this.index = index;
@@ -186,7 +192,8 @@ public class NotificationConfigListWidget extends ConfigListWidget
                                             notif.removeTrigger(index);
                                             listWidget.refreshScreen();
                                         })
-                                .size(25, 20).position(width / 2 + 120 + 5, 0)
+                                .size(25, 20)
+                                .position(width / 2 + 120 + 5, 0)
                                 .build());
                     }
                 }
@@ -219,7 +226,10 @@ public class NotificationConfigListWidget extends ConfigListWidget
                         (button) -> {
                             notif.setTrigger(key[0]);
                             listWidget.refreshScreen();
-                        }).size(240, 20).position(width / 2 - 120, 0).build());
+                        })
+                        .size(240, 20)
+                        .position(width / 2 - 120, 0)
+                        .build());
             }
         }
 
@@ -275,7 +285,6 @@ public class NotificationConfigListWidget extends ConfigListWidget
                 }
                 else {
                     message = Text.literal(notif.getColor().getHexCode());
-
                     message.setStyle(Style.EMPTY.withColor(notif.getColor()));
                 }
                 options.add(ButtonWidget.builder(message,
@@ -286,11 +295,11 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class FormatConfig extends Entry
+        private static class FormatConfigOption extends Entry
         {
-            FormatConfig(int width, Notification notif,
-                         NotificationConfigListWidget listWidget, String label,
-                         int index)
+            FormatConfigOption(int width, Notification notif,
+                               NotificationConfigListWidget listWidget,
+                               String label, int index)
             {
                 super(width, notif, listWidget);
                 options.add(CyclingButtonWidget.onOffBuilder()
@@ -311,7 +320,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
                 super(width, notif, listWidget);
 
                 options.add(ButtonWidget.builder(
-                        Text.literal("Enter at Your Own Risk"),
+                        Text.literal("Here be dragons!"),
                                 (button) -> listWidget.openAdvancedConfig())
                         .size(240, 20)
                         .position(width / 2 - 120, 0)
