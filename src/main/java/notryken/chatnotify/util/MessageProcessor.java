@@ -9,9 +9,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.*;
 import notryken.chatnotify.config.Notification;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -100,49 +97,28 @@ public class MessageProcessor
                         }
                     }
                 } else {
-                    for (String trigger : notif.getTriggers())
-                    {
-                        if (notif.regexEnabled) {
-                            if (msgContainsStr(plainMsg, trigger, true) != null)
-                            {
-                                boolean exclude = false;
-                                for (String et : notif.getExclusionTriggers()) {
-                                    if (msgContainsStr(plainMsg, et, true)
-                                            != null)
-                                    {
-                                        exclude = true;
-                                        break;
-                                    }
-                                }
-                                if (!exclude) {
-                                    playSound(notif);
-                                    modifiedMessage =
-                                            simpleRestyle(message, notif);
-                                    sendResponseMessages(notif);
+                    for (String trig : notif.getTriggers()) {
+                        if (msgContainsStr(
+                                (notif.regexEnabled ? plainMsg : processedMsg),
+                                trig, notif.regexEnabled) != null)
+                        {
+                            boolean exclude = false;
+                            for (String exTrig : notif.getExclusionTriggers()) {
+                                if (msgContainsStr((notif.regexEnabled ?
+                                        plainMsg : processedMsg), exTrig,
+                                        notif.regexEnabled) != null)
+                                {
+                                    exclude = true;
                                     break;
                                 }
                             }
-                        }
-                        else {
-                            if (msgContainsStr(processedMsg, trigger, false)
-                                    != null)
-                            {
-                                boolean exclude = false;
-                                for (String et : notif.getExclusionTriggers()) {
-                                    if (msgContainsStr(processedMsg, et, false)
-                                            != null)
-                                    {
-                                        exclude = true;
-                                        break;
-                                    }
-                                }
-                                if (!exclude) {
-                                    playSound(notif);
-                                    modifiedMessage = complexRestyle(message,
-                                            trigger, notif);
-                                    sendResponseMessages(notif);
-                                    break;
-                                }
+                            if (!exclude) {
+                                playSound(notif);
+                                modifiedMessage = (notif.regexEnabled ?
+                                        simpleRestyle(message, notif) :
+                                        complexRestyle(message, trig, notif));
+                                sendResponseMessages(notif);
+                                break;
                             }
                         }
                     }
@@ -151,21 +127,6 @@ public class MessageProcessor
                     }
                 }
             }
-        }
-    }
-
-    private static void sendResponseMessages(Notification notif)
-    {
-        for (String response : notif.getResponseMessages())
-        {
-            Screen oldScreen = MinecraftClient.getInstance().currentScreen;
-            MinecraftClient.getInstance().setScreen(new ChatScreen(response));
-            if (MinecraftClient.getInstance().currentScreen
-                    instanceof ChatScreen cs)
-            {
-                cs.sendMessage(response, true);
-            }
-            MinecraftClient.getInstance().setScreen(oldScreen);
         }
     }
 
@@ -209,6 +170,20 @@ public class MessageProcessor
         }
     }
 
+    private static void sendResponseMessages(Notification notif)
+    {
+        for (String response : notif.getResponseMessages()) {
+            Screen oldScreen = MinecraftClient.getInstance().currentScreen;
+            MinecraftClient.getInstance().setScreen(new ChatScreen(response));
+            if (MinecraftClient.getInstance().currentScreen
+                    instanceof ChatScreen cs)
+            {
+                cs.sendMessage(response, true);
+            }
+            MinecraftClient.getInstance().setScreen(oldScreen);
+        }
+    }
+
     private static Style getStyle(Notification notif)
     {
         return Style.of(
@@ -231,27 +206,22 @@ public class MessageProcessor
         return message;
     }
 
-
-    private static Text complexRestyle(Text oldMessage,
-                                       String trigger,
+    private static Text complexRestyle(Text message, String trigger,
                                        Notification notif)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
-            MutableText message = oldMessage.copy();
-            return processText(message, trigger, getStyle(notif));
+            return processText(message.copy(), trigger, getStyle(notif));
         }
-        return oldMessage;
+        return message;
     }
 
-    private static MutableText processText(MutableText message,
-                                           String trigger, Style style)
+    private static MutableText processText(MutableText message, String trigger,
+                                           Style style)
     {
-        if (message.getContent() instanceof LiteralTextContent)
-        {
+        if (message.getContent() instanceof LiteralTextContent) {
             message = processLiteralTc(message, trigger, style);
         }
-        else if (message.getContent() instanceof TranslatableTextContent ttc)
-        {
+        else if (message.getContent() instanceof TranslatableTextContent ttc) {
             Object[] args = ttc.getArgs();
             for (int i = 0; i < ttc.getArgs().length; i++) {
                 if (args[i] instanceof Text argText) {
@@ -261,13 +231,9 @@ public class MessageProcessor
             message = MutableText.of(new TranslatableTextContent(
                     ttc.getKey(), ttc.getFallback(), args));
         }
-        else
-        {
-            List<Text> siblings = message.getSiblings();
-            for (int i = 0; i < siblings.size(); i++) {
-                siblings.set(i,
-                        processText(siblings.get(i).copy(), trigger, style));
-            }
+        else {
+            message.getSiblings().replaceAll(text ->
+                    processText(text.copy(), trigger, style));
         }
         return message;
     }
@@ -275,8 +241,7 @@ public class MessageProcessor
     private static MutableText processLiteralTc(MutableText message,
                                                 String trigger, Style style)
     {
-        if (message.getContent() instanceof LiteralTextContent ltc)
-        {
+        if (message.getContent() instanceof LiteralTextContent ltc) {
             List<Text> siblings = message.getSiblings();
 
             Style oldStyle = message.getStyle();
@@ -374,8 +339,7 @@ public class MessageProcessor
         }
         return result;
     }
-
-
+    
     /**
      * Replaces the null (or false) fields of oldStyle with the corresponding
      * fields of newStyle.
@@ -417,97 +381,97 @@ public class MessageProcessor
 
     // Message analysis methods
 
-    private static void analyseMessage(Text message)
-    {
-        try (PrintWriter pw = new PrintWriter(
-                String.valueOf(System.currentTimeMillis())))
-        {
-            pw.println("=======================================\n\n\n\n");
-
-            analyseText(pw, message, 0);
-
-            pw.println("\n\n\n\n=======================================");
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void analyseText(PrintWriter pw, Text message, int depth)
-    {
-        depth++;
-        StringBuilder indent = new StringBuilder();
-        indent.append(">>  ".repeat(depth));
-
-        pw.println(indent + "-------------------------------------------\n\n");
-
-        pw.println(indent + "message: " + message);
-        pw.println(indent + "getString(): " + message.getString());
-        pw.println(indent + "getContent(): " + message.getContent());
-        pw.println(indent + "getStyle(): " + message.getStyle());
-        pw.println(indent + "sibling count: " + message.getSiblings().size());
-
-        if (message.getContent() instanceof TranslatableTextContent ttc) {
-            pw.println(indent + "is TTC");
-            analyseTranslatableTc(pw, ttc, depth);
-        }
-        else if (message.getContent() instanceof LiteralTextContent ltc) {
-            pw.println(indent + "is LTC");
-            analyseLiteralTc(pw, ltc, depth);
-        }
-        if (message.getSiblings().size() != 0) {
-            pw.println(indent + "analysing siblings");
-            for (Text sibling : message.getSiblings()) {
-                analyseText(pw, sibling, depth);
-            }
-        }
-
-        pw.println(indent + "\n\n-------------------------------------------");
-    }
-
-    private static void analyseTranslatableTc(PrintWriter pw,
-                                              TranslatableTextContent ttc,
-                                              int depth)
-    {
-        depth++;
-        StringBuilder indent = new StringBuilder();
-        indent.append(">>  ".repeat(depth));
-
-        pw.println(indent + "-------------------------------------------\n\n");
-
-        pw.println(indent + "ttc: " + ttc);
-        pw.println(indent + "toString(): " + ttc.toString());
-        pw.println(indent + "getKey(): " + ttc.getKey());
-        pw.println(indent + "args Count: " + ttc.getArgs().length);
-        pw.println(indent + "getArgs(): " + Arrays.toString(ttc.getArgs()));
-
-        for (int i = 0; i < ttc.getArgs().length; i++) {
-            if (ttc.getArgs()[i] instanceof Text argText) {
-                analyseText(pw, argText, depth);
-            }
-            else {
-                pw.println(indent + "arg " + ttc.getArgs()[i] + " not" +
-                        " Text");
-            }
-        }
-
-        pw.println(indent + "\n\n-------------------------------------------");
-    }
-
-    private static void analyseLiteralTc(PrintWriter pw,
-                                         LiteralTextContent ltc,
-                                         int depth)
-    {
-        depth++;
-        StringBuilder indent = new StringBuilder();
-        indent.append(">>  ".repeat(depth));
-
-        pw.println(indent + "-------------------------------------------\n\n");
-
-        pw.println(indent + "ltc: " + ltc);
-        pw.println(indent + "toString(): " + ltc.toString());
-        pw.println(indent + "string(): " + ltc.string());
-
-        pw.println(indent + "\n\n-------------------------------------------");
-    }
+//    private static void analyseMessage(Text message)
+//    {
+//        try (PrintWriter pw = new PrintWriter("message:" + 
+//                System.currentTimeMillis()))
+//        {
+//            pw.println("=======================================\n\n\n\n");
+//
+//            analyseText(pw, message, 0);
+//
+//            pw.println("\n\n\n\n=======================================");
+//        }
+//        catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private static void analyseText(PrintWriter pw, Text message, int depth)
+//    {
+//        depth++;
+//        StringBuilder indent = new StringBuilder();
+//        indent.append(">>  ".repeat(depth));
+//
+//        pw.println(indent + "------------------------------------------\n\n");
+//
+//        pw.println(indent + "message: " + message);
+//        pw.println(indent + "getString(): " + message.getString());
+//        pw.println(indent + "getContent(): " + message.getContent());
+//        pw.println(indent + "getStyle(): " + message.getStyle());
+//        pw.println(indent + "sibling count: " + message.getSiblings().size());
+//
+//        if (message.getContent() instanceof TranslatableTextContent ttc) {
+//            pw.println(indent + "is TTC");
+//            analyseTranslatableTc(pw, ttc, depth);
+//        }
+//        else if (message.getContent() instanceof LiteralTextContent ltc) {
+//            pw.println(indent + "is LTC");
+//            analyseLiteralTc(pw, ltc, depth);
+//        }
+//        if (message.getSiblings().size() != 0) {
+//            pw.println(indent + "analysing siblings");
+//            for (Text sibling : message.getSiblings()) {
+//                analyseText(pw, sibling, depth);
+//            }
+//        }
+//
+//        pw.println(indent + "\n\n------------------------------------------");
+//    }
+//
+//    private static void analyseTranslatableTc(PrintWriter pw,
+//                                              TranslatableTextContent ttc,
+//                                              int depth)
+//    {
+//        depth++;
+//        StringBuilder indent = new StringBuilder();
+//        indent.append(">>  ".repeat(depth));
+//
+//        pw.println(indent + "------------------------------------------\n\n");
+//
+//        pw.println(indent + "ttc: " + ttc);
+//        pw.println(indent + "toString(): " + ttc.toString());
+//        pw.println(indent + "getKey(): " + ttc.getKey());
+//        pw.println(indent + "args Count: " + ttc.getArgs().length);
+//        pw.println(indent + "getArgs(): " + Arrays.toString(ttc.getArgs()));
+//
+//        for (int i = 0; i < ttc.getArgs().length; i++) {
+//            if (ttc.getArgs()[i] instanceof Text argText) {
+//                analyseText(pw, argText, depth);
+//            }
+//            else {
+//                pw.println(indent + "arg " + ttc.getArgs()[i] + " not" +
+//                        " Text");
+//            }
+//        }
+//
+//        pw.println(indent + "\n\n------------------------------------------");
+//    }
+//
+//    private static void analyseLiteralTc(PrintWriter pw,
+//                                         LiteralTextContent ltc,
+//                                         int depth)
+//    {
+//        depth++;
+//        StringBuilder indent = new StringBuilder();
+//        indent.append(">>  ".repeat(depth));
+//
+//        pw.println(indent + "------------------------------------------\n\n");
+//
+//        pw.println(indent + "ltc: " + ltc);
+//        pw.println(indent + "toString(): " + ltc.toString());
+//        pw.println(indent + "string(): " + ltc.string());
+//
+//        pw.println(indent + "\n\n------------------------------------------");
+//    }
 }

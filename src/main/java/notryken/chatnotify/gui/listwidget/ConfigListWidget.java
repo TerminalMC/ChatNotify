@@ -1,6 +1,7 @@
 package notryken.chatnotify.gui.listwidget;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
@@ -9,7 +10,6 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.MultilineTextWidget;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 
@@ -68,14 +68,14 @@ public abstract class ConfigListWidget
             this.width = width;
         }
 
-        public void render(MatrixStack matrices, int index, int y, int x,
+        public void render(DrawContext context, int index, int y, int x,
                            int entryWidth, int entryHeight,
                            int mouseX, int mouseY,
                            boolean hovered, float tickDelta)
         {
             this.options.forEach((button) -> {
                 button.setY(y);
-                button.render(matrices, mouseX, mouseY, tickDelta);
+                button.render(context, mouseX, mouseY, tickDelta);
             });
         }
 

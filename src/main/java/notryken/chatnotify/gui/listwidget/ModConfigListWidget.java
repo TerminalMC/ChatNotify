@@ -1,11 +1,11 @@
 package notryken.chatnotify.gui.listwidget;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -211,18 +211,19 @@ public class ModConfigListWidget extends ConfigListWidget
         }
 
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x,
+        public void render(DrawContext context, int index, int y, int x,
                            int entryWidth, int entryHeight, int mouseX,
                            int mouseY, boolean hovered, float tickDelta) {
             options.forEach((button) -> {
                 button.setY(y);
-                button.render(matrices, mouseX, mouseY, tickDelta);
+                button.render(context, mouseX, mouseY, tickDelta);
             });
 
             if (this.index >= 1) {
-                listWidget.client.textRenderer.draw(matrices,
-                        String.valueOf(this.index), -36f,
-                        y + (float) entryHeight / 3, 16777215);
+                context.drawCenteredTextWithShadow(
+                        listWidget.client.textRenderer,
+                        String.valueOf(this.index),
+                        -36, y + entryHeight / 3, 16777215);
             }
         }
     }

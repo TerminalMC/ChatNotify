@@ -37,7 +37,7 @@ public class ChatNotifyClient implements ClientModInitializer
      * If the config file exists and is readable, loads the config from it,
      * correcting any invalid fields. If it exists but is unreadable, creates a
      * new config with defaults. If it does not exist, creates it with defaults.
-     * Finally, saves the validated config to the file.
+     * Finally, saves the validated config.
      */
     public static void loadConfig()
     {
@@ -57,8 +57,8 @@ public class ChatNotifyClient implements ClientModInitializer
     }
 
     /**
-     * Deletes the existing config file if it exists. Then, writes the current
-     * config to a new config file.
+     * Writes the current config to the config file, overwriting any existing
+     * value.
      */
     public static void saveConfig()
     {
