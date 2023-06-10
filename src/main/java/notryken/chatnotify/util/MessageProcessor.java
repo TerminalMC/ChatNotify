@@ -9,72 +9,76 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.*;
 import notryken.chatnotify.config.Notification;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.Arrays;
+//import java.io.FileNotFoundException;
+//import java.io.PrintWriter;
+//import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static notryken.chatnotify.client.ChatNotifyClient.*;
 
 public class MessageProcessor
 {
-    private static Text modifiedMessage = null;
-
     /**
-     * Processes the specified message, modifying it and playing a sound if it
-     * matches a notification trigger.
+     * Initiates the message processing algorithm.
      * @param message The original message.
-     * @return The processed message, modified if required.
+     * @return A modified copy of the message, or the original if no modifying
+     * was required.
      */
     public static Text processMessage(Text message)
     {
-        modifiedMessage = null;
+        Text modifiedMessage = null;
 
         String plainMsg = TextVisitFactory.removeFormattingCodes(message);
         String processedMsg = preProcess(plainMsg);
 
         if (processedMsg != null) {
-            tryNotify(message.copy(), plainMsg, processedMsg);
+            modifiedMessage = tryNotify(message.copy(), plainMsg, processedMsg);
         }
 
-        if (modifiedMessage != null) {
-            analyseMessage("original", message);
-            analyseMessage("final", modifiedMessage);
-        }
+//        if (modifiedMessage != null) {
+//            analyseMessage("original", message);
+//            analyseMessage("final", modifiedMessage);
+//        }
 
         return (modifiedMessage == null ? message : modifiedMessage);
     }
 
     /**
-     * Modifies the message based on whether it is identified as being sent by
-     * the user, and whether such messages are to be ignored.
-     * @param strMsg The original message.
-     * @return The processed message.
+     * strMsg is identified as being sent by the user if it contains one of the
+     * stored recently-sent messages, and has a prefix containing (according to
+     * msgContainsStr) one of the username-notification triggers.
+     * If the message is identified as such, it is either set to null, if the
+     * configuration ignoreOwnMessages is true, or the username-matched
+     * component of the prefix is removed, if ignoreOwnMessages is false.
+     * @param strMsg The message string to process.
+     * @return The processed string (or null).
      */
     private static String preProcess(String strMsg)
     {
         if (!recentMessages.isEmpty()) {
-            // Check each username trigger to allow for nicknames.
-            for (String username : config.getNotif(0).getTriggers()) {
-                int[] match = msgContainsStr(strMsg, username, false);
-                if (match != null) {
-                    // Avoid username matching recent message content.
-                    strMsg = strMsg.substring(0, match[0]) +
-                            strMsg.substring(match[1]);
-                    for (int i = 0; i < recentMessages.size(); i++) {
-                        if (strMsg.contains(recentMessages.get(i))) {
+            for (int i = 0; i < recentMessages.size(); i++) {
+                int match1 = strMsg.lastIndexOf(recentMessages.get(i));
+                if (match1 > 0) {
+                    String prefix = strMsg.substring(0, match1);
+                    for (String username : config.getNotif(0).getTriggers()) {
+                        int[] match2 = msgContainsStr(prefix, username, false);
+                        if (match2 != null) {
                             recentMessages.remove(i);
                             recentMessageTimes.remove(i);
                             if (config.ignoreOwnMessages) {
                                 strMsg = null;
                             }
-                            break;
+                            else {
+                                strMsg = strMsg.substring(0, match2[0]) +
+                                        strMsg.substring(match2[1]);
+                            }
+                            return strMsg;
                         }
                     }
-                    break;
                 }
             }
         }
@@ -82,14 +86,17 @@ public class MessageProcessor
     }
 
     /**
-     * Checks each trigger of each notification, until successful, against the
-     * specified message. If one matches, modifies the message according to
-     * the corresponding notification and plays the notification's sound.
+     * Checks each trigger of each notification against one of the specified
+     * forms of the message, depending on the notification's settings. When a
+     * match is successful, completes the notification procedure by playing
+     * the corresponding sound, sending the corresponding response messages,
+     * and returning the re-styled version of the message.
      * @param message The original message.
      * @param plainMsg The message string, stripped of format codes.
-     * @param processedMsg The processed version of plainMsg.
+     * @param processedMsg The pre-processed version of plainMsg.
+     * @return The re-styled message, or null if no notification was triggered.
      */
-    private static void tryNotify(Text message, String plainMsg,
+    private static Text tryNotify(Text message, String plainMsg,
                                   String processedMsg)
     {
         for (Notification notif : config.getNotifs()) {
@@ -99,9 +106,8 @@ public class MessageProcessor
                             TranslatableTextContent ttc) {
                         if (ttc.getKey().contains(notif.getTrigger())) {
                             playSound(notif);
-                            modifiedMessage = simpleRestyle(message, notif);
                             sendResponseMessages(notif);
-                            break;
+                            return simpleRestyle(message, notif);
                         }
                     }
                 } else {
@@ -122,50 +128,55 @@ public class MessageProcessor
                             }
                             if (!exclude) {
                                 playSound(notif);
-                                modifiedMessage = (notif.regexEnabled ?
+                                sendResponseMessages(notif);
+                                return (notif.regexEnabled ?
                                         simpleRestyle(message, notif) :
                                         complexRestyle(message, trig, notif));
-                                sendResponseMessages(notif);
-                                break;
                             }
                         }
-                    }
-                    if (modifiedMessage != null) {
-                        break;
                     }
                 }
             }
         }
+        return null;
     }
 
     /**
-     * Uses regex pattern matching to check whether msg contains str.
-     * Specifically, matches {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"}.
-     * If strIsRegex is true, considers str to be a complete regular expression.
+     * If strIsRegex is true, attempts to compile str as regex. Else, compiles
+     * {@code "(?<!\w)(\W?(?i)" + Pattern.quote(str) + "\W?)(?!\w)"}
+     * case-insensitive. Uses the compiled pattern to search msg.
      * @param msg The message to search in.
-     * @param str The string to search for.
-     * @param strIsRegex Whether to wrap str in the regex
-     *                   {@code "(?<!\w)(\W?(?i)" + str + "\W?)(?!\w)"} when
-     *                   compiling.
-     * @return An integer array [start,end] of str in msg, or null if not found.
+     * @param str The string or regex to search with.
+     * @param strIsRegex Whether to consider str as a complete regex.
+     * @return An integer array [start,end] of the match, or null if not found
+     * or if strIsRegex is true and str does not represent a valid regex.
      */
     private static int[] msgContainsStr(String msg, String str,
                                         boolean strIsRegex)
     {
-        Matcher matcher;
-        if (strIsRegex) {
-            matcher = Pattern.compile(str).matcher(msg);
-        }
-        else {
-            matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" + Pattern.quote(str) +
-                    "\\W?)(?!\\w)", Pattern.CASE_INSENSITIVE).matcher(msg);
-        }
-        if (matcher.find()) {
-            return new int[]{matcher.start(), matcher.end()};
+        try {
+            Matcher matcher;
+            if (strIsRegex) {
+                matcher = Pattern.compile(str).matcher(msg);
+            }
+            else {
+                matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" +
+                        Pattern.quote(str) + "\\W?)(?!\\w)",
+                        Pattern.CASE_INSENSITIVE).matcher(msg);
+            }
+            if (matcher.find()) {
+                return new int[]{matcher.start(), matcher.end()};
+            }
+        } catch (PatternSyntaxException e) {
+            System.err.println(e.getMessage());
         }
         return null;
     }
 
+    /**
+     * Plays the sound of the specified notification.
+     * @param notif The notification.
+     */
     private static void playSound(Notification notif)
     {
         if (notif.getControl(2)) {
@@ -178,6 +189,10 @@ public class MessageProcessor
         }
     }
 
+    /**
+     * Sends all response messages of the specified notification.
+     * @param notif The notification.
+     */
     private static void sendResponseMessages(Notification notif)
     {
         for (String response : notif.getResponseMessages()) {
@@ -192,10 +207,17 @@ public class MessageProcessor
         }
     }
 
+    /**
+     * Constructs a Style from the specified notification's text color
+     * and format fields.
+     * @param notif The notification.
+     * @return The resulting Style.
+     */
     private static Style getStyle(Notification notif)
     {
         return Style.of(
-                Optional.of(notif.getColor()),
+                (notif.getColor() == null ? Optional.empty() :
+                        Optional.of(notif.getColor())),
                 Optional.of(notif.getFormatControl(0)),
                 Optional.of(notif.getFormatControl(1)),
                 Optional.of(notif.getFormatControl(2)),
@@ -205,6 +227,14 @@ public class MessageProcessor
                 Optional.empty());
     }
 
+    /**
+     * If the specified notification's color or format controls are turned on,
+     * uses applyStyle to destructively fill the style of the specified message
+     * with the notification's style.
+     * @param message The original message.
+     * @param notif The notification to draw the style from.
+     * @return The re-styled message.
+     */
     private static Text simpleRestyle(Text message, Notification notif)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
@@ -214,6 +244,16 @@ public class MessageProcessor
         return message;
     }
 
+    /**
+     * If the specified notification's color or format controls are turned on,
+     * initiates a recursive message break-down algorithm with the objective of
+     * restyling only the part of the specified message that matches the
+     * specified trigger.
+     * @param message The original message.
+     * @param trigger The string to re-style.
+     * @param notif The notification to draw the style from.
+     * @return The re-styled message.
+     */
     private static Text complexRestyle(Text message, String trigger,
                                        Notification notif)
     {
@@ -227,9 +267,11 @@ public class MessageProcessor
                                            Style style)
     {
         if (message.getContent() instanceof LiteralTextContent) {
+            // LiteralTextContent is typically the lowest level.
             message = processLiteralTc(message, trigger, style);
         }
         else if (message.getContent() instanceof TranslatableTextContent ttc) {
+            // Recurse for all args of the TranslatableTextContent.
             Object[] args = ttc.getArgs();
             for (int i = 0; i < ttc.getArgs().length; i++) {
                 if (args[i] instanceof Text argText) {
@@ -238,8 +280,10 @@ public class MessageProcessor
             }
             message = MutableText.of(new TranslatableTextContent(
                     ttc.getKey(), ttc.getFallback(), args));
+            // FIXME not restoring style here?
         }
         else {
+            // Recurse for all siblings.
             message.getSiblings().replaceAll(text ->
                     processText(text.copy(), trigger, style));
         }
@@ -250,14 +294,21 @@ public class MessageProcessor
                                                 String trigger, Style style)
     {
         if (message.getContent() instanceof LiteralTextContent ltc) {
-
+            // Only process if the message or its siblings contain the match.
             if (msgContainsStr(removeFormatCodes(
                     message.getString()), trigger, false) != null)
             {
                 List<Text> siblings = message.getSiblings();
 
-                if (siblings.size() == 0)
+                if (siblings.isEmpty())
                 {
+                    /*
+                    If no siblings, the match must exist in the
+                    LiteralTextContent (ltc) of the message, so it is split
+                    down and the parts individually re-styled before being
+                    re-built into a new Text object, which is returned.
+                     */
+
                     String msgStr = removeFormatCodes(ltc.string());
 
                     int[] match = msgContainsStr(msgStr, trigger, false);
@@ -269,10 +320,8 @@ public class MessageProcessor
                         }
 
                         siblings.add(0, Text.literal(msgStr.substring(
-                                match[0], match[1])).setStyle(style
-                                .withClickEvent(message.getStyle().getClickEvent())
-                                .withHoverEvent(message.getStyle().getHoverEvent())
-                                .withInsertion(message.getStyle().getInsertion())));
+                                match[0], match[1])).setStyle(
+                                        applyStyle(message.getStyle(), style)));
 
                         if (match[0] != 0) {
                             siblings.add(0, Text.literal(
@@ -291,60 +340,37 @@ public class MessageProcessor
                     }
                 }
                 else {
-                    // demote
+                    /*
+                    If the message has siblings, it cannot be directly
+                    re-styled. Instead, it is replaced by a new, empty Text
+                    object, with the original LiteralTextContent added as
+                    the first sibling, and all other siblings subsequently
+                    added in their original order. The new message is then
+                    itself processed, and the result is returned.
+                     */
+
                     Style oldStyle = message.getStyle();
-                    siblings.replaceAll(text -> ((MutableText) text)
-                            .setStyle(fixStyle(text.getStyle(), oldStyle)));
+
                     MutableText demoted = MutableText.of(message.getContent());
-                    demoted.setStyle(oldStyle);
                     siblings.add(0, demoted);
 
                     MutableText replacement = MutableText.of(TextContent.EMPTY);
+                    replacement.setStyle(oldStyle);
                     replacement.siblings.addAll(siblings);
+
                     message = processText(replacement, trigger, style);
                 }
             }
-//            List<Text> siblings = message.getSiblings();
-
-//            Style oldStyle = message.getStyle();
-//            siblings.replaceAll(text ->
-//                    ((MutableText) text).setStyle(fixStyle(oldStyle, style)));
-
-//            String msgStr = removeFormatCodes(ltc.string());
-//
-//            int[] match = msgContainsStr(msgStr, trigger, false);
-//            if (match != null) {
-//                if (match[1] != msgStr.length()) {
-//                    siblings.add(0, Text.literal(
-//                                    msgStr.substring(match[1]))
-//                            .setStyle(message.getStyle()));
-//                }
-//
-//                siblings.add(0, Text.literal(msgStr.substring(
-//                        match[0], match[1])).setStyle(style
-//                        .withClickEvent(message.getStyle().getClickEvent())
-//                        .withHoverEvent(message.getStyle().getHoverEvent())
-//                        .withInsertion(message.getStyle().getInsertion())));
-//
-//                if (match[0] != 0) {
-//                    siblings.add(0, Text.literal(
-//                                    msgStr.substring(0, match[0]))
-//                            .setStyle(message.getStyle()));
-//                }
-//
-//                if (siblings.size() == 1) {
-//                    message = siblings.get(0).copy();
-//                }
-//                else {
-//                    MutableText newMessage = MutableText.of(TextContent.EMPTY);
-//                    newMessage.siblings.addAll(siblings);
-//                    message = newMessage;
-//                }
-//            }
         }
         return message;
     }
 
+    /**
+     * Uses basic iteration to remove all format codes (denoted by §) from
+     * the specified string.
+     * @param string The string to clean.
+     * @return The specified string, with format codes removed.
+     */
     private static String removeFormatCodes(String string)
     {
         char[] charArray = string.toCharArray();
@@ -363,8 +389,7 @@ public class MessageProcessor
 
     /**
      * For each non-null (or true) field of newStyle, overrides the
-     * corresponding oldStyle field, returning the result. Note: if the color
-     * of newStyle is 16777215 (white) it is considered null.
+     * corresponding oldStyle field, returning the result.
      * @param oldStyle The style to apply to.
      * @param newStyle The style to apply.
      * @return oldStyle, with newStyle applied.
@@ -382,9 +407,7 @@ public class MessageProcessor
                         oldStyle.isStrikethrough()))
                 .withObfuscated((newStyle.isObfuscated() ||
                         oldStyle.isObfuscated()));
-        if (newStyle.getColor() != null &&
-                !newStyle.getColor().equals(TextColor.fromRgb(16777215)))
-        {
+        if (newStyle.getColor() != null) {
             result = result.withColor(newStyle.getColor());
         }
         if (newStyle.getClickEvent() != null) {
@@ -401,139 +424,100 @@ public class MessageProcessor
         }
         return result;
     }
-    
-    /**
-     * Replaces the null (or false) fields of oldStyle with the corresponding
-     * fields of newStyle.
-     * @param oldStyle The style to fix.
-     * @param newStyle The style to pull from.
-     * @return oldStyle, with null/false fields replaced with the corresponding
-     * newStyle field.
-     */
-    private static Style fixStyle(Style oldStyle, Style newStyle)
-    {
-        Style result = oldStyle
-                .withBold((oldStyle.isBold() ||
-                        newStyle.isBold()))
-                .withItalic((oldStyle.isItalic() ||
-                        newStyle.isItalic()))
-                .withUnderline((oldStyle.isUnderlined() ||
-                        newStyle.isUnderlined()))
-                .withStrikethrough((oldStyle.isStrikethrough() ||
-                        newStyle.isStrikethrough()))
-                .withObfuscated((oldStyle.isObfuscated() ||
-                        newStyle.isObfuscated()));
-        if (oldStyle.getColor() == null) {
-            result = result.withColor(newStyle.getColor());
-        }
-        if (oldStyle.getClickEvent() == null) {
-            result = result.withClickEvent(newStyle.getClickEvent());
-        }
-        if (oldStyle.getHoverEvent() == null) {
-            result = result.withHoverEvent(newStyle.getHoverEvent());
-        }
-        if (oldStyle.getInsertion() == null) {
-            result = result.withInsertion(newStyle.getInsertion());
-        }
-        if (oldStyle.getFont() == null) {
-            result = result.withFont(newStyle.getFont());
-        }
-        return result;
-    }
 
     // Message analysis methods
 
-    private static void analyseMessage(String filePrefix, Text message)
-    {
-        try (PrintWriter pw = new PrintWriter(filePrefix +
-                System.currentTimeMillis()))
-        {
-            pw.println("=======================================\n\n\n\n");
-
-            analyseText(pw, message, 0);
-
-            pw.println("\n\n\n\n=======================================");
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void analyseText(PrintWriter pw, Text message, int depth)
-    {
-        depth++;
-        StringBuilder indent = new StringBuilder();
-        indent.append(">>  ".repeat(depth));
-
-        pw.println(indent + "------------------------------------------\n\n");
-
-        pw.println(indent + "message: " + message);
-        pw.println(indent + "getString(): " + message.getString());
-        pw.println(indent + "getContent(): " + message.getContent());
-        pw.println(indent + "getStyle(): " + message.getStyle());
-        pw.println(indent + "sibling count: " + message.getSiblings().size());
-
-        if (message.getContent() instanceof TranslatableTextContent ttc) {
-            pw.println(indent + "is TTC");
-            analyseTranslatableTc(pw, ttc, depth);
-        }
-        else if (message.getContent() instanceof LiteralTextContent ltc) {
-            pw.println(indent + "is LTC");
-            analyseLiteralTc(pw, ltc, depth);
-        }
-        if (message.getSiblings().size() != 0) {
-            pw.println(indent + "analysing siblings");
-            for (Text sibling : message.getSiblings()) {
-                analyseText(pw, sibling, depth);
-            }
-        }
-
-        pw.println(indent + "\n\n------------------------------------------");
-    }
-
-    private static void analyseTranslatableTc(PrintWriter pw,
-                                              TranslatableTextContent ttc,
-                                              int depth)
-    {
-        depth++;
-        StringBuilder indent = new StringBuilder();
-        indent.append(">>  ".repeat(depth));
-
-        pw.println(indent + "------------------------------------------\n\n");
-
-        pw.println(indent + "ttc: " + ttc);
-        pw.println(indent + "toString(): " + ttc.toString());
-        pw.println(indent + "getKey(): " + ttc.getKey());
-        pw.println(indent + "args Count: " + ttc.getArgs().length);
-        pw.println(indent + "getArgs(): " + Arrays.toString(ttc.getArgs()));
-
-        for (int i = 0; i < ttc.getArgs().length; i++) {
-            if (ttc.getArgs()[i] instanceof Text argText) {
-                analyseText(pw, argText, depth);
-            }
-            else {
-                pw.println(indent + "arg " + ttc.getArgs()[i] + " not" +
-                        " Text");
-            }
-        }
-
-        pw.println(indent + "\n\n------------------------------------------");
-    }
-
-    private static void analyseLiteralTc(PrintWriter pw,
-                                         LiteralTextContent ltc,
-                                         int depth)
-    {
-        depth++;
-        StringBuilder indent = new StringBuilder();
-        indent.append(">>  ".repeat(depth));
-
-        pw.println(indent + "------------------------------------------\n\n");
-
-        pw.println(indent + "ltc: " + ltc);
-        pw.println(indent + "toString(): " + ltc.toString());
-        pw.println(indent + "string(): " + ltc.string());
-
-        pw.println(indent + "\n\n------------------------------------------");
-    }
+//    private static void analyseMessage(String filePrefix, Text message)
+//    {
+//        try (PrintWriter pw = new PrintWriter(filePrefix +
+//                System.currentTimeMillis()))
+//        {
+//            pw.println("=======================================\n\n\n\n");
+//
+//            analyseText(pw, message, 0);
+//
+//            pw.println("\n\n\n\n=======================================");
+//        }
+//        catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private static void analyseText(PrintWriter pw, Text message, int depth)
+//    {
+//        depth++;
+//        StringBuilder indent = new StringBuilder();
+//        indent.append(">>  ".repeat(depth));
+//
+//        pw.println(indent + "------------------------------------------\n\n");
+//
+//        pw.println(indent + "message: " + message);
+//        pw.println(indent + "getString(): " + message.getString());
+//        pw.println(indent + "getContent(): " + message.getContent());
+//        pw.println(indent + "getStyle(): " + message.getStyle());
+//        pw.println(indent + "sibling count: " + message.getSiblings().size());
+//
+//        if (message.getContent() instanceof TranslatableTextContent ttc) {
+//            pw.println(indent + "is TTC");
+//            analyseTranslatableTc(pw, ttc, depth);
+//        }
+//        else if (message.getContent() instanceof LiteralTextContent ltc) {
+//            pw.println(indent + "is LTC");
+//            analyseLiteralTc(pw, ltc, depth);
+//        }
+//        if (message.getSiblings().size() != 0) {
+//            pw.println(indent + "analysing siblings");
+//            for (Text sibling : message.getSiblings()) {
+//                analyseText(pw, sibling, depth);
+//            }
+//        }
+//
+//        pw.println(indent + "\n\n------------------------------------------");
+//    }
+//
+//    private static void analyseTranslatableTc(PrintWriter pw,
+//                                              TranslatableTextContent ttc,
+//                                              int depth)
+//    {
+//        depth++;
+//        StringBuilder indent = new StringBuilder();
+//        indent.append(">>  ".repeat(depth));
+//
+//        pw.println(indent + "------------------------------------------\n\n");
+//
+//        pw.println(indent + "ttc: " + ttc);
+//        pw.println(indent + "toString(): " + ttc.toString());
+//        pw.println(indent + "getKey(): " + ttc.getKey());
+//        pw.println(indent + "args Count: " + ttc.getArgs().length);
+//        pw.println(indent + "getArgs(): " + Arrays.toString(ttc.getArgs()));
+//
+//        for (int i = 0; i < ttc.getArgs().length; i++) {
+//            if (ttc.getArgs()[i] instanceof Text argText) {
+//                analyseText(pw, argText, depth);
+//            }
+//            else {
+//                pw.println(indent + "arg " + ttc.getArgs()[i] + " not" +
+//                        " Text");
+//            }
+//        }
+//
+//        pw.println(indent + "\n\n------------------------------------------");
+//    }
+//
+//    private static void analyseLiteralTc(PrintWriter pw,
+//                                         LiteralTextContent ltc,
+//                                         int depth)
+//    {
+//        depth++;
+//        StringBuilder indent = new StringBuilder();
+//        indent.append(">>  ".repeat(depth));
+//
+//        pw.println(indent + "------------------------------------------\n\n");
+//
+//        pw.println(indent + "ltc: " + ltc);
+//        pw.println(indent + "toString(): " + ltc.toString());
+//        pw.println(indent + "string(): " + ltc.string());
+//
+//        pw.println(indent + "\n\n------------------------------------------");
+//    }
 }

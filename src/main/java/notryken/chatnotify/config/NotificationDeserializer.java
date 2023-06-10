@@ -170,7 +170,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
                    UnsupportedOperationException | IllegalStateException |
                    NumberFormatException e2)
             {
-                color = TextColor.fromRgb(16777215);
+                color = null;
                 formatControls.set(0, false); // Turn color off.
             }
         }

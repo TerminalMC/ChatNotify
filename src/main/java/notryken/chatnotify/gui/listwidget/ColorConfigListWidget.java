@@ -35,7 +35,7 @@ public class ColorConfigListWidget extends ConfigListWidget
         // These arrays match 1:1 for the color and its name.
         int[] intColors = new int[]
                 {
-                        16777215,
+                        -1,
                         10027008,
                         16711680,
                         16753920,
@@ -49,6 +49,7 @@ public class ColorConfigListWidget extends ConfigListWidget
                         255,
                         8388736,
                         16711935,
+                        16777215,
                         8421504,
                         0
                 };
@@ -68,13 +69,16 @@ public class ColorConfigListWidget extends ConfigListWidget
                         "Blue",
                         "Purple",
                         "Magenta",
+                        "White",
                         "Gray",
                         "Black"
                 };
 
         for (int idx = 0; idx < intColors.length; idx++) {
             this.addEntry(new Entry.ColorOption(width, notif, this,
-                    TextColor.fromRgb(intColors[idx]), strColors[idx]));
+                    (intColors[idx] == -1 ? null :
+                            TextColor.fromRgb(intColors[idx])),
+                    strColors[idx]));
         }
 
     }
@@ -142,7 +146,6 @@ public class ColorConfigListWidget extends ConfigListWidget
 
         private static class ColorField extends Entry
         {
-
             ColorField(int width, Notification notif,
                        @NotNull MinecraftClient client,
                        ColorConfigListWidget listWidget)
@@ -153,7 +156,11 @@ public class ColorConfigListWidget extends ConfigListWidget
                         client.textRenderer, this.width / 2 - 120, 0, 240, 20,
                         Text.literal("Hex Color"));
                 colorEdit.setMaxLength(7);
-                colorEdit.setText(this.notif.getColor().getHexCode());
+
+                if (this.notif.getColor() != null) {
+                    colorEdit.setText(this.notif.getColor().getHexCode());
+                }
+
                 colorEdit.setChangedListener(this::setColor);
 
                 this.options.add(colorEdit);

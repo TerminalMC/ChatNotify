@@ -154,7 +154,9 @@ public class ModConfigListWidget extends ConfigListWidget
 
                     MutableText labelText = Text.literal(label)
                             .setStyle(Style.of(
-                                    Optional.of(notif.getColor()),
+                                    (notif.getColor() == null ?
+                                            Optional.empty() :
+                                            Optional.of(notif.getColor())),
                                     Optional.of(notif.getFormatControl(0)),
                                     Optional.of(notif.getFormatControl(1)),
                                     Optional.of(notif.getFormatControl(2)),

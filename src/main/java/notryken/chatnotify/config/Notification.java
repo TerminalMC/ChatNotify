@@ -52,7 +52,7 @@ public class Notification
         setControl(2, doSound);
         setTrigger(trigger);
         this.triggerIsKey = triggerIsKey;
-        setColor(parseColor(strColor));
+        setColor((strColor == null ? null : parseColor(strColor)));
         setFormatControl(0, bold);
         setFormatControl(1, italic);
         setFormatControl(2, underlined);
@@ -284,13 +284,13 @@ public class Notification
     }
 
     /**
-     * 'Smart' setter; If color is white, disables message coloring, else
+     * 'Smart' setter; If color is null, disables message coloring, else
      * enables message coloring. Makes the notification persistent.
      */
     public void setColor(TextColor color)
     {
         this.color = color;
-        setControl(0, color.getRgb() != 16777215);
+        setControl(0, color != null);
         persistent = true;
     }
 
@@ -454,7 +454,7 @@ public class Notification
      * Can handle int format e.g. "16711680", and hex format e.g. "#FF0000".
      * @param strColor The RGB int or hex color to parse.
      * @return The validated TextColor.
-     * Defaults to white (int 16777215, hex #FFFFFF) if the input is invalid.
+     * Defaults to null if the input is invalid.
      */
     public TextColor parseColor(String strColor)
     {
@@ -462,9 +462,6 @@ public class Notification
 
         if (strColor.startsWith("#")) {
             color = TextColor.parse(strColor);
-            if (color == null) {
-                color = TextColor.fromRgb(16777215);
-            }
         }
         else {
             try {
@@ -473,11 +470,11 @@ public class Notification
                     color = TextColor.fromRgb(intColor);
                 }
                 else {
-                    color = TextColor.fromRgb(16777215);
+                    color = null;
                 }
             }
             catch (NumberFormatException e) {
-                color = TextColor.fromRgb(16777215);
+                color = null;
             }
         }
         return color;

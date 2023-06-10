@@ -98,7 +98,7 @@ public class Config
     public void addNotif()
     {
         notifications.add(new Notification(true, false, false, false, "", false,
-                "#FFFFFF", false, false, false, false, false, 1f, 1f,
+                null, false, false, false, false, false, 1f, 1f,
                 DEFAULTSOUND, false));
     }
 

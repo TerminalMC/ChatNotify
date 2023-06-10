@@ -280,7 +280,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
 
                 MutableText message;
 
-                if (notif.getColor().getRgb() == 16777215) {
+                if (notif.getColor() == null) {
                     message = Text.literal("[No Color]");
                 }
                 else {
