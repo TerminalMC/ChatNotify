@@ -32,15 +32,15 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                     "ChatNotify and crash Minecraft. Use with caution.")));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Regex in Notification Triggers"), Text.literal(
-                        "If enabled, all triggers for this notification will " +
-                                "be processed as regex. Note: If using regex," +
-                                " double-escapes must be used ('\\\\' instead" +
-                                " of the normal '\\').")));
+                Text.literal("Regex in Notification Triggers \uD83D\uDEC8"),
+                Text.literal("If enabled, all triggers for this notification " +
+                        "will be processed as regex. Note: If using regex, " +
+                        "double-escapes must be used ('\\\\' instead of the " +
+                        "normal '\\').")));
         this.addEntry(new Entry.RegexToggleButton(width, notif, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Exclusion Triggers"),
+                Text.literal("Exclusion Triggers \uD83D\uDEC8"),
                 Text.literal("If an exclusion trigger is detected in a " +
                         "message, it will prevent this notification from " +
                         "activating when it otherwise would.")));
@@ -52,10 +52,10 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                 this, -1));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Auto Response Messages"), Text.literal(
-                        "Chat messages or commands to be sent by the client " +
-                                "immediately when this notification is " +
-                                "activated. Use only with extreme caution.")));
+                client, Text.literal("Auto Response Messages \uD83D\uDEC8"),
+                Text.literal("Chat messages or commands to be sent by the " +
+                        "client immediately when this notification is " +
+                        "activated. Use only with extreme caution.")));
         for (int idx = 0; idx < notif.getResponseMessages().size(); idx ++) {
             this.addEntry(new Entry.ResponseMessageField(width, notif, client,
                     this, idx));

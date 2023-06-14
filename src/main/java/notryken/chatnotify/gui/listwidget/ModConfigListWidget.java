@@ -31,7 +31,7 @@ public class ModConfigListWidget extends ConfigListWidget
         this.addEntry(new Entry.IgnoreToggle(this.width, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Text.literal("Notifications"),
+                client, Text.literal("Notifications \uD83D\uDEC8"),
                 Text.literal("Notifications are processed in sequential " +
                         "order as displayed below. No more than one " +
                         "notification can activate at a time.")));

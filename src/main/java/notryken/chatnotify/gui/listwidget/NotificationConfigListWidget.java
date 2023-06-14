@@ -24,10 +24,10 @@ public class NotificationConfigListWidget extends ConfigListWidget
         this.notif = notif;
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Notification Trigger"), Text.literal(
-                        "A trigger is a case-insensitive word or series of " +
-                                "words that, if detected in a chat message, " +
-                                "will activate the notification.")));
+                client, Text.literal("Notification Trigger \uD83D\uDEC8"),
+                Text.literal("A trigger is a word or series of words that, " +
+                        "if detected in a chat message, will activate the " +
+                        "notification. NOT case-sensitive.")));
         this.addEntry(new Entry.TriggerConfigType(width, notif, this));
 
         if (notif.triggerIsKey) {
