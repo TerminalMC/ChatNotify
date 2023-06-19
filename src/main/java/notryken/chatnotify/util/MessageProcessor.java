@@ -279,8 +279,8 @@ public class MessageProcessor
                 }
             }
             message = MutableText.of(new TranslatableTextContent(
-                    ttc.getKey(), ttc.getFallback(), args));
-            // FIXME not restoring style here?
+                    ttc.getKey(), ttc.getFallback(), args))
+                    .setStyle(message.getStyle());
         }
         else {
             // Recurse for all siblings.
