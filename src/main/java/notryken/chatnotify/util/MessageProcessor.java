@@ -13,6 +13,7 @@ import notryken.chatnotify.config.Notification;
 //import java.io.PrintWriter;
 //import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,9 +60,12 @@ public class MessageProcessor
      */
     private static String preProcess(String strMsg)
     {
+        String strMsgLower = strMsg.toLowerCase(Locale.ROOT);
+
         if (!recentMessages.isEmpty()) {
             for (int i = 0; i < recentMessages.size(); i++) {
-                int match1 = strMsg.lastIndexOf(recentMessages.get(i));
+                int match1 = strMsgLower.lastIndexOf(
+                        recentMessages.get(i).toLowerCase(Locale.ROOT));
                 if (match1 > 0) {
                     String prefix = strMsg.substring(0, match1);
                     for (String username : config.getNotif(0).getTriggers()) {
