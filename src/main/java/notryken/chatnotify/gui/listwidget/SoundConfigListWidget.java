@@ -139,6 +139,7 @@ public class SoundConfigListWidget extends ConfigListWidget
                         {"item.shield.block", "Shield Block"},
                         {"item.shield.break", "Shield Break"},
                         {"entity.player.death", "Player Death"},
+                        {"entity.goat.screaming.prepare_ram", "Screaming Goat"},
                         {"ui.button.click", "UI Button Click"},
                 };
         for (String[] s : miscSounds) {

@@ -320,7 +320,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
                 super(width, notif, listWidget);
 
                 options.add(ButtonWidget.builder(
-                        Text.literal("Here be dragons!"),
+                        Text.literal("Here be Dragons!"),
                                 (button) -> listWidget.openAdvancedConfig())
                         .size(240, 20)
                         .position(width / 2 - 120, 0)
