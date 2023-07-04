@@ -28,7 +28,9 @@ public class Notification
     private Identifier sound;
     public boolean persistent;
     public boolean regexEnabled;
+    public boolean exclusionEnabled;
     private final ArrayList<String> exclusionTriggers;
+    public boolean responseEnabled;
     private final ArrayList<String> responseMessages;
 
     /**
@@ -63,7 +65,9 @@ public class Notification
         setSound(parseSound(soundName));
         this.persistent = persistent;
         regexEnabled = false;
+        exclusionEnabled = false;
         exclusionTriggers = new ArrayList<>();
+        responseEnabled = false;
         responseMessages = new ArrayList<>();
     }
 
@@ -75,8 +79,8 @@ public class Notification
                  TextColor color, ArrayList<Boolean> formatControls,
                  float soundVolume, float soundPitch, Identifier sound,
                  boolean persistent, boolean regexEnabled,
-                 ArrayList<String> exclusionTriggers,
-                 ArrayList<String> responseMessages)
+                 boolean exclusionEnabled, ArrayList<String> exclusionTriggers,
+                 boolean responseEnabled, ArrayList<String> responseMessages)
     {
         this.enabled = enabled;
         this.controls = controls;
@@ -89,7 +93,9 @@ public class Notification
         this.sound = sound;
         this.persistent = persistent;
         this.regexEnabled = regexEnabled;
+        this.exclusionEnabled = exclusionEnabled;
         this.exclusionTriggers = exclusionTriggers;
+        this.responseEnabled = responseEnabled;
         this.responseMessages = responseMessages;
     }
 
@@ -447,6 +453,16 @@ public class Notification
     public void purgeResponseMessages()
     {
         this.responseMessages.removeIf(s -> s.strip().equals(""));
+    }
+
+    /**
+     * If all controls are disabled, disables the notification.
+     */
+    public void autoDisable()
+    {
+        if (!controls.contains(true)) {
+            enabled = false;
+        }
     }
 
     /**

@@ -6,35 +6,33 @@ phrases appear in chat.
 
 ## Features and Usage
 
-![](https://i.postimg.cc/Qt0W1W8f/2023-06-14-09-09-34.png)
+![](https://i.postimg.cc/hGDd5zgg/2023-07-04-12-01-26.png)
 
 This mod requires [Mod Menu](https://modrinth.com/mod/modmenu) for 
 configuration (if you aren't using it already, now's a great time to start).
 
 With Mod Menu installed, simply go the mods list, find Chat Notify, click
-on the icon, and it's fairly self-explanatory from there. If you get stuck 
-please let me know, and I'll see if I can make it more clear.
+on the icon, and it's fairly self-explanatory from there.
 
-![](https://i.postimg.cc/7LrP6Ykb/2023-06-14-09-00-17.png)
+![](https://i.postimg.cc/MGMsXFMv/2023-07-04-11-51-26.png)
 
-![](https://i.postimg.cc/RhZZBszR/2023-06-14-09-00-20.png)
+![](https://i.postimg.cc/mkNpB1cj/2023-07-04-11-51-29.png)
 
-![](https://i.postimg.cc/VsKNR8jH/2023-06-14-09-00-23.png)
+![](https://i.postimg.cc/vHh2K9wH/2023-07-04-11-51-38.png)
 
-![](https://i.postimg.cc/sXcgbFbx/2023-06-14-09-00-30.png)
+![](https://i.postimg.cc/vHh2K9wH/2023-07-04-11-51-38.png)
 
-![](https://i.postimg.cc/3J6JsFfX/2023-06-14-09-00-36.png)
+![](https://i.postimg.cc/K8Yphzm7/2023-07-04-11-52-06.png)
 
-![](https://i.postimg.cc/Fs1HCBpF/2023-06-14-09-00-58.png)
-
-![](https://i.postimg.cc/VvZLLqfc/2023-06-14-09-01-09.png)
+![](https://i.postimg.cc/MGC9BmVt/2023-07-04-11-52-11.png)
 
 ### Performance
 
-I have tried to reduce the workload wherever possible, but ultimately it still
-has to process every single chat message. That said, it is unlikely you will be
-able to notice any performance impact unless your chat is being spammed really
-fast (e.g. by multiple repeating command-blocks).
+Reasonable effort has been taken to minimise workload, but ultimately it still
+has to process every chat message. That said, it is unlikely you will be able 
+to detect any performance impact unless you have very large numbers of 
+notifications and/or your chat is being spammed extremely fast (e.g. by 
+multiple repeating command-blocks).
 
 ## Contact
 

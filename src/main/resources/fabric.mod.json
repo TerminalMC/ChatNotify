@@ -8,7 +8,7 @@
     "NotRyken"
   ],
   "contact": {
-    "homepage": "https://github.com/NotRyken/ChatNotify",
+    "homepage": "https://modrinth.com/mod/chat-notify",
     "sources": "https://github.com/NotRyken/ChatNotify",
     "issues": "https://github.com/NotRyken/ChatNotify/issues"
   },
@@ -28,8 +28,8 @@
   ],
   "accessWidener": "chatnotify.accesswidener",
   "depends": {
-    "fabricloader": ">=${loader_version}",
+    "fabricloader": ">=0.14.0",
     "fabric": "*",
-    "minecraft": ">=${minecraft_version}"
+    "minecraft": ">=1.20"
   }
 }

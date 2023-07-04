@@ -112,15 +112,19 @@ public class ModConfigListWidget extends ConfigListWidget
                 super(width, listWidget, -1);
 
                 CyclingButtonWidget<Boolean> ignoreButton =
-                        CyclingButtonWidget.onOffBuilder()
-                        .initially(config.ignoreOwnMessages)
-                        .build(this.width / 2 - 120, 32, 240, 20,
-                                Text.literal("Ignore Your Own Messages"),
+                        CyclingButtonWidget.onOffBuilder(
+                                Text.of("No"), Text.of("Yes"))
+                                .initially(config.ignoreOwnMessages)
+                                .tooltip((status) -> Tooltip.of(Text.of(
+                                        "Allows/Prevents your own messages " +
+                                                "triggering notifications.")))
+                                .build(this.width / 2 - 120, 32, 240, 20,
+                                Text.literal("Check Own Messages"),
                                 (button, status) ->
                                         config.ignoreOwnMessages = status);
-                ignoreButton.setTooltip(Tooltip.of(Text.literal("Allows" +
-                        "/Prevents notifications from activating when YOU " +
-                        "send a message.")));
+                ignoreButton.setTooltip(Tooltip.of(Text.literal(
+                        "Allows/Prevents your own messages triggering " +
+                        "notifications.")));
                 options.add(ignoreButton);
             }
         }
@@ -167,19 +171,18 @@ public class ModConfigListWidget extends ConfigListWidget
 
                     options.add(ButtonWidget.builder(labelText, (button) ->
                                     listWidget.openNotificationConfig(index))
-                            .size(240, 20)
+                            .size(210, 20)
                             .position(width / 2 - 120, 0)
                             .build());
 
-                    if (index == 0) {
-                        options.add(CyclingButtonWidget.onOffBuilder()
-                                .omitKeyText()
-                                .initially(notif.enabled)
-                                .build(width / 2 + 120 + 5, 0, 25, 20,
-                                        Text.empty(), (button, status)
-                                                -> notif.enabled = status));
-                    }
-                    else {
+                    options.add(CyclingButtonWidget.onOffBuilder()
+                            .omitKeyText()
+                            .initially(notif.enabled)
+                            .build(width / 2 + 95, 0, 25, 20,
+                                    Text.empty(), (button, status)
+                                            -> notif.enabled = status));
+
+                    if (index > 0) {
                         options.add(ButtonWidget.builder(Text.literal("⬆"),
                                         (button) ->
                                                 listWidget.moveNotifUp(index))

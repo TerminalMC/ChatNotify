@@ -32,36 +32,34 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                     "ChatNotify and crash Minecraft. Use with caution.")));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Regex in Notification Triggers \uD83D\uDEC8"),
-                Text.literal("If enabled, all triggers for this notification " +
-                        "will be processed as regex. Note: If using regex, " +
-                        "double-escapes must be used ('\\\\' instead of the " +
-                        "normal '\\').")));
+                Text.of("Notification Trigger Regex")));
         this.addEntry(new Entry.RegexToggleButton(width, notif, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Exclusion Triggers \uD83D\uDEC8"),
-                Text.literal("If an exclusion trigger is detected in a " +
-                        "message, it will prevent this notification from " +
-                        "activating when it otherwise would.")));
-        for (int idx = 0; idx < notif.getExclusionTriggers().size(); idx ++) {
-            this.addEntry(new Entry.ExclusionTriggerField(width, notif, client,
-                    this, idx));
-        }
-        this.addEntry(new Entry.ExclusionTriggerField(width, notif, client,
-                this, -1));
+                Text.of("Notification Exclusion Triggers")));
+        this.addEntry(new Entry.ExclusionToggleButton(width, notif, this));
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Auto Response Messages \uD83D\uDEC8"),
-                Text.literal("Chat messages or commands to be sent by the " +
-                        "client immediately when this notification is " +
-                        "activated. Use only with extreme caution.")));
-        for (int idx = 0; idx < notif.getResponseMessages().size(); idx ++) {
-            this.addEntry(new Entry.ResponseMessageField(width, notif, client,
-                    this, idx));
+        if (notif.exclusionEnabled) {
+            for (int idx = 0; idx < notif.getExclusionTriggers().size(); idx ++) {
+                this.addEntry(new Entry.ExclusionTriggerField(width, notif, client,
+                        this, idx));
+            }
+            this.addEntry(new Entry.ExclusionTriggerField(width, notif, client,
+                    this, -1));
         }
-        this.addEntry(new Entry.ResponseMessageField(width, notif, client,
-                this, -1));
+
+        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+                Text.of("Auto Response Messages")));
+        this.addEntry(new Entry.ResponseToggleButton(width, notif, this));
+
+        if (notif.responseEnabled) {
+            for (int idx = 0; idx < notif.getResponseMessages().size(); idx ++) {
+                this.addEntry(new Entry.ResponseMessageField(width, notif, client,
+                        this, idx));
+            }
+            this.addEntry(new Entry.ResponseMessageField(width, notif, client,
+                    this, -1));
+        }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
                 client, Text.literal("Broken Everything?")));
@@ -100,17 +98,45 @@ public class AdvancedConfigListWidget extends ConfigListWidget
         private static class RegexToggleButton extends Entry
         {
             RegexToggleButton(int width, Notification notif,
-                              AdvancedConfigListWidget listWidget)
+                                  AdvancedConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
                 options.add(CyclingButtonWidget.onOffBuilder(
                                 Text.literal("Enabled"),
                                 Text.literal("Disabled"))
                         .initially(notif.regexEnabled)
+                        .tooltip((status) -> Tooltip.of(Text.of("If enabled, " +
+                                "all triggers for this notification will be " +
+                                "processed as regex. Note: If using regex, " +
+                                "double-escapes must be used ('\\\\' instead " +
+                                "of the normal '\\').")))
                         .build(this.width / 2 - 120, 0, 240, 20,
                                 Text.literal("Regex"),
                                 (button, status) -> {
                                     notif.regexEnabled = status;
+                                    listWidget.refreshScreen();
+                                }));
+            }
+        }
+
+        private static class ExclusionToggleButton extends Entry
+        {
+            ExclusionToggleButton(int width, Notification notif,
+                              AdvancedConfigListWidget listWidget)
+            {
+                super(width, notif, listWidget);
+                options.add(CyclingButtonWidget.onOffBuilder(
+                                Text.literal("Enabled"),
+                                Text.literal("Disabled"))
+                        .initially(notif.exclusionEnabled)
+                        .tooltip((status) -> Tooltip.of(Text.of("If an " +
+                                "exclusion trigger is detected in a message, " +
+                                "it will prevent this notification from " +
+                                "activating when it otherwise would.")))
+                        .build(this.width / 2 - 120, 0, 240, 20,
+                                Text.literal("Exclusion Triggers"),
+                                (button, status) -> {
+                                    notif.exclusionEnabled = status;
                                     listWidget.refreshScreen();
                                 }));
             }
@@ -163,6 +189,29 @@ public class AdvancedConfigListWidget extends ConfigListWidget
             {
                 this.notif.setExclusionTrigger(this.index,
                         exclusionTrigger.strip());
+            }
+        }
+
+        private static class ResponseToggleButton extends Entry
+        {
+            ResponseToggleButton(int width, Notification notif,
+                                 AdvancedConfigListWidget listWidget)
+            {
+                super(width, notif, listWidget);
+                options.add(CyclingButtonWidget.onOffBuilder(
+                                Text.literal("Enabled"),
+                                Text.literal("Disabled"))
+                        .initially(notif.responseEnabled)
+                        .tooltip((status) -> Tooltip.of(Text.of(
+                                "Chat messages or commands to be sent by the " +
+                                "client immediately when this notification " +
+                                "is activated. Use with caution.")))
+                        .build(this.width / 2 - 120, 0, 240, 20,
+                                Text.literal("Response Messages"),
+                                (button, status) -> {
+                                    notif.responseEnabled = status;
+                                    listWidget.refreshScreen();
+                                }));
             }
         }
 
@@ -226,6 +275,8 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                 ButtonWidget resetButton = ButtonWidget.builder(
                         Text.literal("Reset"), (button) -> {
                             notif.regexEnabled = false;
+                            notif.exclusionEnabled = false;
+                            notif.responseEnabled = false;
                             for (int i = 0;
                                  i < notif.getExclusionTriggers().size();
                                  i++)
@@ -263,6 +314,8 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                                     ChatNotifyClient.config.getNotifs())
                             {
                                 notif2.regexEnabled = false;
+                                notif2.exclusionEnabled = false;
+                                notif2.responseEnabled = false;
                                 for (int i = 0;
                                      i < notif2.getExclusionTriggers().size();
                                      i++)

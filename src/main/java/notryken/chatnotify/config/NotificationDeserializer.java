@@ -32,7 +32,9 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
         Identifier sound;
         boolean persistent;
         boolean regexEnabled;
+        boolean exclusionEnabled;
         ArrayList<String> exclusionTriggers = new ArrayList<>();
+        boolean responseEnabled;
         ArrayList<String> responseMessages = new ArrayList<>();
 
         // Unchanged since v1.2.0-beta.8
@@ -201,6 +203,15 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
         }
 
         try {
+            exclusionEnabled = jsonObject.get("exclusionEnabled").getAsBoolean();
+        }
+        catch (JsonParseException | NullPointerException |
+               UnsupportedOperationException | IllegalStateException e)
+        {
+            exclusionEnabled = !exclusionTriggers.isEmpty();
+        }
+
+        try {
             JsonArray responseMessageArray =
                     jsonObject.get("responseMessages").getAsJsonArray();
             for (JsonElement je : responseMessageArray) {
@@ -216,9 +227,19 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             // Default to empty array.
         }
 
+        try {
+            responseEnabled = jsonObject.get("responseEnabled").getAsBoolean();
+        }
+        catch (JsonParseException | NullPointerException |
+               UnsupportedOperationException | IllegalStateException e)
+        {
+            responseEnabled = !responseMessages.isEmpty();
+        }
+
 
         return new Notification(enabled, controls, triggers, triggerIsKey,
                 color, formatControls, soundVolume, soundPitch, sound,
-                persistent, regexEnabled, exclusionTriggers, responseMessages);
+                persistent, regexEnabled, exclusionEnabled, exclusionTriggers,
+                responseEnabled, responseMessages);
     }
 }

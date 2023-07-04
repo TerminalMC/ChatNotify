@@ -147,8 +147,9 @@ public class Config
 
     /**
      * Removes all non-persistent notifications with empty primary triggers,
-     * and removes all empty secondary triggers from the remaining
-     * notifications.
+     * removes all empty secondary triggers, exclusion triggers, and response
+     * messages from the remaining notifications, and disables all
+     * notifications that have no enabled controls.
      */
     public void purge()
     {
@@ -165,6 +166,7 @@ public class Config
             notif2.purgeTriggers();
             notif2.purgeExclusionTriggers();
             notif2.purgeResponseMessages();
+            notif2.autoDisable();
         }
     }
 }

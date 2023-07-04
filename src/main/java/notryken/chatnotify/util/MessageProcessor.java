@@ -121,15 +121,20 @@ public class MessageProcessor
                                 trig, notif.regexEnabled) != null)
                         {
                             boolean exclude = false;
-                            for (String exTrig : notif.getExclusionTriggers()) {
-                                if (msgContainsStr((notif.regexEnabled ?
-                                        plainMsg : processedMsg), exTrig,
-                                        notif.regexEnabled) != null)
+                            if (notif.exclusionEnabled) {
+                                for (String exTrig :
+                                        notif.getExclusionTriggers())
                                 {
-                                    exclude = true;
-                                    break;
+                                    if (msgContainsStr((notif.regexEnabled ?
+                                                    plainMsg : processedMsg),
+                                            exTrig, notif.regexEnabled) != null)
+                                    {
+                                        exclude = true;
+                                        break;
+                                    }
                                 }
                             }
+
                             if (!exclude) {
                                 playSound(notif);
                                 sendResponseMessages(notif);
@@ -194,20 +199,21 @@ public class MessageProcessor
     }
 
     /**
-     * Sends all response messages of the specified notification.
+     * Sends all response messages of the specified notification, if enabled.
      * @param notif The notification.
      */
     private static void sendResponseMessages(Notification notif)
     {
-        for (String response : notif.getResponseMessages()) {
-            Screen oldScreen = MinecraftClient.getInstance().currentScreen;
-            MinecraftClient.getInstance().setScreen(new ChatScreen(response));
-            if (MinecraftClient.getInstance().currentScreen
-                    instanceof ChatScreen cs)
-            {
-                cs.sendMessage(response, true);
+        if (notif.responseEnabled) {
+            for (String response : notif.getResponseMessages()) {
+                MinecraftClient client = MinecraftClient.getInstance();
+                Screen oldScreen = client.currentScreen;
+                client.setScreen(new ChatScreen(response));
+                if (client.currentScreen instanceof ChatScreen cs) {
+                    cs.sendMessage(response, true);
+                }
+                client.setScreen(oldScreen);
             }
-            MinecraftClient.getInstance().setScreen(oldScreen);
         }
     }
 
