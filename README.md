@@ -6,7 +6,7 @@ phrases appear in chat.
 
 ## Features and Usage
 
-![](https://i.postimg.cc/hGDd5zgg/2023-07-04-12-01-26.png)
+![](https://i.postimg.cc/2SBk1y2m/2023-07-04-14-46-11.png)
 
 This mod requires [Mod Menu](https://modrinth.com/mod/modmenu) for 
 configuration (if you aren't using it already, now's a great time to start).
