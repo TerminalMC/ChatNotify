@@ -20,7 +20,7 @@ on the icon, and it's fairly self-explanatory from there.
 
 ![](https://i.postimg.cc/vHh2K9wH/2023-07-04-11-51-38.png)
 
-![](https://i.postimg.cc/vHh2K9wH/2023-07-04-11-51-38.png)
+![](https://i.postimg.cc/T3H7d6Pz/2023-07-04-11-51-43.png)
 
 ![](https://i.postimg.cc/K8Yphzm7/2023-07-04-11-52-06.png)
 
