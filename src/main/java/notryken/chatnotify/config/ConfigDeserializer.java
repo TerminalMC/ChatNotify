@@ -22,6 +22,7 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
         boolean ignoreOwnMessages;
         String username;
         ArrayList<Notification> notifications = new ArrayList<>();
+        ArrayList<String> messagePrefixes = new ArrayList<>();
 
         try {
             ignoreOwnMessages =
@@ -68,6 +69,21 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
             notifications.add(Config.DEFAULTNOTIF);
         }
 
-        return new Config(ignoreOwnMessages, username, notifications);
+        try {
+            JsonArray prefixArray = jsonObject.get("messagePrefixes")
+                    .getAsJsonArray();
+
+            for (JsonElement je : prefixArray) {
+                messagePrefixes.add(je.getAsString());
+            }
+        } catch (JsonParseException | NullPointerException |
+                 UnsupportedOperationException | IllegalStateException e)
+        {
+            messagePrefixes = new ArrayList<>(Config.DEFAULTPREFIXES);
+        }
+
+
+        return new Config(ignoreOwnMessages, username, notifications,
+                messagePrefixes);
     }
 }

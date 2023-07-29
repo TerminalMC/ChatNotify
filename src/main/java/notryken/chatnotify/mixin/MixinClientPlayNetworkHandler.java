@@ -11,9 +11,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static notryken.chatnotify.client.ChatNotifyClient.recentMessageTimes;
-import static notryken.chatnotify.client.ChatNotifyClient.recentMessages;
+import java.util.Locale;
+
+import static notryken.chatnotify.client.ChatNotifyClient.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler
@@ -58,7 +60,92 @@ public class MixinClientPlayNetworkHandler
                 i++;
             }
         }
-        recentMessages.add(content);
-        recentMessageTimes.add(currentTime);
+
+        // Check for prefixes
+
+        content = content.toLowerCase(Locale.ROOT);
+        String plainMsg = "";
+
+        for (String prefix : config.getPrefixes()) {
+            if (content.startsWith(prefix)) {
+                plainMsg = content.replaceFirst(prefix, "").strip();
+                break;
+            }
+        }
+
+        if (plainMsg.equals("")) {
+            recentMessages.add(content);
+            recentMessageTimes.add(currentTime);
+        }
+        else {
+            recentMessages.add(plainMsg);
+            recentMessageTimes.add(currentTime);
+        }
+    }
+
+    @Inject(method = "sendChatCommand", at = @At("HEAD"))
+    public void sendChatCommand(String command, CallbackInfo ci)
+    {
+        long currentTime = System.currentTimeMillis();
+
+        // Remove old messages if sent more than 5 seconds ago.
+
+        for (int i = 0; i < recentMessages.size();) {
+            if (recentMessageTimes.get(i) + 5000 < currentTime) {
+                recentMessages.remove(i);
+                recentMessageTimes.remove(i);
+            }
+            else {
+                i++;
+            }
+        }
+
+        // Check for prefixes
+
+        command = command.toLowerCase(Locale.ROOT);
+
+        for (String prefix : config.getPrefixes()) {
+            if (command.startsWith(prefix)) {
+                command = command.replaceFirst(prefix, "").strip();
+                if (!command.equals("")) {
+                    recentMessages.add(command.toLowerCase(Locale.ROOT));
+                    recentMessageTimes.add(currentTime);
+                }
+                break;
+            }
+        }
+    }
+
+    @Inject(method = "sendCommand", at = @At("HEAD"))
+    public void sendCommand(String command, CallbackInfoReturnable<Boolean> cir)
+    {
+        long currentTime = System.currentTimeMillis();
+
+        // Remove old messages if sent more than 5 seconds ago.
+
+        for (int i = 0; i < recentMessages.size();) {
+            if (recentMessageTimes.get(i) + 5000 < currentTime) {
+                recentMessages.remove(i);
+                recentMessageTimes.remove(i);
+            }
+            else {
+                i++;
+            }
+        }
+
+        // Check for prefixes
+
+        command = command.toLowerCase(Locale.ROOT);
+
+        for (String prefix : config.getPrefixes()) {
+            if (command.startsWith(prefix)) {
+                command = command.replaceFirst(prefix, "").strip();
+                if (!command.equals("")) {
+                    recentMessages.add(command);
+                    recentMessageTimes.add(currentTime);
+                }
+                break;
+            }
+        }
     }
 }

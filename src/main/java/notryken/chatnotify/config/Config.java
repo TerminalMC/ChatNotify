@@ -13,9 +13,12 @@ public class Config
                     "#FFC400", false, false, false, false, false, 1f, 1f,
                     DEFAULTSOUND, true);
 
+    public static final List<String> DEFAULTPREFIXES = List.of("!", "/shout");
+
     public boolean ignoreOwnMessages;
     private String username;
     private final ArrayList<Notification> notifications;
+    private final ArrayList<String> messagePrefixes;
 
     /**
      * Initialises the config with minimum default values.
@@ -25,6 +28,7 @@ public class Config
         ignoreOwnMessages = false;
         username = null;
         notifications = new ArrayList<>();
+        messagePrefixes = new ArrayList<>(DEFAULTPREFIXES);
         notifications.add(0, DEFAULTNOTIF);
     }
 
@@ -32,11 +36,13 @@ public class Config
      * Initializes the config with specified values.
      */
     Config(boolean ignoreOwnMessages, String username,
-           ArrayList<Notification> notifications)
+           ArrayList<Notification> notifications,
+           ArrayList<String> messagePrefixes)
     {
         this.ignoreOwnMessages = ignoreOwnMessages;
         this.username = username;
         this.notifications = notifications;
+        this.messagePrefixes = messagePrefixes;
     }
 
     // Accessors.
@@ -64,6 +70,25 @@ public class Config
     public List<Notification> getNotifs()
     {
         return Collections.unmodifiableList(notifications);
+    }
+
+    /**
+     * @return The prefix at the specified index, or null if none exists.
+     */
+    public String getPrefix(int index)
+    {
+        if (index >= 0 && index < messagePrefixes.size()) {
+            return messagePrefixes.get(index);
+        }
+        return null;
+    }
+
+    /**
+     * @return An unmodifiable view of the prefix list.
+     */
+    public List<String> getPrefixes()
+    {
+        return Collections.unmodifiableList(messagePrefixes);
     }
 
     // Mutators
@@ -143,16 +168,56 @@ public class Config
         }
     }
 
+    /**
+     * Sets the prefix at the specified index to the specified value, if the
+     * index is valid and the prefix does not already exist.
+     * @param index The index of the prefix to set.
+     * @param prefix The new prefix String.
+     */
+    public void setPrefix(int index, String prefix)
+    {
+        if (index >= 0 && index < this.messagePrefixes.size() &&
+                !this.messagePrefixes.contains(prefix)) {
+            this.messagePrefixes.set(index, prefix);
+        }
+    }
+
+    /**
+     * Adds the specified prefix, if it does not already exist.
+     * @param prefix The prefix String to add.
+     */
+    public void addPrefix(String prefix)
+    {
+        if (!this.messagePrefixes.contains(prefix)) {
+            this.messagePrefixes.add(prefix);
+        }
+    }
+
+    /**
+     * Removes the prefix at the specified index, if the index is not 0 and
+     * not out of range.
+     * @param index The index of the prefix to remove.
+     */
+    public void removePrefix(int index)
+    {
+        if (index > 0 && index < this.messagePrefixes.size()) {
+            this.messagePrefixes.remove(index);
+        }
+    }
+
     // Other processing.
 
     /**
-     * Removes all non-persistent notifications with empty primary triggers,
-     * removes all empty secondary triggers, exclusion triggers, and response
-     * messages from the remaining notifications, and disables all
-     * notifications that have no enabled controls.
+     * Removes all empty message prefixes, removes all non-persistent
+     * notifications with empty primary triggers, removes all empty secondary
+     * triggers, exclusion triggers, and response messages from the remaining
+     * notifications, and disables all notifications that have no enabled
+     * controls.
      */
     public void purge()
     {
+        messagePrefixes.removeIf(s -> s.equals(""));
+
         Notification notif;
         Iterator<Notification> iter = notifications.iterator();
         iter.next(); // Skip the first notification.
@@ -162,6 +227,7 @@ public class Config
                 iter.remove();
             }
         }
+
         for (Notification notif2: notifications) {
             notif2.purgeTriggers();
             notif2.purgeExclusionTriggers();

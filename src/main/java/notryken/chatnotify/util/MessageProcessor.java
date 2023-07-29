@@ -64,8 +64,7 @@ public class MessageProcessor
 
         if (!recentMessages.isEmpty()) {
             for (int i = 0; i < recentMessages.size(); i++) {
-                int match1 = strMsgLower.lastIndexOf(
-                        recentMessages.get(i).toLowerCase(Locale.ROOT));
+                int match1 = strMsgLower.lastIndexOf(recentMessages.get(i));
                 if (match1 > 0) {
                     String prefix = strMsg.substring(0, match1);
                     for (String username : config.getNotif(0).getTriggers()) {
@@ -116,7 +115,7 @@ public class MessageProcessor
                     }
                 } else {
                     for (String trig : notif.getTriggers()) {
-                        if (msgContainsStr(
+                        if (!trig.equals("") && msgContainsStr(
                                 (notif.regexEnabled ? plainMsg : processedMsg),
                                 trig, notif.regexEnabled) != null)
                         {

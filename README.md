@@ -14,17 +14,17 @@ configuration (if you aren't using it already, now's a great time to start).
 With Mod Menu installed, simply go the mods list, find Chat Notify, click
 on the icon, and it's fairly self-explanatory from there.
 
-![](https://i.postimg.cc/MGMsXFMv/2023-07-04-11-51-26.png)
+![](https://i.postimg.cc/cCHz56bz/2023-07-29-16-20-33.png)
 
-![](https://i.postimg.cc/mkNpB1cj/2023-07-04-11-51-29.png)
+![](https://i.postimg.cc/d3xfMwMV/2023-07-29-16-21-52.png)
 
-![](https://i.postimg.cc/vHh2K9wH/2023-07-04-11-51-38.png)
+![](https://i.postimg.cc/y6Qt3XJC/2023-07-29-16-22-35.png)
 
-![](https://i.postimg.cc/T3H7d6Pz/2023-07-04-11-51-43.png)
+![](https://i.postimg.cc/zGWcQsxq/2023-07-29-16-22-39.png)
 
-![](https://i.postimg.cc/K8Yphzm7/2023-07-04-11-52-06.png)
+![](https://i.postimg.cc/9FskJmtx/2023-07-29-16-22-43.png)
 
-![](https://i.postimg.cc/MGC9BmVt/2023-07-04-11-52-11.png)
+![](https://i.postimg.cc/zXyMCbWb/2023-07-29-16-22-46.png)
 
 ### Performance
 

@@ -13,6 +13,7 @@ import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.gui.screen.ModMenuIntegration;
 
+import java.util.List;
 import java.util.Optional;
 
 import static notryken.chatnotify.client.ChatNotifyClient.config;
@@ -27,8 +28,11 @@ public class ModConfigListWidget extends ConfigListWidget
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
                 client, Text.literal("Options")));
-
         this.addEntry(new Entry.IgnoreToggle(this.width, this));
+
+        this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
+                client, Text.literal("Message Modifier Prefixes")));
+        this.addEntry(new Entry.PrefixConfigButton(this.width, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
                 client, Text.literal("Notifications ℹ"),
@@ -57,6 +61,17 @@ public class ModConfigListWidget extends ConfigListWidget
     protected void refreshScreen()
     {
         client.setScreen(new ModMenuIntegration.ModMenuOptionsScreen(parent));
+    }
+
+    private void openPrefixConfig()
+    {
+        assert client.currentScreen != null;
+        Text title = Text.literal("Message Modifier Prefixes");
+        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+                title, new PrefixConfigListWidget(client,
+                client.currentScreen.width, client.currentScreen.height,
+                32, client.currentScreen.height - 32, 25,
+                client.currentScreen, title)));
     }
 
     private void moveNotifUp(int index)
@@ -126,6 +141,37 @@ public class ModConfigListWidget extends ConfigListWidget
                         "Allows/Prevents your own messages triggering " +
                         "notifications.")));
                 options.add(ignoreButton);
+            }
+        }
+
+        private static class PrefixConfigButton extends Entry
+        {
+            PrefixConfigButton(int width, ModConfigListWidget listWidget)
+            {
+                super(width, listWidget, -1);
+
+                List<String> prefixes = config.getPrefixes();
+                String label;
+
+                if (prefixes.size() == 0) {
+                    label = "[None]";
+                }
+                else {
+                    StringBuilder builder =
+                            new StringBuilder(config.getPrefix(0));
+                    for (int i = 1; i < prefixes.size(); i++) {
+                        builder.append(", ");
+                        builder.append(prefixes.get(i));
+                    }
+                    label = builder.toString();
+                }
+
+                options.add(ButtonWidget.builder(
+                                Text.literal(label),
+                                (button) -> listWidget.openPrefixConfig())
+                        .size(240, 20)
+                        .position(width / 2 - 120, 0)
+                        .build());
             }
         }
 
