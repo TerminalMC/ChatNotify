@@ -28,10 +28,8 @@ public class ModConfigListWidget extends ConfigListWidget
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
                 client, Text.literal("Options")));
-        this.addEntry(new Entry.IgnoreToggle(this.width, this));
 
-        this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Text.literal("Message Modifier Prefixes")));
+        this.addEntry(new Entry.IgnoreToggle(this.width, this));
         this.addEntry(new Entry.PrefixConfigButton(this.width, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
@@ -151,14 +149,14 @@ public class ModConfigListWidget extends ConfigListWidget
                 super(width, listWidget, -1);
 
                 List<String> prefixes = config.getPrefixes();
-                String label;
+                String label = "Prefixes: ";
 
                 if (prefixes.size() == 0) {
-                    label = "[None]";
+                    label = label + "[None]";
                 }
                 else {
-                    StringBuilder builder =
-                            new StringBuilder(config.getPrefix(0));
+                    StringBuilder builder = new StringBuilder(label);
+                    builder.append(config.getPrefix(0));
                     for (int i = 1; i < prefixes.size(); i++) {
                         builder.append(", ");
                         builder.append(prefixes.get(i));

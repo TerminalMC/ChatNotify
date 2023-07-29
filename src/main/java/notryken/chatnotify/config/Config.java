@@ -200,7 +200,7 @@ public class Config
      */
     public void removePrefix(int index)
     {
-        if (index > 0 && index < this.messagePrefixes.size()) {
+        if (index >= 0 && index < this.messagePrefixes.size()) {
             this.messagePrefixes.remove(index);
         }
     }
