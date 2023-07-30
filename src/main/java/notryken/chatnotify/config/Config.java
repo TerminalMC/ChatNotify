@@ -13,7 +13,7 @@ public class Config
                     "#FFC400", false, false, false, false, false, 1f, 1f,
                     DEFAULTSOUND, true);
 
-    public static final List<String> DEFAULTPREFIXES = List.of("!", "/shout");
+    public static final List<String> DEFAULTPREFIXES = List.of("/shout", "!");
 
     public boolean ignoreOwnMessages;
     private String username;
@@ -217,6 +217,7 @@ public class Config
     public void purge()
     {
         messagePrefixes.removeIf(s -> s.equals(""));
+        messagePrefixes.sort(Comparator.comparingInt(String::length).reversed());
 
         Notification notif;
         Iterator<Notification> iter = notifications.iterator();

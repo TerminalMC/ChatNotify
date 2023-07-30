@@ -8,6 +8,7 @@ import notryken.chatnotify.client.ChatNotifyClient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -18,7 +19,7 @@ import java.util.Locale;
 import static notryken.chatnotify.client.ChatNotifyClient.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
-public class MixinClientPlayNetworkHandler
+public abstract class MixinClientPlayNetworkHandler
 {
     @Final
     @Shadow
@@ -49,17 +50,8 @@ public class MixinClientPlayNetworkHandler
     {
         long currentTime = System.currentTimeMillis();
 
-        // Remove old messages if sent more than 5 seconds ago.
-
-        for (int i = 0; i < recentMessages.size();) {
-            if (recentMessageTimes.get(i) + 5000 < currentTime) {
-                recentMessages.remove(i);
-                recentMessageTimes.remove(i);
-            }
-            else {
-                i++;
-            }
-        }
+        long oldTime = currentTime - 5000;
+        removeOldMessages(oldTime);
 
         // Check for prefixes
 
@@ -88,21 +80,12 @@ public class MixinClientPlayNetworkHandler
     {
         long currentTime = System.currentTimeMillis();
 
-        // Remove old messages if sent more than 5 seconds ago.
-
-        for (int i = 0; i < recentMessages.size();) {
-            if (recentMessageTimes.get(i) + 5000 < currentTime) {
-                recentMessages.remove(i);
-                recentMessageTimes.remove(i);
-            }
-            else {
-                i++;
-            }
-        }
+        long oldTime = currentTime - 5000;
+        removeOldMessages(oldTime);
 
         // Check for prefixes
 
-        command = command.toLowerCase(Locale.ROOT);
+        command = "/" + command.toLowerCase(Locale.ROOT);
 
         for (String prefix : config.getPrefixes()) {
             if (command.startsWith(prefix)) {
@@ -119,23 +102,16 @@ public class MixinClientPlayNetworkHandler
     @Inject(method = "sendCommand", at = @At("HEAD"))
     public void sendCommand(String command, CallbackInfoReturnable<Boolean> cir)
     {
+        System.out.println("sendCommand:" + command);
+
         long currentTime = System.currentTimeMillis();
 
-        // Remove old messages if sent more than 5 seconds ago.
-
-        for (int i = 0; i < recentMessages.size();) {
-            if (recentMessageTimes.get(i) + 5000 < currentTime) {
-                recentMessages.remove(i);
-                recentMessageTimes.remove(i);
-            }
-            else {
-                i++;
-            }
-        }
+        long oldTime = currentTime - 5000;
+        removeOldMessages(oldTime);
 
         // Check for prefixes
 
-        command = command.toLowerCase(Locale.ROOT);
+        command = "/" + command.toLowerCase(Locale.ROOT);
 
         for (String prefix : config.getPrefixes()) {
             if (command.startsWith(prefix)) {
@@ -145,6 +121,20 @@ public class MixinClientPlayNetworkHandler
                     recentMessageTimes.add(currentTime);
                 }
                 break;
+            }
+        }
+    }
+
+    @Unique
+    private void removeOldMessages(long oldTime)
+    {
+        for (int i = 0; i < recentMessages.size();) {
+            if (recentMessageTimes.get(i) < oldTime) {
+                recentMessages.remove(i);
+                recentMessageTimes.remove(i);
+            }
+            else {
+                i++;
             }
         }
     }
