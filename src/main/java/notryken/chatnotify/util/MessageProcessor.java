@@ -115,7 +115,7 @@ public class MessageProcessor
                     }
                 } else {
                     for (String trig : notif.getTriggers()) {
-                        if (!trig.equals("") && msgContainsStr(
+                        if (!trig.isEmpty() && msgContainsStr(
                                 (notif.regexEnabled ? plainMsg : processedMsg),
                                 trig, notif.regexEnabled) != null)
                         {
@@ -425,7 +425,7 @@ public class MessageProcessor
         if (newStyle.getHoverEvent() != null) {
             result = result.withHoverEvent(newStyle.getHoverEvent());
         }
-        if (newStyle.getHoverEvent() != null) {
+        if (newStyle.getInsertion() != null) {
             result = result.withInsertion(newStyle.getInsertion());
         }
         if (newStyle.getFont() != null) {
