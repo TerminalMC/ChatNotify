@@ -3,6 +3,7 @@ package notryken.chatnotify.client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.MinecraftClient;
 import notryken.chatnotify.config.Config;
 import notryken.chatnotify.config.ConfigDeserializer;
 
@@ -17,6 +18,8 @@ import java.util.List;
  */
 public class ChatNotifyClient implements ClientModInitializer
 {
+    public static MinecraftClient client = MinecraftClient.getInstance();
+
     public static Config config;
     public static final List<String> recentMessages = new ArrayList<>();
     public static final List<Long> recentMessageTimes = new ArrayList<>();

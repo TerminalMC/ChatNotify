@@ -28,7 +28,6 @@ public abstract class ConfigListWidget
                             Screen parent, Text title)
     {
         super(client, width, height, top, bottom, itemHeight);
-        this.setRenderSelection(true);
         this.client = client;
         this.parent = parent;
         this.title = title;
