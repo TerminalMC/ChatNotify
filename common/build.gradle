@@ -1,0 +1,18 @@
+archivesBaseName = "${rootProject.projectArchiveBaseName}-common"
+
+architectury {
+    common(rootProject.enabledPlatforms.split(','))
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/chatnotify.accesswidener')
+}
+
+dependencies {
+    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
+    // Do NOT use other classes from fabric loader
+    modImplementation("net.fabricmc:fabric-loader:${rootProject.fabricLoaderVersion}")
+
+    // Nullable annotations.
+    implementation 'org.jetbrains:annotations:23.0.0'
+}

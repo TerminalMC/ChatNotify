@@ -1,0 +1,27 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+issueTrackerURL = "https://github.com/NotRyken/ChatNotify/issues"
+displayURL = "https://modrinth.com/mod/chat-notify"
+license = "MIT"
+
+[[mods]]
+modId = "chatnotify"
+version = "${version}"
+displayName = "Chat Notify"
+authors = "NotRyken"
+description = "Provides support for configuring audio and visual notifications based on chat messages."
+logoFile = "icon.png"
+
+[[dependencies.chatnotify]]
+modId = "forge"
+mandatory = true
+versionRange = "[41.0.15,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.chatnotify]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.2,)"
+ordering = "NONE"
+side = "BOTH"

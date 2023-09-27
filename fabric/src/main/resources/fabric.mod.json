@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "chat-notify",
+  "version": "${version}",
+  "name": "Chat Notify",
+  "description": "Provides support for configuring audio and visual notifications based on chat messages.",
+  "authors": [
+    "NotRyken"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/chat-notify",
+    "sources": "https://github.com/NotRyken/ChatNotify",
+    "issues": "https://github.com/NotRyken/ChatNotify/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/chatnotify/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "notryken.chatnotify.ChatNotifyFabric"
+    ],
+    "modmenu": [
+      "notryken.chatnotify.gui.screen.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "chatnotify-fabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric": "*",
+    "minecraft": ">=1.20.2",
+    "modmenu": ">=8.0.0"
+  }
+}

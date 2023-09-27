@@ -1,6 +1,6 @@
 # Chat Notify
 
-This is a client-side Minecraft Fabric mod that allows the 
+This is a client-side Minecraft mod for Fabric and Forge that allows the 
 user to set up audio and visual notifications for when specified words or 
 phrases appear in chat.
 
@@ -8,13 +8,8 @@ phrases appear in chat.
 
 ![](https://i.postimg.cc/2SBk1y2m/2023-07-04-14-46-11.png)
 
-This mod requires [Mod Menu](https://modrinth.com/mod/modmenu) for 
+The Fabric version mod requires [Mod Menu](https://modrinth.com/mod/modmenu) for 
 configuration (if you aren't using it already, now's a great time to start).
-
-With Mod Menu installed, simply go the mods list, find Chat Notify, click
-on the icon, and it's fairly self-explanatory from there.
-
-![](https://i.postimg.cc/cCHz56bz/2023-07-29-16-20-33.png)
 
 ![](https://i.postimg.cc/d3xfMwMV/2023-07-29-16-21-52.png)
 
@@ -28,8 +23,8 @@ on the icon, and it's fairly self-explanatory from there.
 
 ### Performance
 
-Reasonable effort has been taken to minimise workload, but ultimately it still
-has to process every chat message. That said, it is unlikely you will be able 
+Reasonable effort has been taken to reduce workload, but ultimately it still
+has to process every chat message. That said, it is unlikely that you will be able 
 to detect any performance impact unless you have very large numbers of 
 notifications and/or your chat is being spammed extremely fast (e.g. by 
 multiple repeating command-blocks).
