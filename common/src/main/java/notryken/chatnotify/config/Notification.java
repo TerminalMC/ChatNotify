@@ -7,7 +7,10 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Configurable notification including text color, text formatting and sound

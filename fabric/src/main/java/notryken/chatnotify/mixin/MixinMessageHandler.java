@@ -1,7 +1,7 @@
 package notryken.chatnotify.mixin;
 
 import net.minecraft.client.network.message.MessageHandler;
-import net.minecraft.text.*;
+import net.minecraft.text.Text;
 import notryken.chatnotify.util.MessageProcessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

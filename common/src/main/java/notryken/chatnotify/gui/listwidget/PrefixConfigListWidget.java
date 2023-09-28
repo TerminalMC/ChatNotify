@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-import static notryken.chatnotify.ChatNotifyForge.config;
+import static notryken.chatnotify.ChatNotify.config;
 
 public class PrefixConfigListWidget extends ConfigListWidget
 {
@@ -58,7 +58,7 @@ public class PrefixConfigListWidget extends ConfigListWidget
             super(width, listWidget);
         }
 
-        private static class PrefixField extends PrefixConfigListWidget.Entry
+        private static class PrefixField extends Entry
         {
             final int index;
 

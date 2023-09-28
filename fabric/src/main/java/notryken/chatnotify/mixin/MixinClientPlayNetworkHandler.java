@@ -4,8 +4,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import notryken.chatnotify.ChatNotifyFabric;
-import org.spongepowered.asm.mixin.*;
+import notryken.chatnotify.ChatNotify;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -13,13 +14,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Locale;
 
-import static notryken.chatnotify.ChatNotifyFabric.*;
+import static notryken.chatnotify.ChatNotify.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class MixinClientPlayNetworkHandler
 {
     @Unique
-    MinecraftClient client = MinecraftClient.getInstance();
+    MinecraftClient chatNotify$client = MinecraftClient.getInstance();
 
     /**
      * Injects into ClientPlayNetworkHandler.onGameJoin(), which handles
@@ -29,11 +30,11 @@ public abstract class MixinClientPlayNetworkHandler
     @Inject(method = "onGameJoin", at = @At("TAIL"))
     public void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci)
     {
-        PlayerEntity player = client.player;
+        PlayerEntity player = chatNotify$client.player;
         /* This can only be null if Minecraft's internal onGameJoin() method
         breaks completely, which will crash the game anyway.*/
         assert player != null;
-        ChatNotifyFabric.config.setUsername(player.getName().getString());
+        ChatNotify.config.setUsername(player.getName().getString());
     }
 
     /**
@@ -47,7 +48,7 @@ public abstract class MixinClientPlayNetworkHandler
         long currentTime = System.currentTimeMillis();
 
         long oldTime = currentTime - 5000;
-        removeOldMessages(oldTime);
+        chatNotify$removeOldMessages(oldTime);
 
         // Check for prefixes
 
@@ -77,7 +78,7 @@ public abstract class MixinClientPlayNetworkHandler
         long currentTime = System.currentTimeMillis();
 
         long oldTime = currentTime - 5000;
-        removeOldMessages(oldTime);
+        chatNotify$removeOldMessages(oldTime);
 
         // Check for prefixes
 
@@ -101,7 +102,7 @@ public abstract class MixinClientPlayNetworkHandler
         long currentTime = System.currentTimeMillis();
 
         long oldTime = currentTime - 5000;
-        removeOldMessages(oldTime);
+        chatNotify$removeOldMessages(oldTime);
 
         // Check for prefixes
 
@@ -120,7 +121,7 @@ public abstract class MixinClientPlayNetworkHandler
     }
 
     @Unique
-    private void removeOldMessages(long oldTime)
+    private void chatNotify$removeOldMessages(long oldTime)
     {
         for (int i = 0; i < recentMessages.size();) {
             if (recentMessageTimes.get(i) < oldTime) {

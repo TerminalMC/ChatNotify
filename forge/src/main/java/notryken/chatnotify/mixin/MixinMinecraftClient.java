@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static notryken.chatnotify.ChatNotifyForge.saveConfig;
+import static notryken.chatnotify.ChatNotify.saveConfig;
 
 @Mixin(MinecraftClient.class)
 public class MixinMinecraftClient {

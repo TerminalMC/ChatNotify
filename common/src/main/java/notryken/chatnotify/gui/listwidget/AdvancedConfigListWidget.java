@@ -8,7 +8,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
-import notryken.chatnotify.ChatNotifyForge;
+import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
 import org.jetbrains.annotations.NotNull;
 
@@ -311,7 +311,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                 ButtonWidget totalResetButton = ButtonWidget.builder(
                         Text.literal("Reset All"), (button) -> {
                             for (Notification notif2 :
-                                    ChatNotifyForge.config.getNotifs())
+                                    ChatNotify.config.getNotifs())
                             {
                                 notif2.regexEnabled = false;
                                 notif2.exclusionEnabled = false;
@@ -354,9 +354,9 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                         Text.literal("Nuclear Reset"), (button) -> {
                             client.setScreen(new ConfirmScreen((value) -> {
                                 if (value) {
-                                    ChatNotifyForge.deleteConfigFile();
-                                    ChatNotifyForge.config = null;
-                                    ChatNotifyForge.loadConfig();
+                                    ChatNotify.deleteConfigFile();
+                                    ChatNotify.config = null;
+                                    ChatNotify.loadConfig();
                                     client.setScreen(null);
                                 }
                                 else {

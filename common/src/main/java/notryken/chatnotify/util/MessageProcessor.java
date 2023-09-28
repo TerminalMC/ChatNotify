@@ -9,9 +9,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.*;
 import notryken.chatnotify.config.Notification;
 
-//import java.io.FileNotFoundException;
-//import java.io.PrintWriter;
-//import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -19,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static notryken.chatnotify.ChatNotifyForge.*;
+import static notryken.chatnotify.ChatNotify.*;
 
 public class MessageProcessor
 {

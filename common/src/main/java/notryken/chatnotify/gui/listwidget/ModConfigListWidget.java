@@ -11,12 +11,12 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
-import notryken.chatnotify.gui.screen.ModMenuIntegration;
+import notryken.chatnotify.gui.screen.ScreenLauncher;
 
 import java.util.List;
 import java.util.Optional;
 
-import static notryken.chatnotify.ChatNotifyFabric.config;
+import static notryken.chatnotify.ChatNotify.config;
 
 public class ModConfigListWidget extends ConfigListWidget
 {
@@ -58,7 +58,7 @@ public class ModConfigListWidget extends ConfigListWidget
     @Override
     protected void refreshScreen()
     {
-        client.setScreen(new ModMenuIntegration.ModMenuOptionsScreen(parent));
+        client.setScreen(new ScreenLauncher.MainOptionsScreen(parent));
     }
 
     private void openPrefixConfig()

@@ -1,8 +1,6 @@
 {
   "parent": "chatnotify-common.mixins.json",
   "package": "notryken.chatnotify.mixin",
-  "mixins": [
-  ],
   "client": [
     "MixinChatHud",
     "MixinClientPlayNetworkHandler",

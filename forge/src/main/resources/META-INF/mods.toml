@@ -10,7 +10,7 @@ version = "${version}"
 displayName = "Chat Notify"
 authors = "NotRyken"
 description = "Provides support for configuring audio and visual notifications based on chat messages."
-logoFile = "icon.png"
+logoFile = "assets/chatnotify/icon.png"
 
 [[dependencies.chatnotify]]
 modId = "forge"

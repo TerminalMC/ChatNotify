@@ -4,8 +4,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import notryken.chatnotify.ChatNotifyForge;
-import org.spongepowered.asm.mixin.*;
+import notryken.chatnotify.ChatNotify;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Locale;
 
-import static notryken.chatnotify.ChatNotifyForge.*;
+import static notryken.chatnotify.ChatNotify.*;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class MixinClientPlayNetworkHandler
@@ -33,7 +34,7 @@ public abstract class MixinClientPlayNetworkHandler
         /* This can only be null if Minecraft's internal onGameJoin() method
         breaks completely, which will crash the game anyway.*/
         assert player != null;
-        ChatNotifyForge.config.setUsername(player.getName().getString());
+        ChatNotify.config.setUsername(player.getName().getString());
     }
 
     /**

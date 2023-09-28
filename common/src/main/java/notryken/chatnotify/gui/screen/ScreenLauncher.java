@@ -7,17 +7,17 @@ import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import notryken.chatnotify.ChatNotifyForge;
+import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.gui.listwidget.ModConfigListWidget;
 
-import static notryken.chatnotify.ChatNotifyForge.config;
+import static notryken.chatnotify.ChatNotify.config;
 
 public class ScreenLauncher
 {
-    public static class OptionScreenLauncher extends GameOptionsScreen
+    public static class MainOptionsScreen extends GameOptionsScreen
     {
         private ModConfigListWidget list;
-        public OptionScreenLauncher(Screen parent)
+        public MainOptionsScreen(Screen parent)
         {
             super(parent, MinecraftClient.getInstance().options,
                     Text.literal("Chat Notify"));
@@ -35,7 +35,7 @@ public class ScreenLauncher
                             (button) -> {
                 config.refreshUsernameNotif();
                 config.purge();
-                ChatNotifyForge.saveConfig();
+                ChatNotify.saveConfig();
                 assert this.client != null;
                 this.client.setScreen(this.parent);
             })
@@ -60,7 +60,7 @@ public class ScreenLauncher
         {
             config.refreshUsernameNotif();
             config.purge();
-            ChatNotifyForge.saveConfig();
+            ChatNotify.saveConfig();
             assert this.client != null;
             this.client.setScreen(this.parent);
         }
