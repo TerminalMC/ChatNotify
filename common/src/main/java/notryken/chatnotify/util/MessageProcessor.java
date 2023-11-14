@@ -1,12 +1,18 @@
 package notryken.chatnotify.util;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.StringDecomposer;
 import notryken.chatnotify.config.Notification;
 
 import java.util.List;
@@ -26,11 +32,11 @@ public class MessageProcessor
      * @return A modified copy of the message, or the original if no modifying
      * was required.
      */
-    public static Text processMessage(Text message)
+    public static Component processMessage(Component message)
     {
-        Text modifiedMessage = null;
+        Component modifiedMessage = null;
 
-        String plainMsg = TextVisitFactory.removeFormattingCodes(message);
+        String plainMsg = StringDecomposer.getPlainText(message); // Removes formatting codes
         String processedMsg = preProcess(plainMsg);
 
         if (processedMsg != null) {
@@ -96,14 +102,14 @@ public class MessageProcessor
      * @param processedMsg The pre-processed version of plainMsg.
      * @return The re-styled message, or null if no notification was triggered.
      */
-    private static Text tryNotify(Text message, String plainMsg,
+    private static Component tryNotify(Component message, String plainMsg,
                                   String processedMsg)
     {
         for (Notification notif : config.getNotifs()) {
             if (notif.enabled) {
                 if (notif.triggerIsKey) {
-                    if (message.getContent() instanceof
-                            TranslatableTextContent ttc) {
+                    if (message.getContents() instanceof
+                            TranslatableContents ttc) {
                         if (ttc.getKey().contains(notif.getTrigger())) {
                             playSound(notif);
                             sendResponseMessages(notif);
@@ -185,12 +191,12 @@ public class MessageProcessor
     private static void playSound(Notification notif)
     {
         if (notif.getControl(2)) {
-            MinecraftClient.getInstance().getSoundManager().play(
-                    new PositionedSoundInstance(
-                            notif.getSound(), SoundCategory.PLAYERS,
+            Minecraft.getInstance().getSoundManager().play(
+                    new SimpleSoundInstance(
+                            notif.getSound(), SoundSource.PLAYERS,
                             notif.soundVolume, notif.soundPitch,
-                            SoundInstance.createRandom(), false, 0,
-                            SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
+                            SoundInstance.createUnseededRandom(), false, 0,
+                            SoundInstance.Attenuation.NONE, 0, 0, 0, true));
         }
     }
 
@@ -202,11 +208,11 @@ public class MessageProcessor
     {
         if (notif.responseEnabled) {
             for (String response : notif.getResponseMessages()) {
-                MinecraftClient client = MinecraftClient.getInstance();
-                Screen oldScreen = client.currentScreen;
+                Minecraft client = Minecraft.getInstance();
+                Screen oldScreen = client.screen;
                 client.setScreen(new ChatScreen(response));
-                if (client.currentScreen instanceof ChatScreen cs) {
-                    cs.sendMessage(response, true);
+                if (client.screen instanceof ChatScreen cs) {
+                    cs.handleChatInput(response, true);
                 }
                 client.setScreen(oldScreen);
             }
@@ -221,7 +227,7 @@ public class MessageProcessor
      */
     private static Style getStyle(Notification notif)
     {
-        return Style.of(
+        return Style.create(
                 (notif.getColor() == null ? Optional.empty() :
                         Optional.of(notif.getColor())),
                 Optional.of(notif.getFormatControl(0)),
@@ -241,7 +247,7 @@ public class MessageProcessor
      * @param notif The notification to draw the style from.
      * @return The re-styled message.
      */
-    private static Text simpleRestyle(Text message, Notification notif)
+    private static Component simpleRestyle(Component message, Notification notif)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
             return message.copy().setStyle(applyStyle(message.getStyle(),
@@ -260,7 +266,7 @@ public class MessageProcessor
      * @param notif The notification to draw the style from.
      * @return The re-styled message.
      */
-    private static Text complexRestyle(Text message, String trigger,
+    private static Component complexRestyle(Component message, String trigger,
                                        Notification notif)
     {
         if (notif.getControl(0) || notif.getControl(1)) {
@@ -269,22 +275,22 @@ public class MessageProcessor
         return message;
     }
 
-    private static MutableText processText(MutableText message, String trigger,
-                                           Style style)
+    private static MutableComponent processText(MutableComponent message, String trigger,
+                                                Style style)
     {
-        if (message.getContent() instanceof LiteralTextContent) {
-            // LiteralTextContent is typically the lowest level.
+        if (message.getContents() instanceof LiteralContents) {
+            // LiteralContents is typically the lowest level.
             message = processLiteralTc(message, trigger, style);
         }
-        else if (message.getContent() instanceof TranslatableTextContent ttc) {
-            // Recurse for all args of the TranslatableTextContent.
+        else if (message.getContents() instanceof TranslatableContents ttc) {
+            // Recurse for all args of the TranslatableContents.
             Object[] args = ttc.getArgs();
             for (int i = 0; i < ttc.getArgs().length; i++) {
-                if (args[i] instanceof Text argText) {
+                if (args[i] instanceof Component argText) {
                     args[i] = processText(argText.copy(), trigger, style);
                 }
             }
-            message = MutableText.of(new TranslatableTextContent(
+            message = MutableComponent.create(new TranslatableContents(
                     ttc.getKey(), ttc.getFallback(), args))
                     .setStyle(message.getStyle());
         }
@@ -296,41 +302,41 @@ public class MessageProcessor
         return message;
     }
 
-    private static MutableText processLiteralTc(MutableText message,
+    private static MutableComponent processLiteralTc(MutableComponent message,
                                                 String trigger, Style style)
     {
-        if (message.getContent() instanceof LiteralTextContent ltc) {
+        if (message.getContents() instanceof LiteralContents ltc) {
             // Only process if the message or its siblings contain the match.
             if (msgContainsStr(removeFormatCodes(
                     message.getString()), trigger, false) != null)
             {
-                List<Text> siblings = message.getSiblings();
+                List<Component> siblings = message.getSiblings();
 
                 if (siblings.isEmpty())
                 {
                     /*
                     If no siblings, the match must exist in the
-                    LiteralTextContent (ltc) of the message, so it is split
+                    LiteralContents (ltc) of the message, so it is split
                     down and the parts individually re-styled before being
-                    re-built into a new Text object, which is returned.
+                    re-built into a new Component object, which is returned.
                      */
 
-                    String msgStr = removeFormatCodes(ltc.string());
+                    String msgStr = removeFormatCodes(ltc.text());
 
                     int[] match = msgContainsStr(msgStr, trigger, false);
                     if (match != null) {
                         if (match[1] != msgStr.length()) {
-                            siblings.add(0, Text.literal(
+                            siblings.add(0, Component.literal(
                                             msgStr.substring(match[1]))
                                     .setStyle(message.getStyle()));
                         }
 
-                        siblings.add(0, Text.literal(msgStr.substring(
+                        siblings.add(0, Component.literal(msgStr.substring(
                                 match[0], match[1])).setStyle(
                                         applyStyle(message.getStyle(), style)));
 
                         if (match[0] != 0) {
-                            siblings.add(0, Text.literal(
+                            siblings.add(0, Component.literal(
                                             msgStr.substring(0, match[0]))
                                     .setStyle(message.getStyle()));
                         }
@@ -339,7 +345,7 @@ public class MessageProcessor
                             message = siblings.get(0).copy();
                         }
                         else {
-                            MutableText newMessage = MutableText.of(TextContent.EMPTY);
+                            MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
                             newMessage.siblings.addAll(siblings);
                             message = newMessage;
                         }
@@ -349,7 +355,7 @@ public class MessageProcessor
                     /*
                     If the message has siblings, it cannot be directly
                     re-styled. Instead, it is replaced by a new, empty Text
-                    object, with the original LiteralTextContent added as
+                    object, with the original LiteralContents added as
                     the first sibling, and all other siblings subsequently
                     added in their original order. The new message is then
                     itself processed, and the result is returned.
@@ -357,10 +363,10 @@ public class MessageProcessor
 
                     Style oldStyle = message.getStyle();
 
-                    MutableText demoted = MutableText.of(message.getContent());
+                    MutableComponent demoted = MutableComponent.create(message.getContents());
                     siblings.add(0, demoted);
 
-                    MutableText replacement = MutableText.of(TextContent.EMPTY);
+                    MutableComponent replacement = MutableComponent.create(ComponentContents.EMPTY);
                     replacement.setStyle(oldStyle);
                     replacement.siblings.addAll(siblings);
 
@@ -383,7 +389,7 @@ public class MessageProcessor
         StringBuilder cleanString = new StringBuilder();
 
         for (int i = 0; i < charArray.length; i++) {
-            if (charArray[i] == '§') {
+            if (charArray[i] == '\u00a7') {
                 i++; // Skip
             }
             else {
@@ -407,7 +413,7 @@ public class MessageProcessor
                         oldStyle.isBold()))
                 .withItalic((newStyle.isItalic() ||
                         oldStyle.isItalic()))
-                .withUnderline((newStyle.isUnderlined() ||
+                .withUnderlined((newStyle.isUnderlined() ||
                         oldStyle.isUnderlined()))
                 .withStrikethrough((newStyle.isStrikethrough() ||
                         oldStyle.isStrikethrough()))
@@ -425,7 +431,7 @@ public class MessageProcessor
         if (newStyle.getInsertion() != null) {
             result = result.withInsertion(newStyle.getInsertion());
         }
-        if (newStyle.getFont() != null) {
+        if (newStyle.getFont() != Style.DEFAULT_FONT) {
             result = result.withFont(newStyle.getFont());
         }
         return result;
@@ -433,7 +439,7 @@ public class MessageProcessor
 
     // Message analysis methods
 
-//    private static void analyseMessage(String filePrefix, Text message)
+//    private static void analyseMessage(String filePrefix, Component message)
 //    {
 //        try (PrintWriter pw = new PrintWriter(filePrefix +
 //                System.currentTimeMillis()))
@@ -449,7 +455,7 @@ public class MessageProcessor
 //        }
 //    }
 //
-//    private static void analyseText(PrintWriter pw, Text message, int depth)
+//    private static void analyseText(PrintWriter pw, Component message, int depth)
 //    {
 //        depth++;
 //        StringBuilder indent = new StringBuilder();
@@ -459,21 +465,21 @@ public class MessageProcessor
 //
 //        pw.println(indent + "message: " + message);
 //        pw.println(indent + "getString(): " + message.getString());
-//        pw.println(indent + "getContent(): " + message.getContent());
+//        pw.println(indent + "getContents(): " + message.getContents());
 //        pw.println(indent + "getStyle(): " + message.getStyle());
 //        pw.println(indent + "sibling count: " + message.getSiblings().size());
 //
-//        if (message.getContent() instanceof TranslatableTextContent ttc) {
+//        if (message.getContents() instanceof TranslatableContents ttc) {
 //            pw.println(indent + "is TTC");
 //            analyseTranslatableTc(pw, ttc, depth);
 //        }
-//        else if (message.getContent() instanceof LiteralTextContent ltc) {
+//        else if (message.getContents() instanceof LiteralContents ltc) {
 //            pw.println(indent + "is LTC");
 //            analyseLiteralTc(pw, ltc, depth);
 //        }
 //        if (message.getSiblings().size() != 0) {
 //            pw.println(indent + "analysing siblings");
-//            for (Text sibling : message.getSiblings()) {
+//            for (Component sibling : message.getSiblings()) {
 //                analyseText(pw, sibling, depth);
 //            }
 //        }
@@ -482,7 +488,7 @@ public class MessageProcessor
 //    }
 //
 //    private static void analyseTranslatableTc(PrintWriter pw,
-//                                              TranslatableTextContent ttc,
+//                                              TranslatableContents ttc,
 //                                              int depth)
 //    {
 //        depth++;
@@ -498,7 +504,7 @@ public class MessageProcessor
 //        pw.println(indent + "getArgs(): " + Arrays.toString(ttc.getArgs()));
 //
 //        for (int i = 0; i < ttc.getArgs().length; i++) {
-//            if (ttc.getArgs()[i] instanceof Text argText) {
+//            if (ttc.getArgs()[i] instanceof Component argText) {
 //                analyseText(pw, argText, depth);
 //            }
 //            else {
@@ -511,7 +517,7 @@ public class MessageProcessor
 //    }
 //
 //    private static void analyseLiteralTc(PrintWriter pw,
-//                                         LiteralTextContent ltc,
+//                                         LiteralContents ltc,
 //                                         int depth)
 //    {
 //        depth++;

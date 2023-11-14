@@ -2,33 +2,33 @@ package notryken.chatnotify.misc;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import net.minecraft.client.option.SimpleOption.SliderCallbacks;
+import net.minecraft.client.OptionInstance.SliderableValueSet;
 
 import java.util.Optional;
 
 /**
  * Modified slider for boosted chat height.
  */
-public enum ChatHeightSliderCallbacks implements SliderCallbacks<Double>
+public enum ChatHeightSliderCallbacks implements SliderableValueSet<Double>
 {
     INSTANCE;
 
     private final double maxChatHeight = 3.0;
 
     @Override
-    public double toSliderProgress(Double double_) {
-        return double_ / maxChatHeight;
+    public Optional<Double> validateValue(Double d) {
+        return d >= 0.0 && d <= maxChatHeight ?
+                Optional.of(d) : Optional.empty();
     }
 
     @Override
-    public Double toValue(double d) {
+    public double toSliderValue(Double d) {
         return d * maxChatHeight;
     }
 
     @Override
-    public Optional<Double> validate(Double double_) {
-        return double_ >= 0.0 && double_ <= maxChatHeight ?
-                Optional.of(double_) : Optional.empty();
+    public Double fromSliderValue(double d) {
+        return d / maxChatHeight;
     }
 
     @Override

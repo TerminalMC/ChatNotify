@@ -8,11 +8,11 @@ import java.util.ArrayList;
 public class ConfigDeserializer implements JsonDeserializer<Config>
 {
     @Override
-    public Config deserialize(JsonElement jsonElement, Type type,
+    public Config deserialize(JsonElement jsonGuiEventListener, Type type,
                               JsonDeserializationContext context)
             throws JsonParseException
     {
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        JsonObject jsonObject = jsonGuiEventListener.getAsJsonObject();
 
         boolean ignoreOwnMessages;
         String username;

@@ -1,12 +1,24 @@
-/forge/.gradle/
-/forge/build/
-/forge/run/
-/fabric/.gradle/
-/fabric/build/
-/fabric/run/
-/.gradle/
-/.idea/
-/common/.gradle/
-/common/build/
-/.architectury-transformer/
-/build/
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea/*
+!.idea/scopes
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+runs

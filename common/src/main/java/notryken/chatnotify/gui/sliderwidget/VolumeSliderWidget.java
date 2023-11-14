@@ -1,17 +1,17 @@
 package notryken.chatnotify.gui.sliderwidget;
 
-import net.minecraft.client.gui.widget.SliderWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.network.chat.Component;
 import notryken.chatnotify.config.Notification;
 
-public class VolumeSliderWidget extends SliderWidget
+public class VolumeSliderWidget extends AbstractSliderButton
 {
     private final Notification notif;
 
     public VolumeSliderWidget(int x, int y, int width, int height, double value,
                               Notification notif)
     {
-        super(x, y, width, height, Text.empty(), value);
+        super(x, y, width, height, Component.empty(), value);
         this.notif = notif;
         this.updateMessage();
     }
@@ -25,9 +25,9 @@ public class VolumeSliderWidget extends SliderWidget
     protected void updateMessage()
     {
         double volume = roundVolume();
-        Text message = Text.literal("Volume: ").append(
-                volume == 0 ? Text.literal("OFF") :
-                Text.literal(String.valueOf(volume)));
+        Component message = Component.literal("Volume: ").append(
+                volume == 0 ? Component.literal("OFF") :
+                Component.literal(String.valueOf(volume)));
         this.setMessage(message);
     }
 

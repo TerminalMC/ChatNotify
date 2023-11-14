@@ -1,16 +1,16 @@
 package notryken.chatnotify.gui.listwidget;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConfirmLinkScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.Util;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
@@ -19,19 +19,19 @@ public class ColorConfigListWidget extends ConfigListWidget
 {
     public final Notification notif;
 
-    public ColorConfigListWidget(MinecraftClient client, int width, int height,
+    public ColorConfigListWidget(Minecraft client, int width, int height,
                                  int top, int bottom, int itemHeight,
-                                 Screen parent, Text title, Notification notif)
+                                 Screen parent, Component title, Notification notif)
     {
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Hex Color")));
+                Component.literal("Hex Color")));
         this.addEntry(new Entry.ColorLink(width, notif, client, parent, this));
         this.addEntry(new Entry.ColorField(width, notif, client, this));
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Quick Colors")));
+                Component.literal("Quick Colors")));
 
         // These arrays match 1:1 for the color and its name.
         int[] intColors = new int[]
@@ -113,33 +113,33 @@ public class ColorConfigListWidget extends ConfigListWidget
         private static class ColorLink extends Entry
         {
             ColorLink(int width, Notification notif,
-                      @NotNull MinecraftClient client,
+                      @NotNull Minecraft client,
                       Screen parentScreen, ColorConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                ButtonWidget linkButton = ButtonWidget.builder(
-                        Text.literal("color-hex.com"), (button) -> openLink(
+                Button linkButton = Button.builder(
+                        Component.literal("color-hex.com"), (button) -> openLink(
                                 client, parentScreen, listWidget))
                         .size(80, 20)
-                        .position(width / 2 - 40, 0)
+                        .pos(width / 2 - 40, 0)
                         .build();
-                linkButton.setTooltip(Tooltip.of(Text.literal("Probably " +
+                linkButton.setTooltip(Tooltip.create(Component.literal("Probably " +
                         "opens a webpage with hex color selection.")));
 
                 this.options.add(linkButton);
             }
 
-            private void openLink(MinecraftClient client, Screen parent,
+            private void openLink(Minecraft client, Screen parent,
                                   ColorConfigListWidget listWidget)
             {
                 client.setScreen(new ConfirmLinkScreen(confirmed -> {
                     if (confirmed) {
-                        Util.getOperatingSystem().open(
+                        Util.getPlatform().openUri(
                                 "https://www.color-hex.com/");
                     }
                     client.setScreen(new ConfigScreen(parent, client.options,
-                            Text.literal("Notification Highlight Color"),
+                            Component.literal("Notification Highlight Color"),
                             listWidget));
                 }, "https://www.color-hex.com/", true));
             }
@@ -148,21 +148,21 @@ public class ColorConfigListWidget extends ConfigListWidget
         private static class ColorField extends Entry
         {
             ColorField(int width, Notification notif,
-                       @NotNull MinecraftClient client,
+                       @NotNull Minecraft client,
                        ColorConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                TextFieldWidget colorEdit = new TextFieldWidget(
-                        client.textRenderer, this.width / 2 - 120, 0, 240, 20,
-                        Text.literal("Hex Color"));
+                EditBox colorEdit = new EditBox(
+                        client.font, this.width / 2 - 120, 0, 240, 20,
+                        Component.literal("Hex Color"));
                 colorEdit.setMaxLength(7);
 
                 if (this.notif.getColor() != null) {
-                    colorEdit.setText(this.notif.getColor().getHexCode());
+                    colorEdit.setValue(this.notif.getColor().formatValue());
                 }
 
-                colorEdit.setChangedListener(this::setColor);
+                colorEdit.setResponder(this::setColor);
 
                 this.options.add(colorEdit);
             }
@@ -181,16 +181,16 @@ public class ColorConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                MutableText message = Text.literal(colorName);
+                MutableComponent message = Component.literal(colorName);
 
                 message.setStyle(Style.EMPTY.withColor(color));
 
-                this.options.add(ButtonWidget.builder(message, (button) -> {
+                this.options.add(Button.builder(message, (button) -> {
                     notif.setColor(color);
                     listWidget.refreshScreen();
                 })
                         .size(240, 20)
-                        .position(width / 2 - 120, 0)
+                        .pos(width / 2 - 120, 0)
                         .build());
             }
         }

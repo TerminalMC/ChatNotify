@@ -1,11 +1,11 @@
 package notryken.chatnotify.config;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,8 +18,8 @@ import java.util.Objects;
  */
 public class Notification
 {
-    private static final Identifier DEFAULTSOUND =
-            Identifier.tryParse(Config.DEFAULTSOUND);
+    private static final ResourceLocation DEFAULTSOUND =
+            ResourceLocation.tryParse(Config.DEFAULTSOUND);
     public boolean enabled;
     private final ArrayList<Boolean> controls;
     private final ArrayList<String> triggers;
@@ -28,7 +28,7 @@ public class Notification
     private final ArrayList<Boolean> formatControls;
     public float soundVolume;
     public float soundPitch;
-    private Identifier sound;
+    private ResourceLocation sound;
     public boolean persistent;
     public boolean regexEnabled;
     public boolean exclusionEnabled;
@@ -79,7 +79,7 @@ public class Notification
     Notification(boolean enabled, ArrayList<Boolean> controls,
                  ArrayList<String> triggers, boolean triggerIsKey,
                  TextColor color, ArrayList<Boolean> formatControls,
-                 float soundVolume, float soundPitch, Identifier sound,
+                 float soundVolume, float soundPitch, ResourceLocation sound,
                  boolean persistent, boolean regexEnabled,
                  boolean exclusionEnabled, ArrayList<String> exclusionTriggers,
                  boolean responseEnabled, ArrayList<String> responseMessages)
@@ -160,9 +160,9 @@ public class Notification
     }
 
     /**
-     * @return The Identifier of the notification's sound.
+     * @return The ResourceLocation of the notification's sound.
      */
-    public Identifier getSound()
+    public ResourceLocation getSound()
     {
         return this.sound;
     }
@@ -338,9 +338,9 @@ public class Notification
     /**
      * 'Smart' setter; if the specified sound is invalid, uses a default.
      * Additionally, enables sound and makes the notification persistent.
-     * @param sound The Identifier of the sound.
+     * @param sound The ResourceLocation of the sound.
      */
-    public void setSound(Identifier sound)
+    public void setSound(ResourceLocation sound)
     {
         this.sound = validSound(sound) ? sound : DEFAULTSOUND;
         setControl(2, true);
@@ -479,7 +479,7 @@ public class Notification
         TextColor color;
 
         if (strColor.startsWith("#")) {
-            color = TextColor.parse(strColor);
+            color = TextColor.parseColor(strColor);
         }
         else {
             try {
@@ -503,12 +503,12 @@ public class Notification
      * "namespace:category.source.sound" (such as "minecraft:block.anvil.land").
      * If the "namespace:" is omitted, will default to "minecraft:".
      * @param soundName The string representing the sound.
-     * @return The sound Identifier, or a default Identifier if the string
+     * @return The sound ResourceLocation, or a default ResourceLocation if the string
      * cannot be parsed.
      */
-    public Identifier parseSound(String soundName)
+    public ResourceLocation parseSound(String soundName)
     {
-        Identifier sound = Identifier.tryParse(soundName);
+        ResourceLocation sound = ResourceLocation.tryParse(soundName);
 
         if (sound == null) {
             sound = DEFAULTSOUND;
@@ -517,24 +517,24 @@ public class Notification
     }
 
     /**
-     * Determines whether the specified Identifier represents a playable sound.
+     * Determines whether the specified ResourceLocation represents a playable sound.
      * Returns true if the check cannot be run due to the Minecraft state, or
-     * if the Identifier is valid, false otherwise.
-     * @param sound The sound Identifier.
+     * if the ResourceLocation is valid, false otherwise.
+     * @param sound The sound ResourceLocation.
      * @return The boolean result of validation.
      */
-    public boolean validSound(Identifier sound) {
+    public boolean validSound(ResourceLocation sound) {
         /*
         Uses Minecraft's internal approach to sound validation, for lack of
         a better idea.
          */
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         boolean valid = true;
         if (client.player != null) {
-            if (new PositionedSoundInstance(sound, SoundCategory.PLAYERS,
-                    1f, 1f, SoundInstance.createRandom(), false, 0,
-                    SoundInstance.AttenuationType.NONE, 0, 0, 0, true)
-                    .getSoundSet(client.getSoundManager()) == null) {
+            if (new SimpleSoundInstance(sound, SoundSource.PLAYERS,
+                    1f, 1f, SoundInstance.createUnseededRandom(), false, 0,
+                    SoundInstance.Attenuation.NONE, 0, 0, 0, true)
+                    .resolve(client.getSoundManager()) == null) {
                 valid = false;
             }
         }

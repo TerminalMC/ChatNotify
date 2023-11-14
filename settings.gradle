@@ -1,25 +1,32 @@
 pluginManagement {
     repositories {
-        mavenCentral()
+        gradlePluginPortal()
         maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
         maven {
-            name = 'Forge'
-            url 'https://maven.minecraftforge.net/'
+            name = 'NeoForge'
+            url = 'https://maven.neoforged.net/releases/'
         }
         maven {
-            name = 'Architectury Plugin'
-            url 'https://maven.architectury.dev/'
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
         }
-        maven { url "https://jitpack.io" }
-        gradlePluginPortal()
+        maven {
+            name = 'Sponge Snapshots'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
     }
 }
 
-include('common')
-include('fabric')
-include('forge')
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
+}
 
+// This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
 rootProject.name = 'ChatNotify'
+include("common")
+include("fabric")
+include("forge")
+include("neoforge")

@@ -1,19 +1,19 @@
 package notryken.chatnotify.gui.screen;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.option.GameOptionsScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import net.minecraft.client.Options;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import notryken.chatnotify.gui.listwidget.ConfigListWidget;
 
-public class ConfigScreen extends GameOptionsScreen
+public class ConfigScreen extends OptionsSubScreen
 {
     private ConfigListWidget listWidget;
 
-    public ConfigScreen(Screen parent, GameOptions gameOptions, Text title,
+    public ConfigScreen(Screen parent, Options gameOptions, Component title,
                         ConfigListWidget listWidget)
     {
         super(parent, gameOptions, title);
@@ -25,26 +25,26 @@ public class ConfigScreen extends GameOptionsScreen
     {
         this.listWidget = this.listWidget.resize(
                 this.width, this.height, 32, this.height - 32);
-        this.addSelectableChild(listWidget);
+        this.addWidget(listWidget);
 
-        this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,
                         (button) -> {
-            assert this.client != null;
-            this.client.setScreen(this.parent);
+            assert this.minecraft != null;
+            this.minecraft.setScreen(this.lastScreen);
         })
                 .size(240, 20)
-                .position(this.width / 2 - 120, this.height - 27)
+                .pos(this.width / 2 - 120, this.height - 27)
                 .build());
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY,
+    public void render(GuiGraphics context, int mouseX, int mouseY,
                        float delta)
     {
-        this.renderBackgroundTexture(context);
+        this.renderDirtBackground(context);
         super.render(context, mouseX, mouseY, delta);
         this.listWidget.render(context, mouseX, mouseY, delta);
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title,
+        context.drawCenteredString(this.font, this.title,
                 this.width / 2, 5, 0xffffff);
     }
 }

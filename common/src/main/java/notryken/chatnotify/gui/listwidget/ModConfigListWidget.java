@@ -1,14 +1,14 @@
 package notryken.chatnotify.gui.listwidget;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.gui.screen.ScreenLauncher;
@@ -20,21 +20,21 @@ import static notryken.chatnotify.ChatNotify.config;
 
 public class ModConfigListWidget extends ConfigListWidget
 {
-    public ModConfigListWidget(MinecraftClient client, int width, int height,
+    public ModConfigListWidget(Minecraft client, int width, int height,
                                int top, int bottom, int itemHeight,
-                               Screen parent, Text title)
+                               Screen parent, Component title)
     {
         super(client, width, height, top, bottom, itemHeight, parent, title);
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Text.literal("Options")));
+                client, Component.literal("Options")));
 
         this.addEntry(new Entry.IgnoreToggle(this.width, this));
         this.addEntry(new Entry.PrefixConfigButton(this.width, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Text.literal("Notifications ℹ"),
-                Text.literal("Notifications are processed in sequential " +
+                client, Component.literal("Notifications ℹ"),
+                Component.literal("Notifications are processed in sequential " +
                         "order as displayed below. No more than one " +
                         "notification can activate at a time.")));
 
@@ -63,13 +63,13 @@ public class ModConfigListWidget extends ConfigListWidget
 
     private void openPrefixConfig()
     {
-        assert client.currentScreen != null;
-        Text title = Text.literal("Message Modifier Prefixes");
-        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+        assert client.screen != null;
+        Component title = Component.literal("Message Modifier Prefixes");
+        client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new PrefixConfigListWidget(client,
-                client.currentScreen.width, client.currentScreen.height,
-                32, client.currentScreen.height - 32, 25,
-                client.currentScreen, title)));
+                client.screen.width, client.screen.height,
+                32, client.screen.height - 32, 25,
+                client.screen, title)));
     }
 
     private void moveNotifUp(int index)
@@ -99,13 +99,13 @@ public class ModConfigListWidget extends ConfigListWidget
 
     private void openNotificationConfig(int index)
     {
-        assert client.currentScreen != null;
-        Text title = Text.literal("Notification Settings");
-        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+        assert client.screen != null;
+        Component title = Component.literal("Notification Settings");
+        client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new NotificationConfigListWidget(client,
-                client.currentScreen.width, client.currentScreen.height,
-                32, client.currentScreen.height - 32, 25,
-                client.currentScreen, title, config.getNotif(index))));
+                client.screen.width, client.screen.height,
+                32, client.screen.height - 32, 25,
+                client.screen, title, config.getNotif(index))));
     }
 
     public static class Entry extends ConfigListWidget.Entry
@@ -124,18 +124,18 @@ public class ModConfigListWidget extends ConfigListWidget
             {
                 super(width, listWidget, -1);
 
-                CyclingButtonWidget<Boolean> ignoreButton =
-                        CyclingButtonWidget.onOffBuilder(
-                                Text.of("No"), Text.of("Yes"))
-                                .initially(config.ignoreOwnMessages)
-                                .tooltip((status) -> Tooltip.of(Text.of(
+                CycleButton<Boolean> ignoreButton =
+                        CycleButton.booleanBuilder(
+                                Component.nullToEmpty("No"), Component.nullToEmpty("Yes"))
+                                .withInitialValue(config.ignoreOwnMessages)
+                                .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                         "Allows/Prevents your own messages " +
                                                 "triggering notifications.")))
-                                .build(this.width / 2 - 120, 32, 240, 20,
-                                Text.literal("Check Own Messages"),
+                                .create(this.width / 2 - 120, 32, 240, 20,
+                                Component.literal("Check Own Messages"),
                                 (button, status) ->
                                         config.ignoreOwnMessages = status);
-                ignoreButton.setTooltip(Tooltip.of(Text.literal(
+                ignoreButton.setTooltip(Tooltip.create(Component.literal(
                         "Allows/Prevents your own messages triggering " +
                         "notifications.")));
                 options.add(ignoreButton);
@@ -164,11 +164,11 @@ public class ModConfigListWidget extends ConfigListWidget
                     label = builder.toString();
                 }
 
-                options.add(ButtonWidget.builder(
-                                Text.literal(label),
+                options.add(Button.builder(
+                                Component.literal(label),
                                 (button) -> listWidget.openPrefixConfig())
                         .size(240, 20)
-                        .position(width / 2 - 120, 0)
+                        .pos(width / 2 - 120, 0)
                         .build());
             }
         }
@@ -200,8 +200,8 @@ public class ModConfigListWidget extends ConfigListWidget
                         }
                     }
 
-                    MutableText labelText = Text.literal(label)
-                            .setStyle(Style.of(
+                    MutableComponent labelText = Component.literal(label)
+                            .setStyle(Style.create(
                                     (notif.getColor() == null ?
                                             Optional.empty() :
                                             Optional.of(notif.getColor())),
@@ -213,54 +213,54 @@ public class ModConfigListWidget extends ConfigListWidget
                                     Optional.empty(),
                                     Optional.empty()));
 
-                    options.add(ButtonWidget.builder(labelText, (button) ->
+                    options.add(Button.builder(labelText, (button) ->
                                     listWidget.openNotificationConfig(index))
                             .size(210, 20)
-                            .position(width / 2 - 120, 0)
+                            .pos(width / 2 - 120, 0)
                             .build());
 
-                    options.add(CyclingButtonWidget.onOffBuilder()
-                            .omitKeyText()
-                            .initially(notif.enabled)
-                            .build(width / 2 + 95, 0, 25, 20,
-                                    Text.empty(), (button, status)
+                    options.add(CycleButton.onOffBuilder()
+                            .displayOnlyValue()
+                            .withInitialValue(notif.enabled)
+                            .create(width / 2 + 95, 0, 25, 20,
+                                    Component.empty(), (button, status)
                                             -> notif.enabled = status));
 
                     if (index > 0) {
-                        options.add(ButtonWidget.builder(Text.literal("⬆"),
+                        options.add(Button.builder(Component.literal("⬆"),
                                         (button) ->
                                                 listWidget.moveNotifUp(index))
                                 .size(12, 20)
-                                .position(width / 2 - 120 - 29, 0)
+                                .pos(width / 2 - 120 - 29, 0)
                                 .build());
 
-                        options.add(ButtonWidget.builder(Text.literal("⬇"),
+                        options.add(Button.builder(Component.literal("⬇"),
                                         (button) ->
                                                 listWidget.moveNotifDown(index))
                                 .size(12, 20)
-                                .position(width / 2 - 120 - 17, 0)
+                                .pos(width / 2 - 120 - 17, 0)
                                 .build());
 
-                        options.add(ButtonWidget.builder(Text.literal("X"),
+                        options.add(Button.builder(Component.literal("X"),
                                         (button) -> listWidget
                                                 .removeNotification(index))
                                 .size(25, 20)
-                                .position(width / 2 + 120 + 5, 0)
+                                .pos(width / 2 + 120 + 5, 0)
                                 .build());
                     }
                 }
                 else {
-                    options.add(ButtonWidget.builder(Text.literal("+"),
+                    options.add(Button.builder(Component.literal("+"),
                                     (button) -> listWidget.addNotification())
                             .size(240, 20)
-                            .position(width / 2 - 120, 0)
+                            .pos(width / 2 - 120, 0)
                             .build());
                 }
             }
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x,
+        public void render(GuiGraphics context, int index, int y, int x,
                            int entryWidth, int entryHeight, int mouseX,
                            int mouseY, boolean hovered, float tickDelta) {
             options.forEach((button) -> {
@@ -269,8 +269,8 @@ public class ModConfigListWidget extends ConfigListWidget
             });
 
             if (this.index >= 1) {
-                context.drawCenteredTextWithShadow(
-                        listWidget.client.textRenderer,
+                context.drawCenteredString(
+                        listWidget.client.font,
                         String.valueOf(this.index),
                         -36, y + entryHeight / 3, 16777215);
             }

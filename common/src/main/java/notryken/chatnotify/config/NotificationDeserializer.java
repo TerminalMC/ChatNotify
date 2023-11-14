@@ -1,8 +1,8 @@
 package notryken.chatnotify.config;
 
 import com.google.gson.*;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -11,11 +11,11 @@ import java.util.List;
 public class NotificationDeserializer implements JsonDeserializer<Notification>
 {
     @Override
-    public Notification deserialize(JsonElement jsonElement, Type type,
+    public Notification deserialize(JsonElement jsonGuiEventListener, Type type,
                                     JsonDeserializationContext context)
             throws JsonParseException
     {
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        JsonObject jsonObject = jsonGuiEventListener.getAsJsonObject();
 
         boolean enabled;
         ArrayList<Boolean> controls = new ArrayList<>();
@@ -25,7 +25,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
         ArrayList<Boolean> formatControls = new ArrayList<>();
         float soundVolume;
         float soundPitch;
-        Identifier sound;
+        ResourceLocation sound;
         boolean persistent;
         boolean regexEnabled;
         boolean exclusionEnabled;
@@ -122,9 +122,9 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
             JsonObject soundObj = jsonObject.get("sound").getAsJsonObject();
             String namespace = soundObj.get("field_13353").getAsString();
             String identifier = soundObj.get("field_13355").getAsString();
-            sound = Identifier.tryParse(namespace + ":" + identifier);
+            sound = ResourceLocation.tryParse(namespace + ":" + identifier);
             if (sound == null) {
-                sound = Identifier.tryParse("block.note_block.bell");
+                sound = ResourceLocation.tryParse("block.note_block.bell");
             }
         }
         catch (JsonParseException | NullPointerException |
@@ -134,15 +134,15 @@ public class NotificationDeserializer implements JsonDeserializer<Notification>
                 JsonObject soundObj = jsonObject.get("sound").getAsJsonObject();
                 String namespace = soundObj.get("f_135804_").getAsString();
                 String identifier = soundObj.get("f_135805_").getAsString();
-                sound = Identifier.tryParse(namespace + ":" + identifier);
+                sound = ResourceLocation.tryParse(namespace + ":" + identifier);
                 if (sound == null) {
-                    sound = Identifier.tryParse("block.note_block.bell");
+                    sound = ResourceLocation.tryParse("block.note_block.bell");
                 }
             }
             catch (JsonParseException | NullPointerException |
                    UnsupportedOperationException | IllegalStateException e2)
             {
-                sound = Identifier.tryParse("block.note_block.bell");
+                sound = ResourceLocation.tryParse("block.note_block.bell");
                 if (sound == null) {
                     return null;
                 }

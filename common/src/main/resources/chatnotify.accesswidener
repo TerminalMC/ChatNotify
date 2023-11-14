@@ -1,6 +1,6 @@
 accessWidener v1 named
-accessible method net/minecraft/text/Style of (Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;)Lnet/minecraft/text/Style;
-accessible field net/minecraft/text/MutableText siblings Ljava/util/List;
-extendable class net/minecraft/client/option/SimpleOption$Callbacks
-accessible class net/minecraft/client/option/SimpleOption$SliderCallbacks
-accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;
+accessible class net/minecraft/client/OptionInstance$SliderableValueSet
+accessible method net/minecraft/network/chat/TextColor formatValue ()Ljava/lang/String;
+accessible method net/minecraft/network/chat/Style create (Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;)Lnet/minecraft/network/chat/Style;
+accessible field net/minecraft/network/chat/MutableComponent siblings Ljava/util/List;
+extendable class net/minecraft/client/OptionInstance$ValueSet

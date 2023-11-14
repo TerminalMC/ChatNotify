@@ -1,17 +1,17 @@
 package notryken.chatnotify.gui.sliderwidget;
 
-import net.minecraft.client.gui.widget.SliderWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.network.chat.Component;
 import notryken.chatnotify.config.Notification;
 
-public class PitchSliderWidget extends SliderWidget
+public class PitchSliderWidget extends AbstractSliderButton
 {
     private final Notification notif;
 
     public PitchSliderWidget(int x, int y, int width, int height, double value,
                               Notification notif)
     {
-        super(x, y, width, height, Text.empty(), value);
+        super(x, y, width, height, Component.empty(), value);
         this.notif = notif;
         this.updateMessage();
     }
@@ -24,8 +24,8 @@ public class PitchSliderWidget extends SliderWidget
     @Override
     protected void updateMessage()
     {
-        Text message = Text.literal("Pitch: ").append(
-                Text.literal(String.valueOf(notif.soundPitch)));
+        Component message = Component.literal("Pitch: ").append(
+                Component.literal(String.valueOf(notif.soundPitch)));
         this.setMessage(message);
     }
 

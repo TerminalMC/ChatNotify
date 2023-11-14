@@ -2,7 +2,7 @@ package notryken.chatnotify;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import notryken.chatnotify.config.Config;
 import notryken.chatnotify.config.ConfigDeserializer;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ChatNotify
 {
-    public static MinecraftClient client = MinecraftClient.getInstance();
+    public static Minecraft client = Minecraft.getInstance();
 
     public static Config config;
     public static final List<String> recentMessages = new ArrayList<>();

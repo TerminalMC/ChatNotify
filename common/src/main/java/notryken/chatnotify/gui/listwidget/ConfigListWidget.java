@@ -1,31 +1,31 @@
 package notryken.chatnotify.gui.listwidget;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.ElementListWidget;
-import net.minecraft.client.gui.widget.MultilineTextWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.network.chat.Component;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ConfigListWidget
-        extends ElementListWidget<ConfigListWidget.Entry>
+        extends ContainerObjectSelectionList<ConfigListWidget.Entry>
 {
-    public final MinecraftClient client;
+    public final Minecraft client;
     public final Screen parent;
-    public final Text title;
+    public final Component title;
 
-    public ConfigListWidget(MinecraftClient client, int width, int height,
+    public ConfigListWidget(Minecraft client, int width, int height,
                             int top, int bottom, int itemHeight,
-                            Screen parent, Text title)
+                            Screen parent, Component title)
     {
         super(client, width, height, top, bottom, itemHeight);
         this.client = client;
@@ -44,9 +44,9 @@ public abstract class ConfigListWidget
         return 300;
     }
 
-    protected int getScrollbarPositionX()
+    protected int getScrollbarPosition()
     {
-        return super.getScrollbarPositionX() + 32;
+        return super.getScrollbarPosition() + 32;
     }
 
     public abstract ConfigListWidget resize(int width, int height,
@@ -54,9 +54,9 @@ public abstract class ConfigListWidget
 
     protected abstract void refreshScreen();
 
-    public abstract static class Entry extends ElementListWidget.Entry<Entry>
+    public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry>
     {
-        public final List<ClickableWidget> options;
+        public final List<AbstractWidget> options;
         public final ConfigListWidget listWidget;
         public final int width;
 
@@ -67,7 +67,7 @@ public abstract class ConfigListWidget
             this.width = width;
         }
 
-        public void render(DrawContext context, int index, int y, int x,
+        public void render(GuiGraphics context, int index, int y, int x,
                            int entryWidth, int entryHeight,
                            int mouseX, int mouseY,
                            boolean hovered, float tickDelta)
@@ -78,12 +78,12 @@ public abstract class ConfigListWidget
             });
         }
 
-        public List<? extends Element> children()
+        public List<? extends GuiEventListener> children()
         {
             return this.options;
         }
 
-        public List<? extends Selectable> selectableChildren()
+        public List<? extends NarratableEntry> narratables()
         {
             return this.options;
         }
@@ -91,40 +91,40 @@ public abstract class ConfigListWidget
         public static class Header extends Entry
         {
             public Header(int width, ConfigListWidget listWidget,
-                          MinecraftClient client, Text label)
+                          Minecraft client, Component label)
             {
                 super(width, listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.textRenderer));
+                this.options.add(new StringWidget(width / 2 - 120, 0, 240, 20,
+                        label, client.font));
             }
 
             public Header(int width, ConfigListWidget listWidget,
-                          MinecraftClient client, Text label, int labelColor)
+                          Minecraft client, Component label, int labelColor)
             {
                 super(width, listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.textRenderer).setTextColor(labelColor));
+                this.options.add(new StringWidget(width / 2 - 120, 0, 240, 20,
+                        label, client.font).setColor(labelColor));
             }
 
             public Header(int width, ConfigListWidget listWidget,
-                          MinecraftClient client, Text label, Text tooltip)
+                          Minecraft client, Component label, Component tooltip)
             {
                 super(width, listWidget);
-                TextWidget header = new TextWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.textRenderer);
-                header.setTooltip(Tooltip.of(tooltip));
+                StringWidget header = new StringWidget(width / 2 - 120, 0, 240, 20,
+                        label, client.font);
+                header.setTooltip(Tooltip.create(tooltip));
                 this.options.add(header);
             }
 
             public Header(int width, ConfigListWidget listWidget,
-                          MinecraftClient client, Text label, int labelColor,
-                          Text tooltip)
+                          Minecraft client, Component label, int labelColor,
+                          Component tooltip)
             {
                 super(width, listWidget);
-                TextWidget header = new TextWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.textRenderer);
-                header.setTextColor(labelColor);
-                header.setTooltip(Tooltip.of(tooltip));
+                StringWidget header = new StringWidget(width / 2 - 120, 0, 240, 20,
+                        label, client.font);
+                header.setColor(labelColor);
+                header.setTooltip(Tooltip.create(tooltip));
                 this.options.add(header);
             }
         }
@@ -132,47 +132,47 @@ public abstract class ConfigListWidget
         public static class MultiLineHeader extends Entry
         {
             public MultiLineHeader(int width, ConfigListWidget listWidget,
-                                   MinecraftClient client, Text label)
+                                   Minecraft client, Component label)
             {
                 super(width, listWidget);
-                this.options.add(new MultilineTextWidget(width / 2 - 120, 0,
-                        label, client.textRenderer)
+                this.options.add(new MultiLineTextWidget(width / 2 - 120, 0,
+                        label, client.font)
                         .setMaxWidth(240));
             }
 
             public MultiLineHeader(int width, ConfigListWidget listWidget,
-                                   MinecraftClient client, Text label,
+                                   Minecraft client, Component label,
                                    int labelColor)
             {
                 super(width, listWidget);
-                this.options.add(new MultilineTextWidget(width / 2 - 120, 0,
-                                label, client.textRenderer)
+                this.options.add(new MultiLineTextWidget(width / 2 - 120, 0,
+                                label, client.font)
                         .setMaxWidth(240)
-                        .setTextColor(labelColor));
+                        .setColor(labelColor));
             }
 
             public MultiLineHeader(int width, ConfigListWidget listWidget,
-                                   MinecraftClient client,
-                                   Text label, Text tooltip)
+                                   Minecraft client,
+                                   Component label, Component tooltip)
             {
                 super(width, listWidget);
-                MultilineTextWidget header = new MultilineTextWidget(
-                        width / 2 - 120, 0, label, client.textRenderer)
+                MultiLineTextWidget header = new MultiLineTextWidget(
+                        width / 2 - 120, 0, label, client.font)
                         .setMaxWidth(240);
-                header.setTooltip(Tooltip.of(tooltip));
+                header.setTooltip(Tooltip.create(tooltip));
                 this.options.add(header);
             }
 
             public MultiLineHeader(int width, ConfigListWidget listWidget,
-                                   MinecraftClient client,
-                                   Text label, int labelColor, Text tooltip)
+                                   Minecraft client,
+                                   Component label, int labelColor, Component tooltip)
             {
                 super(width, listWidget);
-                MultilineTextWidget header = new MultilineTextWidget(
-                        width / 2 - 120, 0, label, client.textRenderer)
+                MultiLineTextWidget header = new MultiLineTextWidget(
+                        width / 2 - 120, 0, label, client.font)
                         .setMaxWidth(240);
-                header.setTextColor(labelColor);
-                header.setTooltip(Tooltip.of(tooltip));
+                header.setColor(labelColor);
+                header.setTooltip(Tooltip.create(tooltip));
                 this.options.add(header);
             }
         }

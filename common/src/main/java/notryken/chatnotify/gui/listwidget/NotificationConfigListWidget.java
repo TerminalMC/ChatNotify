@@ -1,14 +1,14 @@
 package notryken.chatnotify.gui.listwidget;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
@@ -17,29 +17,29 @@ public class NotificationConfigListWidget extends ConfigListWidget
 {
     private final Notification notif;
 
-    public NotificationConfigListWidget(MinecraftClient client,
+    public NotificationConfigListWidget(Minecraft client,
                                         int width, int height,
                                         int top, int bottom, int itemHeight,
-                                        Screen parent, Text title,
+                                        Screen parent, Component title,
                                         Notification notif)
     {
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Notification Trigger ℹ"),
-                Text.literal("A trigger is a word or series of words that, " +
+                client, Component.literal("Notification Trigger ℹ"),
+                Component.literal("A trigger is a word or series of words that, " +
                         "if detected in a chat message, will activate the " +
                         "notification. NOT case-sensitive.")));
         this.addEntry(new Entry.TriggerConfigType(width, notif, this));
 
         if (notif.triggerIsKey) {
             this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                    Text.literal("May not work on some servers.")));
+                    Component.literal("May not work on some servers.")));
             this.addEntry(new Entry.TriggerField(width, notif, client, this,
                     0));
             this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                    Text.literal("Quick Keys")));
+                    Component.literal("Quick Keys")));
 
             String[][] keys =
                     {
@@ -68,11 +68,11 @@ public class NotificationConfigListWidget extends ConfigListWidget
         this.addEntry(new Entry.SoundConfigButton(width, notif, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Message Color")));
+                Component.literal("Message Color")));
         this.addEntry(new Entry.ColorConfigButton(width, notif, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Message Format")));
+                Component.literal("Message Format")));
         this.addEntry(new Entry.FormatConfigOption(
                 width, notif, this, "Bold", 0));
         this.addEntry(new Entry.FormatConfigOption(
@@ -85,7 +85,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
                 width, notif, this, "Obfuscated", 4));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Text.literal("Advanced Settings")));
+                Component.literal("Advanced Settings")));
         this.addEntry(new Entry.AdvancedConfigButton(width, notif, this));
     }
 
@@ -108,35 +108,35 @@ public class NotificationConfigListWidget extends ConfigListWidget
 
     private void openColorConfig()
     {
-        assert client.currentScreen != null;
-        Text title = Text.literal("Notification Message Color");
-        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+        assert client.screen != null;
+        Component title = Component.literal("Notification Message Color");
+        client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new ColorConfigListWidget(client,
-                client.currentScreen.width, client.currentScreen.height,
-                32, client.currentScreen.height - 32, 25,
-                client.currentScreen, title, this.notif)));
+                client.screen.width, client.screen.height,
+                32, client.screen.height - 32, 25,
+                client.screen, title, this.notif)));
     }
 
     private void openSoundConfig()
     {
-        assert client.currentScreen != null;
-        Text title = Text.literal("Notification Sound");
-        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+        assert client.screen != null;
+        Component title = Component.literal("Notification Sound");
+        client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new SoundConfigListWidget(client,
-                client.currentScreen.width, client.currentScreen.height,
-                32, client.currentScreen.height - 32, 25,
-                client.currentScreen, title, notif)));
+                client.screen.width, client.screen.height,
+                32, client.screen.height - 32, 25,
+                client.screen, title, notif)));
     }
 
     private void openAdvancedConfig()
     {
-        assert client.currentScreen != null;
-        Text title = Text.literal("Advanced Options");
-        client.setScreen(new ConfigScreen(client.currentScreen, client.options,
+        assert client.screen != null;
+        Component title = Component.literal("Advanced Options");
+        client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new AdvancedConfigListWidget(client,
-                client.currentScreen.width, client.currentScreen.height,
-                32, client.currentScreen.height - 32, 25,
-                client.currentScreen, title, notif)));
+                client.screen.width, client.screen.height,
+                32, client.screen.height - 32, 25,
+                client.screen, title, notif)));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry
@@ -156,11 +156,11 @@ public class NotificationConfigListWidget extends ConfigListWidget
                               NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
-                options.add(CyclingButtonWidget.onOffBuilder(
-                        Text.literal("Event Key"), Text.literal("Word/Phrase"))
-                                .initially(notif.triggerIsKey)
-                                .build(this.width / 2 - 120, 0, 240, 20,
-                                        Text.literal("Type"),
+                options.add(CycleButton.booleanBuilder(
+                        Component.literal("Event Key"), Component.literal("Word/Phrase"))
+                                .withInitialValue(notif.triggerIsKey)
+                                .create(this.width / 2 - 120, 0, 240, 20,
+                                        Component.literal("Type"),
                                         (button, status) -> {
                                     notif.triggerIsKey = status;
                                     listWidget.refreshScreen();
@@ -173,41 +173,41 @@ public class NotificationConfigListWidget extends ConfigListWidget
             final int index;
 
             TriggerField(int width, Notification notif,
-                         @NotNull MinecraftClient client,
+                         @NotNull Minecraft client,
                          NotificationConfigListWidget listWidget, int index)
             {
                 super(width, notif, listWidget);
                 this.index = index;
 
                 if (index >= 0) {
-                    TextFieldWidget triggerEdit = new TextFieldWidget(
-                            client.textRenderer, this.width / 2 - 120, 0, 240,
-                            20, Text.literal("Notification Trigger"));
+                    EditBox triggerEdit = new EditBox(
+                            client.font, this.width / 2 - 120, 0, 240,
+                            20, Component.literal("Notification Trigger"));
                     triggerEdit.setMaxLength(120);
-                    triggerEdit.setText(this.notif.getTrigger(index));
-                    triggerEdit.setChangedListener(this::setTrigger);
+                    triggerEdit.setValue(this.notif.getTrigger(index));
+                    triggerEdit.setResponder(this::setTrigger);
 
                     this.options.add(triggerEdit);
 
                     if (index != 0) {
-                        options.add(ButtonWidget.builder(Text.literal("X"),
+                        options.add(Button.builder(Component.literal("X"),
                                         (button) -> {
                                             notif.removeTrigger(index);
                                             listWidget.refreshScreen();
                                         })
                                 .size(25, 20)
-                                .position(width / 2 + 120 + 5, 0)
+                                .pos(width / 2 + 120 + 5, 0)
                                 .build());
                     }
                 }
                 else {
-                    options.add(ButtonWidget.builder(Text.literal("+"),
+                    options.add(Button.builder(Component.literal("+"),
                                     (button) -> {
                                         notif.addTrigger("");
                                         listWidget.refreshScreen();
                                     })
                             .size(240, 20)
-                            .position(width / 2 - 120, 0)
+                            .pos(width / 2 - 120, 0)
                             .build());
                 }
             }
@@ -225,13 +225,13 @@ public class NotificationConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                options.add(ButtonWidget.builder(Text.literal(key[1]),
+                options.add(Button.builder(Component.literal(key[1]),
                         (button) -> {
                             notif.setTrigger(key[0]);
                             listWidget.refreshScreen();
                         })
                         .size(240, 20)
-                        .position(width / 2 - 120, 0)
+                        .pos(width / 2 - 120, 0)
                         .build());
             }
         }
@@ -243,11 +243,11 @@ public class NotificationConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                options.add(ButtonWidget.builder(
-                                Text.literal(notif.getSound().toString()),
+                options.add(Button.builder(
+                                Component.literal(notif.getSound().toString()),
                                 (button) -> listWidget.openSoundConfig())
                         .size(240, 20)
-                        .position(width / 2 - 120, 0)
+                        .pos(width / 2 - 120, 0)
                         .build());
             }
         }
@@ -255,18 +255,18 @@ public class NotificationConfigListWidget extends ConfigListWidget
         private static class ControlConfigHeader extends Entry
         {
             ControlConfigHeader(int width, Notification notif,
-                                @NotNull MinecraftClient client,
+                                @NotNull Minecraft client,
                                 NotificationConfigListWidget listWidget,
                                 String label, int index)
             {
                 super(width, notif, listWidget);
-                options.add(new TextWidget(width / 2 - 60, 0, 120, 20,
-                        Text.literal(label),
-                        client.textRenderer));
-                options.add(CyclingButtonWidget.onOffBuilder()
-                        .omitKeyText()
-                        .initially(notif.getControl(index))
-                        .build(this.width / 2 + 60, 0, 25, 20, Text.empty(),
+                options.add(new StringWidget(width / 2 - 60, 0, 120, 20,
+                        Component.literal(label),
+                        client.font));
+                options.add(CycleButton.onOffBuilder()
+                        .displayOnlyValue()
+                        .withInitialValue(notif.getControl(index))
+                        .create(this.width / 2 + 60, 0, 25, 20, Component.empty(),
                                 (button, status) -> {
                                     notif.setControl(index, status);
                                     listWidget.refreshScreen();
@@ -281,19 +281,19 @@ public class NotificationConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                MutableText message;
+                MutableComponent message;
 
                 if (notif.getColor() == null) {
-                    message = Text.literal("[No Color]");
+                    message = Component.literal("[No Color]");
                 }
                 else {
-                    message = Text.literal(notif.getColor().getHexCode());
+                    message = Component.literal(notif.getColor().formatValue());
                     message.setStyle(Style.EMPTY.withColor(notif.getColor()));
                 }
-                options.add(ButtonWidget.builder(message,
+                options.add(Button.builder(message,
                                 (button) -> listWidget.openColorConfig())
                         .size(240, 20)
-                        .position(width / 2 - 120, 0)
+                        .pos(width / 2 - 120, 0)
                         .build());
             }
         }
@@ -305,10 +305,10 @@ public class NotificationConfigListWidget extends ConfigListWidget
                                String label, int index)
             {
                 super(width, notif, listWidget);
-                options.add(CyclingButtonWidget.onOffBuilder()
-                        .initially(notif.getFormatControl(index))
-                        .build(this.width / 2 - 120, 0, 240, 20,
-                                Text.literal(label), (button, status) -> {
+                options.add(CycleButton.onOffBuilder()
+                        .withInitialValue(notif.getFormatControl(index))
+                        .create(this.width / 2 - 120, 0, 240, 20,
+                                Component.literal(label), (button, status) -> {
                                     notif.setFormatControl(index, status);
                                     listWidget.refreshScreen();
                                 }));
@@ -322,11 +322,11 @@ public class NotificationConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                options.add(ButtonWidget.builder(
-                        Text.literal("Here be Dragons!"),
+                options.add(Button.builder(
+                        Component.literal("Here be Dragons!"),
                                 (button) -> listWidget.openAdvancedConfig())
                         .size(240, 20)
-                        .position(width / 2 - 120, 0)
+                        .pos(width / 2 - 120, 0)
                         .build());
             }
         }

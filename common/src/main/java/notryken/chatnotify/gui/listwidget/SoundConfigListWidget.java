@@ -1,16 +1,16 @@
 package notryken.chatnotify.gui.listwidget;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConfirmLinkScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.Util;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.sliderwidget.PitchSliderWidget;
 import notryken.chatnotify.gui.sliderwidget.VolumeSliderWidget;
@@ -20,26 +20,26 @@ public class SoundConfigListWidget extends ConfigListWidget
 {
     private final Notification notif;
 
-    public SoundConfigListWidget(MinecraftClient client, int width, int height,
+    public SoundConfigListWidget(Minecraft client, int width, int height,
                                  int top, int bottom, int itemHeight,
-                                 Screen parent, Text title, Notification notif)
+                                 Screen parent, Component title, Notification notif)
     {
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Sound ID")));
+                client, Component.literal("Sound ID")));
         this.addEntry(new Entry.SoundLink(width, notif, client, this));
         this.addEntry(new Entry.SoundField(width, notif, client, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Sound Options")));
+                client, Component.literal("Sound Options")));
         this.addEntry(new Entry.SoundConfigVolume(width, notif, this));
         this.addEntry(new Entry.SoundConfigPitch(width, notif, this));
         this.addEntry(new Entry.SoundTest(width, notif, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Noteblock Sounds")));
+                client, Component.literal("Noteblock Sounds")));
         String[][] noteblockSounds =
                 {
                         {"block.note_block.banjo", "Banjo"},
@@ -65,7 +65,7 @@ public class SoundConfigListWidget extends ConfigListWidget
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Power/Portal Sounds")));
+                client, Component.literal("Power/Portal Sounds")));
         String[][] powerSounds = new String[][]
                 {
                         {"block.beacon.activate", "Beacon Activate"},
@@ -91,7 +91,7 @@ public class SoundConfigListWidget extends ConfigListWidget
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Explosion Sounds")));
+                client, Component.literal("Explosion Sounds")));
         String[][] explosionSounds = new String[][]
                 {
                         {"entity.tnt.primed", "TNT Ignite"},
@@ -109,7 +109,7 @@ public class SoundConfigListWidget extends ConfigListWidget
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Illager Sounds")));
+                client, Component.literal("Illager Sounds")));
         String[][] villagerSounds = new String[][]
                 {
                         {"entity.villager.ambient", "Villager"},
@@ -127,7 +127,7 @@ public class SoundConfigListWidget extends ConfigListWidget
         }
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Misc Sounds")));
+                client, Component.literal("Misc Sounds")));
         String[][] miscSounds = new String[][]
                 {
                         {"entity.arrow.hit_player", "Arrow Hit"},
@@ -168,11 +168,11 @@ public class SoundConfigListWidget extends ConfigListWidget
     private void playNotifSound()
     {
         client.getSoundManager().play(
-                new PositionedSoundInstance(notif.getSound(),
-                        SoundCategory.PLAYERS,
+                new SimpleSoundInstance(notif.getSound(),
+                        SoundSource.PLAYERS,
                         notif.soundVolume, notif.soundPitch,
-                        SoundInstance.createRandom(), false, 0,
-                        SoundInstance.AttenuationType.NONE, 0, 0, 0, true));
+                        SoundInstance.createUnseededRandom(), false, 0,
+                        SoundInstance.Attenuation.NONE, 0, 0, 0, true));
 
     }
 
@@ -189,28 +189,28 @@ public class SoundConfigListWidget extends ConfigListWidget
         private static class SoundLink extends Entry
         {
             SoundLink(int width, Notification notif,
-                      @NotNull MinecraftClient client,
+                      @NotNull Minecraft client,
                       SoundConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                ButtonWidget linkButton = ButtonWidget.builder(
-                        Text.literal("Sound List"),
+                Button linkButton = Button.builder(
+                        Component.literal("Sound List"),
                                 (button) -> openLink(client))
                         .size(80, 20)
-                        .position(width / 2 - 40, 0)
+                        .pos(width / 2 - 40, 0)
                         .build();
-                linkButton.setTooltip(Tooltip.of(Text.literal("Probably " +
+                linkButton.setTooltip(Tooltip.create(Component.literal("Probably " +
                         "opens a webpage with a list of Minecraft sounds.")));
 
                 options.add(linkButton);
             }
 
-            private void openLink(MinecraftClient client)
+            private void openLink(Minecraft client)
             {
                 client.setScreen(new ConfirmLinkScreen(confirmed -> {
                     if (confirmed) {
-                        Util.getOperatingSystem().open("https://github.com/" +
+                        Util.getPlatform().openUri("https://github.com/" +
                                 "NotRyken/ChatNotify/blob/master/src/main/" +
                                 "resources/assets/chatnotify/SoundList.txt");
                     }
@@ -251,27 +251,27 @@ public class SoundConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                options.add(ButtonWidget.builder(Text.literal(
+                options.add(Button.builder(Component.literal(
                         "> Click to Test Sound <"), (button) ->
                                 listWidget.playNotifSound()).size(240, 20)
-                        .position(width / 2 - 120, 0).build());
+                        .pos(width / 2 - 120, 0).build());
             }
         }
 
         private static class SoundField extends Entry
         {
             SoundField(int width, Notification notif,
-                       @NotNull MinecraftClient client,
+                       @NotNull Minecraft client,
                        SoundConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                TextFieldWidget soundField = new TextFieldWidget(
-                        client.textRenderer, this.width / 2 - 120, 0, 240, 20,
-                        Text.literal("Notification Sound"));
+                EditBox soundField = new EditBox(
+                        client.font, this.width / 2 - 120, 0, 240, 20,
+                        Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
-                soundField.setText(this.notif.getSound().toString());
-                soundField.setChangedListener(this::setSound);
+                soundField.setValue(this.notif.getSound().toString());
+                soundField.setResponder(this::setSound);
 
                 options.add(soundField);
             }
@@ -290,14 +290,14 @@ public class SoundConfigListWidget extends ConfigListWidget
             {
                 super(width, notif, listWidget);
 
-                options.add(ButtonWidget.builder(Text.literal(soundName),
+                options.add(Button.builder(Component.literal(soundName),
                         (button) -> {
                     notif.setSound(notif.parseSound(sound));
                     listWidget.refreshScreen();
                     listWidget.playNotifSound();
                 })
                         .size(240, 20)
-                        .position(width / 2 - 120, 0)
+                        .pos(width / 2 - 120, 0)
                         .build());
             }
         }

@@ -1,10 +1,10 @@
 package notryken.chatnotify.gui.listwidget;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -13,15 +13,15 @@ import static notryken.chatnotify.ChatNotify.config;
 
 public class PrefixConfigListWidget extends ConfigListWidget
 {
-    public PrefixConfigListWidget(MinecraftClient client, int width, int height,
+    public PrefixConfigListWidget(Minecraft client, int width, int height,
                                   int top, int bottom, int itemHeight,
-                                  Screen parent, Text title)
+                                  Screen parent, Component title)
     {
         super(client, width, height, top, bottom, itemHeight, parent, title);
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Text.literal("Message Prefixes ℹ"),
-                Text.literal("A message prefix is a character or sequence of " +
+                client, Component.literal("Message Prefixes ℹ"),
+                Component.literal("A message prefix is a character or sequence of " +
                         "characters that you type before a message to modify " +
                         "it. For example, '!' or '/shout' may be used on some" +
                         " servers to communicate in global chat. This may be " +
@@ -62,40 +62,40 @@ public class PrefixConfigListWidget extends ConfigListWidget
         {
             final int index;
 
-            PrefixField(int width, @NotNull MinecraftClient client,
+            PrefixField(int width, @NotNull Minecraft client,
                         PrefixConfigListWidget listWidget, int index)
             {
                 super(width, listWidget);
                 this.index = index;
 
                 if (index >= 0) {
-                    TextFieldWidget prefixEdit = new TextFieldWidget(
-                            client.textRenderer, this.width / 2 - 120, 0, 240,
-                            20, Text.literal("Message Prefix"));
+                    EditBox prefixEdit = new EditBox(
+                            client.font, this.width / 2 - 120, 0, 240,
+                            20, Component.literal("Message Prefix"));
                     prefixEdit.setMaxLength(20);
-                    prefixEdit.setText(config.getPrefix(index));
-                    prefixEdit.setChangedListener(this::setPrefix);
+                    prefixEdit.setValue(config.getPrefix(index));
+                    prefixEdit.setResponder(this::setPrefix);
 
                     this.options.add(prefixEdit);
 
-                    options.add(ButtonWidget.builder(Text.literal("X"),
+                    options.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         config.removePrefix(index);
                                         listWidget.refreshScreen();
                                     })
                             .size(25, 20)
-                            .position(width / 2 + 120 + 5, 0)
+                            .pos(width / 2 + 120 + 5, 0)
                             .build());
 
                 }
                 else {
-                    options.add(ButtonWidget.builder(Text.literal("+"),
+                    options.add(Button.builder(Component.literal("+"),
                                     (button) -> {
                                         config.addPrefix("");
                                         listWidget.refreshScreen();
                                     })
                             .size(240, 20)
-                            .position(width / 2 - 120, 0)
+                            .pos(width / 2 - 120, 0)
                             .build());
                 }
             }
