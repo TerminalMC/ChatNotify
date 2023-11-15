@@ -2,8 +2,8 @@ package notryken.chatnotify.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import net.minecraft.world.entity.player.Player;
 import notryken.chatnotify.ChatNotify;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

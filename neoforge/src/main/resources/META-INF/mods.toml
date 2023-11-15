@@ -13,9 +13,9 @@ credits="${credits}" #optional
 authors = "${mod_author}" #optional
 description = '''${description}''' #mandatory (Supports multiline text)
 [[mixins]]
-config = "examplemod.mixins.json"
+config = "chatnotify.mixins.json"
 [[mixins]]
-config = "examplemod.neoforge.mixins.json"
+config = "chatnotify.neoforge.mixins.json"
 [[dependencies.${ mod_id }]] #optional
 modId = "neoforge" #mandatory
 mandatory = true #mandatory

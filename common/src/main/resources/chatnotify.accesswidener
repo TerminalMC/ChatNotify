@@ -1,6 +1,6 @@
 accessWidener v1 named
 accessible class net/minecraft/client/OptionInstance$SliderableValueSet
-accessible method net/minecraft/network/chat/TextColor formatValue ()Ljava/lang/String;
 accessible method net/minecraft/network/chat/Style create (Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;)Lnet/minecraft/network/chat/Style;
 accessible field net/minecraft/network/chat/MutableComponent siblings Ljava/util/List;
-extendable class net/minecraft/client/OptionInstance$ValueSet
+accessible method net/minecraft/network/chat/TextColor formatValue ()Ljava/lang/String;
+accessible class net/minecraft/client/OptionInstance$ValueSet
