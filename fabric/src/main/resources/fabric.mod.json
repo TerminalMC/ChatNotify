@@ -12,11 +12,14 @@
         "sources": "https://github.com/FabricMC/fabric-example-mod"
     },
     "license": "${license}",
-    "icon": "assets/modid/${mod_id}.png",
+    "icon": "assets/${mod_id}/icon.png",
     "environment": "*",
     "entrypoints": {
         "client": [
             "notryken.chatnotify.ChatNotifyFabric"
+        ],
+        "modmenu": [
+            "notryken.chatnotify.gui.screen.ModMenuIntegration"
         ]
     },
     "mixins": [
