@@ -2,21 +2,20 @@ package notryken.chatnotify.gui.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.Component;
+import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.gui.screen.ScreenLauncher;
 
 import java.util.List;
 import java.util.Optional;
-
-import static notryken.chatnotify.ChatNotify.config;
 
 public class ModConfigListWidget extends ConfigListWidget
 {
@@ -38,7 +37,7 @@ public class ModConfigListWidget extends ConfigListWidget
                         "order as displayed below. No more than one " +
                         "notification can activate at a time.")));
 
-        int max = config.getNumNotifs();
+        int max = ChatNotify.config().getNumNotifs();
         for (int idx = 0; idx < max; idx++) {
             this.addEntry(new Entry.NotifButton(this.width, this, idx));
         }
@@ -74,25 +73,25 @@ public class ModConfigListWidget extends ConfigListWidget
 
     private void moveNotifUp(int index)
     {
-        config.moveNotifUp(index);
+        ChatNotify.config().moveNotifUp(index);
         refreshScreen();
     }
 
     private void moveNotifDown(int index)
     {
-        config.moveNotifDown(index);
+        ChatNotify.config().moveNotifDown(index);
         refreshScreen();
     }
 
     private void addNotification()
     {
-        config.addNotif();
+        ChatNotify.config().addNotif();
         refreshScreen();
     }
 
     private void removeNotification(int index)
     {
-        if (config.removeNotif(index) == 0) {
+        if (ChatNotify.config().removeNotif(index) == 0) {
             refreshScreen();
         }
     }
@@ -105,7 +104,7 @@ public class ModConfigListWidget extends ConfigListWidget
                 title, new NotificationConfigListWidget(client,
                 client.screen.width, client.screen.height,
                 32, client.screen.height - 32, 25,
-                client.screen, title, config.getNotif(index))));
+                client.screen, title, ChatNotify.config().getNotif(index))));
     }
 
     public static class Entry extends ConfigListWidget.Entry
@@ -127,14 +126,14 @@ public class ModConfigListWidget extends ConfigListWidget
                 CycleButton<Boolean> ignoreButton =
                         CycleButton.booleanBuilder(
                                 Component.nullToEmpty("No"), Component.nullToEmpty("Yes"))
-                                .withInitialValue(config.ignoreOwnMessages)
+                                .withInitialValue(ChatNotify.config().ignoreOwnMessages)
                                 .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                         "Allows/Prevents your own messages " +
                                                 "triggering notifications.")))
                                 .create(this.width / 2 - 120, 32, 240, 20,
                                 Component.literal("Check Own Messages"),
                                 (button, status) ->
-                                        config.ignoreOwnMessages = status);
+                                        ChatNotify.config().ignoreOwnMessages = status);
                 ignoreButton.setTooltip(Tooltip.create(Component.literal(
                         "Allows/Prevents your own messages triggering " +
                         "notifications.")));
@@ -148,7 +147,7 @@ public class ModConfigListWidget extends ConfigListWidget
             {
                 super(width, listWidget, -1);
 
-                List<String> prefixes = config.getPrefixes();
+                List<String> prefixes = ChatNotify.config().getPrefixes();
                 String label = "Prefixes: ";
 
                 if (prefixes.isEmpty()) {
@@ -156,7 +155,7 @@ public class ModConfigListWidget extends ConfigListWidget
                 }
                 else {
                     StringBuilder builder = new StringBuilder(label);
-                    builder.append(config.getPrefix(0));
+                    builder.append(ChatNotify.config().getPrefix(0));
                     for (int i = 1; i < prefixes.size(); i++) {
                         builder.append(", ");
                         builder.append(prefixes.get(i));
@@ -180,7 +179,7 @@ public class ModConfigListWidget extends ConfigListWidget
                 super(width, listWidget, index);
 
                 if (index >= 0) {
-                    Notification notif = config.getNotif(index);
+                    Notification notif = ChatNotify.config().getNotif(index);
                     String label = notif.getTrigger();
                     if (label.isEmpty()) {
                         label = "> Click to Configure <";

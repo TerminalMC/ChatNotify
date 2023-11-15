@@ -1,86 +1,44 @@
 package notryken.chatnotify;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import notryken.chatnotify.config.Config;
-import notryken.chatnotify.config.ConfigDeserializer;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatNotify
 {
     public static Minecraft client = Minecraft.getInstance();
+    public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
+    private static Config CONFIG;
 
-    public static Config config;
-    public static final List<String> recentMessages = new ArrayList<>();
-    public static final List<Long> recentMessageTimes = new ArrayList<>();
-    private static final File settingsFile =
-            new File("config", "chatnotify.json");
-
-    private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(Config.class, new ConfigDeserializer())
-            .setPrettyPrinting().create();
 
     public static void init()
     {
-        loadConfig();
+        CONFIG = loadConfig();
     }
 
-    /**
-     * If the config file exists and is readable, loads the config from it,
-     * correcting any invalid fields. If it exists but is unreadable, creates a
-     * new config with defaults. If it does not exist, creates it with defaults.
-     * Finally, saves the validated config.
-     */
-    public static void loadConfig()
-    {
-        if (settingsFile.exists()) {
-            try {
-                config = gson.fromJson(Files.readString(settingsFile.toPath()),
-                        Config.class);
-            } catch (Exception e) { // Catching Exception to cover all bases.
-                System.err.println(e.getMessage());
-                config = null;
-            }
+    public static Config config() {
+        if (CONFIG == null) {
+            throw new IllegalStateException("Config not yet available");
         }
-        if (config == null) {
-            config = new Config();
-        }
-        saveConfig();
+        return CONFIG;
     }
 
-    /**
-     * Writes the current config to the config file, overwriting any existing
-     * value.
-     */
-    public static void saveConfig()
-    {
+    private static Config loadConfig() {
         try {
-            Files.writeString(settingsFile.toPath(), gson.toJson(config));
-        } catch (IOException | SecurityException e) {
-            e.printStackTrace();
+            return Config.load();
+        } catch (Exception e) {
+            Constants.LOG.error("Failed to load configuration file", e);
+            Constants.LOG.error("Using default configuration file");
+
+            return new Config();
         }
     }
 
-    /**
-     * Deletes the existing config file if it exists.
-     */
-    public static void deleteConfigFile()
-    {
-        if (settingsFile.exists()) {
-            try {
-                if (!settingsFile.delete()) {
-                    throw new IOException("Unable to delete config file.");
-                }
-            }
-            catch (IOException | SecurityException e) {
-                e.printStackTrace();
-            }
-        }
+    public static void restoreDefaultConfig() {
+        CONFIG = new Config();
+        CONFIG.writeChanges();
     }
 }

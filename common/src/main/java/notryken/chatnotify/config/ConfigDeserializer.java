@@ -15,7 +15,6 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
         JsonObject jsonObject = jsonGuiEventListener.getAsJsonObject();
 
         boolean ignoreOwnMessages;
-        String username;
         ArrayList<Notification> notifications = new ArrayList<>();
         ArrayList<String> messagePrefixes = new ArrayList<>();
 
@@ -27,15 +26,6 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
                UnsupportedOperationException | IllegalStateException e)
         {
             ignoreOwnMessages = false;
-        }
-
-        try {
-            username = jsonObject.get("username").getAsString();
-        }
-        catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e)
-        {
-            username = null;
         }
 
         try {
@@ -59,7 +49,7 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
         catch (JsonParseException | NullPointerException |
                UnsupportedOperationException | IllegalStateException e)
         {
-            notifications.add(Config.DEFAULTNOTIF);
+            notifications.add(Config.DEFAULT_NOTIF);
         }
 
         try {
@@ -72,10 +62,9 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
         } catch (JsonParseException | NullPointerException |
                  UnsupportedOperationException | IllegalStateException e)
         {
-            messagePrefixes = new ArrayList<>(Config.DEFAULTPREFIXES);
+            messagePrefixes = new ArrayList<>(Config.DEFAULT_PREFIXES);
         }
 
-        return new Config(ignoreOwnMessages, username, notifications,
-                messagePrefixes);
+        return new Config(ignoreOwnMessages, notifications, messagePrefixes);
     }
 }

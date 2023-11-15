@@ -1,5 +1,15 @@
 package notryken.chatnotify.config;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import notryken.chatnotify.Constants;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
@@ -7,16 +17,23 @@ import java.util.*;
  */
 public class Config
 {
-    public static final String DEFAULTSOUND = "block.note_block.bell";
-    public static final Notification DEFAULTNOTIF =
+    // Defaults
+    private static final String DEFAULT_FILE_NAME = "chatnotify.json";
+    public static final String DEFAULT_SOUND = "block.note_block.bell";
+    public static final Notification DEFAULT_NOTIF =
             new Notification(true, true, false, true, "username", false,
                     "#FFC400", false, false, false, false, false, 1f, 1f,
-                    DEFAULTSOUND, true);
+                    DEFAULT_SOUND, true);
+    public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
 
-    public static final List<String> DEFAULTPREFIXES = List.of("/shout", "!");
+    // Stored but not saved
+    private static String username;
+    private static Path configPath;
 
+    // Options
+    // TODO add soundSource field
+    private final String FORMAT_VERSION = "001";
     public boolean ignoreOwnMessages;
-    private String username;
     private final ArrayList<Notification> notifications;
     private final ArrayList<String> messagePrefixes;
 
@@ -26,26 +43,23 @@ public class Config
     public Config()
     {
         ignoreOwnMessages = false;
-        username = null;
         notifications = new ArrayList<>();
-        messagePrefixes = new ArrayList<>(DEFAULTPREFIXES);
-        notifications.add(0, DEFAULTNOTIF);
+        notifications.add(0, DEFAULT_NOTIF);
+        messagePrefixes = new ArrayList<>(DEFAULT_PREFIXES);
     }
 
     /**
      * Initializes the config with specified values.
      */
-    Config(boolean ignoreOwnMessages, String username,
-           ArrayList<Notification> notifications,
+    Config(boolean ignoreOwnMessages, ArrayList<Notification> notifications,
            ArrayList<String> messagePrefixes)
     {
         this.ignoreOwnMessages = ignoreOwnMessages;
-        this.username = username;
         this.notifications = notifications;
         this.messagePrefixes = messagePrefixes;
     }
 
-    // Accessors.
+    // Accessors
 
     /**
      * @return The total number of notifications, including disabled ones.
@@ -73,14 +87,11 @@ public class Config
     }
 
     /**
-     * @return The prefix at the specified index, or null if none exists.
+     * @return The prefix at the specified index, or null if none exists or the index is invalid.
      */
     public String getPrefix(int index)
     {
-        if (index >= 0 && index < messagePrefixes.size()) {
-            return messagePrefixes.get(index);
-        }
-        return null;
+        return (index >= 0 && index < messagePrefixes.size()) ? messagePrefixes.get(index) : null;
     }
 
     /**
@@ -96,11 +107,11 @@ public class Config
     /**
      * 'Smart' setter; ensures that the username notification's trigger is also
      * set to the specified username.
-     * @param username The user's in-game name.
+     * @param pUsername The user's in-game name.
      */
-    public void setUsername(String username)
+    public void setUsername(String pUsername)
     {
-        this.username = username;
+        username = pUsername;
         refreshUsernameNotif();
     }
 
@@ -124,7 +135,7 @@ public class Config
     {
         notifications.add(new Notification(true, false, false, false, "", false,
                 null, false, false, false, false, false, 1f, 1f,
-                DEFAULTSOUND, false));
+                DEFAULT_SOUND, false));
     }
 
     /**
@@ -205,7 +216,7 @@ public class Config
         }
     }
 
-    // Other processing.
+    // Other processing
 
     /**
      * Removes all empty message prefixes, removes all non-persistent
@@ -234,6 +245,85 @@ public class Config
             notif2.purgeExclusionTriggers();
             notif2.purgeResponseMessages();
             notif2.autoDisable();
+        }
+    }
+
+    // Save and load
+
+    private static final Gson GSON = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .setPrettyPrinting()
+            .create();
+
+    private static final Gson LEGACY_GSON = new GsonBuilder()
+            .registerTypeAdapter(Config.class, new ConfigDeserializer())
+            .setPrettyPrinting()
+            .create();
+
+    public static Config load() {
+        return load(DEFAULT_FILE_NAME);
+    }
+
+    public static Config load(String name) {
+        Path path = getConfigPath(name);
+        Config config;
+
+        if (Files.exists(path)) {
+            try (FileReader reader = new FileReader(path.toFile())) {
+                // Second reader because apparently FileReader.reset() isn't allowed.
+                try (FileReader checkReader = new FileReader(path.toFile())) {
+                    for (int i = 0; i < 5; i++) {
+                        checkReader.read();
+                    }
+                    Gson formatGson;
+                    if (checkReader.read() == 102) {
+                        formatGson = GSON;
+                    }
+                    else {
+                        formatGson = LEGACY_GSON;
+                        Constants.LOG.info("Config file using legacy format, applying custom deserializer.");
+                    }
+                    config = formatGson.fromJson(reader, Config.class);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Could not parse config", e);
+            }
+        } else {
+            config = new Config();
+        }
+
+        configPath = path;
+
+        config.writeChanges();
+
+        return config;
+    }
+
+    private static Path getConfigPath(String name) {
+        return Path.of("config").resolve(name);
+    }
+
+    public void writeChanges() {
+        Path dir = configPath.getParent();
+
+        try {
+            if (!Files.exists(dir)) {
+                Files.createDirectories(dir);
+            } else if (!Files.isDirectory(dir)) {
+                throw new IOException("Not a directory: " + dir);
+            }
+
+            // Use a temporary location next to the config's final destination
+            Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
+
+            // Write the file to our temporary location
+            Files.writeString(tempPath, GSON.toJson(this));
+
+            // Atomically replace the old config file (if it exists) with the temporary file
+            Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Couldn't update config file", e);
         }
     }
 }

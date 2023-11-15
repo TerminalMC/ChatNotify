@@ -13,6 +13,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.StringDecomposer;
+import notryken.chatnotify.ChatNotify;
+import notryken.chatnotify.config.Config;
 import notryken.chatnotify.config.Notification;
 
 import java.util.List;
@@ -64,17 +66,17 @@ public class MessageProcessor
     private static String preProcess(String strMsg)
     {
         String strMsgLower = strMsg.toLowerCase(Locale.ROOT);
+        Config config = ChatNotify.config();
 
         if (!recentMessages.isEmpty()) {
             for (int i = 0; i < recentMessages.size(); i++) {
-                int match1 = strMsgLower.lastIndexOf(recentMessages.get(i));
+                int match1 = strMsgLower.lastIndexOf(recentMessages.get(i).getSecond());
                 if (match1 > 0) {
                     String prefix = strMsg.substring(0, match1);
                     for (String username : config.getNotif(0).getTriggers()) {
                         int[] match2 = msgContainsStr(prefix, username, false);
                         if (match2 != null) {
                             recentMessages.remove(i);
-                            recentMessageTimes.remove(i);
                             if (config.ignoreOwnMessages) {
                                 strMsg = null;
                             }
@@ -105,7 +107,7 @@ public class MessageProcessor
     private static Component tryNotify(Component message, String plainMsg,
                                   String processedMsg)
     {
-        for (Notification notif : config.getNotifs()) {
+        for (Notification notif : ChatNotify.config().getNotifs()) {
             if (notif.enabled) {
                 if (notif.triggerIsKey) {
                     if (message.getContents() instanceof

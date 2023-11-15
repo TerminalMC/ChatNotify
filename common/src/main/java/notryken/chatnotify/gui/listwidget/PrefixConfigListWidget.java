@@ -5,11 +5,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import notryken.chatnotify.ChatNotify;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
-
-import static notryken.chatnotify.ChatNotify.config;
 
 public class PrefixConfigListWidget extends ConfigListWidget
 {
@@ -27,7 +26,7 @@ public class PrefixConfigListWidget extends ConfigListWidget
                         " servers to communicate in global chat. This may be " +
                         "useful for preventing spurious notifications.")));
 
-        for (int i = 0; i < config.getPrefixes().size(); i++) {
+        for (int i = 0; i < ChatNotify.config().getPrefixes().size(); i++) {
             this.addEntry(new Entry.PrefixField(width, client, this, i));
         }
         this.addEntry(new Entry.PrefixField(width, client, this, -1));
@@ -73,14 +72,14 @@ public class PrefixConfigListWidget extends ConfigListWidget
                             client.font, this.width / 2 - 120, 0, 240,
                             20, Component.literal("Message Prefix"));
                     prefixEdit.setMaxLength(20);
-                    prefixEdit.setValue(config.getPrefix(index));
+                    prefixEdit.setValue(ChatNotify.config().getPrefix(index));
                     prefixEdit.setResponder(this::setPrefix);
 
                     this.options.add(prefixEdit);
 
                     options.add(Button.builder(Component.literal("X"),
                                     (button) -> {
-                                        config.removePrefix(index);
+                                        ChatNotify.config().removePrefix(index);
                                         listWidget.refreshScreen();
                                     })
                             .size(25, 20)
@@ -91,7 +90,7 @@ public class PrefixConfigListWidget extends ConfigListWidget
                 else {
                     options.add(Button.builder(Component.literal("+"),
                                     (button) -> {
-                                        config.addPrefix("");
+                                        ChatNotify.config().addPrefix("");
                                         listWidget.refreshScreen();
                                     })
                             .size(240, 20)
@@ -102,7 +101,7 @@ public class PrefixConfigListWidget extends ConfigListWidget
 
             private void setPrefix(String prefix)
             {
-                config.setPrefix(index,
+                ChatNotify.config().setPrefix(index,
                         prefix.strip().toLowerCase(Locale.ROOT));
             }
         }

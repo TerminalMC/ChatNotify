@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.gui.listwidget.ModConfigListWidget;
 
-import static notryken.chatnotify.ChatNotify.config;
+import java.io.IOException;
 
 public class ScreenLauncher
 {
@@ -33,9 +33,9 @@ public class ScreenLauncher
 
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,
                             (button) -> {
-                config.refreshUsernameNotif();
-                config.purge();
-                ChatNotify.saveConfig();
+                ChatNotify.config().refreshUsernameNotif();
+                ChatNotify.config().purge();
+                ChatNotify.config().writeChanges();
                 assert this.minecraft != null;
                 this.minecraft.setScreen(this.lastScreen);
             })
@@ -56,11 +56,10 @@ public class ScreenLauncher
         }
 
         @Override
-        public void onClose()
-        {
-            config.refreshUsernameNotif();
-            config.purge();
-            ChatNotify.saveConfig();
+        public void onClose() {
+            ChatNotify.config().refreshUsernameNotif();
+            ChatNotify.config().purge();
+            ChatNotify.config().writeChanges();
             assert this.minecraft != null;
             this.minecraft.setScreen(this.lastScreen);
         }

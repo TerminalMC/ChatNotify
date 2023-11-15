@@ -3,9 +3,9 @@ package notryken.chatnotify.config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,7 +19,7 @@ import java.util.Objects;
 public class Notification
 {
     private static final ResourceLocation DEFAULTSOUND =
-            ResourceLocation.tryParse(Config.DEFAULTSOUND);
+            ResourceLocation.tryParse(Config.DEFAULT_SOUND);
     public boolean enabled;
     private final ArrayList<Boolean> controls;
     private final ArrayList<String> triggers;
