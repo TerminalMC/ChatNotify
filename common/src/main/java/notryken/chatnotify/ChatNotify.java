@@ -1,7 +1,6 @@
 package notryken.chatnotify;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.Minecraft;
 import notryken.chatnotify.config.Config;
 
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.List;
 
 public class ChatNotify
 {
-    public static Minecraft client = Minecraft.getInstance();
     public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
     private static Config CONFIG;
 
@@ -32,8 +30,9 @@ public class ChatNotify
         } catch (Exception e) {
             Constants.LOG.error("Failed to load configuration file", e);
             Constants.LOG.error("Using default configuration file");
-
-            return new Config();
+            Config newConfig = new Config();
+            newConfig.writeChanges();
+            return newConfig;
         }
     }
 

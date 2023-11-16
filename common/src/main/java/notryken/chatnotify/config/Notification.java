@@ -18,8 +18,7 @@ import java.util.Objects;
  */
 public class Notification
 {
-    private static final ResourceLocation DEFAULTSOUND =
-            ResourceLocation.tryParse(Config.DEFAULT_SOUND);
+    // Saved, user-accessible
     public boolean enabled;
     private final ArrayList<Boolean> controls;
     private final ArrayList<String> triggers;
@@ -49,7 +48,6 @@ public class Notification
         this.controls = new ArrayList<>(List.of(true, true, true));
         this.triggers = new ArrayList<>();
         this.formatControls = new ArrayList<>(List.of(true, true, true, true, true));
-
         this.enabled = enabled;
         setControl(0, doColor);
         setControl(1, doFormat);
@@ -74,7 +72,7 @@ public class Notification
     }
 
     /**
-     * Not validated.
+     * Not validated, only for use by deserializer.
      */
     Notification(boolean enabled, ArrayList<Boolean> controls,
                  ArrayList<String> triggers, boolean triggerIsKey,
@@ -213,7 +211,7 @@ public class Notification
     // Mutators.
 
     /**
-     * 'Smart' setter; disables the parent if all sibling control are disabled,
+     * 'Smart' setter; disables the parent if all sibling controls are disabled,
      * and enables the parent when enabled. If the control has sub-controls,
      * prevents enabling it if they are all disabled.
      * @param index The index of the control (0:color, 1:format, 2:sound).
@@ -268,8 +266,7 @@ public class Notification
     }
 
     /**
-     * Adds the specified trigger, if the notification does not already contain
-     * it.
+     * Adds the specified trigger, if the notification does not already contain it.
      * @param trigger The trigger String to add.
      */
     public void addTrigger(String trigger)
@@ -342,7 +339,7 @@ public class Notification
      */
     public void setSound(ResourceLocation sound)
     {
-        this.sound = validSound(sound) ? sound : DEFAULTSOUND;
+        this.sound = validSound(sound) ? sound : Config.DEFAULT_SOUND;
         setControl(2, true);
         persistent = true;
     }
@@ -511,7 +508,7 @@ public class Notification
         ResourceLocation sound = ResourceLocation.tryParse(soundName);
 
         if (sound == null) {
-            sound = DEFAULTSOUND;
+            sound = Config.DEFAULT_SOUND;
         }
         return sound;
     }

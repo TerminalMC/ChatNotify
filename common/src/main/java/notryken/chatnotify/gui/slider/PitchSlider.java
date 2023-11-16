@@ -1,15 +1,14 @@
-package notryken.chatnotify.gui.sliderwidget;
+package notryken.chatnotify.gui.slider;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.config.Notification;
 
-public class PitchSliderWidget extends AbstractSliderButton
+public class PitchSlider extends AbstractSliderButton
 {
     private final Notification notif;
 
-    public PitchSliderWidget(int x, int y, int width, int height, double value,
-                              Notification notif)
+    public PitchSlider(int x, int y, int width, int height, double value, Notification notif)
     {
         super(x, y, width, height, Component.empty(), value);
         this.notif = notif;

@@ -1,4 +1,4 @@
-package notryken.chatnotify.misc;
+package notryken.chatnotify.gui.slider;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * Modified slider for boosted chat height.
  */
-public enum ChatHeightSliderCallbacks implements SliderableValueSet<Double>
+public enum ChatHeightSlider implements SliderableValueSet<Double>
 {
     INSTANCE;
 

@@ -5,7 +5,7 @@ import net.minecraft.client.OptionInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import notryken.chatnotify.misc.ChatHeightSliderCallbacks;
+import notryken.chatnotify.gui.slider.ChatHeightSlider;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -47,7 +47,7 @@ public class MixinOptionInstance
         if (!key.equals("options.chat.height.focused"))
             return;
 
-        this.values = ChatHeightSliderCallbacks.INSTANCE;
+        this.values = ChatHeightSlider.INSTANCE;
         this.codec = this.values.codec();
     }
 }

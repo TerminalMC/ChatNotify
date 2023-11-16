@@ -5,6 +5,9 @@ import com.google.gson.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
+/**
+ * Legacy deserializer. Provides backwards-compatibility to ChatNotify v1.0.x (prior to mojmap conversion).
+ */
 public class ConfigDeserializer implements JsonDeserializer<Config>
 {
     @Override
@@ -65,6 +68,6 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
             messagePrefixes = new ArrayList<>(Config.DEFAULT_PREFIXES);
         }
 
-        return new Config(ignoreOwnMessages, notifications, messagePrefixes);
+        return new Config(ignoreOwnMessages, true, Config.DEFAULT_SOUND_SOURCE, notifications, messagePrefixes);
     }
 }

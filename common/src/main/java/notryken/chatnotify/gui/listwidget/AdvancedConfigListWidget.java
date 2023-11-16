@@ -1,15 +1,14 @@
 package notryken.chatnotify.gui.listwidget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
-import notryken.chatnotify.config.Config;
 import notryken.chatnotify.config.Notification;
 import org.jetbrains.annotations.NotNull;
 

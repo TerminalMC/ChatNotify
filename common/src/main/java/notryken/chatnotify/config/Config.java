@@ -3,6 +3,8 @@ package notryken.chatnotify.config;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.Constants;
 
 import java.io.FileReader;
@@ -13,48 +15,56 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
- * User-customizable configuration options class, with defaults.
+ * Configuration options class with defaults. Loosely based on the design used by
+ * <a href="https://github.com/CaffeineMC/sodium-fabric">Sodium</a>.
  */
 public class Config
 {
     // Defaults
-    private static final String DEFAULT_FILE_NAME = "chatnotify.json";
-    public static final String DEFAULT_SOUND = "block.note_block.bell";
+    public static final String DEFAULT_FILE_NAME = "chatnotify.json";
+    public static final String DEFAULT_SOUND_STRING = "block.note_block.bell";
+    public static final ResourceLocation DEFAULT_SOUND = ResourceLocation.tryParse(DEFAULT_SOUND_STRING);
+    public static final SoundSource DEFAULT_SOUND_SOURCE = SoundSource.PLAYERS;
     public static final Notification DEFAULT_NOTIF =
             new Notification(true, true, false, true, "username", false,
-                    "#FFC400", false, false, false, false, false, 1f, 1f,
-                    DEFAULT_SOUND, true);
+                    "#FFC400", false, false, false, false, false,
+                    1f, 1f, DEFAULT_SOUND_STRING, true);
     public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
 
-    // Stored but not saved
+    // Not saved, not user-accessible
     private static String username;
     private static Path configPath;
 
-    // Options
-    // TODO add soundSource field
-    private final String FORMAT_VERSION = "001";
+    // Saved, not user-accessible
+    private final String version = "001";
+
+    // Saved, user-accessible
     public boolean ignoreOwnMessages;
-    private final ArrayList<Notification> notifications;
+    public boolean advancedHighlight;
+    public SoundSource notifSoundSource;
     private final ArrayList<String> messagePrefixes;
+    private final ArrayList<Notification> notifications;
 
     /**
-     * Initialises the config with minimum default values.
+     * Default initialization
      */
-    public Config()
-    {
+    public Config() {
         ignoreOwnMessages = false;
+        advancedHighlight = true;
+        notifSoundSource = DEFAULT_SOUND_SOURCE;
         notifications = new ArrayList<>();
         notifications.add(0, DEFAULT_NOTIF);
         messagePrefixes = new ArrayList<>(DEFAULT_PREFIXES);
     }
 
     /**
-     * Initializes the config with specified values.
+     * Parameterized initialization
      */
-    Config(boolean ignoreOwnMessages, ArrayList<Notification> notifications,
-           ArrayList<String> messagePrefixes)
-    {
+    Config(boolean ignoreOwnMessages, boolean advancedHighlight, SoundSource notifSoundSource,
+           ArrayList<Notification> notifications, ArrayList<String> messagePrefixes) {
         this.ignoreOwnMessages = ignoreOwnMessages;
+        this.advancedHighlight = advancedHighlight;
+        this.notifSoundSource = notifSoundSource;
         this.notifications = notifications;
         this.messagePrefixes = messagePrefixes;
     }
@@ -64,33 +74,14 @@ public class Config
     /**
      * @return The total number of notifications, including disabled ones.
      */
-    public int getNumNotifs()
-    {
+    public int getNumNotifs() {
         return this.notifications.size();
     }
 
     /**
-     * @return The notification at the specified index, or null if none exists.
-     * Note that the username notification is located at index 0.
+     * @return The prefix at the specified index, or null if none exists.
      */
-    public Notification getNotif(int index)
-    {
-        return notifications.get(index);
-    }
-
-    /**
-     * @return An unmodifiable view of the notification map.
-     */
-    public List<Notification> getNotifs()
-    {
-        return Collections.unmodifiableList(notifications);
-    }
-
-    /**
-     * @return The prefix at the specified index, or null if none exists or the index is invalid.
-     */
-    public String getPrefix(int index)
-    {
+    public String getPrefix(int index) {
         return (index >= 0 && index < messagePrefixes.size()) ? messagePrefixes.get(index) : null;
     }
 
@@ -100,6 +91,23 @@ public class Config
     public List<String> getPrefixes()
     {
         return Collections.unmodifiableList(messagePrefixes);
+    }
+
+    /**
+     * @return The notification at the specified index, or null if none exists.
+     * Username notification is located at index 0.
+     */
+    public Notification getNotif(int index)
+    {
+        return (index >= 0 && index < notifications.size()) ? notifications.get(index) : null;
+    }
+
+    /**
+     * @return An unmodifiable view of the notification list.
+     */
+    public List<Notification> getNotifs()
+    {
+        return Collections.unmodifiableList(notifications);
     }
 
     // Mutators
@@ -135,7 +143,7 @@ public class Config
     {
         notifications.add(new Notification(true, false, false, false, "", false,
                 null, false, false, false, false, false, 1f, 1f,
-                DEFAULT_SOUND, false));
+                DEFAULT_SOUND_STRING, false));
     }
 
     /**
@@ -248,7 +256,7 @@ public class Config
         }
     }
 
-    // Save and load
+    // Load and save
 
     private static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
@@ -265,18 +273,26 @@ public class Config
     }
 
     public static Config load(String name) {
-        Path path = getConfigPath(name);
+        Path path = Path.of("config").resolve(name);
         Config config;
 
         if (Files.exists(path)) {
             try (FileReader reader = new FileReader(path.toFile())) {
-                // Second reader because apparently FileReader.reset() isn't allowed.
+                /*
+                Check the config file to determine version. v1.0.2-3 have "username" as the first stored identifier.
+                v1.1.0 and higher have "version". v1.0.1 and lower are unsupported by v1.0.2 and higher.
+
+                Backwards-compatibility to v1.0.x to be maintained until it can be reasonably surmised that the
+                vast majority of v1.0.x users have updated to v1.1.0 or higher.
+
+                Uses a second reader because apparently FileReader.reset() isn't allowed.
+                 */
                 try (FileReader checkReader = new FileReader(path.toFile())) {
                     for (int i = 0; i < 5; i++) {
                         checkReader.read();
                     }
                     Gson formatGson;
-                    if (checkReader.read() == 102) {
+                    if (checkReader.read() == 118) {
                         formatGson = GSON;
                     }
                     else {
@@ -297,10 +313,6 @@ public class Config
         config.writeChanges();
 
         return config;
-    }
-
-    private static Path getConfigPath(String name) {
-        return Path.of("config").resolve(name);
     }
 
     public void writeChanges() {

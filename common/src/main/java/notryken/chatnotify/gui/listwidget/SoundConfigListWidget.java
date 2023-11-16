@@ -1,19 +1,19 @@
 package notryken.chatnotify.gui.listwidget;
 
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.Util;
+import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.sliderwidget.PitchSliderWidget;
-import notryken.chatnotify.gui.sliderwidget.VolumeSliderWidget;
+import notryken.chatnotify.gui.slider.PitchSlider;
+import notryken.chatnotify.gui.slider.VolumeSlider;
 import org.jetbrains.annotations.NotNull;
 
 public class SoundConfigListWidget extends ConfigListWidget
@@ -169,7 +169,7 @@ public class SoundConfigListWidget extends ConfigListWidget
     {
         client.getSoundManager().play(
                 new SimpleSoundInstance(notif.getSound(),
-                        SoundSource.PLAYERS,
+                        ChatNotify.config().notifSoundSource,
                         notif.soundVolume, notif.soundPitch,
                         SoundInstance.createUnseededRandom(), false, 0,
                         SoundInstance.Attenuation.NONE, 0, 0, 0, true));
@@ -227,7 +227,7 @@ public class SoundConfigListWidget extends ConfigListWidget
                               SoundConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
-                options.add(new VolumeSliderWidget(width / 2 - 120, 0, 240, 20,
+                options.add(new VolumeSlider(width / 2 - 120, 0, 240, 20,
                         notif.soundVolume, notif));
             }
         }
@@ -238,8 +238,8 @@ public class SoundConfigListWidget extends ConfigListWidget
                              SoundConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
-                options.add(new PitchSliderWidget(width / 2 - 120, 0, 240, 20,
-                        PitchSliderWidget.sliderValue(notif.soundPitch),
+                options.add(new PitchSlider(width / 2 - 120, 0, 240, 20,
+                        PitchSlider.sliderValue(notif.soundPitch),
                         notif));
             }
         }

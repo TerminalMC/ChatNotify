@@ -8,6 +8,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Legacy deserializer. Provides backwards-compatibility to ChatNotify v1.0.x (prior to mojmap conversion).
+ */
 public class NotificationDeserializer implements JsonDeserializer<Notification>
 {
     @Override

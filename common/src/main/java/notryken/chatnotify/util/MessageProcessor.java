@@ -1,30 +1,29 @@
 package notryken.chatnotify.util;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.util.StringDecomposer;
 import notryken.chatnotify.ChatNotify;
+import notryken.chatnotify.Constants;
 import notryken.chatnotify.config.Config;
 import notryken.chatnotify.config.Notification;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static notryken.chatnotify.ChatNotify.*;
+import static notryken.chatnotify.ChatNotify.config;
+import static notryken.chatnotify.ChatNotify.recentMessages;
 
 public class MessageProcessor
 {
@@ -38,7 +37,8 @@ public class MessageProcessor
     {
         Component modifiedMessage = null;
 
-        String plainMsg = StringDecomposer.getPlainText(message); // Removes formatting codes
+        //String plainMsg = StringDecomposer.getPlainText(message); // Removes formatting codes
+        String plainMsg = message.getString();
         String processedMsg = preProcess(plainMsg);
 
         if (processedMsg != null) {
@@ -107,6 +107,8 @@ public class MessageProcessor
     private static Component tryNotify(Component message, String plainMsg,
                                   String processedMsg)
     {
+        Constants.LOG.info("tryNotify message: " + message.getString());
+
         for (Notification notif : ChatNotify.config().getNotifs()) {
             if (notif.enabled) {
                 if (notif.triggerIsKey) {
@@ -120,6 +122,18 @@ public class MessageProcessor
                     }
                 } else {
                     for (String trig : notif.getTriggers()) {
+
+                        Constants.LOG.info("Checking trigger: " + trig);
+                        if (!trig.isEmpty()) {
+                            int[] match = msgContainsStr((notif.regexEnabled ? plainMsg : processedMsg), trig, notif.regexEnabled);
+                            if (match == null) {
+                                Constants.LOG.info("Match null");
+                            }
+                            else {
+                                Constants.LOG.info("Match: [" + match[0] + "," + match[1] + "]");
+                            }
+                        }
+
                         if (!trig.isEmpty() && msgContainsStr(
                                 (notif.regexEnabled ? plainMsg : processedMsg),
                                 trig, notif.regexEnabled) != null)
@@ -173,9 +187,13 @@ public class MessageProcessor
                 matcher = Pattern.compile(str).matcher(msg);
             }
             else {
-                matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" +
-                        Pattern.quote(str) + "\\W?)(?!\\w)",
-                        Pattern.CASE_INSENSITIVE).matcher(msg);
+//                matcher = Pattern.compile("(?<!\\w)(\\W?(?i)" +
+//                        Pattern.quote(str) + "\\W?)(?!\\w)",
+//                        Pattern.CASE_INSENSITIVE).matcher(msg);
+//                matcher = Pattern.compile("(?<!\\w)((\\W|§[a-z0-9])?(?i)" +
+//                                Pattern.quote(str) + "\\W?)(?!\\w)").matcher(msg);
+                matcher = Pattern.compile("(?<!\\w)((\\W?|(§[a-z0-9])+)(?i)" +
+                        Pattern.quote(str) + "\\W?)(?!\\w)").matcher(msg);
             }
             if (matcher.find()) {
                 return new int[]{matcher.start(), matcher.end()};
@@ -195,7 +213,7 @@ public class MessageProcessor
         if (notif.getControl(2)) {
             Minecraft.getInstance().getSoundManager().play(
                     new SimpleSoundInstance(
-                            notif.getSound(), SoundSource.PLAYERS,
+                            notif.getSound(), config().notifSoundSource,
                             notif.soundVolume, notif.soundPitch,
                             SoundInstance.createUnseededRandom(), false, 0,
                             SoundInstance.Attenuation.NONE, 0, 0, 0, true));
@@ -308,9 +326,14 @@ public class MessageProcessor
                                                 String trigger, Style style)
     {
         if (message.getContents() instanceof LiteralContents ltc) {
+
             // Only process if the message or its siblings contain the match.
-            if (msgContainsStr(removeFormatCodes(
-                    message.getString()), trigger, false) != null)
+
+            //String msgStr = removeFormatCodes(ltc.text()); // TODO stringdecomposer.getplaintext()?
+            String msgStr = ltc.text();
+            int[] match = msgContainsStr(msgStr, trigger, false);
+
+            if (match != null)
             {
                 List<Component> siblings = message.getSiblings();
 
@@ -323,35 +346,90 @@ public class MessageProcessor
                     re-built into a new Component object, which is returned.
                      */
 
-                    String msgStr = removeFormatCodes(ltc.text());
+                    Constants.LOG.info("processLiteralTc final stage");
+                    Constants.LOG.info("msgStr: " + msgStr);
+                    Constants.LOG.info("trigger: " + trigger);
+                    Constants.LOG.info("match: " + match[0] + " (" + msgStr.charAt(match[0]) + "), " + (match[1]-1) + " (" + msgStr.charAt(match[1]-1) + ")");
 
-                    int[] match = msgContainsStr(msgStr, trigger, false);
-                    if (match != null) {
-                        if (match[1] != msgStr.length()) {
-                            siblings.add(0, Component.literal(
-                                            msgStr.substring(match[1]))
-                                    .setStyle(message.getStyle()));
-                        }
+                    List<ChatFormatting> appliedCodes = new ArrayList<>();
 
-                        siblings.add(0, Component.literal(msgStr.substring(
-                                match[0], match[1])).setStyle(
-                                        applyStyle(message.getStyle(), style)));
+                    int len = match[1] - trigger.length();
 
-                        if (match[0] != 0) {
-                            siblings.add(0, Component.literal(
-                                            msgStr.substring(0, match[0]))
-                                    .setStyle(message.getStyle()));
-                        }
+                    Constants.LOG.info("Scanning for codes over length " + len + " (string: " + msgStr.substring(0, len) + ")");
 
-                        if (siblings.size() == 1) {
-                            message = siblings.get(0).copy();
-                        }
-                        else {
-                            MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
-                            newMessage.siblings.addAll(siblings);
-                            message = newMessage;
+                    for (int i = 0; i < len; i++) {
+                        char c = msgStr.charAt(i);
+                        if ((int)c == 167) {
+                            char d = msgStr.charAt(i+1);
+                            ChatFormatting format = ChatFormatting.getByCode(d);
+                            if (format != null) {
+                                if (format == ChatFormatting.RESET) {
+                                    appliedCodes.clear();
+                                }
+                                else {
+                                    if (format.isColor()) {
+                                        appliedCodes.removeIf(ChatFormatting::isColor);
+                                    }
+                                    appliedCodes.add(format);
+                                }
+                            }
                         }
                     }
+
+                    StringBuilder builder = new StringBuilder();
+                    for (ChatFormatting cf : appliedCodes) {
+                        builder.append('\u00a7');
+                        builder.append(cf.getChar());
+                    }
+
+                    Constants.LOG.info("codes applied at trigger: " + builder);
+
+                    String msgTriggerFull = msgStr.substring(match[0],match[1]);
+                    int realStart = formatCodesEnd(trigger, msgTriggerFull);
+
+                    String msgStart = msgStr.substring(0, match[0]);
+                    String msgTrigger = realStart == -1 ? msgTriggerFull : msgTriggerFull.substring(realStart);
+                    String msgEnd = msgStr.substring(match[1]);
+
+                    Constants.LOG.info("actual trigger: " + msgTrigger);
+
+                    msgStr = msgStart + '\u00a7' + 'r' + msgTrigger + builder + msgEnd;
+
+                    Constants.LOG.info("edited string: " + msgStr);
+
+                    match = new int[]{match[0],match[1]};
+
+                    if (match[1] != msgStr.length()) {
+                        siblings.add(0, Component.literal(
+                                        msgStr.substring(match[1]))
+                                .setStyle(message.getStyle()));
+                    }
+
+                    siblings.add(0, Component.literal(msgStr.substring(
+                            match[0], match[1])).setStyle(
+                                    applyStyle(message.getStyle(), style)));
+
+                    if (match[0] != 0) {
+                        siblings.add(0, Component.literal(
+                                        msgStr.substring(0, match[0]))
+                                .setStyle(message.getStyle()));
+                    }
+
+                    if (siblings.size() == 1) {
+                        message = siblings.get(0).copy();
+                    }
+                    else {
+                        MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
+                        newMessage.siblings.addAll(siblings);
+                        message = newMessage;
+                    }
+
+                    for (Component c : message.getSiblings()) {
+                        Constants.LOG.info("sibling: " + c.getString());
+                    }
+
+                    Constants.LOG.info("final string: " + message.getString());
+
                 }
                 else {
                     /*
@@ -377,6 +455,20 @@ public class MessageProcessor
             }
         }
         return message;
+    }
+
+    private static int formatCodesEnd(String trigger, String msgTriggerFull) {
+        Constants.LOG.info("msgTriggerFull: '" + msgTriggerFull + "'");
+        char[] arr1 = msgTriggerFull.toCharArray();
+        int realStart = -1;
+        for (int i = 0; i < arr1.length-trigger.length(); i++) {
+            if ((int)arr1[i] == 167 && (((int)arr1[i+1] > 47 && (int)arr1[i+1] < 58) ||
+                    ((int)arr1[i+1] > 96 && (int)arr1[i+1] < 123))) {
+                realStart = i+2;
+                Constants.LOG.info("realStart: " + arr1[i+2] + " at " + (i+2));
+            }
+        }
+        return realStart;
     }
 
     /**
