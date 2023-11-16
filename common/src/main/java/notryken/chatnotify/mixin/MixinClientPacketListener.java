@@ -17,22 +17,38 @@ import java.util.Locale;
 
 import static notryken.chatnotify.ChatNotify.recentMessages;
 
+/**
+ * Minecraft provides no reliable way to identify which player sent a given chat message, or
+ * even determine whether the message came from a player at all.
+ * <p>
+ * As a workaround, ChatNotify uses mixins in all message and command-sending methods of
+ * ClientPacketListener, to temporarily store all outgoing messages and commands, so that they
+ * can be compared to incoming messages to determine whether a given incoming message was sent
+ * by the user.
+ * <p>
+ * All messages and commands are converted to lowercase before being stored, as a workaround
+ * for server-side caps filters.
+ * <p>
+ * Stored messages are normally removed by MessageProcessor when the matching message is
+ * received, but in case of a message 'going missing', removeOldMessages is called in each
+ * send mixin, and removes all messages that have been stored for more than 5 seconds.
+ */
 @Mixin(ClientPacketListener.class)
 public abstract class MixinClientPacketListener
 {
-    @Unique
-    Minecraft chatNotify$client = Minecraft.getInstance();
-
     /**
      * This is one of the earliest opportunities to get a non-null value of the Player.
+     * Used to verify or correct the username notification.
      */
     @Inject(method = "handleLogin", at = @At("TAIL"))
     public void onGameJoin(ClientboundLoginPacket packet, CallbackInfo ci)
     {
-        Player player = chatNotify$client.player;
+        Player player = Minecraft.getInstance().player;
         assert player != null;
         ChatNotify.config().setUsername(player.getName().getString());
     }
+
+    // Chat message and command storage mixins
 
     @Inject(method = "sendChat", at = @At("HEAD"))
     public void sendChatMessage(String content, CallbackInfo ci) {
@@ -54,7 +70,6 @@ public abstract class MixinClientPacketListener
         long currentTime = System.currentTimeMillis();
         chatNotify$removeOldMessages(currentTime - 5000);
 
-        // Check for prefixes
         content = content.toLowerCase(Locale.ROOT);
         String plainMsg = "";
 
@@ -73,7 +88,6 @@ public abstract class MixinClientPacketListener
         long currentTime = System.currentTimeMillis();
         chatNotify$removeOldMessages(currentTime - 5000);
 
-        // Check for prefixes
         command = "/" + command.toLowerCase(Locale.ROOT);
 
         for (String prefix : ChatNotify.config().getPrefixes()) {
