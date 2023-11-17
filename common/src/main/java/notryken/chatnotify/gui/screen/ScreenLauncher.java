@@ -8,9 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
-import notryken.chatnotify.gui.listwidget.ModConfigListWidget;
-
-import java.io.IOException;
+import notryken.chatnotify.gui.components.listwidget.ModConfigListWidget;
 
 public class ScreenLauncher
 {

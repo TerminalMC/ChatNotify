@@ -1,19 +1,17 @@
-package notryken.chatnotify.gui.listwidget;
+package notryken.chatnotify.gui.components.listwidget;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.slider.PitchSlider;
-import notryken.chatnotify.gui.slider.VolumeSlider;
+import notryken.chatnotify.gui.components.button.PitchSlider;
+import notryken.chatnotify.gui.components.button.VolumeSlider;
 import org.jetbrains.annotations.NotNull;
 
 public class SoundConfigListWidget extends ConfigListWidget
@@ -27,13 +25,7 @@ public class SoundConfigListWidget extends ConfigListWidget
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Sound ID")));
-        this.addEntry(new Entry.SoundLink(width, notif, client, this));
         this.addEntry(new Entry.SoundField(width, notif, client, this));
-
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Sound Options")));
         this.addEntry(new Entry.SoundConfigVolume(width, notif, this));
         this.addEntry(new Entry.SoundConfigPitch(width, notif, this));
         this.addEntry(new Entry.SoundTest(width, notif, this));
@@ -186,41 +178,6 @@ public class SoundConfigListWidget extends ConfigListWidget
             this.notif = notif;
         }
 
-        private static class SoundLink extends Entry
-        {
-            SoundLink(int width, Notification notif,
-                      @NotNull Minecraft client,
-                      SoundConfigListWidget listWidget)
-            {
-                super(width, notif, listWidget);
-
-                Button linkButton = Button.builder(
-                        Component.literal("Sound List"),
-                                (button) -> openLink(client))
-                        .size(80, 20)
-                        .pos(width / 2 - 40, 0)
-                        .build();
-                linkButton.setTooltip(Tooltip.create(Component.literal("Probably " +
-                        "opens a webpage with a list of Minecraft sounds.")));
-
-                options.add(linkButton);
-            }
-
-            private void openLink(Minecraft client)
-            {
-                client.setScreen(new ConfirmLinkScreen(confirmed -> {
-                    if (confirmed) {
-                        Util.getPlatform().openUri("https://github.com/" +
-                                "NotRyken/ChatNotify/blob/master/src/main/" +
-                                "resources/assets/chatnotify/SoundList.txt");
-                    }
-                    listWidget.refreshScreen();
-                }, "https://github.com/NotRyken/ChatNotify/blob/master/src/" +
-                        "main/resources/assets/chatnotify/SoundList.txt",
-                        true));
-            }
-        }
-
         private static class SoundConfigVolume extends Entry
         {
             SoundConfigVolume(int width, Notification notif,
@@ -253,7 +210,12 @@ public class SoundConfigListWidget extends ConfigListWidget
 
                 options.add(Button.builder(Component.literal(
                         "> Click to Test Sound <"), (button) ->
-                                listWidget.playNotifSound()).size(240, 20)
+                                listWidget.playNotifSound())
+                        .size(240, 20)
+                        .tooltip(Tooltip.create(
+                                Component.literal("Volume category currently set to ")
+                                        .append(Component.translatable("soundCategory."
+                                                + ChatNotify.config().notifSoundSource.getName()))))
                         .pos(width / 2 - 120, 0).build());
             }
         }

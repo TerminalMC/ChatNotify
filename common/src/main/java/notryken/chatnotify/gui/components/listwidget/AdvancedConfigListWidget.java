@@ -1,4 +1,4 @@
-package notryken.chatnotify.gui.listwidget;
+package notryken.chatnotify.gui.components.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -273,7 +273,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                 super(width, notif, listWidget);
 
                 Button resetButton = Button.builder(
-                        Component.literal("Reset"), (button) -> {
+                        Component.literal("Reset Advanced Options"), (button) -> {
                             notif.regexEnabled = false;
                             notif.exclusionEnabled = false;
                             notif.responseEnabled = false;
@@ -309,7 +309,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                 super(width, notif, listWidget);
 
                 Button totalResetButton = Button.builder(
-                        Component.literal("Reset All"), (button) -> {
+                        Component.literal("Reset All Advanced Options"), (button) -> {
                             for (Notification notif2 :
                                     ChatNotify.config().getNotifs())
                             {
@@ -361,17 +361,15 @@ public class AdvancedConfigListWidget extends ConfigListWidget
                                     listWidget.refreshScreen();
                                 }
                             }, Component.literal("Nuclear Reset"), Component.literal(
-                                    "Are you sure you want to delete all " +
-                                            "ChatNotify notifications and " +
-                                            "reset all settings?")));
+                                    "Are you sure you want to delete all ChatNotify " +
+                                            "notifications and reset all settings?")));
                         })
                         .size(240, 20)
                         .pos(width / 2 - 120, 0)
                         .build();
 
                 nuclearResetButton.setTooltip(Tooltip.create(Component.literal(
-                        "Deletes all ChatNotify notifications and resets all " +
-                                "settings.")));
+                        "Deletes all ChatNotify notifications and resets all settings.")));
 
                 this.options.add(nuclearResetButton);
             }

@@ -54,7 +54,7 @@ public class Notification
         setControl(2, doSound);
         setTrigger(trigger);
         this.triggerIsKey = triggerIsKey;
-        setColor((strColor == null ? null : parseColor(strColor)));
+        setColor((strColor == null ? parseColor("#FFFFFF") : parseColor(strColor)));
         setFormatControl(0, bold);
         setFormatControl(1, italic);
         setFormatControl(2, underlined);
@@ -74,7 +74,7 @@ public class Notification
     /**
      * Not validated, only for use by deserializer.
      */
-    Notification(boolean enabled, ArrayList<Boolean> controls,
+    public Notification(boolean enabled, ArrayList<Boolean> controls,
                  ArrayList<String> triggers, boolean triggerIsKey,
                  TextColor color, ArrayList<Boolean> formatControls,
                  float soundVolume, float soundPitch, ResourceLocation sound,
@@ -145,6 +145,18 @@ public class Notification
     public TextColor getColor()
     {
         return this.color;
+    }
+
+    public int getRed() {
+        return (this.color.getValue() >> 16) & 255;
+    }
+
+    public int getGreen() {
+        return (this.color.getValue() >> 8) & 255;
+    }
+
+    public int getBlue() {
+        return this.color.getValue() & 255;
     }
 
     /**
@@ -289,14 +301,26 @@ public class Notification
     }
 
     /**
-     * 'Smart' setter; If color is null, disables message coloring, else
-     * enables message coloring. Makes the notification persistent.
+     * 'Smart' setter; Makes the notification persistent.
      */
     public void setColor(TextColor color)
     {
-        this.color = color;
-        setControl(0, color != null);
+        if (color != null) {
+            this.color = color;
+        }
         persistent = true;
+    }
+
+    public void setRed(int val) {
+        setColor(TextColor.fromRgb((65536 * val) + (256 * getGreen()) + getBlue()));
+    }
+
+    public void setGreen(int val) {
+        setColor(TextColor.fromRgb((65536 * getRed()) + (256 * val) + (getBlue())));
+    }
+
+    public void setBlue(int val) {
+        setColor(TextColor.fromRgb((65536 * getRed()) + (256 * getGreen()) + val));
     }
 
     /**
@@ -465,34 +489,17 @@ public class Notification
     }
 
     /**
-     * Parses and validates a string representing an RGB int or hex color.
-     * Can handle int format e.g. "16711680", and hex format e.g. "#FF0000".
-     * @param strColor The RGB int or hex color to parse.
-     * @return The validated TextColor.
-     * Defaults to null if the input is invalid.
+     * Parses and validates a String representing a hex color.
+     * Note: requires a full-length hex code with leading # (7 chars total)
+     * @param strColor the String to parse.
+     * @return the validated TextColor, or null if the String is invalid.
      */
     public TextColor parseColor(String strColor)
     {
-        TextColor color;
-
-        if (strColor.startsWith("#")) {
-            color = TextColor.parseColor(strColor);
+        if (strColor.startsWith("#") && strColor.length() == 7) {
+            return TextColor.parseColor(strColor);
         }
-        else {
-            try {
-                int intColor = Integer.parseInt(strColor);
-                if (intColor > 0 && intColor <= 16777215) {
-                    color = TextColor.fromRgb(intColor);
-                }
-                else {
-                    color = null;
-                }
-            }
-            catch (NumberFormatException e) {
-                color = null;
-            }
-        }
-        return color;
+        return null;
     }
 
     /**

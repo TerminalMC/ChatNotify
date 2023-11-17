@@ -1,12 +1,15 @@
-package notryken.chatnotify.config;
+package notryken.chatnotify.config.deserialize;
 
 import com.google.gson.*;
+import notryken.chatnotify.config.Config;
+import notryken.chatnotify.config.Notification;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
- * Legacy deserializer. Provides backwards-compatibility to ChatNotify v1.0.x (prior to mojmap conversion).
+ * Legacy deserializer. Provides backwards-compatibility to ChatNotify v1.0.x
+ * (prior to mojmap conversion).
  */
 public class ConfigDeserializer implements JsonDeserializer<Config>
 {
@@ -68,6 +71,6 @@ public class ConfigDeserializer implements JsonDeserializer<Config>
             messagePrefixes = new ArrayList<>(Config.DEFAULT_PREFIXES);
         }
 
-        return new Config(ignoreOwnMessages, true, Config.DEFAULT_SOUND_SOURCE, notifications, messagePrefixes);
+        return new Config(ignoreOwnMessages, Config.DEFAULT_SOUND_SOURCE, notifications, messagePrefixes);
     }
 }

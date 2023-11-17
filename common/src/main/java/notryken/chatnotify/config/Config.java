@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.Constants;
+import notryken.chatnotify.config.deserialize.ConfigDeserializer;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,8 +16,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
- * Configuration options class with defaults. Loosely based on the design used by
- * <a href="https://github.com/CaffeineMC/sodium-fabric">Sodium</a>.
+ * Configuration options class with defaults. Loosely based on the design used
+ * by <a href="https://github.com/CaffeineMC/sodium-fabric">Sodium</a>.
  */
 public class Config
 {
@@ -40,7 +41,6 @@ public class Config
 
     // Saved, user-accessible
     public boolean ignoreOwnMessages;
-    public boolean advancedHighlight;
     public SoundSource notifSoundSource;
     private final ArrayList<String> messagePrefixes;
     private final ArrayList<Notification> notifications;
@@ -50,7 +50,6 @@ public class Config
      */
     public Config() {
         ignoreOwnMessages = false;
-        advancedHighlight = true;
         notifSoundSource = DEFAULT_SOUND_SOURCE;
         notifications = new ArrayList<>();
         notifications.add(0, DEFAULT_NOTIF);
@@ -60,10 +59,9 @@ public class Config
     /**
      * Parameterized initialization
      */
-    Config(boolean ignoreOwnMessages, boolean advancedHighlight, SoundSource notifSoundSource,
+    public Config(boolean ignoreOwnMessages, SoundSource notifSoundSource,
            ArrayList<Notification> notifications, ArrayList<String> messagePrefixes) {
         this.ignoreOwnMessages = ignoreOwnMessages;
-        this.advancedHighlight = advancedHighlight;
         this.notifSoundSource = notifSoundSource;
         this.notifications = notifications;
         this.messagePrefixes = messagePrefixes;
@@ -141,7 +139,7 @@ public class Config
      */
     public void addNotif()
     {
-        notifications.add(new Notification(true, false, false, false, "", false,
+        notifications.add(new Notification(true, true, false, false, "", false,
                 null, false, false, false, false, false, 1f, 1f,
                 DEFAULT_SOUND_STRING, false));
     }
@@ -235,7 +233,7 @@ public class Config
      */
     public void purge()
     {
-        messagePrefixes.removeIf(String::isEmpty);
+        messagePrefixes.removeIf(String::isBlank);
         messagePrefixes.sort(Comparator.comparingInt(String::length).reversed());
 
         Notification notif;
@@ -279,13 +277,16 @@ public class Config
         if (Files.exists(path)) {
             try (FileReader reader = new FileReader(path.toFile())) {
                 /*
-                Check the config file to determine version. v1.0.2-3 have "username" as the first stored identifier.
-                v1.1.0 and higher have "version". v1.0.1 and lower are unsupported by v1.0.2 and higher.
+                Check the config file to determine version. v1.0.2-3 have
+                "username" as the first stored identifier. v1.1.0 and higher
+                have "version". v1.0.1 and lower are unsupported by v1.0.2+.
 
-                Backwards-compatibility to v1.0.x to be maintained until it can be reasonably surmised that the
-                vast majority of v1.0.x users have updated to v1.1.0 or higher.
+                Backwards-compatibility to v1.0.x to be maintained until it can
+                be reasonably surmised that the vast majority of v1.0.x users
+                have updated to v1.1.0 or higher.
 
-                Uses a second reader because apparently FileReader.reset() isn't allowed.
+                This uses a second reader because apparently FileReader.reset()
+                isn't allowed.
                  */
                 try (FileReader checkReader = new FileReader(path.toFile())) {
                     for (int i = 0; i < 5; i++) {

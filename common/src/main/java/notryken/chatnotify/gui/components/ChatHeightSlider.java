@@ -1,4 +1,4 @@
-package notryken.chatnotify.gui.slider;
+package notryken.chatnotify.gui.components;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

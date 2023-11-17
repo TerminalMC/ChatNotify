@@ -1,28 +1,31 @@
 package notryken.chatnotify.gui.screen;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.main.GameConfig;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import notryken.chatnotify.gui.listwidget.ConfigListWidget;
+import net.minecraft.sounds.SoundSource;
+import notryken.chatnotify.ChatNotify;
+import notryken.chatnotify.gui.components.listwidget.ConfigListWidget;
+import notryken.chatnotify.gui.components.listwidget.SoundConfigListWidget;
 
-public class ConfigScreen extends OptionsSubScreen
-{
+public class ConfigScreen extends OptionsSubScreen {
     private ConfigListWidget listWidget;
 
     public ConfigScreen(Screen parent, Options gameOptions, Component title,
-                        ConfigListWidget listWidget)
-    {
+                        ConfigListWidget listWidget) {
         super(parent, gameOptions, title);
         this.listWidget = listWidget;
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         this.listWidget = this.listWidget.resize(
                 this.width, this.height, 32, this.height - 32);
         this.addWidget(listWidget);
@@ -38,9 +41,7 @@ public class ConfigScreen extends OptionsSubScreen
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY,
-                       float delta)
-    {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.renderDirtBackground(context);
         super.render(context, mouseX, mouseY, delta);
         this.listWidget.render(context, mouseX, mouseY, delta);

@@ -1,11 +1,10 @@
-package notryken.chatnotify.gui.listwidget;
+package notryken.chatnotify.gui.components.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
@@ -63,26 +62,13 @@ public class NotificationConfigListWidget extends ConfigListWidget
                     -1));
         }
 
-        this.addEntry(new Entry.ControlConfigHeader(width, notif, client, this,
-                "Notification Sound", 2));
-        this.addEntry(new Entry.SoundConfigButton(width, notif, this));
-
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Component.literal("Message Color")));
-        this.addEntry(new Entry.ColorConfigButton(width, notif, this));
+                Component.literal("Notification Options")));
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                Component.literal("Message Format")));
-        this.addEntry(new Entry.FormatConfigOption(
-                width, notif, this, "Bold", 0));
-        this.addEntry(new Entry.FormatConfigOption(
-                width, notif, this, "Italic", 1));
-        this.addEntry(new Entry.FormatConfigOption(
-                width, notif, this, "Underlined", 2));
-        this.addEntry(new Entry.FormatConfigOption(
-                width, notif, this, "Strikethrough", 3));
-        this.addEntry(new Entry.FormatConfigOption(
-                width, notif, this, "Obfuscated", 4));
+        this.addEntry(new Entry.SoundConfigOption(width, notif, this));
+        this.addEntry(new Entry.ColorConfigOption(width, notif, client, this));
+        this.addEntry(new Entry.FormatOptionPrimary(width, notif, this));
+        this.addEntry(new Entry.FormatOptionSecondary(width, notif, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
                 Component.literal("Advanced Settings")));
@@ -101,15 +87,14 @@ public class NotificationConfigListWidget extends ConfigListWidget
     }
 
     @Override
-    protected void refreshScreen()
-    {
+    protected void refreshScreen() {
         refreshScreen(this);
     }
 
     private void openColorConfig()
     {
         assert client.screen != null;
-        Component title = Component.literal("Notification Message Color");
+        Component title = Component.literal("Notification Color Options");
         client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new ColorConfigListWidget(client,
                 client.screen.width, client.screen.height,
@@ -120,7 +105,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
     private void openSoundConfig()
     {
         assert client.screen != null;
-        Component title = Component.literal("Notification Sound");
+        Component title = Component.literal("Notification Sound Options");
         client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new SoundConfigListWidget(client,
                 client.screen.width, client.screen.height,
@@ -131,7 +116,7 @@ public class NotificationConfigListWidget extends ConfigListWidget
     private void openAdvancedConfig()
     {
         assert client.screen != null;
-        Component title = Component.literal("Advanced Options");
+        Component title = Component.literal("Advanced Settings");
         client.setScreen(new ConfigScreen(client.screen, client.options,
                 title, new AdvancedConfigListWidget(client,
                 client.screen.width, client.screen.height,
@@ -236,82 +221,140 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class SoundConfigButton extends Entry
+        private static class SoundConfigOption extends Entry
         {
-            SoundConfigButton(int width, Notification notif,
+            SoundConfigOption(int width, Notification notif,
                               NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
                 options.add(Button.builder(
-                                Component.literal(notif.getSound().toString()),
+                                Component.literal("Sound: " + notif.getSound().toString()),
                                 (button) -> listWidget.openSoundConfig())
-                        .size(240, 20)
+                        .size(210, 20)
                         .pos(width / 2 - 120, 0)
                         .build());
-            }
-        }
 
-        private static class ControlConfigHeader extends Entry
-        {
-            ControlConfigHeader(int width, Notification notif,
-                                @NotNull Minecraft client,
-                                NotificationConfigListWidget listWidget,
-                                String label, int index)
-            {
-                super(width, notif, listWidget);
-                options.add(new StringWidget(width / 2 - 60, 0, 120, 20,
-                        Component.literal(label),
-                        client.font));
                 options.add(CycleButton.onOffBuilder()
                         .displayOnlyValue()
-                        .withInitialValue(notif.getControl(index))
-                        .create(this.width / 2 + 60, 0, 25, 20, Component.empty(),
+                        .withInitialValue(notif.getControl(2))
+                        .create(this.width / 2 + 95, 0, 25, 20, Component.empty(),
                                 (button, status) -> {
-                                    notif.setControl(index, status);
+                                    notif.setControl(2, status);
                                     listWidget.refreshScreen();
                                 }));
             }
         }
 
-        private static class ColorConfigButton extends Entry
+        private static class ColorConfigOption extends Entry
         {
-            ColorConfigButton(int width, Notification notif,
+            ColorConfigOption(int width, Notification notif, Minecraft client,
                               NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
 
-                MutableComponent message;
-
-                if (notif.getColor() == null) {
-                    message = Component.literal("[No Color]");
-                }
-                else {
-                    message = Component.literal(notif.getColor().formatValue());
+                MutableComponent message = Component.literal("Text Color");
+                if (notif.getColor() != null) {
                     message.setStyle(Style.EMPTY.withColor(notif.getColor()));
                 }
-                options.add(Button.builder(message,
-                                (button) -> listWidget.openColorConfig())
-                        .size(240, 20)
+                options.add(Button.builder(message, (button) -> listWidget.openColorConfig())
+                        .size(120, 20)
                         .pos(width / 2 - 120, 0)
                         .build());
+
+                EditBox colorEdit = new EditBox(client.font, this.width / 2 + 6, 0, 64, 20,
+                        Component.literal("Hex Color"));
+                colorEdit.setMaxLength(7);
+                colorEdit.setResponder(color -> notif.setColor(notif.parseColor(color)));
+                if (this.notif.getColor() != null) {
+                    colorEdit.setValue(this.notif.getColor().formatValue());
+                }
+                options.add(colorEdit);
+
+                options.add(Button.builder(Component.literal("\ud83d\uddd8"),
+                                (button) -> listWidget.refreshScreen())
+                        .size(20, 20)
+                        .pos(width / 2 + 70, 0)
+                        .build());
+
+                options.add(CycleButton.onOffBuilder()
+                        .displayOnlyValue()
+                        .withInitialValue(notif.getControl(0))
+                        .create(this.width / 2 + 95, 0, 25, 20, Component.empty(),
+                                (button, status) -> {
+                                    notif.setControl(0, status);
+                                    listWidget.refreshScreen();
+                                }));
             }
         }
 
-        private static class FormatConfigOption extends Entry
+        private static class FormatOptionPrimary extends Entry
         {
-            FormatConfigOption(int width, Notification notif,
-                               NotificationConfigListWidget listWidget,
-                               String label, int index)
+            FormatOptionPrimary(int width, Notification notif,
+                                NotificationConfigListWidget listWidget)
             {
                 super(width, notif, listWidget);
+
                 options.add(CycleButton.onOffBuilder()
-                        .withInitialValue(notif.getFormatControl(index))
-                        .create(this.width / 2 - 120, 0, 240, 20,
-                                Component.literal(label), (button, status) -> {
-                                    notif.setFormatControl(index, status);
+                        .withInitialValue(notif.getFormatControl(0))
+                        .create(this.width / 2 - 120, 0, 76, 20, Component.literal("Bold")
+                                .withStyle(Style.EMPTY.withBold(
+                                        notif.getFormatControl(0))),
+                                (button, status) -> {
+                                    notif.setFormatControl(0, status);
                                     listWidget.refreshScreen();
                                 }));
+
+                options.add(CycleButton.onOffBuilder()
+                        .withInitialValue(notif.getFormatControl(1))
+                        .create(this.width / 2 - 38, 0, 76, 20, Component.literal("Italic")
+                                        .withStyle(Style.EMPTY.withItalic(
+                                                notif.getFormatControl(1))),
+                                (button, status) -> {
+                                    notif.setFormatControl(1, status);
+                                    listWidget.refreshScreen();
+                                }));
+
+                options.add(CycleButton.onOffBuilder()
+                        .withInitialValue(notif.getFormatControl(2))
+                        .create(this.width / 2 + 44, 0, 76, 20, Component.literal("Underline")
+                                        .withStyle(Style.EMPTY.withUnderlined(
+                                                notif.getFormatControl(2))),
+                                (button, status) -> {
+                                    notif.setFormatControl(2, status);
+                                    listWidget.refreshScreen();
+                                }));
+            }
+        }
+
+        private static class FormatOptionSecondary extends Entry
+        {
+            FormatOptionSecondary(int width, Notification notif,
+                                  NotificationConfigListWidget listWidget)
+            {
+                super(width, notif, listWidget);
+
+                options.add(CycleButton.onOffBuilder()
+                        .withInitialValue(notif.getFormatControl(3))
+                        .create(this.width / 2 - 120, 0, 117, 20, Component.literal("Strikethrough")
+                                        .withStyle(Style.EMPTY.withStrikethrough(
+                                                notif.getFormatControl(3))),
+                                (button, status) -> {
+                                    notif.setFormatControl(3, status);
+                                    listWidget.refreshScreen();
+                                }));
+
+                options.add(CycleButton.onOffBuilder()
+                        .withInitialValue(notif.getFormatControl(4))
+                        .create(this.width / 2 + 3, 0, 117, 20, Component.literal("Obfuscate")
+                                        .withStyle(Style.EMPTY.withObfuscated(
+                                                notif.getFormatControl(4))),
+                                (button, status) -> {
+                                    notif.setFormatControl(4, status);
+                                    listWidget.refreshScreen();
+                                }));
+
+
             }
         }
 

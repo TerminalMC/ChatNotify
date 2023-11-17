@@ -1,4 +1,4 @@
-package notryken.chatnotify.gui.listwidget;
+package notryken.chatnotify.gui.components.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
@@ -29,10 +30,11 @@ public class ModConfigListWidget extends ConfigListWidget
                 client, Component.literal("Options")));
 
         this.addEntry(new Entry.IgnoreToggle(this.width, this));
+        this.addEntry(new Entry.SoundSourceButton(this.width, this));
         this.addEntry(new Entry.PrefixConfigButton(this.width, this));
 
         this.addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Component.literal("Notifications ℹ"),
+                client, Component.literal("Notifications \u2139"),
                 Component.literal("Notifications are processed in sequential " +
                         "order as displayed below. No more than one " +
                         "notification can activate at a time.")));
@@ -140,6 +142,31 @@ public class ModConfigListWidget extends ConfigListWidget
                 options.add(ignoreButton);
             }
         }
+
+        private static class SoundSourceButton extends Entry
+        {
+            SoundSourceButton(int width, ModConfigListWidget listWidget)
+            {
+                super(width, listWidget, -1);
+
+                CycleButton<SoundSource> ignoreButton =
+                        CycleButton.<SoundSource>builder(source ->
+                                        Component.translatable("soundCategory." + source.getName()))
+                                .withValues(SoundSource.values())
+                                .withInitialValue(ChatNotify.config().notifSoundSource)
+                                .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
+                                        "Notification sound volume control category.")))
+                                .create(this.width / 2 - 120, 32, 240, 20,
+                                        Component.literal("Sound Source"),
+                                        (button, status) ->
+                                                ChatNotify.config().notifSoundSource = status);
+                ignoreButton.setTooltip(Tooltip.create(Component.literal(
+                        "Allows/Prevents your own messages triggering " +
+                                "notifications.")));
+                options.add(ignoreButton);
+            }
+        }
+
 
         private static class PrefixConfigButton extends Entry
         {

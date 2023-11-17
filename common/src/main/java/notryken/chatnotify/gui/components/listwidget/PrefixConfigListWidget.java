@@ -1,4 +1,4 @@
-package notryken.chatnotify.gui.listwidget;
+package notryken.chatnotify.gui.components.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

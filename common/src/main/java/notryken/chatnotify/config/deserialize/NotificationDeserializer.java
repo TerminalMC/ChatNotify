@@ -1,15 +1,17 @@
-package notryken.chatnotify.config;
+package notryken.chatnotify.config.deserialize;
 
 import com.google.gson.*;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import notryken.chatnotify.config.Notification;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Legacy deserializer. Provides backwards-compatibility to ChatNotify v1.0.x (prior to mojmap conversion).
+ * Legacy deserializer. Provides backwards-compatibility to ChatNotify v1.0.x
+ * (prior to mojmap conversion).
  */
 public class NotificationDeserializer implements JsonDeserializer<Notification>
 {

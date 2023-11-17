@@ -69,7 +69,7 @@ public class MessageProcessor {
      * the configuration {@code ignoreOwnMessages} is true, else the part of the
      * prefix that matched a username {@code Notification} trigger is removed.
      * <p>
-     * <b>Note:</b> This approach is imperfect and will fail if, for example,
+     * <b>Note:</b> This approach is imperfect and may fail if, for example,
      * two messages are sent, the first contains the second, and the return of
      * the second message occurs first.
      * @param msgStr the message {@code String} to process.
@@ -248,8 +248,8 @@ public class MessageProcessor {
      */
     private static Style getStyle(Notification notif) {
         return Style.create(
-                (notif.getColor() == null ? Optional.empty() :
-                        Optional.of(notif.getColor())),
+                ((notif.getColor() == null || !notif.getControl(0)) ?
+                        Optional.empty() : Optional.of(notif.getColor())),
                 Optional.of(notif.getFormatControl(0)),
                 Optional.of(notif.getFormatControl(1)),
                 Optional.of(notif.getFormatControl(2)),
@@ -270,11 +270,10 @@ public class MessageProcessor {
      */
     private static Component simpleRestyle(Component msg, Notification notif) {
         if (notif.getControl(0) || notif.getControl(1)) {
-//            Constants.LOG.info("debug::Attempting simple restyle");
-//            Constants.LOG.info("debug::Original: '{}'", msg);
+//            Constants.LOG.info("debug::Simple restyle original: '{}'", msg);
             msg = msg.copy().setStyle(applyStyle(msg.getStyle(), getStyle(notif)));
+//            Constants.LOG.info("debug::Simple restyle final: '{}'", msg);
         }
-//        Constants.LOG.info("debug::Final: '{}'", msg);
         return msg;
     }
 
@@ -291,10 +290,9 @@ public class MessageProcessor {
      */
     private static Component complexRestyle(Component msg, String trigger, Notification notif) {
         if (notif.getControl(0) || notif.getControl(1)) {
-//            Constants.LOG.info("debug::Attempting complex restyle");
-//            Constants.LOG.info("debug::Original: '{}'", msg);
+//            Constants.LOG.info("debug::Complex restyle original: '{}'", msg);
             msg = restyleComponent(msg.copy(), trigger, getStyle(notif));
-//            Constants.LOG.info("debug::Final: '{}'", msg);
+//            Constants.LOG.info("debug::Complex restyle final: '{}'", msg);
         }
         return msg;
     }
@@ -314,16 +312,16 @@ public class MessageProcessor {
             msg = restyleContents(msg, trigger, style);
         }
         else if (msg.getContents() instanceof TranslatableContents contents) {
-//            Constants.LOG.info("debug::TranslatableContents found: '{}'",contents);
+//            Constants.LOG.info("debug::TranslatableContents found: '{}'", contents);
             // Recurse for all args
             Object[] args = contents.getArgs();
             for (int i = 0; i < contents.getArgs().length; i++) {
                 if (args[i] instanceof Component argText) {
-//                    Constants.LOG.info("debug::Attempting to restyle Component arg: '{}'", argText.getString());
+//                    Constants.LOG.info("debug::Restyle Component arg: '{}'", argText.getString());
                     args[i] = restyleComponent(argText.copy(), trigger, style);
                 }
                 else if (args[i] instanceof String argString) {
-//                    Constants.LOG.info("debug::Attempting to restyle String arg: '{}'", argString);
+//                    Constants.LOG.info("debug::Restyle String arg: '{}'", argString);
                     args[i] = Component.literal(argString).setStyle(style);
                 }
             }
@@ -334,9 +332,9 @@ public class MessageProcessor {
         }
         else {
             // Recurse for all siblings
-//            Constants.LOG.info("debug::Recursing");
+//            Constants.LOG.info("debug::restyleComponent recurse");
             msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
-//            Constants.LOG.info("debug::Recurse finished");
+//            Constants.LOG.info("debug::restyleComponent recurse finish");
         }
         return msg;
     }
@@ -357,18 +355,18 @@ public class MessageProcessor {
             String msgStr = contents.text();
             Pair<Integer,Integer> triggerMatch = msgContainsStr(msgStr, trigger, false);
 
-//            Constants.LOG.info("debug::Match found: '{}'", (triggerMatch != null));
-
             if (triggerMatch == null) {
-//                Constants.LOG.info("debug::Recursing literal");
+//                Constants.LOG.info("debug::restyleContents match not found");
+//                Constants.LOG.info("debug::restyleContents no-trigger restyleComponent");
                 msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
-//                Constants.LOG.info("debug::Recurse literal finished");
             }
             else {
+//                Constants.LOG.info("debug::restyleContents match found");
                 List<Component> siblings = msg.getSiblings();
 
                 if (siblings.isEmpty())
                 {
+//                    Constants.LOG.info("debug::No siblings");
                     int matchFirst = triggerMatch.getFirst();
                     int matchLast = triggerMatch.getSecond();
 
@@ -377,7 +375,7 @@ public class MessageProcessor {
                     so it is deconstructed and the parts individually re-styled
                     before being re-built into a new MutableComponent.
                      */
-//                    Constants.LOG.info("debug::Attempting to restyle matched contents");
+//                    Constants.LOG.info("debug::Restyle matched contents");
 //                    Constants.LOG.info("debug::Original msgStr: '{}'", msgStr);
 //                    Constants.LOG.info("debug::Trigger: '{}'", trigger);
 //                    Constants.LOG.info("debug::Matched from {} ({}) to {} ({})", matchFirst, msgStr.charAt(matchFirst), matchLast, msgStr.charAt(matchLast-1));
@@ -396,7 +394,7 @@ public class MessageProcessor {
 
                         msgStr = msgStart + '\u00a7' + 'r' + msgTrigger + activeCodes + msgEnd;
 
-                        Constants.LOG.info("Modified msgStr: '{}'", msgStr);
+//                        Constants.LOG.info("debug::Modified msgStr: '{}'", msgStr);
 
                         matchLast = matchLast-realStart+2;
                     }
@@ -435,10 +433,10 @@ public class MessageProcessor {
                         newMessage.siblings.addAll(siblings);
                         msg = newMessage;
                     }
-
-//                    Constants.LOG.info("debug::Final msg: '{}'", msg);
                 }
                 else {
+//                    Constants.LOG.info("debug::Siblings found");
+
                     /*
                     If the message has siblings, it cannot be directly
                     re-styled. Instead, it is replaced by a new, empty
@@ -455,6 +453,7 @@ public class MessageProcessor {
                     replacement.setStyle(msg.getStyle());
                     replacement.siblings.addAll(siblings);
 
+//                    Constants.LOG.info("debug::restyleContents empty-parent restyleComponent");
                     msg = restyleComponent(replacement, trigger, style);
                 }
             }
@@ -470,7 +469,6 @@ public class MessageProcessor {
      */
     private static String activeFormatCodes(String msgStr) {
 //        Constants.LOG.info("debug::Scanning for codes in string '{}'", msgStr);
-
         List<ChatFormatting> activeCodes = new ArrayList<>();
         for (int i = 0; i < msgStr.length(); i++) {
             char c = msgStr.charAt(i);
