@@ -7,60 +7,57 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.components.button.BlueColorSlider;
-import notryken.chatnotify.gui.components.button.GreenColorSlider;
-import notryken.chatnotify.gui.components.button.RedColorSlider;
+import notryken.chatnotify.gui.components.slider.BlueColorSlider;
+import notryken.chatnotify.gui.components.slider.GreenColorSlider;
+import notryken.chatnotify.gui.components.slider.RedColorSlider;
 
-public class ColorConfigListWidget extends ConfigListWidget
-{
+/**
+ * {@code ConfigListWidget} containing controls for text color of the
+ * specified {@code Notification}.
+ */
+public class ColorConfigListWidget extends ConfigListWidget {
     public final Notification notif;
 
     public ColorConfigListWidget(Minecraft client, int width, int height,
-                                 int top, int bottom, int itemHeight,
-                                 Screen parent, Component title, Notification notif) {
+                                 int top, int bottom, int itemHeight, Screen parent,
+                                 Component title, Notification notif) {
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+        addEntry(new ConfigListWidget.Entry.Header(width, this, client,
                 Component.literal("Notification Text Color")
                         .setStyle(Style.EMPTY.withColor(notif.getColor()))));
-        this.addEntry(new Entry.RedSlider(width, notif, this));
-        this.addEntry(new Entry.GreenSlider(width, notif, this));
-        this.addEntry(new Entry.BlueSlider(width, notif, this));
+        addEntry(new Entry.RedSlider(width, notif, this));
+        addEntry(new Entry.GreenSlider(width, notif, this));
+        addEntry(new Entry.BlueSlider(width, notif, this));
 
-        this.addEntry(new Entry.ColorOption(width, notif, this));
-
+        addEntry(new Entry.ColorOption(width, notif, this));
     }
 
     @Override
-    public ColorConfigListWidget resize(int width, int height,
-                                        int top, int bottom)
-    {
-        ColorConfigListWidget listWidget = new ColorConfigListWidget(client,
-                width, height, top, bottom, itemHeight, parent, title, notif);
-        listWidget.setScrollAmount(this.getScrollAmount());
+    public ColorConfigListWidget resize(int width, int height, int top, int bottom) {
+        ColorConfigListWidget listWidget = new ColorConfigListWidget(
+                client, width, height, top, bottom, itemHeight, parentScreen, title, notif);
+        listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     @Override
-    protected void refreshScreen()
-    {
+    protected void refreshScreen() {
         refreshScreen(this);
     }
 
     public void refreshColorIndicator() {
-        this.remove(0);
-        this.addEntryToTop(new ConfigListWidget.Entry.Header(width, this, client,
+        remove(0);
+        addEntryToTop(new ConfigListWidget.Entry.Header(width, this, client,
                 Component.literal("Notification Text Color")
                         .setStyle(Style.EMPTY.withColor(notif.getColor()))));
     }
 
-    private abstract static class Entry extends ConfigListWidget.Entry
-    {
+    private abstract static class Entry extends ConfigListWidget.Entry {
         public final Notification notif;
 
-        Entry(int width, Notification notif, ColorConfigListWidget listWidget)
-        {
+        Entry(int width, Notification notif, ColorConfigListWidget listWidget) {
             super(width, listWidget);
             this.notif = notif;
         }
@@ -93,6 +90,7 @@ public class ColorConfigListWidget extends ConfigListWidget
             ColorOption(int width, Notification notif, ColorConfigListWidget listWidget) {
                 super(width, notif, listWidget);
 
+                // Minecraft's 16 default colors represented in integer form.
                 int[] quickColors = new int[] {
                         10027008,
                         16711680,
@@ -117,7 +115,7 @@ public class ColorConfigListWidget extends ConfigListWidget
 
                 for (int i = 0; i < quickColors.length; i++) {
                     TextColor color = TextColor.fromRgb(quickColors[i]);
-                    this.options.add(Button.builder(Component.literal("\u2588")
+                    options.add(Button.builder(Component.literal("\u2588")
                                             .setStyle(Style.EMPTY.withColor(color)), (button) -> {
                         notif.setColor(color);
                         listWidget.refreshScreen();

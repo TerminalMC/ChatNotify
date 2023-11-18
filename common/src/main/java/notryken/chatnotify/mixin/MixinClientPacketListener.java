@@ -34,15 +34,13 @@ import static notryken.chatnotify.ChatNotify.recentMessages;
  * send mixin, and removes all messages that have been stored for more than 5 seconds.
  */
 @Mixin(ClientPacketListener.class)
-public abstract class MixinClientPacketListener
-{
+public abstract class MixinClientPacketListener {
     /**
      * This is one of the earliest opportunities to get a non-null value of the Player.
      * Used to verify or correct the username notification.
      */
     @Inject(method = "handleLogin", at = @At("TAIL"))
-    public void onGameJoin(ClientboundLoginPacket packet, CallbackInfo ci)
-    {
+    public void onGameJoin(ClientboundLoginPacket packet, CallbackInfo ci) {
         Player player = Minecraft.getInstance().player;
         assert player != null;
         ChatNotify.config().setUsername(player.getName().getString());

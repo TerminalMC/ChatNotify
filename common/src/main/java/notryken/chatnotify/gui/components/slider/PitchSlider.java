@@ -1,8 +1,7 @@
-package notryken.chatnotify.gui.components.button;
+package notryken.chatnotify.gui.components.slider;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
-import notryken.chatnotify.Constants;
 import notryken.chatnotify.config.Notification;
 
 public class PitchSlider extends AbstractSliderButton {

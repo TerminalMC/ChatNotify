@@ -14,9 +14,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Boosts the chat height slider.
+ */
 @Mixin(OptionInstance.class)
-public class MixinOptionInstance
-{
+public class MixinOptionInstance {
     @Shadow
     @Final
     Component caption;
@@ -37,8 +39,7 @@ public class MixinOptionInstance
      * Increases the maximum value of the chat height focused slider.
      */
     @Inject(at = @At("RETURN"), method = "<init>*")
-    private void init(CallbackInfo ci)
-    {
+    private void init(CallbackInfo ci) {
         ComponentContents content = this.caption.getContents();
         if (!(content instanceof TranslatableContents)) return;
 

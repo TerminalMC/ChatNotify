@@ -1,19 +1,21 @@
 {
     "schemaVersion": 1,
     "id": "${mod_id}",
-    "version": "${version}",
     "name": "${mod_name}",
+    "version": "${version}",
+    "environment": "${environment}",
+    "license": "${license}",
     "description": "${description}",
+    "icon": "assets/${mod_id}/icon.png",
     "authors": [
         "${mod_author}"
     ],
     "contact": {
-        "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
+        "homepage": "${homepage_url}",
+        "sources": "${sources_url}",
+        "issues": "${issues_url}"
     },
-    "license": "${license}",
-    "icon": "assets/${mod_id}/icon.png",
-    "environment": "*",
+    "accessWidener": "${mod_id}.accesswidener",
     "entrypoints": {
         "client": [
             "notryken.chatnotify.ChatNotifyFabric"
@@ -29,12 +31,18 @@
     "depends": {
         "fabricloader": ">=0.14",
         "fabric-api": "*",
-        "minecraft": "1.20.2",
+        "minecraft": ">=${minecraft_version}",
         "java": ">=17"
     },
-    "suggests": {
-        "another-mod": "*"
+    "recommends": {
+        "modmenu": "${modmenu_version}"
     },
-    "accessWidener": "${mod_id}.accesswidener"
+    "custom": {
+        "modmenu": {
+            "links": {
+                "Contact": "https://linktr.ee/notryken"
+            }
+        }
+    }
 }
   

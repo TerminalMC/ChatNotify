@@ -10,7 +10,6 @@
         "MixinChatComponent",
         "MixinChatListener",
         "MixinClientPacketListener",
-        "MixinMinecraft",
         "MixinOptionInstance"
     ],
     "server": [

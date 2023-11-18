@@ -9,39 +9,35 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.screen.ConfigScreen;
+import notryken.chatnotify.gui.screen.ConfigSubScreen;
 import org.jetbrains.annotations.NotNull;
 
-public class NotificationConfigListWidget extends ConfigListWidget
-{
+/**
+ * {@code ConfigListWidget} containing controls for the specified
+ * {@code Notification}, including references to other screens.
+ */
+public class NotificationConfigListWidget extends ConfigListWidget {
     private final Notification notif;
 
-    public NotificationConfigListWidget(Minecraft client,
-                                        int width, int height,
-                                        int top, int bottom, int itemHeight,
-                                        Screen parent, Component title,
-                                        Notification notif)
-    {
+    public NotificationConfigListWidget(Minecraft client, int width, int height,
+                                        int top, int bottom, int itemHeight, Screen parent,
+                                        Component title, Notification notif) {
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Notification Trigger ℹ"),
+        addEntry(new ConfigListWidget.Entry.Header(width, this,
+                client, Component.literal("Notification Trigger \u2139"),
                 Component.literal("A trigger is a word or series of words that, " +
-                        "if detected in a chat message, will activate the " +
-                        "notification. NOT case-sensitive.")));
-        this.addEntry(new Entry.TriggerConfigType(width, notif, this));
+                        "if detected in a chat message, will activate the notification. " +
+                        "NOT case-sensitive.")));
+        addEntry(new Entry.TriggerConfigType(width, notif, this));
 
         if (notif.triggerIsKey) {
-            this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+            addEntry(new ConfigListWidget.Entry.Header(width, this, client,
                     Component.literal("May not work on some servers.")));
-            this.addEntry(new Entry.TriggerField(width, notif, client, this,
-                    0));
-            this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
-                    Component.literal("Quick Keys")));
+            addEntry(new Entry.TriggerField(width, notif, client, this, 0));
 
-            String[][] keys =
-                    {
+            String[][] keys = {
                             {"chat.type", "Any Message"},
                             {"commands.message.display", "Private Message"},
                             {"multiplayer.player.joined", "Player Joined"},
@@ -50,39 +46,34 @@ public class NotificationConfigListWidget extends ConfigListWidget
                             {"death.", "Player/Pet Died"}
                     };
             for (String[] key : keys) {
-                this.addEntry(new Entry.TriggerOption(width, notif, this, key));
+                addEntry(new Entry.KeyTriggerButton(width, notif, this, key));
             }
         }
         else {
             for (int i = 0; i < notif.getTriggers().size(); i++) {
-                this.addEntry(new Entry.TriggerField(width, notif, client, this,
-                        i));
+                addEntry(new Entry.TriggerField(width, notif, client, this, i));
             }
-            this.addEntry(new Entry.TriggerField(width, notif, client, this,
-                    -1));
+            addEntry(new Entry.TriggerField(width, notif, client, this, -1));
         }
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+        addEntry(new ConfigListWidget.Entry.Header(width, this, client,
                 Component.literal("Notification Options")));
 
-        this.addEntry(new Entry.SoundConfigOption(width, notif, this));
-        this.addEntry(new Entry.ColorConfigOption(width, notif, client, this));
-        this.addEntry(new Entry.FormatOptionPrimary(width, notif, this));
-        this.addEntry(new Entry.FormatOptionSecondary(width, notif, this));
+        addEntry(new Entry.SoundConfigOption(width, notif, this));
+        addEntry(new Entry.ColorConfigOption(width, notif, client, this));
+        addEntry(new Entry.FormatOptionPrimary(width, notif, this));
+        addEntry(new Entry.FormatOptionSecondary(width, notif, this));
 
-        this.addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+        addEntry(new ConfigListWidget.Entry.Header(width, this, client,
                 Component.literal("Advanced Settings")));
-        this.addEntry(new Entry.AdvancedConfigButton(width, notif, this));
+        addEntry(new Entry.AdvancedConfigButton(width, notif, this));
     }
 
     @Override
-    public NotificationConfigListWidget resize(int width, int height,
-                                               int top, int bottom)
-    {
-        NotificationConfigListWidget listWidget =
-                new NotificationConfigListWidget(client, width, height, top,
-                        bottom, itemHeight, parent, title, notif);
-        listWidget.setScrollAmount(this.getScrollAmount());
+    public NotificationConfigListWidget resize(int width, int height, int top, int bottom) {
+        NotificationConfigListWidget listWidget = new NotificationConfigListWidget(
+                client, width, height, top, bottom, itemHeight, parentScreen, title, notif);
+        listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
@@ -91,55 +82,47 @@ public class NotificationConfigListWidget extends ConfigListWidget
         refreshScreen(this);
     }
 
-    private void openColorConfig()
-    {
+    private void openColorConfig() {
         assert client.screen != null;
         Component title = Component.literal("Notification Color Options");
-        client.setScreen(new ConfigScreen(client.screen, client.options,
+        client.setScreen(new ConfigSubScreen(client.screen, client.options,
                 title, new ColorConfigListWidget(client,
                 client.screen.width, client.screen.height,
                 32, client.screen.height - 32, 25,
-                client.screen, title, this.notif)));
+                client.screen, title, notif)));
     }
 
-    private void openSoundConfig()
-    {
+    private void openSoundConfig() {
         assert client.screen != null;
         Component title = Component.literal("Notification Sound Options");
-        client.setScreen(new ConfigScreen(client.screen, client.options,
+        client.setScreen(new ConfigSubScreen(client.screen, client.options,
                 title, new SoundConfigListWidget(client,
                 client.screen.width, client.screen.height,
                 32, client.screen.height - 32, 25,
                 client.screen, title, notif)));
     }
 
-    private void openAdvancedConfig()
-    {
+    private void openAdvancedConfig() {
         assert client.screen != null;
         Component title = Component.literal("Advanced Settings");
-        client.setScreen(new ConfigScreen(client.screen, client.options,
+        client.setScreen(new ConfigSubScreen(client.screen, client.options,
                 title, new AdvancedConfigListWidget(client,
                 client.screen.width, client.screen.height,
                 32, client.screen.height - 32, 25,
                 client.screen, title, notif)));
     }
 
-    private abstract static class Entry extends ConfigListWidget.Entry
-    {
+    private abstract static class Entry extends ConfigListWidget.Entry {
         public final Notification notif;
 
-        Entry(int width, Notification notif,
-              NotificationConfigListWidget listWidget)
-        {
+        Entry(int width, Notification notif, NotificationConfigListWidget listWidget) {
             super(width, listWidget);
             this.notif = notif;
         }
 
-        private static class TriggerConfigType extends Entry
-        {
+        private static class TriggerConfigType extends Entry {
             TriggerConfigType(int width, Notification notif,
-                              NotificationConfigListWidget listWidget)
-            {
+                              NotificationConfigListWidget listWidget) {
                 super(width, notif, listWidget);
                 options.add(CycleButton.booleanBuilder(
                         Component.literal("Event Key"), Component.literal("Word/Phrase"))
@@ -153,25 +136,36 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class TriggerField extends Entry
-        {
+        private static class TriggerField extends Entry {
             final int index;
 
-            TriggerField(int width, Notification notif,
-                         @NotNull Minecraft client,
-                         NotificationConfigListWidget listWidget, int index)
-            {
+            /**
+             * @param index the index of the {@code Notification} trigger,
+             *              or -1 for the 'add trigger' button.
+             */
+            TriggerField(int width, Notification notif, @NotNull Minecraft client,
+                         NotificationConfigListWidget listWidget, int index) {
                 super(width, notif, listWidget);
                 this.index = index;
 
-                if (index >= 0) {
+                if (index == -1) {
+                    options.add(Button.builder(Component.literal("+"),
+                                    (button) -> {
+                                        notif.addTrigger("");
+                                        listWidget.refreshScreen();
+                                    })
+                            .size(240, 20)
+                            .pos(width / 2 - 120, 0)
+                            .build());
+                }
+                else if (index >= 0) {
                     EditBox triggerEdit = new EditBox(
                             client.font, this.width / 2 - 120, 0, 240,
                             20, Component.literal("Notification Trigger"));
                     triggerEdit.setMaxLength(120);
                     triggerEdit.setValue(this.notif.getTrigger(index));
-                    triggerEdit.setResponder(this::setTrigger);
-
+                    triggerEdit.setResponder((trigger) ->
+                            notif.setTrigger(index, trigger.strip()));
                     this.options.add(triggerEdit);
 
                     if (index != 0) {
@@ -185,29 +179,12 @@ public class NotificationConfigListWidget extends ConfigListWidget
                                 .build());
                     }
                 }
-                else {
-                    options.add(Button.builder(Component.literal("+"),
-                                    (button) -> {
-                                        notif.addTrigger("");
-                                        listWidget.refreshScreen();
-                                    })
-                            .size(240, 20)
-                            .pos(width / 2 - 120, 0)
-                            .build());
-                }
-            }
-
-            private void setTrigger(String trigger)
-            {
-                notif.setTrigger(index, trigger.strip());
             }
         }
 
-        private static class TriggerOption extends Entry
-        {
-            TriggerOption(int width, Notification notif,
-                          NotificationConfigListWidget listWidget, String[] key)
-            {
+        private static class KeyTriggerButton extends Entry {
+            KeyTriggerButton(int width, Notification notif,
+                             NotificationConfigListWidget listWidget, String[] key) {
                 super(width, notif, listWidget);
 
                 options.add(Button.builder(Component.literal(key[1]),
@@ -221,11 +198,9 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class SoundConfigOption extends Entry
-        {
+        private static class SoundConfigOption extends Entry {
             SoundConfigOption(int width, Notification notif,
-                              NotificationConfigListWidget listWidget)
-            {
+                              NotificationConfigListWidget listWidget) {
                 super(width, notif, listWidget);
 
                 options.add(Button.builder(
@@ -246,11 +221,9 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class ColorConfigOption extends Entry
-        {
+        private static class ColorConfigOption extends Entry {
             ColorConfigOption(int width, Notification notif, Minecraft client,
-                              NotificationConfigListWidget listWidget)
-            {
+                              NotificationConfigListWidget listWidget) {
                 super(width, notif, listWidget);
 
                 MutableComponent message = Component.literal("Text Color");
@@ -288,11 +261,9 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class FormatOptionPrimary extends Entry
-        {
+        private static class FormatOptionPrimary extends Entry {
             FormatOptionPrimary(int width, Notification notif,
-                                NotificationConfigListWidget listWidget)
-            {
+                                NotificationConfigListWidget listWidget) {
                 super(width, notif, listWidget);
 
                 options.add(CycleButton.onOffBuilder()
@@ -327,11 +298,9 @@ public class NotificationConfigListWidget extends ConfigListWidget
             }
         }
 
-        private static class FormatOptionSecondary extends Entry
-        {
+        private static class FormatOptionSecondary extends Entry {
             FormatOptionSecondary(int width, Notification notif,
-                                  NotificationConfigListWidget listWidget)
-            {
+                                  NotificationConfigListWidget listWidget) {
                 super(width, notif, listWidget);
 
                 options.add(CycleButton.onOffBuilder()
@@ -353,16 +322,12 @@ public class NotificationConfigListWidget extends ConfigListWidget
                                     notif.setFormatControl(4, status);
                                     listWidget.refreshScreen();
                                 }));
-
-
             }
         }
 
-        private static class AdvancedConfigButton extends Entry
-        {
+        private static class AdvancedConfigButton extends Entry {
             AdvancedConfigButton(int width, Notification notif,
-                                 NotificationConfigListWidget listWidget)
-            {
+                                 NotificationConfigListWidget listWidget) {
                 super(width, notif, listWidget);
 
                 options.add(Button.builder(

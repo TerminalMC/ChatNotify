@@ -9,8 +9,7 @@ import java.util.Optional;
 /**
  * Modified slider for boosted chat height.
  */
-public enum ChatHeightSlider implements SliderableValueSet<Double>
-{
+public enum ChatHeightSlider implements SliderableValueSet<Double> {
     INSTANCE;
 
     private final double maxChatHeight = 3.0;
