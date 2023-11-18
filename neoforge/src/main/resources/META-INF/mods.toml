@@ -1,36 +1,37 @@
-modLoader = "javafml" #mandatory
-loaderVersion = "${neoforge_loader_version_range}" #mandatory
-license = "${license}"
-issueTrackerURL="${issues_url}" #optional
-[[mods]] #mandatory
-modId = "${mod_id}" #mandatory
-version = "${version}" #mandatory
-displayName = "${mod_name}" #mandatory
-#updateJSONURL="https://change.me.example.invalid/updates.json" #optional (see https://docs.neoforged.net/docs/misc/updatechecker/)
-displayURL = "${homepage_url}" #optional (displayed in the mod UI)
-logoFile = "assets/${mod_id}/icon.png" #optional
-credits = "${credits}" #optional
-authors = "${mod_author}" #optional
-description = '''${description}''' #mandatory (Supports multiline text)
-[[mixins]]
-config = "chatnotify.mixins.json"
-[[mixins]]
-config = "chatnotify.neoforge.mixins.json"
-[[dependencies.${ mod_id }]] #optional
-modId = "neoforge" #mandatory
-mandatory = true #mandatory
-versionRange = "${neoforge_loader_version_range}" #mandatory
-ordering = "NONE" # The order that this dependency should load in relation to your mod, required to be either 'BEFORE' or 'AFTER' if the dependency is not mandatory
-side = "CLIENT" # Side this dependency is applied on - 'BOTH', 'CLIENT' or 'SERVER'
-[[dependencies.${ mod_id }]]
-modId = "minecraft"
-mandatory = true
-versionRange = "${minecraft_version_range}"
-ordering = "NONE"
-side = "BOTH"
+modLoader="javafml"
+loaderVersion="${neoforge_loader_version_range}"
+license="${mod_license}"
+issueTrackerURL="${issues_url}" #optional: none
 
-# Features are specific properties of the game environment, that you may want to declare you require. This example declares
-# that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
-# stop your mod loading on the server for example.
-#[features.${mod_id}]
-#openGLVersion="[3.2,)"
+[[mods]]
+  modId="${mod_id}"
+  version="${mod_version}" #optional: "1"
+  displayName="${mod_name}" #optional: modId
+  description='''${mod_description}''' # optional: "MISSING DESCRIPTION"
+  logoFile="assets/${mod_id}/icon.png" #optional: none
+  features={ java_version="[17,)" }
+  credits="${mod_credits}" #optional: none
+  authors="${mod_author}" #optional: none
+  displayURL="${homepage_url}" #optional: none
+
+[[mixins]]
+  config="chatnotify.mixins.json"
+[[mixins]]
+  config="chatnotify.neoforge.mixins.json"
+
+[[dependencies.${mod_id}]] #optional
+  modId="neoforge"
+  mandatory=true
+  versionRange="${neoforge_loader_version_range}"
+  ordering="NONE" #optional: "NONE"
+  side="CLIENT" #optional: "BOTH"
+
+[[dependencies.${mod_id}]]
+  modId="minecraft"
+  mandatory=true
+  versionRange="${minecraft_version_range}"
+  ordering="NONE" #optional: "NONE"
+  side="BOTH" #optional: "BOTH"
+
+# https://docs.neoforged.net/docs/gettingstarted/modfiles/
+# https://docs.neoforged.net/docs/misc/updatechecker/

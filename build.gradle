@@ -43,10 +43,6 @@ subprojects {
             url = 'https://repo.spongepowered.org/repository/maven-public/'
         }
         maven {
-            name = 'BlameJared Maven (JEI / CraftTweaker / Bookshelf)'
-            url = 'https://maven.blamejared.com'
-        }
-        maven {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
         }
@@ -60,31 +56,34 @@ subprojects {
 
     processResources {
         def expandProps = [
-                "version": version,
-                "group": project.group, //Else we target the task's group.
+                "mod_group": project.group, // Else we target the task's group.
+                "mod_id": mod_id,
+                "mod_version": mod_version,
+                "mod_environment": mod_environment,
+                "mod_name": mod_name,
+                "mod_description": mod_description,
+                "mod_author": mod_author,
+                "mod_credits": mod_credits,
+                "mod_license": mod_license,
                 "minecraft_version": minecraft_version,
+                "minecraft_version_range": minecraft_version_range,
+                "fabric_loader_version": fabric_loader_version,
+                "fabric_api_version": fabric_api_version,
+                "modmenu_version": modmenu_version,
+//                "quilt_loader_version": quilt_loader_version,
+//                "quilt_api_version": quilt_api_version,
                 "forge_version": forge_version,
                 "forge_loader_version_range": forge_loader_version_range,
                 "forge_version_range": forge_version_range,
-                "minecraft_version_range": minecraft_version_range,
-                "fabric_version": fabric_version,
-                "fabric_loader_version": fabric_loader_version,
-                "mod_name": mod_name,
-                "mod_author": mod_author,
-                "mod_id": mod_id,
-                "license": license,
-                "description": project.description,
                 "neoforge_version": neoforge_version,
                 "neoforge_loader_version_range": neoforge_loader_version_range,
-                "credits": credits,
-                "modmenu_version": modmenu_version,
-                "environment": environment,
                 "homepage_url": homepage_url,
                 "sources_url": sources_url,
-                "issues_url": issues_url
+                "issues_url": issues_url,
+                "contact_url": contact_url
         ]
 
-        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'quilt.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
             expand expandProps
         }
         inputs.properties(expandProps)
@@ -94,7 +93,6 @@ subprojects {
     // metadata includes mapped dependencies which are not reasonably consumable by
     // other mod developers.
     tasks.withType(GenerateModuleMetadata).configureEach {
-
         enabled = false
     }
 }

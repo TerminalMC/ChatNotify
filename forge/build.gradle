@@ -5,7 +5,7 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 base {
-    archivesName = "${mod_name}-forge-${minecraft_version}"
+    archivesName = "${mod_name}-Forge-${minecraft_version}"
 }
 mixin {
     add(sourceSets.main, "${mod_id}.refmap.json")
@@ -19,8 +19,8 @@ minecraft {
 
     copyIdeResources = true //Calls processResources when in dev
 
-    // Automatically enable forge AccessTransformers if the file exists
-    // This location is hardcoded in Forge and can not be changed.
+    // Automatically enable Forge AccessTransformers if the file exists
+    // This location is hardcoded in Forge and cannot be changed.
     // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
     if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
         accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')

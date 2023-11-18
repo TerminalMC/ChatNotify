@@ -15,6 +15,16 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
+/*
+ TODO: Validate config after deserialization to prevent null values for sound
+    and color causing errors when a Fabric instance reads a Forge config file
+    or vice-versa.
+
+ Alternatively find a way to force Fabric to not use Intermediary, but
+ good luck with that.
+ */
+
+
 /**
  * Configuration options class with defaults. Loosely based on the design used
  * by <a href="https://github.com/CaffeineMC/sodium-fabric">Sodium</a>.

@@ -1,26 +1,38 @@
-modLoader = "javafml" #mandatory
-loaderVersion = "${forge_loader_version_range}" #mandatory This is typically bumped every Minecraft version by Forge. See https://files.minecraftforge.net/ for a list of versions.
-license = "${license}"
-issueTrackerURL = "${issues_url}" #optional
-[[mods]] #mandatory
-modId = "${mod_id}" #mandatory
-version = "${version}" #mandatory
-displayName = "${mod_name}" #mandatory
-#updateJSONURL="https://change.me.example.invalid/updates.json" #optional (see https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/)
-displayURL = "${homepage_url}" #optional (displayed in the mod UI)
-logoFile = "assets/${mod_id}/icon.png" #optional
-credits = "${credits}" #optional
-authors = "${mod_author}" #optional
-description = '''${description}''' #mandatory (Supports multiline text)
+modLoader="javafml"
+loaderVersion="${forge_loader_version_range}"
+license="${mod_license}"
+issueTrackerURL="${issues_url}" #optional: none
+
+[[mods]]
+  modId="${mod_id}"
+  version="${mod_version}" #optional: "1"
+  displayName="${mod_name}" #optional: modId
+  description='''${mod_description}''' # optional: "MISSING DESCRIPTION"
+  logoFile="assets/${mod_id}/icon.png" #optional: none
+  features={ java_version="[17,)" }
+  credits="${mod_credits}" #optional: none
+  authors="${mod_author}" #optional: none
+  displayURL="${homepage_url}" #optional: none
+
+[[mixins]]
+  config="chatnotify.mixins.json"
+[[mixins]]
+  config="chatnotify.forge.mixins.json"
+
 [[dependencies.${mod_id}]] #optional
-modId = "forge" #mandatory
-mandatory = true #mandatory
-versionRange = "${forge_version_range}" #mandatory
-ordering = "NONE" # The order that this dependency should load in relation to your mod, required to be either 'BEFORE' or 'AFTER' if the dependency is not mandatory
-side = "CLIENT" # Side this dependency is applied on - 'BOTH', 'CLIENT' or 'SERVER'
+  modId="forge"
+  mandatory=true
+  versionRange="${forge_version_range}"
+  ordering="NONE" #optional: "NONE"
+  side="CLIENT" #optional: "BOTH"
+
 [[dependencies.${mod_id}]]
-modId = "minecraft"
-mandatory = true
-versionRange = "${minecraft_version_range}"
-ordering = "NONE"
-side = "BOTH"
+  modId="minecraft"
+  mandatory=true
+  versionRange="${minecraft_version_range}"
+  ordering="NONE" #optional: "NONE"
+  side="BOTH" #optional: "BOTH"
+
+# https://docs.minecraftforge.net/en/latest/gettingstarted/modfiles/
+# https://docs.minecraftforge.net/en/latest/misc/updatechecker/
+# https://files.minecraftforge.net/

@@ -1,28 +1,15 @@
 {
     "schemaVersion": 1,
     "id": "${mod_id}",
-    "name": "${mod_name}",
-    "version": "${version}",
-    "environment": "${environment}",
-    "license": "${license}",
-    "description": "${description}",
-    "icon": "assets/${mod_id}/icon.png",
-    "authors": [
-        "${mod_author}"
-    ],
-    "contact": {
-        "homepage": "${homepage_url}",
-        "sources": "${sources_url}",
-        "issues": "${issues_url}"
-    },
+    "version": "${mod_version}",
+    "environment": "${mod_environment}",
+    "provides": [],
     "accessWidener": "${mod_id}.accesswidener",
     "entrypoints": {
-        "client": [
-            "notryken.chatnotify.ChatNotifyFabric"
-        ],
-        "modmenu": [
-            "notryken.chatnotify.gui.screen.ModMenuIntegration"
-        ]
+        "main": [],
+        "client": ["notryken.chatnotify.ChatNotifyFabric"],
+        "server": [],
+        "modmenu": ["notryken.chatnotify.gui.screen.ModMenuIntegration"]
     },
     "mixins": [
         "${mod_id}.mixins.json",
@@ -30,19 +17,37 @@
     ],
     "depends": {
         "fabricloader": ">=0.14",
-        "fabric-api": "*",
-        "minecraft": ">=${minecraft_version}",
+        "minecraft": "~${minecraft_version}",
         "java": ">=17"
     },
     "recommends": {
         "modmenu": "${modmenu_version}"
     },
+    "suggests": {},
+    "conflicts": {},
+    "breaks": {},
+
+    "name": "${mod_name}",
+    "description": "${mod_description}",
+    "contact": {
+        "homepage": "${homepage_url}",
+        "sources": "${sources_url}",
+        "issues": "${issues_url}"
+    },
+    "authors": ["${mod_author}"],
+    "contributors": [],
+    "license": "${mod_license}",
+    "icon": "assets/${mod_id}/icon.png",
     "custom": {
         "modmenu": {
             "links": {
-                "Contact": "https://linktr.ee/notryken"
+                "Contact": "${contact_url}"
+            }
+        },
+        "chatnotify": {
+            "links": {
+                "formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec"
             }
         }
     }
 }
-  
