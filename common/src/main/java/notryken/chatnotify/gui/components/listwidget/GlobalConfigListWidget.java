@@ -188,8 +188,9 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                 else if (index >= 0) {
                     Notification notif = ChatNotify.config().getNotif(index);
                     String label = notif.getTrigger();
+                    MutableComponent labelText;
                     if (label.isEmpty()) {
-                        label = "> Click to Configure <";
+                        labelText = Component.literal("> Click to Configure <");
                     }
                     else {
                         if (notif.triggerIsKey) {
@@ -204,19 +205,17 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                             }
                             label = builder.toString();
                         }
+                        labelText = Component.literal(label)
+                                .setStyle(Style.create((notif.getControl(0) ?
+                                                Optional.of(notif.getColor()) : Optional.empty()),
+                                Optional.of(notif.getFormatControl(0)),
+                                Optional.of(notif.getFormatControl(1)),
+                                Optional.of(notif.getFormatControl(2)),
+                                Optional.of(notif.getFormatControl(3)),
+                                Optional.of(notif.getFormatControl(4)),
+                                Optional.empty(),
+                                Optional.empty()));
                     }
-
-                    MutableComponent labelText = Component.literal(label)
-                            .setStyle(Style.create(
-                                    (notif.getControl(0) ? Optional.of(notif.getColor()) :
-                                            Optional.empty()),
-                                    Optional.of(notif.getFormatControl(0)),
-                                    Optional.of(notif.getFormatControl(1)),
-                                    Optional.of(notif.getFormatControl(2)),
-                                    Optional.of(notif.getFormatControl(3)),
-                                    Optional.of(notif.getFormatControl(4)),
-                                    Optional.empty(),
-                                    Optional.empty()));
 
                     options.add(Button.builder(labelText,
                                     (button) -> listWidget.openNotificationConfig(index))
