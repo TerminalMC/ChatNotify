@@ -1,7 +1,6 @@
-<div style="text-align: center;">
+<div align="center"><center>
 
 ## Chat Notify
-___
 
 ![Environment](https://img.shields.io/badge/Environment-Client-purple?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAACXBIWXMAAAsTAAALEwEAmpwYAAAATlBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADEoqZZAAAAGXRSTlMAAQYHCFlaW1xdd3h+f4CFiKius7vEycrMs7f02gAAAQZJREFUSMfVVtESgiAQ1IjEy/Q0qO7/f7QH0QA5MBub2qcdZGdgFxaL4qsolSp5FkFNVPMsgpao5dmHAqEAQBNpAIixk/DnHx+Uwd1XVJSF9AQNkUHE6xUtAmaIGma7OTu2CEoFoPMCDWAzr8dNDSnBMM6plwKhwIP13xOUCtHYJS3zGP1viQyicwynTVWM/6xLNo8Zk/+sIPzAjf+awE06IYgnzQnYpFcJ3KQTS4on/a85uAOXuY/mVkofvlXH201a3MP5t0P6TgvZufehkyJzp9eUgJt0ombiSe/TfC//z31/Hv0PmQ7L+O26X/ofz8NRyA7RzK0UsimPb76i2x72t38ddsETRA9Fud9QwqwAAAAASUVORK5CYII=)
 ![Update](https://img.shields.io/modrinth/game-versions/Iudurxl8?logo=modrinth&label=Update&color=%2300AF5C)
@@ -16,24 +15,22 @@ ___
 
 Chat Notify provides client-side configurable support for audio and visual notification based on chat messages.
 
-</div>
+</center></div>
 
 ### Features and Usage
-___
 
 <img alt="Demonstration" src="https://i.postimg.cc/2SBk1y2m/2023-07-04-14-46-11.png" width="637">
 
- - Notifications activate based on words or phrases called triggers, which you can set in the
-configuration menu.
- - When a trigger is detected in a chat message, a sound will be played and the trigger will
-be colored in the message.
- - You can customize the sound and color for any notification using the configuration
-menu. On Fabric and Quilt, you must have [Mod Menu](https://modrinth.com/mod/modmenu) installed to access it.
+- Notifications activate based on words or phrases called triggers, which you can set in the
+  configuration menu.
+- When a trigger is detected in a chat message, a sound will be played and the trigger will
+  be colored in the message.
+- You can customize the sound and color for any notification using the configuration
+  menu. On Fabric and Quilt, you must have [Mod Menu](https://modrinth.com/mod/modmenu) installed to access it.
 
 <img alt="Configuration" src="https://i.postimg.cc/c4qmv2Cj/2023-11-20-15-14-12.png" width="637">
 
 ### Contact
-___
 
 [![Discord](https://img.shields.io/discord/1103153365216669797?logo=discord&label=Discord&color=%235865F2)](https://discord.gg/sSgQ9AF4mU)
 
