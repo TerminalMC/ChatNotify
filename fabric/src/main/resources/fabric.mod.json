@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
     "id": "${mod_id}",
-    "version": "${mod_version}",
+    "version": "${version}",
     "environment": "${mod_environment}",
     "provides": [],
     "accessWidener": "${mod_id}.accesswidener",

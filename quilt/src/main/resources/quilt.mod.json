@@ -3,7 +3,7 @@
     "quilt_loader": {
         "group": "${mod_group}",
         "id": "${mod_id}",
-        "version": "${mod_version}",
+        "version": "${version}",
         "provides": [],
         "entrypoints": {
             "main": [],
