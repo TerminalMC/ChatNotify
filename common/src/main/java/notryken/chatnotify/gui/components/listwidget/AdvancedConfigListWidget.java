@@ -252,15 +252,11 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                             notif.regexEnabled = false;
                             notif.exclusionEnabled = false;
                             notif.responseEnabled = false;
-                            for (int i = 0;
-                                 i < notif.getExclusionTriggers().size();
-                                 i++)
+                            for (int i = 0; i < notif.getExclusionTriggers().size(); i++)
                             {
                                 notif.removeExclusionTrigger(0);
                             }
-                            for (int i = 0;
-                                 i < notif.getResponseMessages().size();
-                                 i++)
+                            for (int i = 0; i < notif.getResponseMessages().size(); i++)
                             {
                                 notif.removeResponseMessage(0);
                             }

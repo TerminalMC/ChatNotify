@@ -11,8 +11,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.screen.ConfigSubScreen;
 import notryken.chatnotify.gui.screen.ConfigMainScreen;
+import notryken.chatnotify.gui.screen.ConfigSubScreen;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,22 +60,22 @@ public class GlobalConfigListWidget extends ConfigListWidget {
     }
 
     private void moveNotifUp(int index) {
-        ChatNotify.config().moveNotifUp(index);
+        ChatNotify.config().increasePriority(index);
         refreshScreen();
     }
 
     private void moveNotifDown(int index) {
-        ChatNotify.config().moveNotifDown(index);
+        ChatNotify.config().reducePriority(index);
         refreshScreen();
     }
 
     private void addNotification() {
         ChatNotify.config().addNotif();
-        refreshScreen();
+        openNotificationConfig(ChatNotify.config().getNumNotifs()-1);
     }
 
     private void removeNotification(int index) {
-        if (ChatNotify.config().removeNotif(index) == 0) {
+        if (ChatNotify.config().removeNotif(index)) {
             refreshScreen();
         }
     }
@@ -208,8 +208,8 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
                     MutableComponent labelText = Component.literal(label)
                             .setStyle(Style.create(
-                                    (notif.getColor() == null ? Optional.empty() :
-                                            Optional.of(notif.getColor())),
+                                    (notif.getControl(0) ? Optional.of(notif.getColor()) :
+                                            Optional.empty()),
                                     Optional.of(notif.getFormatControl(0)),
                                     Optional.of(notif.getFormatControl(1)),
                                     Optional.of(notif.getFormatControl(2)),
@@ -226,10 +226,10 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
                     options.add(CycleButton.onOffBuilder()
                             .displayOnlyValue()
-                            .withInitialValue(notif.enabled)
+                            .withInitialValue(notif.getEnabled())
                             .create(width / 2 + 95, 0, 25, 20,
                                     Component.empty(),
-                                    (button, status) -> notif.enabled = status));
+                                    (button, status) -> notif.setEnabled(status)));
 
                     if (index > 0) {
                         options.add(Button.builder(Component.literal("⬆"),

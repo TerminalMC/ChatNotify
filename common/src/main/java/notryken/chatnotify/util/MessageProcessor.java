@@ -123,7 +123,7 @@ public class MessageProcessor {
 //        Constants.LOG.info("debug::Attempting notification");
 
         for (Notification notif : ChatNotify.config().getNotifs()) {
-            if (notif.enabled) {
+            if (notif.getEnabled()) {
                 /*
                 triggerIsKey indicates that the Notification should only be
                 triggered by messages with a TranslatableContents key matching
@@ -132,7 +132,7 @@ public class MessageProcessor {
                 if (notif.triggerIsKey) {
 //                    Constants.LOG.info("debug::triggerIsKey true");
                     if (message.getContents() instanceof TranslatableContents ttc) {
-                        if (ttc.getKey().contains(notif.getTrigger())) {
+                        if (!notif.getTrigger().isBlank() && ttc.getKey().contains(notif.getTrigger())) {
 //                            Constants.LOG.info("debug::Message matches key: '{}'", notif.getTrigger());
                             playSound(notif);
                             sendResponses(notif);

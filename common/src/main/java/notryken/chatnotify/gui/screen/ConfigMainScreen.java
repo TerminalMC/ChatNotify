@@ -32,7 +32,7 @@ public class ConfigMainScreen extends OptionsSubScreen {
         this.addWidget(this.listWidget);
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
-            ChatNotify.config().refreshUsernameNotif();
+            ChatNotify.config().validateUsernameNotif();
             ChatNotify.config().purge();
             ChatNotify.config().writeChanges();
             assert this.minecraft != null;
@@ -54,7 +54,7 @@ public class ConfigMainScreen extends OptionsSubScreen {
 
     @Override
     public void onClose() {
-        ChatNotify.config().refreshUsernameNotif();
+        ChatNotify.config().validateUsernameNotif();
         ChatNotify.config().purge();
         ChatNotify.config().writeChanges();
         assert this.minecraft != null;
