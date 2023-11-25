@@ -5,7 +5,7 @@ import net.minecraft.client.OptionInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import notryken.chatnotify.gui.components.ChatHeightSlider;
+import notryken.chatnotify.gui.component.ChatHeightSlider;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;

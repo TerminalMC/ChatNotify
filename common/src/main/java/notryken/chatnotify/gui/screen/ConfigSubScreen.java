@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import notryken.chatnotify.gui.components.listwidget.ConfigListWidget;
+import notryken.chatnotify.gui.component.listwidget.ConfigListWidget;
 
 /**
  * ChatNotify configuration options sub-screen. Contains a single

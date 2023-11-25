@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
-import notryken.chatnotify.gui.components.listwidget.GlobalConfigListWidget;
+import notryken.chatnotify.gui.component.listwidget.GlobalConfigListWidget;
 
 /**
  * Main options screen. Similar to {@code ConfigSubScreen} but required as a

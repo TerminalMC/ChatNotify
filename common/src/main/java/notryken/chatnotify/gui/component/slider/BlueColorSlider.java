@@ -1,19 +1,19 @@
-package notryken.chatnotify.gui.components.slider;
+package notryken.chatnotify.gui.component.slider;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.components.listwidget.ColorConfigListWidget;
+import notryken.chatnotify.gui.component.listwidget.ColorConfigListWidget;
 
-public class RedColorSlider extends AbstractSliderButton
+public class BlueColorSlider extends AbstractSliderButton
 {
     private final Notification notif;
     private final ColorConfigListWidget listWidget;
 
-    public RedColorSlider(int x, int y, int width, int height, double value, Notification notif,
-                          ColorConfigListWidget listWidget) {
+    public BlueColorSlider(int x, int y, int width, int height, double value, Notification notif,
+                           ColorConfigListWidget listWidget) {
         super(x, y, width, height, Component.empty(), value);
         this.notif = notif;
         this.listWidget = listWidget;
@@ -26,15 +26,15 @@ public class RedColorSlider extends AbstractSliderButton
 
     @Override
     protected void updateMessage() {
-        Component message = Component.literal("Red: ")
-                .append(Component.literal(String.valueOf(notif.getRed())))
-                .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(65536 * notif.getRed())));
+        Component message = Component.literal("Blue: ")
+                .append(Component.literal(String.valueOf(notif.getBlue())))
+                .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(notif.getBlue())));
         this.setMessage(message);
     }
 
     @Override
     protected void applyValue() {
-        notif.setRed((int) (this.value * 255 + 0.5));
+        notif.setBlue((int) (this.value * 255 + 0.5));
         listWidget.refreshColorIndicator();
     }
 }

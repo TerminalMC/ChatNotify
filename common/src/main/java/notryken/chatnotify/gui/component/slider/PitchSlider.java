@@ -1,4 +1,4 @@
-package notryken.chatnotify.gui.components.slider;
+package notryken.chatnotify.gui.component.slider;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;

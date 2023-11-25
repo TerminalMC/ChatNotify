@@ -1,4 +1,4 @@
-package notryken.chatnotify.gui.components.listwidget;
+package notryken.chatnotify.gui.component.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -7,9 +7,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.components.slider.BlueColorSlider;
-import notryken.chatnotify.gui.components.slider.GreenColorSlider;
-import notryken.chatnotify.gui.components.slider.RedColorSlider;
+import notryken.chatnotify.gui.component.slider.BlueColorSlider;
+import notryken.chatnotify.gui.component.slider.GreenColorSlider;
+import notryken.chatnotify.gui.component.slider.RedColorSlider;
 
 /**
  * {@code ConfigListWidget} containing controls for text color of the

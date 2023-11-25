@@ -1,11 +1,11 @@
-package notryken.chatnotify.gui.components.slider;
+package notryken.chatnotify.gui.component.slider;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.components.listwidget.ColorConfigListWidget;
+import notryken.chatnotify.gui.component.listwidget.ColorConfigListWidget;
 
 public class GreenColorSlider extends AbstractSliderButton
 {

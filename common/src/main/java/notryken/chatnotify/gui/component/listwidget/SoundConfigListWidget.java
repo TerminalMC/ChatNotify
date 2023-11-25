@@ -1,4 +1,4 @@
-package notryken.chatnotify.gui.components.listwidget;
+package notryken.chatnotify.gui.component.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -10,8 +10,8 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.components.slider.PitchSlider;
-import notryken.chatnotify.gui.components.slider.VolumeSlider;
+import notryken.chatnotify.gui.component.slider.PitchSlider;
+import notryken.chatnotify.gui.component.slider.VolumeSlider;
 import org.jetbrains.annotations.NotNull;
 
 /**

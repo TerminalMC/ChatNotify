@@ -6,14 +6,11 @@ import notryken.chatnotify.config.Config;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatNotify
-{
+public class ChatNotify {
     public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
     private static Config CONFIG;
 
-
-    public static void init()
-    {
+    public static void init() {
         CONFIG = loadConfig();
     }
 
