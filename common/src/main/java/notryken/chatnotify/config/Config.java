@@ -172,7 +172,7 @@ public class Config {
      * @param pUsername the user's in-game name.
      */
     public void setUsername(String pUsername) {
-        if (username != null && !username.isBlank()) {
+        if (pUsername != null && !pUsername.isBlank()) {
             username = pUsername;
             validateUsernameNotif();
         }
