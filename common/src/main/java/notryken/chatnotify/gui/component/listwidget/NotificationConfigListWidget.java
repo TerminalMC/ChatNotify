@@ -46,8 +46,10 @@ public class NotificationConfigListWidget extends ConfigListWidget {
                             {"chat.type.advancement", "Advancement"},
                             {"death.", "Player/Pet Died"}
                     };
-            for (String[] key : keys) {
-                addEntry(new Entry.KeyTriggerButton(this.width, this.notif, this, key));
+            for (int i = 0; i < keys.length; i++) {
+                // Requires an even number of keys
+                addEntry(new Entry.KeyTriggerButton(this.width, this.notif, this, keys[i], keys[i+1]));
+                i++;
             }
         }
         else {
@@ -99,7 +101,7 @@ public class NotificationConfigListWidget extends ConfigListWidget {
         client.setScreen(new NotifConfigScreen(client.screen, title,
                 new SoundConfigListWidget(client,
                         client.screen.width, client.screen.height,
-                        32, client.screen.height - 32, 25,
+                        32, client.screen.height - 32, 21,
                         client.screen, title, notif)));
     }
 
@@ -179,15 +181,24 @@ public class NotificationConfigListWidget extends ConfigListWidget {
 
         private static class KeyTriggerButton extends Entry {
             KeyTriggerButton(int width, Notification notif,
-                             NotificationConfigListWidget listWidget, String[] key) {
+                             NotificationConfigListWidget listWidget,
+                             String[] keyLeft, String[] keyRight) {
                 super();
-                options.add(Button.builder(Component.literal(key[1]),
+                options.add(Button.builder(Component.literal(keyLeft[1]),
                         (button) -> {
-                            notif.setTrigger(key[0]);
+                            notif.setTrigger(keyLeft[0]);
                             listWidget.reloadScreen();
                         })
-                        .size(240, 20)
+                        .size(117, 20)
                         .pos(width / 2 - 120, 0)
+                        .build());
+                options.add(Button.builder(Component.literal(keyRight[1]),
+                                (button) -> {
+                                    notif.setTrigger(keyRight[0]);
+                                    listWidget.reloadScreen();
+                                })
+                        .size(117, 20)
+                        .pos(width / 2 + 3, 0)
                         .build());
             }
         }

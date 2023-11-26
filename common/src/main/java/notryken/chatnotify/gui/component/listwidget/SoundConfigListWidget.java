@@ -212,7 +212,7 @@ public class SoundConfigListWidget extends ConfigListWidget {
                     listWidget.reloadScreen();
                     listWidget.playNotifSound();
                 })
-                        .size(240, 20)
+                        .size(240, 19)
                         .pos(width / 2 - 120, 0)
                         .build());
             }
