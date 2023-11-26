@@ -289,25 +289,39 @@ public class Config {
      * triggers, and response messages from the remaining {@code Notification}s,
      * and disables all {@code Notification}s that have no enabled controls.
      */
-    public void purge() {
+    public void validateAll() {
+        validateUsernameNotif();
+
         messagePrefixes.removeIf(String::isBlank);
         messagePrefixes.sort(Comparator.comparingInt(String::length).reversed());
 
         Notification notif;
-        Iterator<Notification> iter = notifications.iterator();
-        iter.next(); // Skip the username notification.
-        while (iter.hasNext()) {
-            notif = iter.next();
+        Iterator<Notification> iter1 = notifications.iterator();
+        iter1.next(); // Skip the username notification.
+        while (iter1.hasNext()) {
+            notif = iter1.next();
             if (notif.getTrigger().isBlank() && !notif.persistent) {
-                iter.remove();
+                iter1.remove();
             }
         }
 
-        for (Notification notif2 : notifications) {
-            notif2.purgeTriggers();
-            notif2.purgeExclusionTriggers();
-            notif2.purgeResponseMessages();
-            notif2.autoDisable();
+        /*
+        Move all triggers activated by the "chat.type" key to the low-priority
+        end, so that they do not block other notifications from activating.
+         */
+        List<Notification> anyMsgNotifList = new ArrayList<>();
+        Iterator<Notification> iter2 = notifications.iterator();
+        while (iter2.hasNext()) {
+            notif = iter2.next();
+            notif.purgeTriggers();
+            notif.purgeExclusionTriggers();
+            notif.purgeResponseMessages();
+            notif.autoDisable();
+            if (notif.triggerIsKey && notif.getTrigger().equals("chat.type")) {
+                anyMsgNotifList.add(notif);
+                iter2.remove();
+            }
         }
+        notifications.addAll(anyMsgNotifList);
     }
 }

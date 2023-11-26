@@ -131,12 +131,20 @@ public class MessageProcessor {
                  */
                 if (notif.triggerIsKey) {
 //                    Constants.LOG.info("debug::triggerIsKey true");
-                    if (message.getContents() instanceof TranslatableContents ttc) {
-                        if (!notif.getTrigger().isBlank() && ttc.getKey().contains(notif.getTrigger())) {
+                    if (notif.getTrigger().equals("chat.type")) {
+//                        Constants.LOG.info("debug::Triggered by chat.type key");
+                        playSound(notif);
+                        sendResponses(notif);
+                        return simpleRestyle(message, notif);
+                    }
+                    else {
+                        if (message.getContents() instanceof TranslatableContents ttc) {
+                            if (!notif.getTrigger().isBlank() && ttc.getKey().contains(notif.getTrigger())) {
 //                            Constants.LOG.info("debug::Message matches key: '{}'", notif.getTrigger());
-                            playSound(notif);
-                            sendResponses(notif);
-                            return simpleRestyle(message, notif);
+                                playSound(notif);
+                                sendResponses(notif);
+                                return simpleRestyle(message, notif);
+                            }
                         }
                     }
                 } else {

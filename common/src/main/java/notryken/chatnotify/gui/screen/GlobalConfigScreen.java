@@ -1,16 +1,10 @@
 package notryken.chatnotify.gui.screen;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.OptionsSubScreen;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.gui.component.listwidget.GlobalConfigListWidget;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <b>Note:</b> If creating a ChatNotify config screen (e.g. for ModMenu
@@ -33,8 +27,7 @@ public class GlobalConfigScreen extends ConfigScreen {
 
     @Override
     public void onClose() {
-        ChatNotify.config().validateUsernameNotif();
-        ChatNotify.config().purge();
+        ChatNotify.config().validateAll();
         ChatNotify.config().writeChanges();
         super.onClose();
     }
