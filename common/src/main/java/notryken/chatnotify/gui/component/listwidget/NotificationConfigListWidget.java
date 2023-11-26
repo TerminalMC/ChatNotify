@@ -39,7 +39,7 @@ public class NotificationConfigListWidget extends ConfigListWidget {
             addEntry(new Entry.TriggerField(this.width, this.notif, this.client, this, 0));
 
             String[][] keys = {
-                            {"chat.type", "Any Message"},
+                            {".", "Any Message"},
                             {"commands.message.display", "Private Message"},
                             {"multiplayer.player.joined", "Player Joined"},
                             {"multiplayer.player.left", "Player Left"},

@@ -131,8 +131,8 @@ public class MessageProcessor {
                  */
                 if (notif.triggerIsKey) {
 //                    Constants.LOG.info("debug::triggerIsKey true");
-                    if (notif.getTrigger().equals("chat.type")) {
-//                        Constants.LOG.info("debug::Triggered by chat.type key");
+                    if (notif.getTrigger().equals(".")) {
+//                        Constants.LOG.info("debug::Triggered by "." key");
                         playSound(notif);
                         sendResponses(notif);
                         return simpleRestyle(message, notif);

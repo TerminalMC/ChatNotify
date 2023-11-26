@@ -190,7 +190,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                     }
                     else {
                         if (notif.triggerIsKey) {
-                            label = "[Key] " + label;
+                            label = "[Key] " + (label.equals(".") ? "Any Message" : label);
                         }
                         else {
                             StringBuilder builder = new StringBuilder(label);

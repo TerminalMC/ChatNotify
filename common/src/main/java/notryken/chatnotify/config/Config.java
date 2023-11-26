@@ -306,7 +306,7 @@ public class Config {
         }
 
         /*
-        Move all triggers activated by the "chat.type" key to the low-priority
+        Move all triggers activated by the "." key to the low-priority
         end, so that they do not block other notifications from activating.
          */
         List<Notification> anyMsgNotifList = new ArrayList<>();
@@ -314,10 +314,11 @@ public class Config {
         while (iter2.hasNext()) {
             notif = iter2.next();
             notif.purgeTriggers();
+            notif.fixKeyTriggerCase();
             notif.purgeExclusionTriggers();
             notif.purgeResponseMessages();
             notif.autoDisable();
-            if (notif.triggerIsKey && notif.getTrigger().equals("chat.type")) {
+            if (notif.triggerIsKey && notif.getTrigger().equals(".")) {
                 anyMsgNotifList.add(notif);
                 iter2.remove();
             }

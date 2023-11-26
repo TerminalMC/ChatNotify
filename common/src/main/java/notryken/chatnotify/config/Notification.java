@@ -7,10 +7,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Configurable notification including text color, text formatting and sound
@@ -447,6 +444,15 @@ public class Notification
             if (iter.next().isBlank()) {
                 iter.remove();
             }
+        }
+    }
+
+    /**
+     * If configured for key-activation, converts all keys to lowercase.
+     */
+    public void fixKeyTriggerCase() {
+        if (triggerIsKey) {
+            triggers.replaceAll(s -> s.toLowerCase(Locale.ROOT));
         }
     }
 
