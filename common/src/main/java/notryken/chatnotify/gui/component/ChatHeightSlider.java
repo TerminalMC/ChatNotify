@@ -23,12 +23,12 @@ public enum ChatHeightSlider implements SliderableValueSet<Double> {
 
     @Override
     public double toSliderValue(@NotNull Double d) {
-        return d * maxChatHeight;
+        return d / maxChatHeight;
     }
 
     @Override
     public @NotNull Double fromSliderValue(double d) {
-        return d / maxChatHeight;
+        return d * maxChatHeight;
     }
 
     @Override
