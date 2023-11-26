@@ -26,7 +26,6 @@ public class PitchSlider extends AbstractSliderButton {
 
     @Override
     protected void applyValue() {
-        notif.soundPitch =
-                (float) (Math.round(10 * (this.value * 1.5 + 0.5)) / 10.0D);
+        notif.soundPitch = (float) (Math.round(10 * (value * 1.5 + 0.5)) / 10.0D);
     }
 }

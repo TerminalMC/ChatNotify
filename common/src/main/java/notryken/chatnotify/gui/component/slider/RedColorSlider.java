@@ -34,7 +34,7 @@ public class RedColorSlider extends AbstractSliderButton
 
     @Override
     protected void applyValue() {
-        notif.setRed((int) (this.value * 255 + 0.5));
+        notif.setRed((int) (value * 255 + 0.5));
         listWidget.refreshColorIndicator();
     }
 }

@@ -24,14 +24,14 @@ public class ColorConfigListWidget extends ConfigListWidget {
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
-        addEntry(new ConfigListWidget.Entry.Header(width, this, client,
+        addEntry(new ConfigListWidget.Entry.Header(this.width, this.client,
                 Component.literal("Notification Text Color")
-                        .setStyle(Style.EMPTY.withColor(notif.getColor()))));
-        addEntry(new Entry.RedSlider(width, notif, this));
-        addEntry(new Entry.GreenSlider(width, notif, this));
-        addEntry(new Entry.BlueSlider(width, notif, this));
+                        .setStyle(Style.EMPTY.withColor(this.notif.getColor()))));
+        addEntry(new Entry.RedSlider(this.width, this.notif, this));
+        addEntry(new Entry.GreenSlider(this.width, this.notif, this));
+        addEntry(new Entry.BlueSlider(this.width, this.notif, this));
 
-        addEntry(new Entry.ColorOption(width, notif, this));
+        addEntry(new Entry.ColorOption(this.width, this.notif, this));
     }
 
     @Override
@@ -43,28 +43,22 @@ public class ColorConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    protected void refreshScreen() {
-        refreshScreen(this);
+    protected void reloadScreen() {
+        reloadScreen(this);
     }
 
     public void refreshColorIndicator() {
         remove(0);
-        addEntryToTop(new ConfigListWidget.Entry.Header(width, this, client,
+        addEntryToTop(new ConfigListWidget.Entry.Header(width, client,
                 Component.literal("Notification Text Color")
                         .setStyle(Style.EMPTY.withColor(notif.getColor()))));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
-        public final Notification notif;
-
-        Entry(int width, Notification notif, ColorConfigListWidget listWidget) {
-            super(width, listWidget);
-            this.notif = notif;
-        }
 
         private static class RedSlider extends ColorConfigListWidget.Entry {
             RedSlider(int width, Notification notif, ColorConfigListWidget listWidget) {
-                super(width, notif, listWidget);
+                super();
                 options.add(new RedColorSlider(width / 2 - 120, 0, 240, 20,
                         RedColorSlider.sliderValue(notif.getRed()), notif, listWidget));
             }
@@ -72,7 +66,7 @@ public class ColorConfigListWidget extends ConfigListWidget {
 
         private static class GreenSlider extends ColorConfigListWidget.Entry {
             GreenSlider(int width, Notification notif, ColorConfigListWidget listWidget) {
-                super(width, notif, listWidget);
+                super();
                 options.add(new GreenColorSlider(width / 2 - 120, 0, 240, 20,
                         GreenColorSlider.sliderValue(notif.getGreen()), notif,listWidget));
             }
@@ -80,7 +74,7 @@ public class ColorConfigListWidget extends ConfigListWidget {
 
         private static class BlueSlider extends ColorConfigListWidget.Entry {
             BlueSlider(int width, Notification notif, ColorConfigListWidget listWidget) {
-                super(width, notif, listWidget);
+                super();
                 options.add(new BlueColorSlider(width / 2 - 120, 0, 240, 20,
                         BlueColorSlider.sliderValue(notif.getBlue()), notif, listWidget));
             }
@@ -88,7 +82,7 @@ public class ColorConfigListWidget extends ConfigListWidget {
 
         private static class ColorOption extends Entry {
             ColorOption(int width, Notification notif, ColorConfigListWidget listWidget) {
-                super(width, notif, listWidget);
+                super();
 
                 // Minecraft's 16 default colors represented in integer form.
                 int[] quickColors = new int[] {
@@ -118,7 +112,7 @@ public class ColorConfigListWidget extends ConfigListWidget {
                     options.add(Button.builder(Component.literal("\u2588")
                                             .setStyle(Style.EMPTY.withColor(color)), (button) -> {
                         notif.setColor(color);
-                        listWidget.refreshScreen();
+                        listWidget.reloadScreen();
                     })
                             .size(buttonWidth, 15)
                             .pos((width / 2) + offset + (buttonWidth * i), 0)

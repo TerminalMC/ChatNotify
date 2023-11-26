@@ -11,8 +11,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.screen.ConfigMainScreen;
-import notryken.chatnotify.gui.screen.ConfigSubScreen;
+import notryken.chatnotify.gui.screen.GlobalConfigScreen;
+import notryken.chatnotify.gui.screen.NotifConfigScreen;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,17 +27,17 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                                   Screen parent, Component title) {
         super(client, width, height, top, bottom, itemHeight, parent, title);
 
-        addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Component.literal("Global Options")));
+        addEntry(new ConfigListWidget.Entry.Header(this.width, this.client, 
+                Component.literal("Global Options")));
 
-        addEntry(new Entry.IgnoreToggle(this.width, this));
-        addEntry(new Entry.SoundSourceButton(this.width, this));
+        addEntry(new Entry.IgnoreToggle(this.width));
+        addEntry(new Entry.SoundSourceButton(this.width));
         addEntry(new Entry.PrefixConfigButton(this.width, this));
 
-        addEntry(new ConfigListWidget.Entry.Header(this.width, this,
-                client, Component.literal("Notifications \u2139"),
-                Component.literal("Notifications are processed in sequential order as " +
-                        "displayed below. No more than one notification can activate at a time.")));
+        addEntry(new ConfigListWidget.Entry.Header(this.width, this.client, 
+                Component.literal("Notifications \u2139"),
+                Component.literal("Notifications are checked in sequential order as " +
+                        "displayed below. A message can activate at most 1 notification.")));
 
         int max = ChatNotify.config().getNumNotifs();
         for (int i = 0; i < max; i++) {
@@ -55,18 +55,18 @@ public class GlobalConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    protected void refreshScreen() {
-        client.setScreen(new ConfigMainScreen(parentScreen));
+    protected void reloadScreen() {
+        client.setScreen(new GlobalConfigScreen(parentScreen));
     }
 
     private void moveNotifUp(int index) {
         ChatNotify.config().increasePriority(index);
-        refreshScreen();
+        reloadScreen();
     }
 
     private void moveNotifDown(int index) {
         ChatNotify.config().reducePriority(index);
-        refreshScreen();
+        reloadScreen();
     }
 
     private void addNotification() {
@@ -76,39 +76,35 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
     private void removeNotification(int index) {
         if (ChatNotify.config().removeNotif(index)) {
-            refreshScreen();
+            reloadScreen();
         }
     }
 
     private void openPrefixConfig() {
         assert client.screen != null;
-        Component title = Component.literal("Message Prefix Settings");
-        client.setScreen(new ConfigSubScreen(client.screen, client.options,
-                title, new PrefixConfigListWidget(client,
-                client.screen.width, client.screen.height,
-                32, client.screen.height - 32, 25,
-                client.screen, title)));
+        client.setScreen(new NotifConfigScreen(client.screen, 
+                Component.translatable("screen.chatnotify.title.prefix"), 
+                new PrefixConfigListWidget(client,
+                        client.screen.width, client.screen.height,
+                        32, client.screen.height - 32, 25,
+                        client.screen, title)));
     }
 
     private void openNotificationConfig(int index) {
         assert client.screen != null;
-        Component title = Component.literal("Notification Settings");
-        client.setScreen(new ConfigSubScreen(client.screen, client.options,
-                title, new NotificationConfigListWidget(client,
-                client.screen.width, client.screen.height,
-                32, client.screen.height - 32, 25,
-                client.screen, title, ChatNotify.config().getNotif(index))));
+        client.setScreen(new NotifConfigScreen(client.screen, 
+                Component.translatable("screen.chatnotify.title.notif"),
+                new NotificationConfigListWidget(client,
+                        client.screen.width, client.screen.height,
+                        32, client.screen.height - 32, 25,
+                        client.screen, title, ChatNotify.config().getNotif(index))));
     }
 
     public static class Entry extends ConfigListWidget.Entry {
 
-        Entry(int width, GlobalConfigListWidget listWidget) {
-            super(width, listWidget);
-        }
-
         private static class IgnoreToggle extends Entry {
-            IgnoreToggle(int width, GlobalConfigListWidget listWidget) {
-                super(width, listWidget);
+            IgnoreToggle(int width) {
+                super();
 
                 CycleButton<Boolean> ignoreButton =
                         CycleButton.booleanBuilder(Component.nullToEmpty("No"),
@@ -117,7 +113,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                                 .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                         "Allows or prevents your own messages " +
                                                 "triggering notifications.")))
-                                .create(this.width / 2 - 120, 32, 240, 20,
+                                .create(width / 2 - 120, 32, 240, 20,
                                 Component.literal("Check Own Messages"),
                                 (button, status) ->
                                         ChatNotify.config().ignoreOwnMessages = status);
@@ -126,8 +122,8 @@ public class GlobalConfigListWidget extends ConfigListWidget {
         }
 
         private static class SoundSourceButton extends Entry {
-            SoundSourceButton(int width, GlobalConfigListWidget listWidget) {
-                super(width, listWidget);
+            SoundSourceButton(int width) {
+                super();
 
                 CycleButton<SoundSource> soundSourceButton =
                         CycleButton.<SoundSource>builder(source -> Component.translatable(
@@ -136,7 +132,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                                 .withInitialValue(ChatNotify.config().notifSoundSource)
                                 .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                         "Notification sound volume control category.")))
-                                .create(this.width / 2 - 120, 32, 240, 20,
+                                .create(width / 2 - 120, 32, 240, 20,
                                         Component.literal("Sound Volume Type"),
                                         (button, status) ->
                                                 ChatNotify.config().notifSoundSource = status);
@@ -146,7 +142,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
         private static class PrefixConfigButton extends Entry {
             PrefixConfigButton(int width, GlobalConfigListWidget listWidget) {
-                super(width, listWidget);
+                super();
 
                 StringBuilder labelBuilder = new StringBuilder("Prefixes: ");
 
@@ -176,7 +172,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
              *              'add notification' button.
              */
             NotifButton(int width, GlobalConfigListWidget listWidget, int index) {
-                super(width, listWidget);
+                super();
 
                 if (index == -1) {
                     options.add(Button.builder(Component.literal("+"),

@@ -27,13 +27,13 @@ public class SoundConfigListWidget extends ConfigListWidget {
         super(client, width, height, top, bottom, itemHeight, parent, title);
         this.notif = notif;
 
-        addEntry(new Entry.SoundField(width, notif, client, this));
-        addEntry(new Entry.SoundConfigVolume(width, notif, this));
-        addEntry(new Entry.SoundConfigPitch(width, notif, this));
-        addEntry(new Entry.SoundTest(width, notif, this));
+        addEntry(new Entry.SoundField(width, notif, client));
+        addEntry(new Entry.SoundConfigVolume(width, notif));
+        addEntry(new Entry.SoundConfigPitch(width, notif));
+        addEntry(new Entry.SoundTest(width, this));
 
-        addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Noteblock Sounds")));
+        addEntry(new ConfigListWidget.Entry.Header(width, client,
+                Component.literal("Noteblock Sounds")));
         String[][] noteblockSounds = {
                         {"block.note_block.banjo", "Banjo"},
                         {"block.note_block.bass", "Bass"},
@@ -56,8 +56,8 @@ public class SoundConfigListWidget extends ConfigListWidget {
             addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Power/Portal Sounds")));
+        addEntry(new ConfigListWidget.Entry.Header(width, client,
+                Component.literal("Power/Portal Sounds")));
         String[][] powerSounds = new String[][]{
                         {"block.beacon.activate", "Beacon Activate"},
                         {"block.beacon.deactivate", "Beacon Deactivate"},
@@ -80,8 +80,8 @@ public class SoundConfigListWidget extends ConfigListWidget {
             addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Explosion Sounds")));
+        addEntry(new ConfigListWidget.Entry.Header(width, client,
+                Component.literal("Explosion Sounds")));
         String[][] explosionSounds = new String[][]{
                         {"entity.tnt.primed", "TNT Ignite"},
                         {"entity.generic.explode", "TNT Explode"},
@@ -96,8 +96,8 @@ public class SoundConfigListWidget extends ConfigListWidget {
             addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Illager Sounds")));
+        addEntry(new ConfigListWidget.Entry.Header(width, client,
+                Component.literal("Illager Sounds")));
         String[][] villagerSounds = new String[][]{
                         {"entity.villager.ambient", "Villager"},
                         {"entity.villager.yes", "Villager Yes"},
@@ -112,8 +112,8 @@ public class SoundConfigListWidget extends ConfigListWidget {
             addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Misc Sounds")));
+        addEntry(new ConfigListWidget.Entry.Header(width, client,
+                Component.literal("Misc Sounds")));
         String[][] miscSounds = new String[][]{
                         {"entity.arrow.hit_player", "Arrow Hit"},
                         {"block.bell.use", "Bell"},
@@ -142,8 +142,8 @@ public class SoundConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    protected void refreshScreen() {
-        refreshScreen(this);
+    protected void reloadScreen() {
+        reloadScreen(this);
     }
 
     private void playNotifSound() {
@@ -157,33 +157,26 @@ public class SoundConfigListWidget extends ConfigListWidget {
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
-        public final Notification notif;
-
-        Entry(int width, Notification notif, SoundConfigListWidget listWidget) {
-            super(width, listWidget);
-            this.notif = notif;
-        }
 
         private static class SoundConfigVolume extends Entry {
-            SoundConfigVolume(int width, Notification notif, SoundConfigListWidget listWidget) {
-                super(width, notif, listWidget);
+            SoundConfigVolume(int width, Notification notif) {
+                super();
                 options.add(new VolumeSlider(width / 2 - 120, 0, 240, 20,
                         notif.soundVolume, notif));
             }
         }
 
         private static class SoundConfigPitch extends Entry {
-            SoundConfigPitch(int width, Notification notif, SoundConfigListWidget listWidget) {
-                super(width, notif, listWidget);
+            SoundConfigPitch(int width, Notification notif) {
+                super();
                 options.add(new PitchSlider(width / 2 - 120, 0, 240, 20,
                         PitchSlider.sliderValue(notif.soundPitch), notif));
             }
         }
 
         private static class SoundTest extends Entry {
-            SoundTest(int width, Notification notif, SoundConfigListWidget listWidget) {
-                super(width, notif, listWidget);
-
+            SoundTest(int width, SoundConfigListWidget listWidget) {
+                super();
                 options.add(Button.builder(Component.literal(
                         "> Click to Test Sound <"), (button) ->
                                 listWidget.playNotifSound())
@@ -197,17 +190,14 @@ public class SoundConfigListWidget extends ConfigListWidget {
         }
 
         private static class SoundField extends Entry {
-            SoundField(int width, Notification notif, @NotNull Minecraft client,
-                       SoundConfigListWidget listWidget) {
-                super(width, notif, listWidget);
-
+            SoundField(int width, Notification notif, @NotNull Minecraft client) {
+                super();
                 EditBox soundField = new EditBox(
-                        client.font, this.width / 2 - 120, 0, 240, 20,
+                        client.font, width / 2 - 120, 0, 240, 20,
                         Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
-                soundField.setValue(this.notif.getSound().toString());
+                soundField.setValue(notif.getSound().toString());
                 soundField.setResponder((sound) -> notif.setSound(notif.parseSound(sound.strip())));
-
                 options.add(soundField);
             }
         }
@@ -215,12 +205,11 @@ public class SoundConfigListWidget extends ConfigListWidget {
         private static class SoundOption extends Entry {
             SoundOption(int width, Notification notif, SoundConfigListWidget listWidget,
                         String sound, String soundName) {
-                super(width, notif, listWidget);
-
+                super();
                 options.add(Button.builder(Component.literal(soundName),
                         (button) -> {
                     notif.setSound(notif.parseSound(sound));
-                    listWidget.refreshScreen();
+                    listWidget.reloadScreen();
                     listWidget.playNotifSound();
                 })
                         .size(240, 20)

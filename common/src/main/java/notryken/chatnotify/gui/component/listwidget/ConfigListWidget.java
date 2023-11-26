@@ -11,7 +11,8 @@ import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.network.chat.Component;
-import notryken.chatnotify.gui.screen.ConfigSubScreen;
+import notryken.chatnotify.gui.screen.NotifConfigScreen;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,29 +46,30 @@ public abstract class ConfigListWidget
     // Default methods
 
     /**
-     * Pseudo-refresh method. Sets the client screen to a new instance of
-     * {@code ConfigSubScreen}, with the specified {@code ConfigListWidget} and
-     * the stored parent screen.
+     * Sets the client screen to a new instance of {@code NotifConfigScreen}, 
+     * with the specified {@code ConfigListWidget} and the stored parent screen.
      * @param listWidget the {@code ConfigListWidget} to provide to the new
      *                   screen.
      */
-    public void refreshScreen(ConfigListWidget listWidget) {
-        client.setScreen(new ConfigSubScreen(parentScreen, client.options, title, listWidget));
+    public void reloadScreen(ConfigListWidget listWidget) {
+        client.setScreen(new NotifConfigScreen(parentScreen, title, listWidget));
     }
+    
+    // Override implementations
 
+    @Override
     public int getRowWidth() {
-        // Sets the position of the scrollbar
-        return 300;
+        return 300; // Sets the position of the scrollbar
     }
 
+    @Override
     protected int getScrollbarPosition() {
-        // Offset since ChatNotify config screens use a size-32 buffer
-        return super.getScrollbarPosition() + 32;
+        return super.getScrollbarPosition() + 32; // Offset as a buffer
     }
 
     // Abstract methods
 
-    protected abstract void refreshScreen();
+    protected abstract void reloadScreen();
 
     public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
 
@@ -78,16 +80,15 @@ public abstract class ConfigListWidget
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
 
         public final List<AbstractWidget> options;
-        public final ConfigListWidget listWidget;
-        public final int width;
 
-        public Entry(int width, ConfigListWidget listWidget) {
+        public Entry() {
             this.options = new ArrayList<>();
-            this.listWidget = listWidget;
-            this.width = width;
         }
 
-        public void render(GuiGraphics context, int index, int y, int x,
+        // Override implementations
+        
+        @Override
+        public void render(@NotNull GuiGraphics context, int index, int y, int x,
                            int entryWidth, int entryHeight, int mouseX, int mouseY,
                            boolean hovered, float tickDelta) {
             options.forEach((button) -> {
@@ -96,47 +97,46 @@ public abstract class ConfigListWidget
             });
         }
 
-        public List<? extends GuiEventListener> children() {
-            return this.options;
+        @Override
+        public @NotNull List<? extends GuiEventListener> children() {
+            return options;
         }
 
-        public List<? extends NarratableEntry> narratables() {
-            return this.options;
+        @Override
+        public @NotNull List<? extends NarratableEntry> narratables() {
+            return options;
         }
 
-        // Default Entry implementations
+        // Common Entry implementations
 
         /**
          * A {@code Header} is a {@code StringWidget} with position and
          * dimensions set to standard ChatNotify values.
          */
         public static class Header extends Entry {
-            public Header(int width, ConfigListWidget listWidget, Minecraft client,
-                          Component label) {
-                super(width, listWidget);
+            public Header(int width, Minecraft client, Component label) {
+                super();
                 options.add(new StringWidget(width / 2 - 120, 0, 240, 20,
                         label, client.font));
             }
 
-            public Header(int width, ConfigListWidget listWidget, Minecraft client,
-                          Component label, int labelColor) {
-                super(width, listWidget);
+            public Header(int width, Minecraft client, Component label, int labelColor) {
+                super();
                 options.add(new StringWidget(width / 2 - 120, 0, 240, 20,
                         label, client.font).setColor(labelColor));
             }
 
-            public Header(int width, ConfigListWidget listWidget, Minecraft client,
-                          Component label, Component tooltip) {
-                super(width, listWidget);
+            public Header(int width, Minecraft client, Component label, Component tooltip) {
+                super();
                 StringWidget header = new StringWidget(width / 2 - 120, 0, 240, 20,
                         label, client.font);
                 header.setTooltip(Tooltip.create(tooltip));
                 options.add(header);
             }
 
-            public Header(int width, ConfigListWidget listWidget, Minecraft client,
-                          Component label, int labelColor, Component tooltip) {
-                super(width, listWidget);
+            public Header(int width, Minecraft client, Component label, int labelColor,
+                          Component tooltip) {
+                super();
                 StringWidget header = new StringWidget(width / 2 - 120, 0, 240, 20,
                         label, client.font);
                 header.setColor(labelColor);
@@ -150,24 +150,23 @@ public abstract class ConfigListWidget
          * position and dimensions set to standard ChatNotify values.
          */
         public static class MultiLineHeader extends Entry {
-            public MultiLineHeader(int width, ConfigListWidget listWidget,
-                                   Minecraft client, Component label) {
-                super(width, listWidget);
+            public MultiLineHeader(int width, Minecraft client, Component label) {
+                super();
                 options.add(new MultiLineTextWidget(width / 2 - 120, 0, label, client.font)
                         .setMaxWidth(240));
             }
 
-            public MultiLineHeader(int width, ConfigListWidget listWidget, Minecraft client,
-                                   Component label, int labelColor) {
-                super(width, listWidget);
+            public MultiLineHeader(int width, Minecraft client, Component label,
+                                   int labelColor) {
+                super();
                 options.add(new MultiLineTextWidget(width / 2 - 120, 0, label, client.font)
                         .setMaxWidth(240)
                         .setColor(labelColor));
             }
 
-            public MultiLineHeader(int width, ConfigListWidget listWidget, Minecraft client,
-                                   Component label, Component tooltip) {
-                super(width, listWidget);
+            public MultiLineHeader(int width, Minecraft client, Component label,
+                                   Component tooltip) {
+                super();
                 MultiLineTextWidget header = new MultiLineTextWidget(
                         width / 2 - 120, 0, label, client.font)
                         .setMaxWidth(240);
@@ -175,9 +174,9 @@ public abstract class ConfigListWidget
                 options.add(header);
             }
 
-            public MultiLineHeader(int width, ConfigListWidget listWidget, Minecraft client,
-                                   Component label, int labelColor, Component tooltip) {
-                super(width, listWidget);
+            public MultiLineHeader(int width, Minecraft client, Component label,
+                                   int labelColor, Component tooltip) {
+                super();
                 MultiLineTextWidget header = new MultiLineTextWidget(
                         width / 2 - 120, 0, label, client.font)
                         .setMaxWidth(240);

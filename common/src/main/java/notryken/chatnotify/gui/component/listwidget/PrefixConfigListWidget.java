@@ -20,8 +20,8 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                                   Screen parent, Component title) {
         super(client, width, height, top, bottom, itemHeight, parent, title);
 
-        addEntry(new ConfigListWidget.Entry.Header(width, this,
-                client, Component.literal("Message Modifier Prefixes ℹ"),
+        addEntry(new ConfigListWidget.Entry.Header(this.width, this.client,
+                Component.literal("Message Modifier Prefixes ℹ"),
                 Component.literal("A message prefix is a character or sequence of " +
                         "characters that you type before a message to modify it. For " +
                         "example, '!' or '/shout' may be used on some servers to " +
@@ -29,9 +29,9 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                         "spurious notifications.")));
 
         for (int i = 0; i < ChatNotify.config().getPrefixes().size(); i++) {
-            addEntry(new Entry.PrefixField(width, client, this, i));
+            addEntry(new Entry.PrefixField(this.width, this.client, this, i));
         }
-        addEntry(new Entry.PrefixField(width, client, this, -1));
+        addEntry(new Entry.PrefixField(this.width, this.client, this, -1));
     }
 
     @Override
@@ -43,30 +43,26 @@ public class PrefixConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    protected void refreshScreen() {
-        refreshScreen(this);
+    protected void reloadScreen() {
+        reloadScreen(this);
     }
 
 
     private abstract static class Entry extends ConfigListWidget.Entry {
-        Entry(int width, PrefixConfigListWidget listWidget)
-        {
-            super(width, listWidget);
-        }
 
         private static class PrefixField extends Entry {
             final int index;
 
             PrefixField(int width, @NotNull Minecraft client,
                         PrefixConfigListWidget listWidget, int index) {
-                super(width, listWidget);
+                super();
                 this.index = index;
 
                 if (index == -1) {
                     options.add(Button.builder(Component.literal("+"),
                                     (button) -> {
                                         ChatNotify.config().addPrefix("");
-                                        listWidget.refreshScreen();
+                                        listWidget.reloadScreen();
                                     })
                             .size(240, 20)
                             .pos(width / 2 - 120, 0)
@@ -74,7 +70,7 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                 }
                 else if (index >= 0) {
                     EditBox prefixEdit = new EditBox(
-                            client.font, this.width / 2 - 120, 0, 240,
+                            client.font, width / 2 - 120, 0, 240,
                             20, Component.literal("Message Prefix"));
                     prefixEdit.setMaxLength(20);
                     prefixEdit.setValue(ChatNotify.config().getPrefix(index));
@@ -86,7 +82,7 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                     options.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         ChatNotify.config().removePrefix(index);
-                                        listWidget.refreshScreen();
+                                        listWidget.reloadScreen();
                                     })
                             .size(25, 20)
                             .pos(width / 2 + 120 + 5, 0)

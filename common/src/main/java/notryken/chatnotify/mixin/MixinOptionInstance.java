@@ -46,7 +46,7 @@ public class MixinOptionInstance {
         String key = ((TranslatableContents) content).getKey();
         if (!key.equals("options.chat.height.focused")) return;
 
-        this.values = ChatHeightSlider.INSTANCE;
-        this.codec = this.values.codec();
+        values = ChatHeightSlider.INSTANCE;
+        codec = values.codec();
     }
 }
