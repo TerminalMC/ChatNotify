@@ -84,7 +84,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification> 
 
         try {
             JsonObject colorObj = jsonObject.get("color").getAsJsonObject();
-            // Mojmap Fabric and NeoForge
+            // NeoForge
             int colorInt = colorObj.get("value").getAsInt();
             if (colorInt < 0 || colorInt > 16777215) {
                 throw new JsonParseException("Color int out of range.");
@@ -95,7 +95,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification> 
                NumberFormatException | IllegalStateException e) {
             try {
                 JsonObject colorObj = jsonObject.get("color").getAsJsonObject();
-                // Quilt and legacy Fabric
+                // Fabric and Quilt
                 int colorInt = colorObj.get("field_24364").getAsInt();
                 if (colorInt < 0 || colorInt > 16777215) {
                     throw new JsonParseException("Color int out of range.");
@@ -153,7 +153,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification> 
 
         try {
             JsonObject soundObj = jsonObject.get("sound").getAsJsonObject();
-            // Mojmap Fabric and NeoForge
+            // NeoForge
             String namespace = soundObj.get("namespace").getAsString();
             String identifier = soundObj.get("path").getAsString();
             sound = ResourceLocation.tryParse(namespace + ":" + identifier);
@@ -165,7 +165,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification> 
                UnsupportedOperationException | IllegalStateException e) {
             try {
                 JsonObject soundObj = jsonObject.get("sound").getAsJsonObject();
-                // Quilt and legacy Fabric
+                // Fabric and Quilt
                 String namespace = soundObj.get("field_13353").getAsString();
                 String identifier = soundObj.get("field_13355").getAsString();
                 sound = ResourceLocation.tryParse(namespace + ":" + identifier);
