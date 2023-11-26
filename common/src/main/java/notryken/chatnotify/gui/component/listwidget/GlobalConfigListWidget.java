@@ -82,8 +82,8 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
     private void openPrefixConfig() {
         assert client.screen != null;
-        client.setScreen(new NotifConfigScreen(client.screen, 
-                Component.translatable("screen.chatnotify.title.prefix"), 
+        Component title = Component.translatable("screen.chatnotify.title.prefix");
+                client.setScreen(new NotifConfigScreen(client.screen, title,
                 new PrefixConfigListWidget(client,
                         client.screen.width, client.screen.height,
                         32, client.screen.height - 32, 25,
@@ -92,8 +92,8 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
     private void openNotificationConfig(int index) {
         assert client.screen != null;
-        client.setScreen(new NotifConfigScreen(client.screen, 
-                Component.translatable("screen.chatnotify.title.notif"),
+        Component title = Component.translatable("screen.chatnotify.title.notif");
+        client.setScreen(new NotifConfigScreen(client.screen, title,
                 new NotificationConfigListWidget(client,
                         client.screen.width, client.screen.height,
                         32, client.screen.height - 32, 25,

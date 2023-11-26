@@ -52,7 +52,7 @@ public abstract class ConfigListWidget
      *                   screen.
      */
     public void reloadScreen(ConfigListWidget listWidget) {
-        client.setScreen(new NotifConfigScreen(parentScreen, title, listWidget));
+        client.setScreen(new NotifConfigScreen(parentScreen, listWidget.title, listWidget));
     }
     
     // Override implementations

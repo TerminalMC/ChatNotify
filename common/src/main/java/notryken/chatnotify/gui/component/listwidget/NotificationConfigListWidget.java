@@ -1,6 +1,7 @@
 package notryken.chatnotify.gui.component.listwidget;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -84,8 +85,8 @@ public class NotificationConfigListWidget extends ConfigListWidget {
 
     private void openColorConfig() {
         assert client.screen != null;
-        client.setScreen(new NotifConfigScreen(client.screen,
-                Component.translatable("screen.chatnotify.title.color"),
+        Component title = Component.translatable("screen.chatnotify.title.color");
+        client.setScreen(new NotifConfigScreen(client.screen, title,
                 new ColorConfigListWidget(client,
                         client.screen.width, client.screen.height,
                         32, client.screen.height - 32, 25,
@@ -94,8 +95,8 @@ public class NotificationConfigListWidget extends ConfigListWidget {
 
     private void openSoundConfig() {
         assert client.screen != null;
-        client.setScreen(new NotifConfigScreen(client.screen,
-                Component.translatable("screen.chatnotify.title.sound"),
+        Component title = Component.translatable("screen.chatnotify.title.sound");
+        client.setScreen(new NotifConfigScreen(client.screen, title,
                 new SoundConfigListWidget(client,
                         client.screen.width, client.screen.height,
                         32, client.screen.height - 32, 25,
@@ -104,8 +105,8 @@ public class NotificationConfigListWidget extends ConfigListWidget {
 
     private void openAdvancedConfig() {
         assert client.screen != null;
-        client.setScreen(new NotifConfigScreen(client.screen,
-                Component.translatable("screen.chatnotify.title.advanced"),
+        Component title = Component.translatable("screen.chatnotify.title.advanced");
+        client.setScreen(new NotifConfigScreen(client.screen, title,
                 new AdvancedConfigListWidget(client,
                         client.screen.width, client.screen.height,
                         32, client.screen.height - 32, 25,
@@ -237,6 +238,7 @@ public class NotificationConfigListWidget extends ConfigListWidget {
 
                 options.add(Button.builder(Component.literal("\ud83d\uddd8"),
                                 (button) -> listWidget.reloadScreen())
+                        .tooltip(Tooltip.create(Component.literal("Check Value")))
                         .size(20, 20)
                         .pos(width / 2 + 70, 0)
                         .build());

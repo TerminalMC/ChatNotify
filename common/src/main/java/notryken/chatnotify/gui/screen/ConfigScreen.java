@@ -21,10 +21,11 @@ public abstract class ConfigScreen extends OptionsSubScreen {
 
     @Override
     protected void init() {
-        // Could drop two AW/AT entries by calling resize() without checking.
-        if (listWidget.width != width || listWidget.height != height) {
-            listWidget = listWidget.resize(width, height, 32, height - 32);
-        }
+        /*
+        The resize method builds a new listWidget based on the old one, so we
+        call it on every initialization to make reloadScreen calls work.
+         */
+        listWidget = listWidget.resize(width, height, 32, height - 32);
         addWidget(listWidget);
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
                 .size(240, 20)
