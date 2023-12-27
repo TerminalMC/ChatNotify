@@ -17,10 +17,7 @@
     ],
     "depends": {
         "fabricloader": ">=0.14",
-        "minecraft": [
-            "=1.20",
-            "=1.20.1"
-        ],
+        "minecraft": "~${min_minecraft_version}",
         "java": ">=17"
     },
     "recommends": {
