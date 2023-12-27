@@ -5,9 +5,11 @@ import com.google.gson.GsonBuilder;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
-import notryken.chatnotify.config.deserialize.ConfigDeserializer;
+import notryken.chatnotify.config.serialize.ConfigDeserializer;
+import notryken.chatnotify.config.serialize.GhettoAsciiWriter;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,7 +87,7 @@ public class Config {
             try (FileReader reader = new FileReader(path.toFile())) {
                 config = GSON.fromJson(reader, Config.class);
             } catch (IOException e) {
-                throw new RuntimeException("Could not parse config", e);
+                throw new RuntimeException("Unable to parse config", e);
             }
         } else {
             config = new Config();
@@ -112,13 +114,15 @@ public class Config {
             Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
 
             // Write the file to our temporary location
-            Files.writeString(tempPath, GSON.toJson(this));
+            FileWriter out = new FileWriter(tempPath.toFile());
+            GSON.toJson(this, new GhettoAsciiWriter(out));
+            out.close();
 
             // Atomically replace the old config file (if it exists) with the temporary file
             Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e) {
-            throw new RuntimeException("Couldn't update config file", e);
+            throw new RuntimeException("Unable to update config file", e);
         }
     }
 

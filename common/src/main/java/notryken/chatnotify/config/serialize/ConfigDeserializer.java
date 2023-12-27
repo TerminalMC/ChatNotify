@@ -1,4 +1,4 @@
-package notryken.chatnotify.config.deserialize;
+package notryken.chatnotify.config.serialize;
 
 import com.google.gson.*;
 import net.minecraft.sounds.SoundSource;
