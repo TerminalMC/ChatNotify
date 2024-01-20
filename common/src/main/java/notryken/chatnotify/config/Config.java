@@ -27,24 +27,29 @@ public class Config {
     public static final ResourceLocation DEFAULT_SOUND = ResourceLocation.tryParse(DEFAULT_SOUND_STRING);
     public static final SoundSource DEFAULT_SOUND_SOURCE = SoundSource.PLAYERS;
     public static final TextColor DEFAULT_COLOR = TextColor.fromRgb(16761856);
-    public static final Notification DEFAULT_NOTIF = new Notification(
+    public static final Notification DEFAULT_USERNAME_NOTIF = new Notification(
             true, new ArrayList<>(List.of(true, false, true)), new ArrayList<>(List.of("username")),
             false, DEFAULT_COLOR, new ArrayList<>(List.of(false, false, false, false, false)),
             1f, 1f, DEFAULT_SOUND, true, false,
+            false, new ArrayList<>(), false, new ArrayList<>());
+    public static final Notification DEFAULT_BLANK_NOTIF = new Notification(
+            true, new ArrayList<>(List.of(true, false, true)), new ArrayList<>(List.of("")),
+            false, DEFAULT_COLOR, new ArrayList<>(List.of(false, false, false, false, false)),
+            1f, 1f, DEFAULT_SOUND, false, false,
             false, new ArrayList<>(), false, new ArrayList<>());
     public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Config.class, new ConfigDeserializer())
             .setPrettyPrinting().create();
 
-    // Not saved, not user-accessible
+    // Not saved, not modifiable by user
     private static String username;
     private static Path configPath;
 
-    // Saved, not user-accessible
+    // Saved, not modifiable by user
     private final String version = "001";
 
-    // Saved, user-accessible
+    // Saved, modifiable by user
     public boolean ignoreOwnMessages;
     public SoundSource notifSoundSource;
     private final ArrayList<String> messagePrefixes;
@@ -59,7 +64,7 @@ public class Config {
         notifSoundSource = DEFAULT_SOUND_SOURCE;
         messagePrefixes = new ArrayList<>(DEFAULT_PREFIXES);
         notifications = new ArrayList<>();
-        notifications.add(DEFAULT_NOTIF);
+        notifications.add(DEFAULT_USERNAME_NOTIF);
     }
 
     /**
@@ -73,60 +78,7 @@ public class Config {
         this.notifications = notifications;
     }
 
-    // Config load and save
-
-    public static Config load() {
-        return load(DEFAULT_FILE_NAME);
-    }
-
-    public static Config load(String name) {
-        Path path = Path.of("config").resolve(name);
-        Config config;
-
-        if (Files.exists(path)) {
-            try (FileReader reader = new FileReader(path.toFile())) {
-                config = GSON.fromJson(reader, Config.class);
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to parse config", e);
-            }
-        } else {
-            config = new Config();
-        }
-
-        configPath = path;
-
-        config.writeChanges();
-
-        return config;
-    }
-
-    public void writeChanges() {
-        Path dir = configPath.getParent();
-
-        try {
-            if (!Files.exists(dir)) {
-                Files.createDirectories(dir);
-            } else if (!Files.isDirectory(dir)) {
-                throw new IOException("Not a directory: " + dir);
-            }
-
-            // Use a temporary location next to the config's final destination
-            Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
-
-            // Write the file to our temporary location
-            FileWriter out = new FileWriter(tempPath.toFile());
-            GSON.toJson(this, new GhettoAsciiWriter(out));
-            out.close();
-
-            // Atomically replace the old config file (if it exists) with the temporary file
-            Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Unable to update config file", e);
-        }
-    }
-
-    // Accessors
+    // Message prefix get and set
 
     /**
      * @return the prefix at the specified index, or null if none exists.
@@ -141,6 +93,41 @@ public class Config {
     public List<String> getPrefixes() {
         return Collections.unmodifiableList(messagePrefixes);
     }
+
+    /**
+     * Sets the prefix at the specified index to the specified value, if the
+     * index is valid and the prefix does not already exist.
+     * @param index the index of the prefix to set.
+     * @param prefix the new prefix {@code String}.
+     */
+    public void setPrefix(int index, String prefix) {
+        if (index >= 0 && index < this.messagePrefixes.size() &&
+                !this.messagePrefixes.contains(prefix)) {
+            this.messagePrefixes.set(index, prefix);
+        }
+    }
+
+    /**
+     * Adds the specified prefix, if it does not already exist.
+     * @param prefix the prefix {@code String} to add.
+     */
+    public void addPrefix(String prefix) {
+        if (!this.messagePrefixes.contains(prefix)) {
+            this.messagePrefixes.add(prefix);
+        }
+    }
+
+    /**
+     * Removes the prefix at the specified index, if one exists.
+     * @param index the index of the prefix to remove.
+     */
+    public void removePrefix(int index) {
+        if (index >= 0 && index < this.messagePrefixes.size()) {
+            this.messagePrefixes.remove(index);
+        }
+    }
+
+    // Notification get and set
 
     /**
      * @return the size of the {@code Notification} list.
@@ -166,43 +153,11 @@ public class Config {
         return Collections.unmodifiableList(notifications);
     }
 
-    // Mutators
-
-    /**
-     * Setter, also sets the first trigger of the username {@code Notification}
-     * to the specified username.
-     * <b>Note:</b> Will fail without error if the specified username is
-     * {@code null} or blank.
-     * @param pUsername the user's in-game name.
-     */
-    public void setUsername(String pUsername) {
-        if (pUsername != null && !pUsername.isBlank()) {
-            username = pUsername;
-            validateUsernameNotif();
-        }
-    }
-
-    /**
-     * Validates the username {@code Notification} and sets its first trigger
-     * to the value of the stored username, if any.
-     */
-    public void validateUsernameNotif() {
-        Notification notif = notifications.get(0);
-        notif.triggerIsKey = false;
-        if (username != null) {
-            notif.setTrigger(username);
-        }
-    }
-
     /**
      * Adds a new {@code Notification} with default values.
      */
     public void addNotif() {
-        notifications.add(new Notification(
-                true, new ArrayList<>(List.of(true, false, true)), new ArrayList<>(List.of("")),
-                false, DEFAULT_COLOR, new ArrayList<>(List.of(false, false, false, false, false)),
-                1f, 1f, DEFAULT_SOUND, false, false,
-                false, new ArrayList<>(), false, new ArrayList<>()));
+        notifications.add(DEFAULT_BLANK_NOTIF);
     }
 
     /**
@@ -243,7 +198,7 @@ public class Config {
      * This represents moving the {@code Notification} to a lower priority.
      * @param index the current index of the {@code Notification}.
      */
-    public void reducePriority(int index) {
+    public void decreasePriority(int index) {
         if (index > 0 && index < notifications.size() - 1) {
             Notification temp = notifications.get(index);
             notifications.set(index, notifications.get(index + 1));
@@ -252,39 +207,32 @@ public class Config {
     }
 
     /**
-     * Sets the prefix at the specified index to the specified value, if the
-     * index is valid and the prefix does not already exist.
-     * @param index the index of the prefix to set.
-     * @param prefix the new prefix {@code String}.
+     * Setter, also sets the first trigger of the username {@code Notification}
+     * to the specified username.
+     * <b>Note:</b> Will fail without error if the specified username is
+     * {@code null} or blank.
+     * @param pUsername the user's in-game name.
      */
-    public void setPrefix(int index, String prefix) {
-        if (index >= 0 && index < this.messagePrefixes.size() &&
-                !this.messagePrefixes.contains(prefix)) {
-            this.messagePrefixes.set(index, prefix);
+    public void setUsername(String pUsername) {
+        if (pUsername != null && !pUsername.isBlank()) {
+            username = pUsername;
+            validateUsernameNotif();
         }
     }
+
+    // Validation
 
     /**
-     * Adds the specified prefix, if it does not already exist.
-     * @param prefix the prefix {@code String} to add.
+     * Validates the username {@code Notification} and sets the first trigger
+     * to the value of the stored username, if any.
      */
-    public void addPrefix(String prefix) {
-        if (!this.messagePrefixes.contains(prefix)) {
-            this.messagePrefixes.add(prefix);
+    public void validateUsernameNotif() {
+        Notification notif = notifications.get(0);
+        notif.triggerIsKey = false;
+        if (username != null) {
+            notif.setTrigger(username);
         }
     }
-
-    /**
-     * Removes the prefix at the specified index, if one exists.
-     * @param index the index of the prefix to remove.
-     */
-    public void removePrefix(int index) {
-        if (index >= 0 && index < this.messagePrefixes.size()) {
-            this.messagePrefixes.remove(index);
-        }
-    }
-
-    // Other processing
 
     /**
      * Removes all blank message prefixes and sorts the remainder by decreasing
@@ -293,7 +241,7 @@ public class Config {
      * triggers, and response messages from the remaining {@code Notification}s,
      * and disables all {@code Notification}s that have no enabled controls.
      */
-    public void validateAll() {
+    public void validate() {
         validateUsernameNotif();
 
         messagePrefixes.removeIf(String::isBlank);
@@ -310,8 +258,9 @@ public class Config {
         }
 
         /*
-        Move all triggers activated by the "." key to the low-priority
-        end, so that they do not block other notifications from activating.
+        Move all triggers activated by the "." (any message) key trigger to the
+        low-priority end, so that they do not block other notifications from
+        activating.
          */
         List<Notification> anyMsgNotifList = new ArrayList<>();
         Iterator<Notification> iter2 = notifications.iterator();
@@ -328,5 +277,55 @@ public class Config {
             }
         }
         notifications.addAll(anyMsgNotifList);
+    }
+
+    // Load and save
+
+    public static Config load() {
+        return load(DEFAULT_FILE_NAME);
+    }
+
+    public static Config load(String name) {
+        configPath = Path.of("config").resolve(name);
+        Config config;
+
+        if (Files.exists(configPath)) {
+            try (FileReader reader = new FileReader(configPath.toFile())) {
+                config = GSON.fromJson(reader, Config.class);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to parse config", e);
+            }
+        } else {
+            config = new Config();
+        }
+
+        config.writeChanges();
+        return config;
+    }
+
+    public void writeChanges() {
+        Path dir = configPath.getParent();
+
+        try {
+            if (!Files.exists(dir)) {
+                Files.createDirectories(dir);
+            } else if (!Files.isDirectory(dir)) {
+                throw new IOException("Not a directory: " + dir);
+            }
+
+            // Use a temporary location next to the config's final destination
+            Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
+
+            // Write the file to the temporary location
+            FileWriter out = new FileWriter(tempPath.toFile());
+            GSON.toJson(this, new GhettoAsciiWriter(out));
+            out.close();
+
+            // Atomically replace the old config file (if it exists) with the temporary file
+            Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Unable to update config file", e);
+        }
     }
 }

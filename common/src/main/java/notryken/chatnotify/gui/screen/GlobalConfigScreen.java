@@ -27,7 +27,7 @@ public class GlobalConfigScreen extends ConfigScreen {
 
     @Override
     public void onClose() {
-        ChatNotify.config().validateAll();
+        ChatNotify.config().validate();
         ChatNotify.config().writeChanges();
         super.onClose();
     }

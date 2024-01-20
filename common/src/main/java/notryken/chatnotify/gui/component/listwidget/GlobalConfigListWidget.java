@@ -65,7 +65,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
     }
 
     private void moveNotifDown(int index) {
-        ChatNotify.config().reducePriority(index);
+        ChatNotify.config().decreasePriority(index);
         reloadScreen();
     }
 

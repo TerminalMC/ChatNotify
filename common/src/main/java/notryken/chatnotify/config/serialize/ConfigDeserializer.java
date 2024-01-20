@@ -69,7 +69,7 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
         catch (JsonParseException | NullPointerException |
                UnsupportedOperationException | IllegalStateException e) {
             notifications = new ArrayList<>();
-            notifications.add(Config.DEFAULT_NOTIF);
+            notifications.add(Config.DEFAULT_USERNAME_NOTIF);
         }
 
         return new Config(ignoreOwnMessages, notifSoundSource, messagePrefixes, notifications);
