@@ -11,6 +11,7 @@ import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.network.chat.Component;
+import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.gui.screen.NotifConfigScreen;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,16 +32,12 @@ import java.util.List;
 public abstract class ConfigListWidget
         extends ContainerObjectSelectionList<ConfigListWidget.Entry> {
 
-    public final Minecraft client;
-    public final Screen parentScreen;
-    public final Component title;
+    public final ConfigScreen parent;
 
-    public ConfigListWidget(Minecraft client, int width, int height, int top, int bottom,
-                            int itemHeight, Screen parentScreen, Component title) {
-        super(client, width, height, top, bottom, itemHeight);
-        this.client = client;
-        this.parentScreen = parentScreen;
-        this.title = title;
+    public ConfigListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
+                            int itemHeight, ConfigScreen parent) {
+        super(minecraft, width, height, top, bottom, itemHeight);
+        this.parent = parent;
     }
 
     // Default methods
@@ -52,7 +49,7 @@ public abstract class ConfigListWidget
      *                   screen.
      */
     public void reloadScreen(ConfigListWidget listWidget) {
-        client.setScreen(new NotifConfigScreen(parentScreen, listWidget.title, listWidget));
+        minecraft.setScreen(new NotifConfigScreen(parent, parent.getTitle(), listWidget));
     }
     
     // Override implementations
@@ -73,117 +70,32 @@ public abstract class ConfigListWidget
 
     public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
 
-    /**
-     * Base implementation of ChatNotify options list widget entry, with common
-     * entries.
-     */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
 
-        public final List<AbstractWidget> options;
+        public final List<AbstractWidget> elements;
 
         public Entry() {
-            this.options = new ArrayList<>();
-        }
-
-        // Override implementations
-        
-        @Override
-        public void render(@NotNull GuiGraphics context, int index, int y, int x,
-                           int entryWidth, int entryHeight, int mouseX, int mouseY,
-                           boolean hovered, float tickDelta) {
-            options.forEach((button) -> {
-                button.setY(y);
-                button.render(context, mouseX, mouseY, tickDelta);
-            });
+            this.elements = new ArrayList<>();
         }
 
         @Override
         public @NotNull List<? extends GuiEventListener> children() {
-            return options;
+            return elements;
         }
 
         @Override
         public @NotNull List<? extends NarratableEntry> narratables() {
-            return options;
+            return elements;
         }
 
-        // Common Entry implementations
-
-        /**
-         * A {@code Header} is a {@code StringWidget} with position and
-         * dimensions set to standard ChatNotify values.
-         */
-        public static class Header extends Entry {
-            public Header(int width, Minecraft client, Component label) {
-                super();
-                options.add(new StringWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.font));
-            }
-
-            public Header(int width, Minecraft client, Component label, int labelColor) {
-                super();
-                options.add(new StringWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.font).setColor(labelColor));
-            }
-
-            public Header(int width, Minecraft client, Component label, Component tooltip) {
-                super();
-                StringWidget header = new StringWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.font);
-                header.setTooltip(Tooltip.create(tooltip));
-                options.add(header);
-            }
-
-            public Header(int width, Minecraft client, Component label, int labelColor,
-                          Component tooltip) {
-                super();
-                StringWidget header = new StringWidget(width / 2 - 120, 0, 240, 20,
-                        label, client.font);
-                header.setColor(labelColor);
-                header.setTooltip(Tooltip.create(tooltip));
-                options.add(header);
-            }
-        }
-
-        /**
-         * A {@code MultiLineHeader} is a {@code MultiLineTextWidget} with
-         * position and dimensions set to standard ChatNotify values.
-         */
-        public static class MultiLineHeader extends Entry {
-            public MultiLineHeader(int width, Minecraft client, Component label) {
-                super();
-                options.add(new MultiLineTextWidget(width / 2 - 120, 0, label, client.font)
-                        .setMaxWidth(240));
-            }
-
-            public MultiLineHeader(int width, Minecraft client, Component label,
-                                   int labelColor) {
-                super();
-                options.add(new MultiLineTextWidget(width / 2 - 120, 0, label, client.font)
-                        .setMaxWidth(240)
-                        .setColor(labelColor));
-            }
-
-            public MultiLineHeader(int width, Minecraft client, Component label,
-                                   Component tooltip) {
-                super();
-                MultiLineTextWidget header = new MultiLineTextWidget(
-                        width / 2 - 120, 0, label, client.font)
-                        .setMaxWidth(240);
-                header.setTooltip(Tooltip.create(tooltip));
-                options.add(header);
-            }
-
-            public MultiLineHeader(int width, Minecraft client, Component label,
-                                   int labelColor, Component tooltip) {
-                super();
-                MultiLineTextWidget header = new MultiLineTextWidget(
-                        width / 2 - 120, 0, label, client.font)
-                        .setMaxWidth(240);
-                header.setColor(labelColor);
-                header.setTooltip(Tooltip.create(tooltip));
-                options.add(header);
-            }
+        @Override
+        public void render(@NotNull GuiGraphics context, int index, int y, int x,
+                           int entryWidth, int entryHeight, int mouseX, int mouseY,
+                           boolean hovered, float tickDelta) {
+            elements.forEach((button) -> {
+                button.setY(y);
+                button.render(context, mouseX, mouseY, tickDelta);
+            });
         }
     }
 }

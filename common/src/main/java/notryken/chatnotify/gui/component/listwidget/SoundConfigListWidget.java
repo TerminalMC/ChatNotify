@@ -12,6 +12,7 @@ import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.component.slider.PitchSlider;
 import notryken.chatnotify.gui.component.slider.VolumeSlider;
+import notryken.chatnotify.util.SoundUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -136,21 +137,21 @@ public class SoundConfigListWidget extends ConfigListWidget {
     @Override
     public SoundConfigListWidget resize(int width, int height, int top, int bottom) {
         SoundConfigListWidget listWidget = new SoundConfigListWidget(
-                client, width, height, top, bottom, itemHeight, parentScreen, title, notif);
+                client, width, height, top, bottom, itemHeight, parent, title, notif);
         listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
+    protected void reload() {
+        reload(this);
     }
 
     private void playNotifSound() {
         client.getSoundManager().play(
                 new SimpleSoundInstance(notif.getSound(),
                         ChatNotify.config().notifSoundSource,
-                        notif.soundVolume, notif.soundPitch,
+                        notif.getSoundVolume(), notif.soundPitch,
                         SoundInstance.createUnseededRandom(), false, 0,
                         SoundInstance.Attenuation.NONE, 0, 0, 0, true));
 
@@ -161,15 +162,15 @@ public class SoundConfigListWidget extends ConfigListWidget {
         private static class SoundConfigVolume extends Entry {
             SoundConfigVolume(int width, Notification notif) {
                 super();
-                options.add(new VolumeSlider(width / 2 - 120, 0, 240, 20,
-                        notif.soundVolume, notif));
+                elements.add(new VolumeSlider(width / 2 - 120, 0, 240, 20,
+                        notif.getSoundVolume(), notif));
             }
         }
 
         private static class SoundConfigPitch extends Entry {
             SoundConfigPitch(int width, Notification notif) {
                 super();
-                options.add(new PitchSlider(width / 2 - 120, 0, 240, 20,
+                elements.add(new PitchSlider(width / 2 - 120, 0, 240, 20,
                         PitchSlider.sliderValue(notif.soundPitch), notif));
             }
         }
@@ -177,7 +178,7 @@ public class SoundConfigListWidget extends ConfigListWidget {
         private static class SoundTest extends Entry {
             SoundTest(int width, SoundConfigListWidget listWidget) {
                 super();
-                options.add(Button.builder(Component.literal(
+                elements.add(Button.builder(Component.literal(
                         "> Click to Test Sound <"), (button) ->
                                 listWidget.playNotifSound())
                         .size(240, 20)
@@ -197,8 +198,8 @@ public class SoundConfigListWidget extends ConfigListWidget {
                         Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
                 soundField.setValue(notif.getSound().toString());
-                soundField.setResponder((sound) -> notif.setSound(notif.parseSound(sound.strip())));
-                options.add(soundField);
+                soundField.setResponder((sound) -> notif.setSound(SoundUtil.parseSound(sound.strip())));
+                elements.add(soundField);
             }
         }
 
@@ -206,10 +207,10 @@ public class SoundConfigListWidget extends ConfigListWidget {
             SoundOption(int width, Notification notif, SoundConfigListWidget listWidget,
                         String sound, String soundName) {
                 super();
-                options.add(Button.builder(Component.literal(soundName),
+                elements.add(Button.builder(Component.literal(soundName),
                         (button) -> {
-                    notif.setSound(notif.parseSound(sound));
-                    listWidget.reloadScreen();
+                    notif.setSound(SoundUtil.parseSound(sound));
+                    listWidget.reload();
                     listWidget.playNotifSound();
                 })
                         .size(240, 19)

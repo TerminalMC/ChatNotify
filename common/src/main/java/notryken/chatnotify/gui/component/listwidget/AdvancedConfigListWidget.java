@@ -68,14 +68,14 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
     @Override
     public AdvancedConfigListWidget resize(int width, int height, int top, int bottom) {
         AdvancedConfigListWidget listWidget = new AdvancedConfigListWidget(
-                client, width, height, top, bottom, itemHeight, parentScreen, title, notif);
+                client, width, height, top, bottom, itemHeight, parent, title, notif);
         listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
+    protected void reload() {
+        reload(this);
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
@@ -84,7 +84,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
             RegexToggleButton(int width, Notification notif,
                               AdvancedConfigListWidget listWidget) {
                 super();
-                options.add(CycleButton.booleanBuilder(
+                elements.add(CycleButton.booleanBuilder(
                                 Component.literal("Enabled"),
                                 Component.literal("Disabled"))
                         .withInitialValue(notif.regexEnabled)
@@ -95,7 +95,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                                 Component.literal("Regex"),
                                 (button, status) -> {
                                     notif.regexEnabled = status;
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -104,7 +104,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
             ExclusionToggleButton(int width, Notification notif,
                               AdvancedConfigListWidget listWidget) {
                 super();
-                options.add(CycleButton.booleanBuilder(
+                elements.add(CycleButton.booleanBuilder(
                                 Component.literal("Enabled"),
                                 Component.literal("Disabled"))
                         .withInitialValue(notif.exclusionEnabled)
@@ -115,7 +115,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                                 Component.literal("Exclusion Triggers"),
                                 (button, status) -> {
                                     notif.exclusionEnabled = status;
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -134,10 +134,10 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 this.index = index;
 
                 if (index == -1) {
-                    options.add(Button.builder(Component.literal("+"),
+                    elements.add(Button.builder(Component.literal("+"),
                                     (button) -> {
                                         notif.addExclusionTrigger("");
-                                        listWidget.reloadScreen();
+                                        listWidget.reload();
                                     })
                             .size(240, 20)
                             .pos(width / 2 - 120, 0)
@@ -151,12 +151,12 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                     triggerEdit.setValue(notif.getExclusionTrigger(index));
                     triggerEdit.setResponder((trigger) ->
                             notif.setExclusionTrigger(index, trigger.strip()));
-                    options.add(triggerEdit);
+                    elements.add(triggerEdit);
 
-                    options.add(Button.builder(Component.literal("X"),
+                    elements.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         notif.removeExclusionTrigger(index);
-                                        listWidget.reloadScreen();
+                                        listWidget.reload();
                                     })
                             .size(20, 20)
                             .pos(width / 2 + 120 + 5, 0)
@@ -170,7 +170,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                                  AdvancedConfigListWidget listWidget)
             {
                 super();
-                options.add(CycleButton.booleanBuilder(
+                elements.add(CycleButton.booleanBuilder(
                                 Component.literal("Enabled"),
                                 Component.literal("Disabled"))
                         .withInitialValue(notif.responseEnabled)
@@ -182,7 +182,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                                 Component.literal("Response Messages"),
                                 (button, status) -> {
                                     notif.responseEnabled = status;
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -201,10 +201,10 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 this.index = index;
 
                 if (index == -1) {
-                    options.add(Button.builder(Component.literal("+"),
+                    elements.add(Button.builder(Component.literal("+"),
                                     (button) -> {
                                         notif.addResponseMessage("");
-                                        listWidget.reloadScreen();
+                                        listWidget.reload();
                                     })
                             .size(240, 20)
                             .pos(width / 2 - 120, 0)
@@ -218,12 +218,12 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                     messageEdit.setValue(notif.getResponseMessage(index));
                     messageEdit.setResponder((message) ->
                             notif.setResponseMessage(index, message.strip()));
-                    options.add(messageEdit);
+                    elements.add(messageEdit);
 
-                    options.add(Button.builder(Component.literal("X"),
+                    elements.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         notif.removeResponseMessage(index);
-                                        listWidget.reloadScreen();
+                                        listWidget.reload();
                                     })
                             .size(20, 20)
                             .pos(width / 2 + 120 + 5, 0)
@@ -254,7 +254,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                             {
                                 notif.removeResponseMessage(0);
                             }
-                            listWidget.reloadScreen();
+                            listWidget.reload();
                         })
                         .size(240, 20)
                         .pos(width / 2 - 120, 0)
@@ -262,7 +262,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 resetButton.setTooltip(Tooltip.create(Component.literal(
                         "Resets all advanced settings for THIS notification.")));
 
-                options.add(resetButton);
+                elements.add(resetButton);
             }
         }
 
@@ -287,7 +287,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                                     notif2.removeResponseMessage(0);
                                 }
                             }
-                            listWidget.reloadScreen();
+                            listWidget.reload();
                         })
                         .size(240, 20)
                         .pos(width / 2 - 120, 0)
@@ -295,7 +295,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 resetButton.setTooltip(Tooltip.create(Component.literal(
                         "Resets all advanced settings for ALL notifications.")));
 
-                options.add(resetButton);
+                elements.add(resetButton);
             }
         }
 
@@ -311,7 +311,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                                     client.setScreen(null);
                                 }
                                 else {
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }
                             }, Component.literal("Nuclear Reset"), Component.literal(
                                     "Are you sure you want to delete all ChatNotify " +
@@ -324,7 +324,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 resetButton.setTooltip(Tooltip.create(Component.literal(
                         "Deletes all ChatNotify notifications and resets all settings.")));
 
-                options.add(resetButton);
+                elements.add(resetButton);
             }
         }
     }

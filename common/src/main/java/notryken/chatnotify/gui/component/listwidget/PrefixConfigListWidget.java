@@ -37,14 +37,14 @@ public class PrefixConfigListWidget extends ConfigListWidget {
     @Override
     public PrefixConfigListWidget resize(int width, int height, int top, int bottom) {
         PrefixConfigListWidget listWidget = new PrefixConfigListWidget(
-                client, width, height, top, bottom, itemHeight, parentScreen, title);
+                client, width, height, top, bottom, itemHeight, parent, title);
         listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
+    protected void reload() {
+        reload(this);
     }
 
 
@@ -59,10 +59,10 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                 this.index = index;
 
                 if (index == -1) {
-                    options.add(Button.builder(Component.literal("+"),
+                    elements.add(Button.builder(Component.literal("+"),
                                     (button) -> {
                                         ChatNotify.config().addPrefix("");
-                                        listWidget.reloadScreen();
+                                        listWidget.reload();
                                     })
                             .size(240, 20)
                             .pos(width / 2 - 120, 0)
@@ -77,12 +77,12 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                     prefixEdit.setResponder((prefix) ->
                             ChatNotify.config().setPrefix(index,
                                     prefix.strip().toLowerCase(Locale.ROOT)));
-                    options.add(prefixEdit);
+                    elements.add(prefixEdit);
 
-                    options.add(Button.builder(Component.literal("X"),
+                    elements.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         ChatNotify.config().removePrefix(index);
-                                        listWidget.reloadScreen();
+                                        listWidget.reload();
                                     })
                             .size(25, 20)
                             .pos(width / 2 + 120 + 5, 0)
