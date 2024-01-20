@@ -17,8 +17,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
- * Configuration options class with defaults. Loosely based on the design used
- * by <a href="https://github.com/CaffeineMC/sodium-fabric">Sodium</a>.
+ * Includes derivative work of code used by
+ * <a href="https://github.com/CaffeineMC/sodium-fabric/">Sodium</a>
  */
 public class Config {
     // Constants

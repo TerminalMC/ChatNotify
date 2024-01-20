@@ -25,9 +25,19 @@ Chat Notify provides client-side configurable support for audio and visual notif
 - When a trigger is detected in a chat message, a sound will be played and the trigger will
   be colored in the message.
 - You can customize the sound and color for any notification using the configuration
-  menu. On Fabric and Quilt, you must have [Mod Menu](https://modrinth.com/mod/modmenu) installed to access it.
+  menu. (Access using [Mod Menu](https://modrinth.com/mod/modmenu) on Fabric/Quilt).
 
 <img alt="Configuration" src="https://i.postimg.cc/c4qmv2Cj/2023-11-20-15-14-12.png" width="637">
+
+### Credits
+
+- ChatNotify includes derivative work of code from the following projects:
+  - [Sodium](https://github.com/CaffeineMC/sodium-fabric/)
+
+### License
+
+Except where otherwise stated, ChatNotify source files are provided under the terms of the GNU LGPL-3.0-only
+open-source license. For more information, refer to the provided LICENSE file.
 
 ### Contact
 
