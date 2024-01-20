@@ -1,6 +1,5 @@
 package notryken.chatnotify.platform;
 
-import notryken.chatnotify.Constants;
 import notryken.chatnotify.platform.services.IPlatformHelper;
 
 import java.util.ServiceLoader;
@@ -24,7 +23,7 @@ public class Services {
         final T loadedService = ServiceLoader.load(clazz)
                 .findFirst()
                 .orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));
-//        Constants.LOG.info("debug::Loaded {} for service {}", loadedService, clazz);
+//        ChatNotify.LOG.info("debug::Loaded {} for service {}", loadedService, clazz);
         return loadedService;
     }
 }

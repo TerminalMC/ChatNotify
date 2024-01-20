@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import notryken.chatnotify.ChatNotify;
-import notryken.chatnotify.Constants;
 import notryken.chatnotify.config.Config;
 import notryken.chatnotify.config.Notification;
 
@@ -41,7 +40,7 @@ public class MessageProcessor {
      * was required.
      */
     public static Component processMessage(Component msg) {
-//        Constants.LOG.info("debug::Processing message: '{}'", msg);
+//        ChatNotify.LOG.info("debug::Processing message: '{}'", msg);
 
         Component modMsgStr = null;
 
@@ -76,7 +75,7 @@ public class MessageProcessor {
      * @return the processed version of {@code strMsg} (can be null).
      */
     private static String checkOwner(String msgStr) {
-//        Constants.LOG.info("debug::Checking ownership of message");
+//        ChatNotify.LOG.info("debug::Checking ownership of message");
         // Stored messages are always converted to lowercase
         String msgStrLow = msgStr.toLowerCase(Locale.ROOT);
         Config config = ChatNotify.config();
@@ -84,12 +83,12 @@ public class MessageProcessor {
         for (int i = 0; i < recentMessages.size(); i++) {
             int lastMatchIdx = msgStrLow.lastIndexOf(recentMessages.get(i).getSecond());
             if (lastMatchIdx > 0) {
-//                Constants.LOG.info("debug::Message matched recent message: '{}'", msgStrLow.lastIndexOf(recentMessages.get(i).getSecond()));
+//                ChatNotify.LOG.info("debug::Message matched recent message: '{}'", msgStrLow.lastIndexOf(recentMessages.get(i).getSecond()));
                 String prefix = msgStr.substring(0, lastMatchIdx);
                 for (String username : config.getNotif(0).getTriggers()) {
                     Pair<Integer,Integer> prefixMatch = msgContainsStr(prefix, username, false);
                     if (prefixMatch != null) {
-//                        Constants.LOG.info("debug::Message matched trigger: '{}'", username);
+//                        ChatNotify.LOG.info("debug::Message matched trigger: '{}'", username);
                         recentMessages.remove(i);
                         if (config.ignoreOwnMessages) {
                             msgStr = null;
@@ -120,7 +119,7 @@ public class MessageProcessor {
      * @return a re-styled copy of {@code msg}, or null if no trigger matched.
      */
     private static Component tryNotify(Component message, String msgStr, String checkedMsgStr) {
-//        Constants.LOG.info("debug::Attempting notification");
+//        ChatNotify.LOG.info("debug::Attempting notification");
 
         for (Notification notif : ChatNotify.config().getNotifs()) {
             if (notif.getEnabled()) {
@@ -130,9 +129,9 @@ public class MessageProcessor {
                 a trigger of the Notification.
                  */
                 if (notif.triggerIsKey) {
-//                    Constants.LOG.info("debug::triggerIsKey true");
+//                    ChatNotify.LOG.info("debug::triggerIsKey true");
                     if (notif.getTrigger().equals(".")) {
-//                        Constants.LOG.info("debug::Triggered by "." key");
+//                        ChatNotify.LOG.info("debug::Triggered by "." key");
                         playSound(notif);
                         sendResponses(notif);
                         return simpleRestyle(message, notif);
@@ -140,7 +139,7 @@ public class MessageProcessor {
                     else {
                         if (message.getContents() instanceof TranslatableContents ttc) {
                             if (!notif.getTrigger().isBlank() && ttc.getKey().contains(notif.getTrigger())) {
-//                            Constants.LOG.info("debug::Message matches key: '{}'", notif.getTrigger());
+//                            ChatNotify.LOG.info("debug::Message matches key: '{}'", notif.getTrigger());
                                 playSound(notif);
                                 sendResponses(notif);
                                 return simpleRestyle(message, notif);
@@ -148,16 +147,16 @@ public class MessageProcessor {
                         }
                     }
                 } else {
-//                    Constants.LOG.info("debug::triggerIsKey false");
+//                    ChatNotify.LOG.info("debug::triggerIsKey false");
                     for (String trigger : notif.getTriggers()) {
-//                        Constants.LOG.info("debug::Checking trigger: '{}'", trigger);
+//                        ChatNotify.LOG.info("debug::Checking trigger: '{}'", trigger);
 
                         // Check trigger
                         // Note: use msgStr if regexEnabled
                         if (!trigger.isBlank() && msgContainsStr(
                                 (notif.regexEnabled ? msgStr : checkedMsgStr),
                                 trigger, notif.regexEnabled) != null) {
-//                            Constants.LOG.info("debug::Trigger matched");
+//                            ChatNotify.LOG.info("debug::Trigger matched");
                             // Matched trigger, check exclusions
                             boolean exclude = false;
                             if (notif.exclusionEnabled) {
@@ -165,7 +164,7 @@ public class MessageProcessor {
                                     if (msgContainsStr((notif.regexEnabled ? msgStr : checkedMsgStr),
                                             exTrig, notif.regexEnabled) != null) {
                                         exclude = true;
-//                                        Constants.LOG.info("debug::Exclusion trigger matched: '{}'", exTrig);
+//                                        ChatNotify.LOG.info("debug::Exclusion trigger matched: '{}'", exTrig);
                                         break;
                                     }
                                 }
@@ -206,7 +205,7 @@ public class MessageProcessor {
                 return Pair.of(matcher.start(), matcher.end());
             }
         } catch (PatternSyntaxException e) {
-            Constants.LOG.warn("Error processing regex: " + e);
+            ChatNotify.LOG.warn("Error processing regex: " + e);
         }
         return null;
     }
@@ -218,7 +217,7 @@ public class MessageProcessor {
      */
     private static void playSound(Notification notif) {
         if (notif.getControl(2)) {
-//            Constants.LOG.info("debug::Playing sound");
+//            ChatNotify.LOG.info("debug::Playing sound");
             Minecraft.getInstance().getSoundManager().play(
                     new SimpleSoundInstance(
                             notif.getSound(), config().notifSoundSource,
@@ -238,7 +237,7 @@ public class MessageProcessor {
             Minecraft client = Minecraft.getInstance();
             Screen oldScreen = client.screen;
             for (String response : notif.getResponseMessages()) {
-//                Constants.LOG.info("debug::Sending response message");
+//                ChatNotify.LOG.info("debug::Sending response message");
                 client.setScreen(new ChatScreen(response));
                 if (client.screen instanceof ChatScreen cs) {
                     cs.handleChatInput(response, true);
@@ -278,9 +277,9 @@ public class MessageProcessor {
      */
     private static Component simpleRestyle(Component msg, Notification notif) {
         if (notif.getControl(0) || notif.getControl(1)) {
-//            Constants.LOG.info("debug::Simple restyle original: '{}'", msg);
+//            ChatNotify.LOG.info("debug::Simple restyle original: '{}'", msg);
             msg = msg.copy().setStyle(applyStyle(msg.getStyle(), getStyle(notif)));
-//            Constants.LOG.info("debug::Simple restyle final: '{}'", msg);
+//            ChatNotify.LOG.info("debug::Simple restyle final: '{}'", msg);
         }
         return msg;
     }
@@ -298,9 +297,9 @@ public class MessageProcessor {
      */
     private static Component complexRestyle(Component msg, String trigger, Notification notif) {
         if (notif.getControl(0) || notif.getControl(1)) {
-//            Constants.LOG.info("debug::Complex restyle original: '{}'", msg);
+//            ChatNotify.LOG.info("debug::Complex restyle original: '{}'", msg);
             msg = restyleComponent(msg.copy(), trigger, getStyle(notif));
-//            Constants.LOG.info("debug::Complex restyle final: '{}'", msg);
+//            ChatNotify.LOG.info("debug::Complex restyle final: '{}'", msg);
         }
         return msg;
     }
@@ -320,16 +319,16 @@ public class MessageProcessor {
             msg = restyleContents(msg, trigger, style);
         }
         else if (msg.getContents() instanceof TranslatableContents contents) {
-//            Constants.LOG.info("debug::TranslatableContents found: '{}'", contents);
+//            ChatNotify.LOG.info("debug::TranslatableContents found: '{}'", contents);
             // Recurse for all args
             Object[] args = contents.getArgs();
             for (int i = 0; i < contents.getArgs().length; i++) {
                 if (args[i] instanceof Component argText) {
-//                    Constants.LOG.info("debug::Restyle Component arg: '{}'", argText.getString());
+//                    ChatNotify.LOG.info("debug::Restyle Component arg: '{}'", argText.getString());
                     args[i] = restyleComponent(argText.copy(), trigger, style);
                 }
                 else if (args[i] instanceof String argString) {
-//                    Constants.LOG.info("debug::Restyle String arg: '{}'", argString);
+//                    ChatNotify.LOG.info("debug::Restyle String arg: '{}'", argString);
                     args[i] = Component.literal(argString).setStyle(style);
                 }
             }
@@ -340,9 +339,9 @@ public class MessageProcessor {
         }
         else {
             // Recurse for all siblings
-//            Constants.LOG.info("debug::restyleComponent recurse");
+//            ChatNotify.LOG.info("debug::restyleComponent recurse");
             msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
-//            Constants.LOG.info("debug::restyleComponent recurse finish");
+//            ChatNotify.LOG.info("debug::restyleComponent recurse finish");
         }
         return msg;
     }
@@ -357,24 +356,24 @@ public class MessageProcessor {
      */
     private static MutableComponent restyleContents(MutableComponent msg, String trigger, Style style) {
         if (msg.getContents() instanceof LiteralContents contents) {
-//            Constants.LOG.info("debug::Restyle Contents: '{}'", msg);
+//            ChatNotify.LOG.info("debug::Restyle Contents: '{}'", msg);
 
             // Only process if the message or its siblings contain the match
             String msgStr = contents.text();
             Pair<Integer,Integer> triggerMatch = msgContainsStr(msgStr, trigger, false);
 
             if (triggerMatch == null) {
-//                Constants.LOG.info("debug::restyleContents match not found");
-//                Constants.LOG.info("debug::restyleContents no-trigger restyleComponent");
+//                ChatNotify.LOG.info("debug::restyleContents match not found");
+//                ChatNotify.LOG.info("debug::restyleContents no-trigger restyleComponent");
                 msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
             }
             else {
-//                Constants.LOG.info("debug::restyleContents match found");
+//                ChatNotify.LOG.info("debug::restyleContents match found");
                 List<Component> siblings = msg.getSiblings();
 
                 if (siblings.isEmpty())
                 {
-//                    Constants.LOG.info("debug::No siblings");
+//                    ChatNotify.LOG.info("debug::No siblings");
                     int matchFirst = triggerMatch.getFirst();
                     int matchLast = triggerMatch.getSecond();
 
@@ -383,15 +382,15 @@ public class MessageProcessor {
                     so it is deconstructed and the parts individually re-styled
                     before being re-built into a new MutableComponent.
                      */
-//                    Constants.LOG.info("debug::Restyle matched contents");
-//                    Constants.LOG.info("debug::Original msgStr: '{}'", msgStr);
-//                    Constants.LOG.info("debug::Trigger: '{}'", trigger);
-//                    Constants.LOG.info("debug::Matched from {} ({}) to {} ({})", matchFirst, msgStr.charAt(matchFirst), matchLast, msgStr.charAt(matchLast-1));
+//                    ChatNotify.LOG.info("debug::Restyle matched contents");
+//                    ChatNotify.LOG.info("debug::Original msgStr: '{}'", msgStr);
+//                    ChatNotify.LOG.info("debug::Trigger: '{}'", trigger);
+//                    ChatNotify.LOG.info("debug::Matched from {} ({}) to {} ({})", matchFirst, msgStr.charAt(matchFirst), matchLast, msgStr.charAt(matchLast-1));
 
                     if (msgStr.contains("§")) {
 
                         String activeCodes = activeFormatCodes(msgStr.substring(0, matchLast-trigger.length()));
-//                        Constants.LOG.info("debug::Active codes: '{}'", activeCodes);
+//                        ChatNotify.LOG.info("debug::Active codes: '{}'", activeCodes);
 
                         String msgTriggerFull = msgStr.substring(matchFirst,matchLast);
                         int realStart = startIgnoreCodes(msgTriggerFull, msgTriggerFull.length()-trigger.length());
@@ -402,7 +401,7 @@ public class MessageProcessor {
 
                         msgStr = msgStart + '\u00a7' + 'r' + msgTrigger + activeCodes + msgEnd;
 
-//                        Constants.LOG.info("debug::Modified msgStr: '{}'", msgStr);
+//                        ChatNotify.LOG.info("debug::Modified msgStr: '{}'", msgStr);
 
                         matchLast = matchLast-realStart+2;
                     }
@@ -432,18 +431,18 @@ public class MessageProcessor {
                     }
 
                     if (siblings.size() == 1) {
-//                        Constants.LOG.info("debug::Only one sibling; promoting");
+//                        ChatNotify.LOG.info("debug::Only one sibling; promoting");
                         msg = siblings.get(0).copy();
                     }
                     else {
-//                        Constants.LOG.info("debug::Siblings: '{}'", siblings);
+//                        ChatNotify.LOG.info("debug::Siblings: '{}'", siblings);
                         MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
                         newMessage.siblings.addAll(siblings);
                         msg = newMessage;
                     }
                 }
                 else {
-//                    Constants.LOG.info("debug::Siblings found");
+//                    ChatNotify.LOG.info("debug::Siblings found");
 
                     /*
                     If the message has siblings, it cannot be directly
@@ -461,7 +460,7 @@ public class MessageProcessor {
                     replacement.setStyle(msg.getStyle());
                     replacement.siblings.addAll(siblings);
 
-//                    Constants.LOG.info("debug::restyleContents empty-parent restyleComponent");
+//                    ChatNotify.LOG.info("debug::restyleContents empty-parent restyleComponent");
                     msg = restyleComponent(replacement, trigger, style);
                 }
             }
@@ -476,7 +475,7 @@ public class MessageProcessor {
      * @return the active format codes as a {@code String}.
      */
     private static String activeFormatCodes(String msgStr) {
-//        Constants.LOG.info("debug::Scanning for codes in string '{}'", msgStr);
+//        ChatNotify.LOG.info("debug::Scanning for codes in string '{}'", msgStr);
         List<ChatFormatting> activeCodes = new ArrayList<>();
         for (int i = 0; i < msgStr.length(); i++) {
             char c = msgStr.charAt(i);
