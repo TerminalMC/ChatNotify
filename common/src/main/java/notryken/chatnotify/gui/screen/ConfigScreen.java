@@ -23,7 +23,7 @@ public abstract class ConfigScreen extends OptionsSubScreen {
     protected void init() {
         /*
         The resize method builds a new listWidget based on the old one, so we
-        call it on initialization to make reloadScreen calls work.
+        call it on every initialization to make reloadScreen calls work.
          */
         listWidget = listWidget.resize(width, height, 32, height - 32);
         addWidget(listWidget);

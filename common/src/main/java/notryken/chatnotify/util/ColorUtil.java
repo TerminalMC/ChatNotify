@@ -14,11 +14,11 @@ public class ColorUtil {
     public static final IntUnaryOperator fromGreen = (value) -> (value * 256);
     public static final IntUnaryOperator fromBlue = (value) -> (value);
     public static final IntBinaryOperator withRed = (value, red) ->
-            ((red * 65536) + value - (value >> 16 & 255) * 65536);
+            (red + value - (value >> 16 & 255) * 65536);
     public static final IntBinaryOperator withGreen = (value, green) ->
-            ((green * 256) + value - (value >> 8 & 255) * 256);
+            (green + value - (value >> 8 & 255) * 256);
     public static final IntBinaryOperator withBlue = (value, blue) ->
-            ((blue) + value - (value & 255));
+            (blue + value - (value & 255));
 
 
     /**

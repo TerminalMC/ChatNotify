@@ -24,7 +24,7 @@ public class Notification
     private TextColor color;
     private final ArrayList<Boolean> formatControls;
     private float soundVolume;
-    public float soundPitch;
+    private float soundPitch;
     private ResourceLocation sound;
     public boolean persistent;
     public boolean regexEnabled;
@@ -288,10 +288,6 @@ public class Notification
         persistent = true;
     }
 
-    /**
-     * @return the {@code ResourceLocation} of the sound used by the
-     * {@code Notification}.
-     */
     public float getSoundVolume() {
         return this.soundVolume;
     }
@@ -303,6 +299,14 @@ public class Notification
     public void setSoundVolume(float soundVolume) {
         this.soundVolume = soundVolume;
         setControl(2, soundVolume != 0f);
+    }
+
+    public float getSoundPitch() {
+        return soundPitch;
+    }
+
+    public void setSoundPitch(float soundPitch) {
+        this.soundPitch = soundPitch;
     }
 
 
@@ -424,6 +428,18 @@ public class Notification
 
 
     // Validation and cleanup //////////////////////////////////////////////////
+
+    /**
+     * Disables regex, exclusion triggers and response messages and clears the
+     * lists of the latter two.
+     */
+    public void resetAdvanced() {
+        regexEnabled = false;
+        exclusionEnabled = false;
+        responseEnabled = false;
+        exclusionTriggers.clear();
+        responseMessages.clear();
+    }
 
     /**
      * Removes all blank non-primary triggers.

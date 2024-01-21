@@ -8,7 +8,9 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.component.slider.RgbChannelSlider;
+import notryken.chatnotify.util.ColorUtil;
 
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
@@ -21,124 +23,111 @@ public class ColorConfigListWidget extends ConfigListWidget {
     public final Notification notif;
 
     public ColorConfigListWidget(Minecraft client, int width, int height,
-                                 int top, int bottom, int itemHeight, Screen parent,
-                                 Component title, Notification notif) {
-        super(client, width, height, top, bottom, itemHeight, parent, title);
+                                 int top, int bottom, int itemHeight,
+                                 Screen parentScreen, Notification notif) {
+        super(client, width, height, top, bottom, itemHeight, parentScreen);
         this.notif = notif;
 
-        addEntry(new ConfigListWidget.Entry.Header(this.width, this.client,
+        int eX = width / 2 - 120;
+        int eW = 240;
+        int eH = 20;
+
+        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
                 Component.literal("Notification Text Color")
-                        .setStyle(Style.EMPTY.withColor(this.notif.getColor()))));
+                        .setStyle(Style.EMPTY.withColor(this.notif.getColor())),
+                null, -1));
 
-        Supplier<Integer> colorSource = notif::getColorInt;
-        Consumer<Integer> colorDest = notif::setColorInt;
+        addEntry(new Entry.RgbSliderEntry(eX, eW, eH, "Red: ", notif::getColorInt,
+                (color) -> {
+                    notif.setColorInt(ColorUtil.withRed.applyAsInt(notif.getColorInt(), color));
+                    refreshColorIndicator();
+                },
+                ColorUtil.toRed, ColorUtil.fromRed));
+        addEntry(new Entry.RgbSliderEntry(eX, eW, eH, "Green: ", notif::getColorInt,
+                (color) -> {
+                    notif.setColorInt(ColorUtil.withGreen.applyAsInt(notif.getColorInt(), color));
+                    refreshColorIndicator();
+                },
+                ColorUtil.toGreen, ColorUtil.fromGreen));
+        addEntry(new Entry.RgbSliderEntry(eX, eW, eH, "Blue: ", notif::getColorInt,
+                (color) -> {
+                    notif.setColorInt(ColorUtil.withBlue.applyAsInt(notif.getColorInt(), color));
+                    refreshColorIndicator();
+                },
+                ColorUtil.toBlue, ColorUtil.fromBlue));
 
-
-        addEntry(new Entry.RedSlider(this.width, this.notif, this));
-        addEntry(new Entry.GreenSlider(this.width, this.notif, this));
-        addEntry(new Entry.BlueSlider(this.width, this.notif, this));
-
-        addEntry(new Entry.ColorOption(this.width, this.notif, this));
+        addEntry(new Entry.ColorSelectionEntry(eX, eW, notif::setColorInt, this));
     }
 
     @Override
     public ColorConfigListWidget resize(int width, int height, int top, int bottom) {
         ColorConfigListWidget listWidget = new ColorConfigListWidget(
-                client, width, height, top, bottom, itemHeight, parent, title, notif);
+                minecraft, width, height, top, bottom, itemHeight, parentScreen, notif);
         listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     @Override
-    protected void reload() {
-        reload(this);
+    protected void reloadScreen() {
+        reloadScreen(this);
     }
 
     public void refreshColorIndicator() {
         remove(0);
-        addEntryToTop(new ConfigListWidget.Entry.Header(width, client,
+        // TODO access eX, eW, eH
+        addEntryToTop(new ConfigListWidget.Entry.TextEntry(width / 2 - 120, 240, 20,
                 Component.literal("Notification Text Color")
-                        .setStyle(Style.EMPTY.withColor(notif.getColor()))));
+                        .setStyle(Style.EMPTY.withColor(this.notif.getColor())),
+                null, -1));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
 
-        protected static class RgbSliderEntry extends ColorConfigListWidget.Entry {
-            RgbChannelSlider rgbaSlider;
-            public RgbSliderEntry(ColorConfigListWidget list, int x, int y, int width, int height, String label,
-                                   Supplier<Integer>source, Consumer<Integer> dest,
-                                   IntUnaryOperator toChannel, IntUnaryOperator fromChannel) {
+        protected static class RgbSliderEntry extends Entry {
+            public RgbSliderEntry(int x, int width, int height, @Nullable String message,
+                                  Supplier<Integer> source, Consumer<Integer> dest,
+                                  IntUnaryOperator toChannel, IntUnaryOperator fromChannel) {
                 super();
-                rgbaSlider = new RgbChannelSlider(x, y, width, height, label,
-                        source, dest, toChannel, fromChannel);
-                elements.add(rgbaSlider);
-            }
-
-            public void refresh() {
-                rgbaSlider.refresh();
+                elements.add(new RgbChannelSlider(x, 0, width, height, message, null,
+                        source, dest, toChannel, fromChannel));
             }
         }
 
-        private static class RedSlider extends ColorConfigListWidget.Entry {
-            RedSlider(int width, Notification notif, ColorConfigListWidget listWidget) {
-                super();
-                elements.add(new RedColorSlider(width / 2 - 120, 0, 240, 20,
-                        RedColorSlider.sliderValue(notif.getRed()), notif, listWidget));
-            }
-        }
+        protected static class ColorSelectionEntry extends Entry {
+            int[] colors = new int[] {
+                    10027008,
+                    16711680,
+                    16753920,
+                    16761856,
+                    16776960,
+                    65280,
+                    32768,
+                    19456,
+                    2142890,
+                    65535,
+                    255,
+                    8388736,
+                    16711935,
+                    16777215,
+                    8421504,
+                    0};
 
-        private static class GreenSlider extends ColorConfigListWidget.Entry {
-            GreenSlider(int width, Notification notif, ColorConfigListWidget listWidget) {
-                super();
-                elements.add(new GreenColorSlider(width / 2 - 120, 0, 240, 20,
-                        GreenColorSlider.sliderValue(notif.getGreen()), notif,listWidget));
-            }
-        }
-
-        private static class BlueSlider extends ColorConfigListWidget.Entry {
-            BlueSlider(int width, Notification notif, ColorConfigListWidget listWidget) {
-                super();
-                elements.add(new BlueColorSlider(width / 2 - 120, 0, 240, 20,
-                        BlueColorSlider.sliderValue(notif.getBlue()), notif, listWidget));
-            }
-        }
-
-        private static class ColorOption extends Entry {
-            ColorOption(int width, Notification notif, ColorConfigListWidget listWidget) {
+            public ColorSelectionEntry(int x, int width, Consumer<Integer> dest,
+                                       ColorConfigListWidget listWidget) {
                 super();
 
-                // Minecraft's 16 default colors represented in integer form.
-                int[] quickColors = new int[] {
-                        10027008,
-                        16711680,
-                        16753920,
-                        16761856,
-                        16776960,
-                        65280,
-                        32768,
-                        19456,
-                        2142890,
-                        65535,
-                        255,
-                        8388736,
-                        16711935,
-                        16777215,
-                        8421504,
-                        0};
-
-                int offset = -120;
-                int usableWidth = 240;
-                int buttonWidth = usableWidth / quickColors.length;
-
-                for (int i = 0; i < quickColors.length; i++) {
-                    TextColor color = TextColor.fromRgb(quickColors[i]);
+                int buttonWidth = width / colors.length;
+                for (int i = 0; i < colors.length; i++) {
+                    int color = colors[i];
+                    int setX = x + (width / 2) - (buttonWidth * colors.length / 2);
                     elements.add(Button.builder(Component.literal("\u2588")
-                                            .setStyle(Style.EMPTY.withColor(color)), (button) -> {
-                        notif.setColor(color);
-                        listWidget.reload();
-                    })
-                            .size(buttonWidth, 15)
-                            .pos((width / 2) + offset + (buttonWidth * i), 0)
+                                    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color))), (button) ->
+                            {
+                                dest.accept(color);
+                                listWidget.reloadScreen();
+                            })
+                            .pos(setX + (buttonWidth * i), 0)
+                            .size(buttonWidth, buttonWidth)
                             .build());
                 }
             }

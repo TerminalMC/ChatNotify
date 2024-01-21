@@ -21,7 +21,7 @@ public class GlobalConfigScreen extends ConfigScreen {
     protected void init() {
         // This screen only ever carries a GlobalConfigListWidget.
         listWidget = new GlobalConfigListWidget(minecraft, width, height,
-                32, height - 32, 25, lastScreen, title);
+                32, height - 32, 25, lastScreen);
         super.init();
     }
 

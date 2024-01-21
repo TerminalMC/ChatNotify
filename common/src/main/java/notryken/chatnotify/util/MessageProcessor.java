@@ -221,7 +221,7 @@ public class MessageProcessor {
             Minecraft.getInstance().getSoundManager().play(
                     new SimpleSoundInstance(
                             notif.getSound(), config().notifSoundSource,
-                            notif.getSoundVolume(), notif.soundPitch,
+                            notif.getSoundVolume(), notif.getSoundPitch(),
                             SoundInstance.createUnseededRandom(), false, 0,
                             SoundInstance.Attenuation.NONE, 0, 0, 0, true));
         }

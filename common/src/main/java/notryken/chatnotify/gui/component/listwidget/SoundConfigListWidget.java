@@ -10,10 +10,8 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.component.slider.PitchSlider;
-import notryken.chatnotify.gui.component.slider.VolumeSlider;
+import notryken.chatnotify.gui.component.slider.DoubleSlider;
 import notryken.chatnotify.util.SoundUtil;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * {@code ConfigListWidget} containing controls for the specified
@@ -23,18 +21,22 @@ public class SoundConfigListWidget extends ConfigListWidget {
     private final Notification notif;
 
     public SoundConfigListWidget(Minecraft client, int width, int height,
-                                 int top, int bottom, int itemHeight, Screen parent,
-                                 Component title, Notification notif) {
-        super(client, width, height, top, bottom, itemHeight, parent, title);
+                                 int top, int bottom, int itemHeight,
+                                 Screen parentScreen, Notification notif) {
+        super(client, width, height, top, bottom, itemHeight, parentScreen);
         this.notif = notif;
 
-        addEntry(new Entry.SoundField(width, notif, client));
-        addEntry(new Entry.SoundConfigVolume(width, notif));
-        addEntry(new Entry.SoundConfigPitch(width, notif));
-        addEntry(new Entry.SoundTest(width, this));
+        int eX = width / 2 - 120;
+        int eW = 240;
+        int eH = 20;
 
-        addEntry(new ConfigListWidget.Entry.Header(width, client,
-                Component.literal("Noteblock Sounds")));
+        addEntry(new Entry.SoundFieldEntry(eX, eW, eH, notif));
+        addEntry(new Entry.VolumeSliderEntry(eX, eW, eH, notif));
+        addEntry(new Entry.PitchSliderEntry(eX, eW, eH, notif));
+        addEntry(new Entry.SoundTestEntry(eX, eW, eH, this));
+
+        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+                Component.literal("Noteblock Sounds"), null, -1));
         String[][] noteblockSounds = {
                         {"block.note_block.banjo", "Banjo"},
                         {"block.note_block.bass", "Bass"},
@@ -54,11 +56,11 @@ public class SoundConfigListWidget extends ConfigListWidget {
                         {"block.note_block.xylophone", "Xylophone"},
                 };
         for (String[] s : noteblockSounds) {
-            addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
+            addEntry(new Entry.SoundOption(eX, eW, eH, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, client,
-                Component.literal("Power/Portal Sounds")));
+        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+                Component.literal("Power/Portal Sounds"), null, -1));
         String[][] powerSounds = new String[][]{
                         {"block.beacon.activate", "Beacon Activate"},
                         {"block.beacon.deactivate", "Beacon Deactivate"},
@@ -78,11 +80,11 @@ public class SoundConfigListWidget extends ConfigListWidget {
                         {"entity.zombie_villager.converted", "Villager Cured"},
                 };
         for (String[] s : powerSounds) {
-            addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
+            addEntry(new Entry.SoundOption(eX, eW, eH, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, client,
-                Component.literal("Explosion Sounds")));
+        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+                Component.literal("Explosion Sounds"), null, -1));
         String[][] explosionSounds = new String[][]{
                         {"entity.tnt.primed", "TNT Ignite"},
                         {"entity.generic.explode", "TNT Explode"},
@@ -94,11 +96,11 @@ public class SoundConfigListWidget extends ConfigListWidget {
                         {"entity.firework_rocket.twinkle", "Firework 3"},
                 };
         for (String[] s : explosionSounds) {
-            addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
+            addEntry(new Entry.SoundOption(eX, eW, eH, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, client,
-                Component.literal("Illager Sounds")));
+        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+                Component.literal("Illager Sounds"), null, -1));
         String[][] villagerSounds = new String[][]{
                         {"entity.villager.ambient", "Villager"},
                         {"entity.villager.yes", "Villager Yes"},
@@ -110,11 +112,11 @@ public class SoundConfigListWidget extends ConfigListWidget {
 
                 };
         for (String[] s : villagerSounds) {
-            addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
+            addEntry(new Entry.SoundOption(eX, eW, eH, notif, this, s[0], s[1]));
         }
 
-        addEntry(new ConfigListWidget.Entry.Header(width, client,
-                Component.literal("Misc Sounds")));
+        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+                Component.literal("Misc Sounds"), null, -1));
         String[][] miscSounds = new String[][]{
                         {"entity.arrow.hit_player", "Arrow Hit"},
                         {"block.bell.use", "Bell"},
@@ -130,28 +132,28 @@ public class SoundConfigListWidget extends ConfigListWidget {
                         {"ui.button.click", "UI Button Click"},
                 };
         for (String[] s : miscSounds) {
-            addEntry(new Entry.SoundOption(width, notif, this, s[0], s[1]));
+            addEntry(new Entry.SoundOption(eX, eW, eH, notif, this, s[0], s[1]));
         }
     }
 
     @Override
     public SoundConfigListWidget resize(int width, int height, int top, int bottom) {
         SoundConfigListWidget listWidget = new SoundConfigListWidget(
-                client, width, height, top, bottom, itemHeight, parent, title, notif);
+                minecraft, width, height, top, bottom, itemHeight, parentScreen, notif);
         listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     @Override
-    protected void reload() {
-        reload(this);
+    protected void reloadScreen() {
+        reloadScreen(this);
     }
 
     private void playNotifSound() {
-        client.getSoundManager().play(
+        minecraft.getSoundManager().play(
                 new SimpleSoundInstance(notif.getSound(),
                         ChatNotify.config().notifSoundSource,
-                        notif.getSoundVolume(), notif.soundPitch,
+                        notif.getSoundVolume(), notif.getSoundPitch(),
                         SoundInstance.createUnseededRandom(), false, 0,
                         SoundInstance.Attenuation.NONE, 0, 0, 0, true));
 
@@ -159,42 +161,10 @@ public class SoundConfigListWidget extends ConfigListWidget {
 
     private abstract static class Entry extends ConfigListWidget.Entry {
 
-        private static class SoundConfigVolume extends Entry {
-            SoundConfigVolume(int width, Notification notif) {
+        private static class SoundFieldEntry extends Entry {
+            SoundFieldEntry(int x, int width, int height, Notification notif) {
                 super();
-                elements.add(new VolumeSlider(width / 2 - 120, 0, 240, 20,
-                        notif.getSoundVolume(), notif));
-            }
-        }
-
-        private static class SoundConfigPitch extends Entry {
-            SoundConfigPitch(int width, Notification notif) {
-                super();
-                elements.add(new PitchSlider(width / 2 - 120, 0, 240, 20,
-                        PitchSlider.sliderValue(notif.soundPitch), notif));
-            }
-        }
-
-        private static class SoundTest extends Entry {
-            SoundTest(int width, SoundConfigListWidget listWidget) {
-                super();
-                elements.add(Button.builder(Component.literal(
-                        "> Click to Test Sound <"), (button) ->
-                                listWidget.playNotifSound())
-                        .size(240, 20)
-                        .tooltip(Tooltip.create(
-                                Component.literal("Volume category currently set to ")
-                                        .append(Component.translatable("soundCategory."
-                                                + ChatNotify.config().notifSoundSource.getName()))))
-                        .pos(width / 2 - 120, 0).build());
-            }
-        }
-
-        private static class SoundField extends Entry {
-            SoundField(int width, Notification notif, @NotNull Minecraft client) {
-                super();
-                EditBox soundField = new EditBox(
-                        client.font, width / 2 - 120, 0, 240, 20,
+                EditBox soundField = new EditBox(Minecraft.getInstance().font, x, 0, width, height,
                         Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
                 soundField.setValue(notif.getSound().toString());
@@ -203,18 +173,54 @@ public class SoundConfigListWidget extends ConfigListWidget {
             }
         }
 
+        private static class VolumeSliderEntry extends Entry {
+            VolumeSliderEntry(int x, int width, int height, Notification notif) {
+                super();
+                elements.add(new DoubleSlider(x, 0, width, height, 0, 1, 1,
+                        "Volume: ", null, "OFF", null,
+                        () -> (double)notif.getSoundPitch(),
+                        (value) -> notif.setSoundPitch(value.floatValue())));
+            }
+        }
+
+        private static class PitchSliderEntry extends Entry {
+            PitchSliderEntry(int x, int width, int height, Notification notif) {
+                super();
+                elements.add(new DoubleSlider(x, 0, width, height, 0, 1, 1,
+                        "Pitch: ", null, null, null,
+                        () -> (double)notif.getSoundPitch(),
+                        (value) -> notif.setSoundPitch(value.floatValue())));
+            }
+        }
+
+        private static class SoundTestEntry extends Entry {
+            SoundTestEntry(int x, int width, int height, SoundConfigListWidget listWidget) {
+                super();
+                elements.add(Button.builder(Component.literal(
+                        "> Click to Test Sound <"), (button) ->
+                                listWidget.playNotifSound())
+                        .pos(x, 0)
+                        .size(width, height)
+                        .tooltip(Tooltip.create(
+                                Component.literal("Volume category currently set to ")
+                                        .append(Component.translatable("soundCategory."
+                                                + ChatNotify.config().notifSoundSource.getName()))))
+                        .build());
+            }
+        }
+
         private static class SoundOption extends Entry {
-            SoundOption(int width, Notification notif, SoundConfigListWidget listWidget,
+            SoundOption(int x, int width, int height, Notification notif, SoundConfigListWidget listWidget,
                         String sound, String soundName) {
                 super();
                 elements.add(Button.builder(Component.literal(soundName),
-                        (button) -> {
-                    notif.setSound(SoundUtil.parseSound(sound));
-                    listWidget.reload();
-                    listWidget.playNotifSound();
-                })
-                        .size(240, 19)
-                        .pos(width / 2 - 120, 0)
+                                (button) -> {
+                                    notif.setSound(SoundUtil.parseSound(sound));
+                                    listWidget.reloadScreen();
+                                    listWidget.playNotifSound();
+                                })
+                        .pos(x, 0)
+                        .size(width, height)
                         .build());
             }
         }

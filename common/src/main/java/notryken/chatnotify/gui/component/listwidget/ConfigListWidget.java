@@ -2,18 +2,14 @@ package notryken.chatnotify.gui.component.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.components.MultiLineTextWidget;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.network.chat.Component;
-import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.gui.screen.NotifConfigScreen;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +28,24 @@ import java.util.List;
 public abstract class ConfigListWidget
         extends ContainerObjectSelectionList<ConfigListWidget.Entry> {
 
-    public final ConfigScreen parent;
+    public final Screen parentScreen;
 
     public ConfigListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
-                            int itemHeight, ConfigScreen parent) {
+                            int itemHeight, Screen parentScreen) {
         super(minecraft, width, height, top, bottom, itemHeight);
-        this.parent = parent;
+        this.parentScreen = parentScreen;
+    }
+
+    // TODO make dynamic
+    @Override
+    public int getRowWidth() {
+        return 300; // Sets the position of the scrollbar
+    }
+
+    // TODO make dynamic
+    @Override
+    protected int getScrollbarPosition() {
+        return super.getScrollbarPosition() + 32; // Offset as a buffer
     }
 
     // Default methods
@@ -49,19 +57,7 @@ public abstract class ConfigListWidget
      *                   screen.
      */
     public void reloadScreen(ConfigListWidget listWidget) {
-        minecraft.setScreen(new NotifConfigScreen(parent, parent.getTitle(), listWidget));
-    }
-    
-    // Override implementations
-
-    @Override
-    public int getRowWidth() {
-        return 300; // Sets the position of the scrollbar
-    }
-
-    @Override
-    protected int getScrollbarPosition() {
-        return super.getScrollbarPosition() + 32; // Offset as a buffer
+        minecraft.setScreen(new NotifConfigScreen(parentScreen, listWidget.parentScreen.getTitle(), listWidget));
     }
 
     // Abstract methods
@@ -70,6 +66,10 @@ public abstract class ConfigListWidget
 
     public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
 
+    /**
+     * Base implementation of ChatNotify options list widget entry, with common
+     * entries.
+     */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
 
         public final List<AbstractWidget> elements;
@@ -96,6 +96,45 @@ public abstract class ConfigListWidget
                 button.setY(y);
                 button.render(context, mouseX, mouseY, tickDelta);
             });
+        }
+
+        // Common Entry implementations
+
+        public static class TextEntry extends Entry {
+            public TextEntry(int x, int width, int height, Component message,
+                             @Nullable Tooltip tooltip, int tooltipDelay) {
+                super();
+
+                AbstractStringWidget widget;
+                if (Minecraft.getInstance().font.width(message.getString()) <= width) {
+                    widget = new StringWidget(x, 0, width, height, message, Minecraft.getInstance().font);
+                }
+                else {
+                    widget = new MultiLineTextWidget(x, 0, message, Minecraft.getInstance().font)
+                            .setMaxWidth(width)
+                            .setCentered(true);
+                }
+                if (tooltip != null) widget.setTooltip(tooltip);
+                if (tooltipDelay >= 0) widget.setTooltipDelay(tooltipDelay);
+
+                elements.add(widget);
+            }
+        }
+
+        public static class ActionButtonEntry extends Entry {
+            public ActionButtonEntry(int x, int y, int width, int height, Component message,
+                                     @Nullable Tooltip tooltip, int tooltipDelay, Button.OnPress onPress) {
+                super();
+
+                Button button = Button.builder(message, onPress)
+                        .pos(x, y)
+                        .size(width, height)
+                        .build();
+                if (tooltip != null) button.setTooltip(tooltip);
+                if (tooltipDelay >= 0) button.setTooltipDelay(tooltipDelay);
+
+                elements.add(button);
+            }
         }
     }
 }

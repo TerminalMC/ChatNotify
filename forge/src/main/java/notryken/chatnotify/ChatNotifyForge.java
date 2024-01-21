@@ -5,7 +5,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import notryken.chatnotify.gui.screen.GlobalConfigScreen;
 
-@Mod(Constants.MOD_ID)
+@Mod(ChatNotify.MOD_ID)
 public class ChatNotifyForge {
     public ChatNotifyForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
