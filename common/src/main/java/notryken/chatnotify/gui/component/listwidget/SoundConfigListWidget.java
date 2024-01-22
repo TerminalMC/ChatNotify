@@ -1,29 +1,29 @@
 package notryken.chatnotify.gui.component.listwidget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.component.slider.DoubleSlider;
+import notryken.chatnotify.gui.component.widget.SilentButton;
 import notryken.chatnotify.util.SoundUtil;
 
 /**
- * {@code ConfigListWidget} containing controls for the specified
- * {@code Notification}, including references to other screens.
+ * {@code ConfigListWidget} containing controls for sound of the specified
+ * {@code Notification}.
  */
 public class SoundConfigListWidget extends ConfigListWidget {
     private final Notification notif;
 
-    public SoundConfigListWidget(Minecraft client, int width, int height,
+    public SoundConfigListWidget(Minecraft minecraft, int width, int height,
                                  int top, int bottom, int itemHeight,
-                                 Screen parentScreen, Notification notif) {
-        super(client, width, height, top, bottom, itemHeight, parentScreen);
+                                 int entryRelX, int entryWidth, int entryHeight,
+                                 Notification notif) {
+        super(minecraft, width, height, top, bottom, itemHeight,
+                width / 2 + entryRelX, entryWidth, entryHeight);
         this.notif = notif;
 
         int eX = width / 2 - 120;
@@ -31,9 +31,23 @@ public class SoundConfigListWidget extends ConfigListWidget {
         int eH = 20;
 
         addEntry(new Entry.SoundFieldEntry(eX, eW, eH, notif));
-        addEntry(new Entry.VolumeSliderEntry(eX, eW, eH, notif));
-        addEntry(new Entry.PitchSliderEntry(eX, eW, eH, notif));
-        addEntry(new Entry.SoundTestEntry(eX, eW, eH, this));
+
+        addEntry(new ConfigListWidget.Entry.DoubleSliderEntry(eX, 0, eW, eH, 0, 1, 2,
+                "Volume: ", null, "OFF", null,
+                () -> (double)notif.getSoundVolume(),
+                (value) -> notif.setSoundVolume(value.floatValue())));
+
+        addEntry(new ConfigListWidget.Entry.DoubleSliderEntry(eX, 0, eW, eH, 0.5, 2, 2,
+                "Pitch: ", null, null, null,
+                () -> (double)notif.getSoundPitch(),
+                (value) -> notif.setSoundPitch(value.floatValue())));
+
+        addEntry(new ConfigListWidget.Entry.SilentActionButtonEntry(eX, 0, eW, eH,
+                Component.literal("> Click to Test Sound <"),
+                Tooltip.create(Component.literal("Volume category currently set to ")
+                        .append(Component.translatable("soundCategory."
+                                + ChatNotify.config().notifSoundSource.getName()))), -1,
+                button -> playNotifSound()));
 
         addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
                 Component.literal("Noteblock Sounds"), null, -1));
@@ -137,16 +151,16 @@ public class SoundConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public SoundConfigListWidget resize(int width, int height, int top, int bottom) {
-        SoundConfigListWidget listWidget = new SoundConfigListWidget(
-                minecraft, width, height, top, bottom, itemHeight, parentScreen, notif);
-        listWidget.setScrollAmount(getScrollAmount());
-        return listWidget;
+    public SoundConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
+        return new SoundConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+                entryX, entryWidth, entryHeight, notif);
     }
 
-    @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
+    private void refreshSoundField() {
+        ConfigListWidget.Entry entry = getEntry(0);
+        if (entry instanceof Entry.SoundFieldEntry soundFieldEntry) {
+            soundFieldEntry.updateValue();
+        }
     }
 
     private void playNotifSound() {
@@ -162,50 +176,22 @@ public class SoundConfigListWidget extends ConfigListWidget {
     private abstract static class Entry extends ConfigListWidget.Entry {
 
         private static class SoundFieldEntry extends Entry {
+            private final Notification notif;
+            private final EditBox soundField;
+
             SoundFieldEntry(int x, int width, int height, Notification notif) {
                 super();
-                EditBox soundField = new EditBox(Minecraft.getInstance().font, x, 0, width, height,
+                this.notif = notif;
+                soundField = new EditBox(Minecraft.getInstance().font, x, 0, width, height,
                         Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
                 soundField.setValue(notif.getSound().toString());
                 soundField.setResponder((sound) -> notif.setSound(SoundUtil.parseSound(sound.strip())));
                 elements.add(soundField);
             }
-        }
 
-        private static class VolumeSliderEntry extends Entry {
-            VolumeSliderEntry(int x, int width, int height, Notification notif) {
-                super();
-                elements.add(new DoubleSlider(x, 0, width, height, 0, 1, 1,
-                        "Volume: ", null, "OFF", null,
-                        () -> (double)notif.getSoundPitch(),
-                        (value) -> notif.setSoundPitch(value.floatValue())));
-            }
-        }
-
-        private static class PitchSliderEntry extends Entry {
-            PitchSliderEntry(int x, int width, int height, Notification notif) {
-                super();
-                elements.add(new DoubleSlider(x, 0, width, height, 0, 1, 1,
-                        "Pitch: ", null, null, null,
-                        () -> (double)notif.getSoundPitch(),
-                        (value) -> notif.setSoundPitch(value.floatValue())));
-            }
-        }
-
-        private static class SoundTestEntry extends Entry {
-            SoundTestEntry(int x, int width, int height, SoundConfigListWidget listWidget) {
-                super();
-                elements.add(Button.builder(Component.literal(
-                        "> Click to Test Sound <"), (button) ->
-                                listWidget.playNotifSound())
-                        .pos(x, 0)
-                        .size(width, height)
-                        .tooltip(Tooltip.create(
-                                Component.literal("Volume category currently set to ")
-                                        .append(Component.translatable("soundCategory."
-                                                + ChatNotify.config().notifSoundSource.getName()))))
-                        .build());
+            public void updateValue() {
+                soundField.setValue(notif.getSound().toString());
             }
         }
 
@@ -213,15 +199,12 @@ public class SoundConfigListWidget extends ConfigListWidget {
             SoundOption(int x, int width, int height, Notification notif, SoundConfigListWidget listWidget,
                         String sound, String soundName) {
                 super();
-                elements.add(Button.builder(Component.literal(soundName),
-                                (button) -> {
-                                    notif.setSound(SoundUtil.parseSound(sound));
-                                    listWidget.reloadScreen();
-                                    listWidget.playNotifSound();
-                                })
-                        .pos(x, 0)
-                        .size(width, height)
-                        .build());
+                elements.add(new SilentButton(x, 0, width, height, Component.literal(soundName),
+                        (button) -> {
+                            notif.setSound(SoundUtil.parseSound(sound));
+                            listWidget.refreshSoundField();
+                            listWidget.playNotifSound();
+                        }));
             }
         }
     }

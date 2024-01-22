@@ -7,12 +7,10 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * {@code ConfigListWidget} containing controls for advanced settings of the
@@ -22,68 +20,71 @@ import org.jetbrains.annotations.NotNull;
 public class AdvancedConfigListWidget extends ConfigListWidget {
     private final Notification notif;
 
-    public AdvancedConfigListWidget(Minecraft client, int width, int height,
+    public AdvancedConfigListWidget(Minecraft minecraft, int width, int height,
                                     int top, int bottom, int itemHeight,
-                                    Screen parentScreen, Notification notif) {
-        super(client, width, height, top, bottom, itemHeight, parentScreen);
+                                    int entryRelX, int entryWidth, int entryHeight,
+                                    Notification notif) {
+        super(minecraft, width, height, top, bottom, itemHeight,
+                width / 2 + entryRelX, entryWidth, entryHeight);
         this.notif = notif;
 
-        int eX = width / 2 - 120;
-        int eW = 240;
-        int eH = 20;
-
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("WARNING").withStyle(Style.EMPTY.withColor(ChatFormatting.RED)),
                 null, -1));
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("These settings allow you to break ChatNotify and crash " +
                         "Minecraft. Use with caution."), null, -1));
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Trigger Regex"), null, -1));
-        addEntry(new Entry.RegexToggleButton(eX, eW, eH, notif, this));
+        addEntry(new Entry.RegexToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Exclusion Triggers"), null, -1));
-        addEntry(new Entry.ExclusionToggleButton(eX, eW, eH, notif, this));
+        addEntry(new Entry.ExclusionToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
         if (this.notif.exclusionEnabled) {
             for (int i = 0; i < this.notif.getExclusionTriggers().size(); i ++) {
-                addEntry(new Entry.ExclusionTriggerField(eX, eW, eH, notif, this, i));
+                addEntry(new Entry.ExclusionTriggerField(entryX, entryWidth, entryHeight, notif, this, i));
             }
-            addEntry(new ConfigListWidget.Entry.ActionButtonEntry(eX, 0, eW, eH,
+            addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.addExclusionTrigger("");
-                        reloadScreen();
+                        reload();
                     }));
         }
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Auto Response Messages"), null, -1));
-        addEntry(new Entry.ResponseToggleButton(eX, eW, eH, notif, this));
+        addEntry(new Entry.ResponseToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
         if (this.notif.responseEnabled) {
             for (int i = 0; i < this.notif.getResponseMessages().size(); i ++) {
-                addEntry(new Entry.ResponseMessageField(eX, eW, eH, notif, this, i));
+                addEntry(new Entry.ResponseMessageField(entryX, entryWidth, entryHeight, notif, this, i));
             }
-            addEntry(new Entry.ResponseMessageField(eX, eW, eH, notif, this, -1));
+            addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+                    Component.literal("+"), null, -1,
+                    (button) -> {
+                        notif.addResponseMessage("");
+                        reload();
+                    }));
         }
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Broken Everything?"), null, -1));
 
-        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(eX, 0, eW, eH,
+        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Reset Advanced Options"), Tooltip.create(
                         Component.literal("Resets all advanced settings for THIS notification.")),
                 -1,
                 (button) -> {
                     notif.resetAdvanced();
-                    reloadScreen();
+                    reload();
                 }));
 
-        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(eX, 0, eW, eH,
+        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Reset All Advanced Options"), Tooltip.create(
                 Component.literal("Resets all advanced settings for ALL notifications.")),
                 -1,
@@ -91,21 +92,21 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                     for (Notification notif2 : ChatNotify.config().getNotifs()) {
                         notif2.resetAdvanced();
                     }
-                    reloadScreen();
+                    reload();
                 }));
 
-        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(eX, 0, eW, eH,
+        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Nuclear Reset"), Tooltip.create(
                 Component.literal("Deletes all ChatNotify notifications and resets all settings.")),
                 -1,
-                (button) -> client.setScreen(new ConfirmScreen(
+                (button) -> minecraft.setScreen(new ConfirmScreen(
                         (value) -> {
                             if (value) {
                                 ChatNotify.restoreDefaultConfig();
-                                client.setScreen(null);
+                                minecraft.setScreen(null);
                             }
                             else {
-                                reloadScreen();
+                                reload();
                             }},
                         Component.literal("Nuclear Reset"),
                         Component.literal("Are you sure you want to delete all ChatNotify " +
@@ -114,16 +115,9 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public AdvancedConfigListWidget resize(int width, int height, int top, int bottom) {
-        AdvancedConfigListWidget listWidget = new AdvancedConfigListWidget(
-                minecraft, width, height, top, bottom, itemHeight, parentScreen, notif);
-        listWidget.setScrollAmount(getScrollAmount());
-        return listWidget;
-    }
-
-    @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
+    public AdvancedConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
+        return new AdvancedConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+                entryX, entryWidth, entryHeight, notif);
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
@@ -141,7 +135,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                         .create(x, 0, width, height, Component.literal("Regex"),
                                 (button, status) -> {
                                     notif.regexEnabled = status;
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -159,7 +153,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                         .create(x, 0, width, height, Component.literal("Exclusion Triggers"),
                                 (button, status) -> {
                                     notif.exclusionEnabled = status;
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -184,7 +178,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 elements.add(Button.builder(Component.literal("X"),
                                 (button) -> {
                                     notif.removeExclusionTrigger(index);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 })
                         .pos(x + width + spacing, 0)
                         .size(removeButtonWidth, height)
@@ -207,7 +201,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                         .create(x, 0, width, height, Component.literal("Response Messages"),
                                 (button, status) -> {
                                     notif.responseEnabled = status;
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -232,7 +226,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 elements.add(Button.builder(Component.literal("X"),
                                 (button) -> {
                                     notif.removeResponseMessage(index);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 })
                         .pos(x + width + spacing, 0)
                         .size(removeButtonWidth, height)

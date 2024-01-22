@@ -5,14 +5,17 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import notryken.chatnotify.gui.screen.NotifConfigScreen;
+import notryken.chatnotify.gui.component.widget.DoubleSlider;
+import notryken.chatnotify.gui.component.widget.SilentButton;
+import notryken.chatnotify.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Base implementation of ChatNotify options list widget.
@@ -25,15 +28,20 @@ import java.util.List;
  * appear side-by-side rather than spaced vertically, you must add them all to a
  * single Entry's list of {@code AbstractWidgets}.
  */
-public abstract class ConfigListWidget
-        extends ContainerObjectSelectionList<ConfigListWidget.Entry> {
+public abstract class ConfigListWidget extends ContainerObjectSelectionList<ConfigListWidget.Entry> {
 
-    public final Screen parentScreen;
+    protected ConfigScreen screen;
+    // Standard positional and dimensional values used by entries
+    protected final int entryX;
+    protected final int entryWidth;
+    protected final int entryHeight;
 
-    public ConfigListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
-                            int itemHeight, Screen parentScreen) {
+    public ConfigListWidget(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight,
+                            int entryX, int entryWidth, int entryHeight) {
         super(minecraft, width, height, top, bottom, itemHeight);
-        this.parentScreen = parentScreen;
+        this.entryX = entryX;
+        this.entryWidth = entryWidth;
+        this.entryHeight = entryHeight;
     }
 
     // TODO make dynamic
@@ -51,20 +59,19 @@ public abstract class ConfigListWidget
     // Default methods
 
     /**
-     * Sets the client screen to a new instance of {@code NotifConfigScreen}, 
-     * with the specified {@code ConfigListWidget} and the stored parent screen.
-     * @param listWidget the {@code ConfigListWidget} to provide to the new
-     *                   screen.
+     * Must be called when the {@code ConfigListWidget} is added to a
+     * {@code Screen}, else breaks.
      */
-    public void reloadScreen(ConfigListWidget listWidget) {
-        minecraft.setScreen(new NotifConfigScreen(parentScreen, listWidget.parentScreen.getTitle(), listWidget));
+    public void setScreen(ConfigScreen screen) {
+        this.screen = screen;
+    }
+
+    public void reload() {
+        screen.reloadListWidget();
     }
 
     // Abstract methods
-
-    protected abstract void reloadScreen();
-
-    public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
+    public abstract ConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight);
 
     /**
      * Base implementation of ChatNotify options list widget entry, with common
@@ -122,8 +129,9 @@ public abstract class ConfigListWidget
         }
 
         public static class ActionButtonEntry extends Entry {
-            public ActionButtonEntry(int x, int y, int width, int height, Component message,
-                                     @Nullable Tooltip tooltip, int tooltipDelay, Button.OnPress onPress) {
+            public ActionButtonEntry(int x, int y, int width, int height,
+                                     Component message, @Nullable Tooltip tooltip,
+                                     int tooltipDelay, Button.OnPress onPress) {
                 super();
 
                 Button button = Button.builder(message, onPress)
@@ -134,6 +142,31 @@ public abstract class ConfigListWidget
                 if (tooltipDelay >= 0) button.setTooltipDelay(tooltipDelay);
 
                 elements.add(button);
+            }
+        }
+
+        public static class SilentActionButtonEntry extends Entry {
+            public SilentActionButtonEntry(int x, int y, int width, int height,
+                                           Component message, @Nullable Tooltip tooltip,
+                                           int tooltipDelay, Button.OnPress onPress) {
+                super();
+
+                Button silentButton = new SilentButton(x, y, width, height, message, onPress);
+                if (tooltip != null) silentButton.setTooltip(tooltip);
+                if (tooltipDelay >= 0) silentButton.setTooltipDelay(tooltipDelay);
+
+                elements.add(silentButton);
+            }
+        }
+
+        public static class DoubleSliderEntry extends Entry {
+            public DoubleSliderEntry(int x, int y, int width, int height, double min, double max, int precision,
+                                     @Nullable String messagePrefix, @Nullable String messageSuffix,
+                                     @Nullable String valueNameMin, @Nullable String valueNameMax,
+                                     Supplier<Double> source, Consumer<Double> dest) {
+                super();
+                elements.add(new DoubleSlider(x, y, width, height, min, max, precision, 
+                        messagePrefix, messageSuffix, valueNameMin, valueNameMax, source, dest));
             }
         }
     }

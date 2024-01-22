@@ -2,15 +2,14 @@ package notryken.chatnotify.gui.component.listwidget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.component.slider.RgbChannelSlider;
+import notryken.chatnotify.gui.component.widget.RgbChannelSlider;
 import notryken.chatnotify.util.ColorUtil;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
@@ -22,11 +21,12 @@ import java.util.function.Supplier;
 public class ColorConfigListWidget extends ConfigListWidget {
     public final Notification notif;
 
-    public ColorConfigListWidget(Minecraft client, int width, int height,
+    public ColorConfigListWidget(Minecraft minecraft, int width, int height,
                                  int top, int bottom, int itemHeight,
-                                 Screen parentScreen, Notification notif) {
-        super(client, width, height, top, bottom, itemHeight, parentScreen);
-        this.notif = notif;
+                                 int entryRelX, int entryWidth, int entryHeight,
+                                 Notification notif) {
+        super(minecraft, width, height, top, bottom, itemHeight,
+                width / 2 + entryRelX, entryWidth, entryHeight);        this.notif = notif;
 
         int eX = width / 2 - 120;
         int eW = 240;
@@ -60,22 +60,14 @@ public class ColorConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public ColorConfigListWidget resize(int width, int height, int top, int bottom) {
-        ColorConfigListWidget listWidget = new ColorConfigListWidget(
-                minecraft, width, height, top, bottom, itemHeight, parentScreen, notif);
-        listWidget.setScrollAmount(getScrollAmount());
-        return listWidget;
-    }
-
-    @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
+    public ColorConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
+        return new ColorConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+                entryX, entryWidth, entryHeight, notif);
     }
 
     public void refreshColorIndicator() {
         remove(0);
-        // TODO access eX, eW, eH
-        addEntryToTop(new ConfigListWidget.Entry.TextEntry(width / 2 - 120, 240, 20,
+        addEntryToTop(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Text Color")
                         .setStyle(Style.EMPTY.withColor(this.notif.getColor())),
                 null, -1));
@@ -124,7 +116,7 @@ public class ColorConfigListWidget extends ConfigListWidget {
                                     .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color))), (button) ->
                             {
                                 dest.accept(color);
-                                listWidget.reloadScreen();
+                                listWidget.reload();
                             })
                             .pos(setX + (buttonWidth * i), 0)
                             .size(buttonWidth, buttonWidth)

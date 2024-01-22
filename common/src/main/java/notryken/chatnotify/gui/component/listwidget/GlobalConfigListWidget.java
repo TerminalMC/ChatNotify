@@ -4,15 +4,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.screen.GlobalConfigScreen;
-import notryken.chatnotify.gui.screen.NotifConfigScreen;
+import notryken.chatnotify.gui.screen.ConfigScreen;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,55 +21,46 @@ import java.util.Optional;
  */
 public class GlobalConfigListWidget extends ConfigListWidget {
     public GlobalConfigListWidget(Minecraft minecraft, int width, int height,
-                                  int top, int bottom, int itemHeight, Screen parentScreen) {
-        super(minecraft, width, height, top, bottom, itemHeight, parentScreen);
+                                  int top, int bottom, int itemHeight,
+                                  int entryRelX, int entryWidth, int entryHeight) {
+        super(minecraft, width, height, top, bottom, itemHeight,
+                width / 2 + entryRelX, entryWidth, entryHeight);
 
-        int eX = width / 2 - 120;
-        int eW = 240;
-        int eH = 20;
-
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Global Options"), null, -1));
 
-        addEntry(new Entry.IgnoreToggleEntry(eX, eW, eH));
-        addEntry(new Entry.SoundSourceEntry(eX, eW, eH));
-        addEntry(new Entry.PrefixConfigEntry(eX, eW, eH, this));
+        addEntry(new Entry.IgnoreToggleEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.PrefixConfigEntry(entryX, entryWidth, entryHeight, this));
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notifications \u2139"),
                 Tooltip.create(Component.literal("Notifications are checked in sequential order as " +
                         "displayed below. A message can activate at most 1 notification.")), -1));
 
         int max = ChatNotify.config().getNumNotifs();
         for (int i = 0; i < max; i++) {
-            addEntry(new Entry.NotifConfigEntry(eX, eW, eH, this, i));
+            addEntry(new Entry.NotifConfigEntry(entryX, entryWidth, entryHeight, this, i));
         }
-        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(eX, 0, eW, eH,
+        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> addNotification()));
     }
 
     @Override
-    public GlobalConfigListWidget resize(int width, int height, int top, int bottom) {
-        GlobalConfigListWidget listWidget = new GlobalConfigListWidget(
-                minecraft, width, height, top, bottom, itemHeight, parentScreen);
-        listWidget.setScrollAmount(getScrollAmount());
-        return listWidget;
-    }
-
-    @Override
-    protected void reloadScreen() {
-        minecraft.setScreen(new GlobalConfigScreen(parentScreen));
+    public GlobalConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
+        return new GlobalConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+                entryX, entryWidth, entryHeight);
     }
 
     private void moveNotifUp(int index) {
         ChatNotify.config().increasePriority(index);
-        reloadScreen();
+        reload();
     }
 
     private void moveNotifDown(int index) {
         ChatNotify.config().decreasePriority(index);
-        reloadScreen();
+        reload();
     }
 
     private void addNotification() {
@@ -81,22 +70,22 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
     private void removeNotification(int index) {
         if (ChatNotify.config().removeNotif(index)) {
-            reloadScreen();
+            reload();
         }
     }
 
     private void openPrefixConfig() {
-        minecraft.setScreen(new NotifConfigScreen(minecraft.screen,
+        minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.prefix"),
-                new PrefixConfigListWidget(minecraft, parentScreen.width, parentScreen.height,
-                        32, parentScreen.height - 32, 25, minecraft.screen)));
+                new PrefixConfigListWidget(minecraft, screen.width, screen.height,
+                        y0, y1, itemHeight, entryX, entryWidth, entryHeight)));
     }
 
     private void openNotificationConfig(int index) {
-        minecraft.setScreen(new NotifConfigScreen(minecraft.screen,
+        minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.notif"),
-                new NotifConfigListWidget(minecraft, parentScreen.width, parentScreen.height,
-                        32, parentScreen.height - 32, 25, minecraft.screen,
+                new NotifConfigListWidget(minecraft, screen.width, screen.height,
+                        y0, y1, itemHeight, entryX, entryWidth, entryHeight,
                         ChatNotify.config().getNotif(index))));
     }
 

@@ -1,11 +1,7 @@
 package notryken.chatnotify.config;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.util.SoundUtil;
 
 import java.util.*;

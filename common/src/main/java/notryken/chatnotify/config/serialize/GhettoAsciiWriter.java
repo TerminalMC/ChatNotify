@@ -1,5 +1,7 @@
 package notryken.chatnotify.config.serialize;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -14,7 +16,7 @@ public class GhettoAsciiWriter extends Writer {
         this.out = out;
     }
 
-    @Override public void write(char[] buffer, int offset, int count) throws IOException {
+    @Override public void write(char @NotNull [] buffer, int offset, int count) throws IOException {
         for (int i = 0; i < count; i++) {
             char c = buffer[i + offset];
             if (c <= 0x7f) {

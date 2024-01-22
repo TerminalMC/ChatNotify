@@ -7,12 +7,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import notryken.chatnotify.config.Notification;
-import notryken.chatnotify.gui.screen.NotifConfigScreen;
+import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.util.ColorUtil;
 
 import java.util.List;
@@ -26,8 +25,11 @@ public class NotifConfigListWidget extends ConfigListWidget {
 
     public NotifConfigListWidget(Minecraft minecraft, int width, int height,
                                  int top, int bottom, int itemHeight,
-                                 Screen parentScreen, Notification notif) {
-        super(minecraft, width, height, top, bottom, itemHeight, parentScreen);
+                                 int entryRelX, int entryWidth, int entryHeight,
+                                 Notification notif) {
+        super(minecraft, width, height, top, bottom, itemHeight,
+                width / 2 + entryRelX, entryWidth, entryHeight);
+
         this.notif = notif;
 
         int eX = width / 2 - 120;
@@ -72,7 +74,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.addTrigger("");
-                        reloadScreen();
+                        reload();
                     }));
         }
 
@@ -91,40 +93,30 @@ public class NotifConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public NotifConfigListWidget resize(int width, int height, int top, int bottom) {
-        NotifConfigListWidget listWidget = new NotifConfigListWidget(
-                minecraft, width, height, top, bottom, itemHeight, parentScreen, notif);
-        listWidget.setScrollAmount(getScrollAmount());
-        return listWidget;
-    }
-
-    @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
+    public NotifConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
+        return new NotifConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+                entryX, entryWidth, entryHeight, notif);
     }
 
     private void openColorConfig() {
-        minecraft.setScreen(new NotifConfigScreen(minecraft.screen,
+        minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.color"),
-                new ColorConfigListWidget(minecraft, parentScreen.width, parentScreen.height,
-                        32, parentScreen.height - 32, 25,
-                        minecraft.screen, notif)));
+                new ColorConfigListWidget(minecraft, screen.width, screen.height,
+                        y0, y1, itemHeight, entryX, entryWidth, entryHeight, notif)));
     }
 
     private void openSoundConfig() {
-        minecraft.setScreen(new NotifConfigScreen(minecraft.screen,
+        minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.sound"),
-                new SoundConfigListWidget(minecraft, parentScreen.width, parentScreen.height,
-                        32, parentScreen.height - 32, 21,
-                        minecraft.screen, notif)));
+                new SoundConfigListWidget(minecraft, screen.width, screen.height,
+                        y0, y1, itemHeight, entryX, entryWidth, entryHeight, notif)));
     }
 
     private void openAdvancedConfig() {
-        minecraft.setScreen(new NotifConfigScreen(minecraft.screen,
+        minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.advanced"),
-                new AdvancedConfigListWidget(minecraft, parentScreen.width, parentScreen.height,
-                        32, parentScreen.height - 32, 25,
-                        minecraft.screen, notif)));
+                new AdvancedConfigListWidget(minecraft, screen.width, screen.height,
+                        y0, y1, itemHeight, entryX, entryWidth, entryHeight, notif)));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
@@ -140,7 +132,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                         Component.literal("Type"),
                                         (button, status) -> {
                                     notif.triggerIsKey = status;
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -166,7 +158,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                     elements.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         notif.removeTrigger(index);
-                                        listWidget.reloadScreen();
+                                        listWidget.reload();
                                     })
                             .pos(x + width + spacing, 0)
                             .size(removeButtonWidth, height)
@@ -187,7 +179,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 elements.add(Button.builder(Component.literal(keyLeft.getSecond()),
                                 (button) -> {
                                     notif.setTrigger(keyLeft.getFirst());
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 })
                         .pos(x, 0)
                         .size(buttonWidth, height)
@@ -196,7 +188,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 elements.add(Button.builder(Component.literal(keyRight.getSecond()),
                                 (button) -> {
                                     notif.setTrigger(keyRight.getFirst());
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 })
                         .pos(x + buttonWidth + spacing, 0)
                         .size(buttonWidth, height)
@@ -227,7 +219,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                 Component.empty(),
                                 (button, status) -> {
                                     notif.setControl(2, status);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -261,7 +253,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 elements.add(colorEditBox);
 
                 elements.add(Button.builder(Component.literal("\ud83d\uddd8"),
-                                (button) -> listWidget.reloadScreen())
+                                (button) -> listWidget.reload())
                         .tooltip(Tooltip.create(Component.literal("Check Value")))
                         .pos(x + mainButtonWidth + spacing + colorFieldWidth, 0)
                         .size(reloadButtonWidth, height)
@@ -274,7 +266,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                 statusButtonWidth, height, Component.empty(),
                                 (button, status) -> {
                                     notif.setControl(0, status);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -294,7 +286,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                         notif.getFormatControl(0))),
                                 (button, status) -> {
                                     notif.setFormatControl(0, status);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
 
                 elements.add(CycleButton.onOffBuilder()
@@ -305,7 +297,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                                 notif.getFormatControl(1))),
                                 (button, status) -> {
                                     notif.setFormatControl(1, status);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
 
                 elements.add(CycleButton.onOffBuilder()
@@ -316,7 +308,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                                 notif.getFormatControl(2))),
                                 (button, status) -> {
                                     notif.setFormatControl(2, status);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }
@@ -337,7 +329,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                                 notif.getFormatControl(3))),
                                 (button, status) -> {
                                     notif.setFormatControl(3, status);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
 
                 elements.add(CycleButton.onOffBuilder()
@@ -348,7 +340,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                                 notif.getFormatControl(4))),
                                 (button, status) -> {
                                     notif.setFormatControl(4, status);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 }));
             }
         }

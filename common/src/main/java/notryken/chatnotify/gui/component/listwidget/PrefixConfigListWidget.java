@@ -1,10 +1,9 @@
 package notryken.chatnotify.gui.component.listwidget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 
@@ -16,8 +15,10 @@ import java.util.Locale;
  */
 public class PrefixConfigListWidget extends ConfigListWidget {
     public PrefixConfigListWidget(Minecraft minecraft, int width, int height,
-                                  int top, int bottom, int itemHeight, Screen parentScreen) {
-        super(minecraft, width, height, top, bottom, itemHeight, parentScreen);
+                                  int top, int bottom, int itemHeight,
+                                  int entryRelX, int entryWidth, int entryHeight) {
+        super(minecraft, width, height, top, bottom, itemHeight,
+                width / 2 + entryRelX, entryWidth, entryHeight);
 
         int eX = width / 2 - 120;
         int eW = 240;
@@ -38,23 +39,15 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                 Component.literal("+"), null, -1,
                 (button) -> {
                     ChatNotify.config().addPrefix("");
-                    reloadScreen();
+                    reload();
                 }));
     }
 
     @Override
-    public PrefixConfigListWidget resize(int width, int height, int top, int bottom) {
-        PrefixConfigListWidget listWidget = new PrefixConfigListWidget(
-                minecraft, width, height, top, bottom, itemHeight, parentScreen);
-        listWidget.setScrollAmount(getScrollAmount());
-        return listWidget;
+    public PrefixConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
+        return new PrefixConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+                entryX, entryWidth, entryHeight);
     }
-
-    @Override
-    protected void reloadScreen() {
-        reloadScreen(this);
-    }
-
 
     private abstract static class Entry extends ConfigListWidget.Entry {
 
@@ -78,7 +71,7 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                 elements.add(Button.builder(Component.literal("X"),
                                 (button) -> {
                                     ChatNotify.config().removePrefix(index);
-                                    listWidget.reloadScreen();
+                                    listWidget.reload();
                                 })
                         .pos(x + width + spacing, 0)
                         .size(removeButtonWidth, height)

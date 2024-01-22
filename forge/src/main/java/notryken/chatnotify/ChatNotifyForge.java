@@ -10,7 +10,7 @@ public class ChatNotifyForge {
     public ChatNotifyForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory(
-                        (client, parent) -> new GlobalConfigScreen(parent))
+                        (minecraft, parent) -> new GlobalConfigScreen(parent))
                 );
 
         ChatNotify.init();
