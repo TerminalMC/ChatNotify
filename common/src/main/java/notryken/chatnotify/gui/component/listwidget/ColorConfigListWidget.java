@@ -24,45 +24,42 @@ public class ColorConfigListWidget extends ConfigListWidget {
     public ColorConfigListWidget(Minecraft minecraft, int width, int height,
                                  int top, int bottom, int itemHeight,
                                  int entryRelX, int entryWidth, int entryHeight,
-                                 Notification notif) {
-        super(minecraft, width, height, top, bottom, itemHeight,
-                width / 2 + entryRelX, entryWidth, entryHeight);        this.notif = notif;
+                                 int scrollWidth, Notification notif) {
+        super(minecraft, width, height, top, bottom, itemHeight, 
+                entryRelX, entryWidth, entryHeight, scrollWidth);
+        this.notif = notif;
 
-        int eX = width / 2 - 120;
-        int eW = 240;
-        int eH = 20;
-
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Text Color")
                         .setStyle(Style.EMPTY.withColor(this.notif.getColor())),
                 null, -1));
 
-        addEntry(new Entry.RgbSliderEntry(eX, eW, eH, "Red: ", notif::getColorInt,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Red: ", notif::getColorInt,
                 (color) -> {
                     notif.setColorInt(ColorUtil.withRed.applyAsInt(notif.getColorInt(), color));
                     refreshColorIndicator();
                 },
                 ColorUtil.toRed, ColorUtil.fromRed));
-        addEntry(new Entry.RgbSliderEntry(eX, eW, eH, "Green: ", notif::getColorInt,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Green: ", notif::getColorInt,
                 (color) -> {
                     notif.setColorInt(ColorUtil.withGreen.applyAsInt(notif.getColorInt(), color));
                     refreshColorIndicator();
                 },
                 ColorUtil.toGreen, ColorUtil.fromGreen));
-        addEntry(new Entry.RgbSliderEntry(eX, eW, eH, "Blue: ", notif::getColorInt,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Blue: ", notif::getColorInt,
                 (color) -> {
                     notif.setColorInt(ColorUtil.withBlue.applyAsInt(notif.getColorInt(), color));
                     refreshColorIndicator();
                 },
                 ColorUtil.toBlue, ColorUtil.fromBlue));
 
-        addEntry(new Entry.ColorSelectionEntry(eX, eW, notif::setColorInt, this));
+        addEntry(new Entry.ColorSelectionEntry(entryX, entryWidth, notif::setColorInt, this));
     }
 
     @Override
     public ColorConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
         return new ColorConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
-                entryX, entryWidth, entryHeight, notif);
+                entryRelX, entryWidth, entryHeight, scrollWidth, notif);
     }
 
     public void refreshColorIndicator() {

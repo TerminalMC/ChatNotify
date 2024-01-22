@@ -32,31 +32,31 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
 
     protected ConfigScreen screen;
     // Standard positional and dimensional values used by entries
+    protected final int entryRelX;
     protected final int entryX;
     protected final int entryWidth;
     protected final int entryHeight;
+    protected final int scrollWidth;
 
     public ConfigListWidget(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight,
-                            int entryX, int entryWidth, int entryHeight) {
+                            int entryRelX, int entryWidth, int entryHeight, int scrollWidth) {
         super(minecraft, width, height, top, bottom, itemHeight);
-        this.entryX = entryX;
+        this.entryRelX = entryRelX;
+        this.entryX = width / 2 + entryRelX;
         this.entryWidth = entryWidth;
         this.entryHeight = entryHeight;
+        this.scrollWidth = scrollWidth;
     }
 
-    // TODO make dynamic
     @Override
     public int getRowWidth() {
-        return 300; // Sets the position of the scrollbar
+        return scrollWidth; // Sets the position of the scrollbar
     }
 
-    // TODO make dynamic
     @Override
     protected int getScrollbarPosition() {
-        return super.getScrollbarPosition() + 32; // Offset as a buffer
+        return super.getScrollbarPosition() + y0;
     }
-
-    // Default methods
 
     /**
      * Must be called when the {@code ConfigListWidget} is added to a

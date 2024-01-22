@@ -23,9 +23,9 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
     public AdvancedConfigListWidget(Minecraft minecraft, int width, int height,
                                     int top, int bottom, int itemHeight,
                                     int entryRelX, int entryWidth, int entryHeight,
-                                    Notification notif) {
+                                    int scrollWidth, Notification notif) {
         super(minecraft, width, height, top, bottom, itemHeight,
-                width / 2 + entryRelX, entryWidth, entryHeight);
+                width / 2 + entryRelX, entryWidth, entryHeight, scrollWidth);
         this.notif = notif;
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -117,7 +117,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
     @Override
     public AdvancedConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
         return new AdvancedConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
-                entryX, entryWidth, entryHeight, notif);
+                entryRelX, entryWidth, entryHeight, scrollWidth, notif);
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {

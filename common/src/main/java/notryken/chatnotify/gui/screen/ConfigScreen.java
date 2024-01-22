@@ -16,20 +16,23 @@ import java.util.function.Supplier;
 public class ConfigScreen extends OptionsSubScreen {
 
     protected ConfigListWidget listWidget;
+
     public final int listTop = 32;
     public final Supplier<Integer> listBottom = () -> height - 32;
     public final int listItemHeight = 25;
 
-    public ConfigScreen(Screen parent, Component title, @Nullable ConfigListWidget listWidget) {
-        super(parent, Minecraft.getInstance().options, title);
+    public ConfigScreen(Screen lastScreen, Component title, @Nullable ConfigListWidget listWidget) {
+        super(lastScreen, Minecraft.getInstance().options, title);
         this.listWidget = listWidget;
     }
 
     @Override
     protected void init() {
-        reloadListWidget();
+        listWidget = listWidget.resize(width, height, listTop, listBottom.get(), listItemHeight);
+        listWidget.setScreen(this);
         addRenderableWidget(listWidget);
-        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
+        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,
+                        (button) -> onClose())
                 .pos(width / 2 - 120, height - 27)
                 .size(240, 20)
                 .build());
@@ -43,9 +46,6 @@ public class ConfigScreen extends OptionsSubScreen {
     }
 
     public void reloadListWidget() {
-        ConfigListWidget newListWidget = listWidget.resize(
-                width, height, listTop, listBottom.get(), listItemHeight);
-        newListWidget.setScreen(this);
-        listWidget = newListWidget;
+        minecraft.setScreen(new ConfigScreen(lastScreen, title, listWidget));
     }
 }

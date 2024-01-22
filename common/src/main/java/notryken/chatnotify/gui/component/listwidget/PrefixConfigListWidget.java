@@ -16,15 +16,12 @@ import java.util.Locale;
 public class PrefixConfigListWidget extends ConfigListWidget {
     public PrefixConfigListWidget(Minecraft minecraft, int width, int height,
                                   int top, int bottom, int itemHeight,
-                                  int entryRelX, int entryWidth, int entryHeight) {
-        super(minecraft, width, height, top, bottom, itemHeight,
-                width / 2 + entryRelX, entryWidth, entryHeight);
+                                  int entryRelX, int entryWidth, int entryHeight, 
+                                  int scrollWidth) {
+        super(minecraft, width, height, top, bottom, itemHeight, 
+                entryRelX, entryWidth, entryHeight, scrollWidth);
 
-        int eX = width / 2 - 120;
-        int eW = 240;
-        int eH = 20;
-
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Message Modifier Prefixes \u2139"),
                 Tooltip.create(Component.literal("A message prefix is a character or " +
                         "sequence of characters that you type before a message to modify it. " +
@@ -33,9 +30,9 @@ public class PrefixConfigListWidget extends ConfigListWidget {
 
         int max = ChatNotify.config().getPrefixes().size();
         for (int i = 0; i < max; i++) {
-            addEntry(new Entry.PrefixFieldEntry(eX, eW, eH, this, i));
+            addEntry(new Entry.PrefixFieldEntry(entryX, entryWidth, entryHeight, this, i));
         }
-        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(eX, 0, eW, eH,
+        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     ChatNotify.config().addPrefix("");
@@ -46,7 +43,7 @@ public class PrefixConfigListWidget extends ConfigListWidget {
     @Override
     public PrefixConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
         return new PrefixConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
-                entryX, entryWidth, entryHeight);
+                entryRelX, entryWidth, entryHeight, scrollWidth);
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {

@@ -255,7 +255,7 @@ public class MessageProcessor {
      */
     private static Style getStyle(Notification notif) {
         return Style.create(
-                ((notif.getColor() == null || !notif.getControl(0)) ?
+                ((!notif.getControl(0)) ?
                         Optional.empty() : Optional.of(notif.getColor())),
                 Optional.of(notif.getFormatControl(0)),
                 Optional.of(notif.getFormatControl(1)),

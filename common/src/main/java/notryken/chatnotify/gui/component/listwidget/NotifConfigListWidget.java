@@ -8,8 +8,8 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.screen.ConfigScreen;
 import notryken.chatnotify.util.ColorUtil;
@@ -26,30 +26,25 @@ public class NotifConfigListWidget extends ConfigListWidget {
     public NotifConfigListWidget(Minecraft minecraft, int width, int height,
                                  int top, int bottom, int itemHeight,
                                  int entryRelX, int entryWidth, int entryHeight,
-                                 Notification notif) {
-        super(minecraft, width, height, top, bottom, itemHeight,
-                width / 2 + entryRelX, entryWidth, entryHeight);
-
+                                 int scrollWidth, Notification notif) {
+        super(minecraft, width, height, top, bottom, itemHeight, 
+                entryRelX, entryWidth, entryHeight, scrollWidth);
         this.notif = notif;
 
-        int eX = width / 2 - 120;
-        int eW = 240;
-        int eH = 20;
-
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Trigger \u2139"),
                 Tooltip.create(Component.literal("A trigger is a word or series of words " +
                         "that, if detected in a chat message, will activate the notification. " +
                         "NOT case-sensitive.")), -1));
 
-        addEntry(new Entry.TriggerTypeEntry(eX, eW, eH, notif, this));
+        addEntry(new Entry.TriggerTypeEntry(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.triggerIsKey) {
-            addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+            addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("<< Key triggers may not work on some servers >>"),
                     null, -1));
 
-            addEntry(new Entry.TriggerFieldEntry(eX, eW, eH, notif, this, 0));
+            addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight, notif, this, 0));
 
             List<Pair<String,String>> keys = List.of(
                     new Pair<>(".", "Any Message"),
@@ -61,16 +56,16 @@ public class NotifConfigListWidget extends ConfigListWidget {
             );
             for (int i = 0; i < keys.size(); i++) {
                 // Number of key-description pairs must be even
-                addEntry(new Entry.KeyTriggerEntry(eX, eW, eH, notif, this, keys.get(i), keys.get(i+1)));
+                addEntry(new Entry.KeyTriggerEntry(entryX, entryWidth, entryHeight, notif, this, keys.get(i), keys.get(i+1)));
                 i++;
             }
         }
         else {
             int max = notif.getTriggers().size();
             for (int i = 0; i < max; i++) {
-                addEntry(new Entry.TriggerFieldEntry(eX, eW, eH, notif, this, i));
+                addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight, notif, this, i));
             }
-            addEntry(new ConfigListWidget.Entry.ActionButtonEntry(eX, 0, eW, eH,
+            addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.addTrigger("");
@@ -78,45 +73,45 @@ public class NotifConfigListWidget extends ConfigListWidget {
                     }));
         }
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Options"), null, -1));
 
-        addEntry(new Entry.SoundConfigEntry(eX, eW, eH, notif, this));
-        addEntry(new Entry.ColorConfigEntry(eX, eW, eH, notif, this));
-        addEntry(new Entry.FormatConfigEntry1(eX, eW, eH, notif, this));
-        addEntry(new Entry.FormatConfigEntry2(eX, eW, eH, notif, this));
+        addEntry(new Entry.SoundConfigEntry(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.FormatConfigEntry1(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.FormatConfigEntry2(entryX, entryWidth, entryHeight, notif, this));
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(eX, eW, eH,
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Advanced Settings"), null, -1));
 
-        addEntry(new Entry.AdvancedConfigButton(eX, eW, eH, this));
+        addEntry(new Entry.AdvancedConfigButton(entryX, entryWidth, entryHeight, this));
     }
 
     @Override
     public NotifConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
         return new NotifConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
-                entryX, entryWidth, entryHeight, notif);
+                entryRelX, entryWidth, entryHeight, scrollWidth, notif);
     }
 
     private void openColorConfig() {
         minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.color"),
-                new ColorConfigListWidget(minecraft, screen.width, screen.height,
-                        y0, y1, itemHeight, entryX, entryWidth, entryHeight, notif)));
+                new ColorConfigListWidget(minecraft, screen.width, screen.height, y0, y1, 
+                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif)));
     }
 
     private void openSoundConfig() {
         minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.sound"),
-                new SoundConfigListWidget(minecraft, screen.width, screen.height,
-                        y0, y1, itemHeight, entryX, entryWidth, entryHeight, notif)));
+                new SoundConfigListWidget(minecraft, screen.width, screen.height, y0, y1, 
+                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif)));
     }
 
     private void openAdvancedConfig() {
         minecraft.setScreen(new ConfigScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.advanced"),
-                new AdvancedConfigListWidget(minecraft, screen.width, screen.height,
-                        y0, y1, itemHeight, entryX, entryWidth, entryHeight, notif)));
+                new AdvancedConfigListWidget(minecraft, screen.width, screen.height, y0, y1, 
+                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif)));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
@@ -236,20 +231,27 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 int mainButtonWidth = width - statusButtonWidth - reloadButtonWidth -
                         colorFieldWidth - spacing * 2;
 
-                MutableComponent message = Component.literal("Text Color");
-                if (notif.getColor() != null) message.setStyle(Style.EMPTY.withColor(notif.getColor()));
-                elements.add(Button.builder(message, (button) -> listWidget.openColorConfig())
+                String mainButtonMessage = "Text Color";
+                Button mainButton = Button.builder(Component.literal(mainButtonMessage)
+                                        .setStyle(Style.EMPTY.withColor(notif.getColor())),
+                                (button) -> listWidget.openColorConfig())
                         .pos(x, 0)
                         .size(mainButtonWidth, height)
-                        .build());
+                        .build();
+                elements.add(mainButton);
 
                 EditBox colorEditBox = new EditBox(activeFont, x + mainButtonWidth + spacing, 0,
                         colorFieldWidth, height, Component.literal("Hex Color"));
                 colorEditBox.setMaxLength(7);
-                colorEditBox.setResponder(color -> notif.setColor(ColorUtil.parseColor(color)));
-                if (notif.getColor() != null) {
-                    colorEditBox.setValue(notif.getColor().formatValue());
-                }
+                colorEditBox.setResponder(strColor -> {
+                    TextColor color = ColorUtil.parseColor(strColor);
+                    if (color != null) {
+                        notif.setColor(color);
+                        mainButton.setMessage(Component.literal(mainButtonMessage)
+                                .setStyle(Style.EMPTY.withColor(notif.getColor())));
+                    }
+                });
+                colorEditBox.setValue(notif.getColor().formatValue());
                 elements.add(colorEditBox);
 
                 elements.add(Button.builder(Component.literal("\ud83d\uddd8"),
