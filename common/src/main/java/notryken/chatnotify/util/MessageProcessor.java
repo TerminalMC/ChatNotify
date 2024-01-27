@@ -122,7 +122,7 @@ public class MessageProcessor {
 //        ChatNotify.LOG.info("debug::Attempting notification");
 
         for (Notification notif : ChatNotify.config().getNotifs()) {
-            if (notif.getEnabled()) {
+            if (notif.isEnabled()) {
                 /*
                 triggerIsKey indicates that the Notification should only be
                 triggered by messages with a TranslatableContents key matching

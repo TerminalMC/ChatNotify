@@ -53,11 +53,8 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
         try {
             JsonArray notifArray = jsonObject.get("notifications").getAsJsonArray();
 
-            Gson gson = new GsonBuilder().registerTypeAdapter(Notification.class,
-                    new NotificationDeserializer()).create();
-
             for (JsonElement je : notifArray) {
-                Notification notif = gson.fromJson(je, Notification.class);
+                Notification notif = Config.NOTIFICATION_GSON.fromJson(je, Notification.class);
                 if (notif != null) {
                     notifications.add(notif);
                 }

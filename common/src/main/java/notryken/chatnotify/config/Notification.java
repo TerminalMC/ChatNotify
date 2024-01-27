@@ -7,11 +7,10 @@ import notryken.chatnotify.util.SoundUtil;
 import java.util.*;
 
 /**
- * Configurable notification including text color, text formatting and sound
- * parameters for a set of trigger words.
+ * A {@code Notification} consists of activation criteria, and parameters for
+ * all ChatNotify user-notification functions.
  */
-public class Notification
-{
+public class Notification {
     // Saved, modifiable by user
     private boolean enabled;
     private final ArrayList<Boolean> controls;
@@ -22,7 +21,6 @@ public class Notification
     private float soundVolume;
     private float soundPitch;
     private ResourceLocation sound;
-    public boolean persistent;
     public boolean regexEnabled;
     public boolean exclusionEnabled;
     private final ArrayList<String> exclusionTriggers;
@@ -30,13 +28,12 @@ public class Notification
     private final ArrayList<String> responseMessages;
 
     /**
-     * Not validated.
+     * <b>Note:</b> Not validated.
      */
     public Notification(boolean enabled, ArrayList<Boolean> controls,
                  ArrayList<String> triggers, boolean triggerIsKey,
                  TextColor color, ArrayList<Boolean> formatControls,
-                 float soundVolume, float soundPitch, ResourceLocation sound,
-                 boolean persistent, boolean regexEnabled,
+                 float soundVolume, float soundPitch, ResourceLocation sound, boolean regexEnabled,
                  boolean exclusionEnabled, ArrayList<String> exclusionTriggers,
                  boolean responseEnabled, ArrayList<String> responseMessages)
     {
@@ -49,7 +46,6 @@ public class Notification
         this.soundVolume = soundVolume;
         this.soundPitch = soundPitch;
         this.sound = sound;
-        this.persistent = persistent;
         this.regexEnabled = regexEnabled;
         this.exclusionEnabled = exclusionEnabled;
         this.exclusionTriggers = exclusionTriggers;
@@ -73,26 +69,22 @@ public class Notification
     config screen, however for ease of use the following automatic changes are
     implemented:
 
-    - If all controls are made false, "enabled" is also made false.
-    - If any control is made true, "enabled" is also made true.
     - If all controls are false and "enabled" is made true, controls 0 and 2
-    (color and sound) are made true, and control 1 (format) is made true if any
-    formatControl is true.
-
+    (color and sound) are made true.
+    - autoDisable() can be used to make "enabled" false if all controls are
+    false.
     - The value of control 1 (format) is tied to the value of
-    formatControls.contains(true), and cannot be individually changed by the
-    user, unlike controls 0 and 2.
+    formatControls.contains(true), and cannot be directly changed by the user.
      */
 
-    public boolean getEnabled() {
+    public boolean isEnabled() {
         return this.enabled;
     }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-        if (!enabled && !controls.contains(true)) {
+        if (enabled && !controls.contains(true)) {
             controls.set(0, true);
-            controls.set(1, formatControls.contains(true));
             controls.set(2, true);
         }
     }
@@ -102,30 +94,20 @@ public class Notification
      * @return the value of the control.
      */
     public boolean getControl(int index) {
-        return this.controls.get(index);
+        return controls.get(index);
     }
 
     /**
-     * The value of control 1 (format) is currently tied to formatControls,
-     * so if the specified index is 1, this method will do nothing.
+     * <b>Note:</b> Index 1 (format) should never be set out of sync with
+     * formatControls.contains(true).
      * @param index the index of the control (0:color, 1:format, 2:sound).
      * @param value the value to set the control to.
      */
     public void setControl(int index, boolean value) {
-        if (index != 1) {
-            this.controls.set(index, value);
-            if (!value) {
-                if (!controls.contains(true)) {
-                    enabled = false;
-                }
-            }
-            else {
-                this.enabled = true;
-                // If sound is turned on and volume is off, set volume to 1.
-                if (index == 2 && this.soundVolume == 0f) {
-                    this.soundVolume = 1f;
-                }
-            }
+        controls.set(index, value);
+        // If sound is turned on and volume is off, set volume to 1.
+        if (index == 2 && value && soundVolume == 0f) {
+            soundVolume = 1f;
         }
     }
 
@@ -135,7 +117,7 @@ public class Notification
      * @return the value of the format control.
      */
     public boolean getFormatControl(int index) {
-        return this.formatControls.get(index);
+        return formatControls.get(index);
     }
 
     /**
@@ -145,13 +127,7 @@ public class Notification
      */
     public void setFormatControl(int index, boolean value) {
         formatControls.set(index, value);
-        persistent = true;
-        if (value) {
-            setControl(1, true);
-        }
-        else {
-            setControl(1, formatControls.contains(true));
-        }
+        setControl(1, formatControls.contains(true));
     }
 
 
@@ -162,7 +138,7 @@ public class Notification
      * {@code null} otherwise.
      */
     public String getTrigger() {
-        return this.triggers.isEmpty() ? null : this.triggers.get(0);
+        return triggers.isEmpty() ? null : triggers.get(0);
     }
 
     /**
@@ -171,17 +147,17 @@ public class Notification
      * otherwise.
      */
     public String getTrigger(int index) {
-        if (index >= 0 && index < this.triggers.size()) {
-            return this.triggers.get(index);
+        if (index >= 0 && index < triggers.size()) {
+            return triggers.get(index);
         }
         return null;
     }
 
     /**
-     * @return the list of triggers.
+     * @return an unmodifiable view of the trigger list.
      */
     public List<String> getTriggers() {
-        return this.triggers;
+        return Collections.unmodifiableList(triggers);
     }
 
     /**
@@ -189,11 +165,11 @@ public class Notification
      * @param trigger the {@code String} to trigger the notification.
      */
     public void setTrigger(String trigger) {
-        if (this.triggers.isEmpty()) {
-            this.triggers.add(Objects.requireNonNullElse(trigger, ""));
+        if (triggers.isEmpty()) {
+            triggers.add(Objects.requireNonNullElse(trigger, ""));
         }
         else {
-            this.triggers.set(0, Objects.requireNonNullElse(trigger, ""));
+            triggers.set(0, Objects.requireNonNullElse(trigger, ""));
         }
     }
 
@@ -205,8 +181,8 @@ public class Notification
      * @param trigger the new trigger {@code String}.
      */
     public void setTrigger(int index, String trigger) {
-        if (index >= 0 && index < this.triggers.size() && !this.triggers.contains(trigger)) {
-            this.triggers.set(index, trigger);
+        if (index >= 0 && index < triggers.size() && !triggers.contains(trigger)) {
+            triggers.set(index, trigger);
         }
     }
 
@@ -216,20 +192,21 @@ public class Notification
      * @param trigger the trigger {@code String} to add.
      */
     public void addTrigger(String trigger) {
-        if (!this.triggers.contains(trigger)) {
-            this.triggers.add(trigger);
+        if (!triggers.contains(trigger)) {
+            triggers.add(trigger);
         }
     }
 
     /**
      * Removes the trigger at the specified index, if the index is valid.
      * <p>
-     * Note: removal of the primary trigger (index=0) is not supported.
+     * <b>Note:</b> Will fail without error if the specified index is invalid
+     * or the trigger is the only one.
      * @param index the index of the trigger to remove.
      */
     public void removeTrigger(int index) {
-        if (index > 0 && index < this.triggers.size()) {
-            this.triggers.remove(index);
+        if (index >= 0 && index < triggers.size() && (index > 0 || triggers.size() > 1)) {
+            triggers.remove(index);
         }
     }
 
@@ -240,7 +217,7 @@ public class Notification
      * @return The {@code TextColor} used by the {@code Notification}.
      */
     public TextColor getColor() {
-        return this.color;
+        return color;
     }
 
     /**
@@ -248,19 +225,24 @@ public class Notification
      * {@code Notification}.
      */
     public int getColorInt() {
-        return this.color.getValue();
+        return color.getValue();
     }
 
+    /**
+     * @param color the {@code TextColor} to be used by the notification.
+     */
     public void setColor(TextColor color) {
         if (color != null) {
             this.color = color;
         }
-        persistent = true;
     }
 
+    /**
+     * @param color the RGB integer value of the color to be used by the
+     * {@code Notification}.
+     */
     public void setColorInt(int color) {
         this.color = TextColor.fromRgb(color);
-        persistent = true;
     }
 
 
@@ -271,7 +253,7 @@ public class Notification
      * {@code Notification}.
      */
     public ResourceLocation getSound() {
-        return this.sound;
+        return sound;
     }
 
     /**
@@ -281,7 +263,6 @@ public class Notification
     public void setSound(ResourceLocation sound) {
         this.sound = SoundUtil.validSound(sound) ? sound : Config.DEFAULT_SOUND;
         setControl(2, true);
-        persistent = true;
     }
 
     public float getSoundVolume() {
@@ -301,6 +282,10 @@ public class Notification
         return soundPitch;
     }
 
+    /**
+     * @param soundPitch the notification sound pitch between 0.5 and 2.0
+     *                   inclusive.
+     */
     public void setSoundPitch(float soundPitch) {
         this.soundPitch = soundPitch;
     }
@@ -314,8 +299,8 @@ public class Notification
      * otherwise.
      */
     public String getExclusionTrigger(int index) {
-        if (index >= 0 && index < this.exclusionTriggers.size()) {
-            return this.exclusionTriggers.get(index);
+        if (index >= 0 && index < exclusionTriggers.size()) {
+            return exclusionTriggers.get(index);
         }
         return null;
     }
@@ -324,7 +309,7 @@ public class Notification
      * @return the list of exclusion triggers.
      */
     public List<String> getExclusionTriggers() {
-        return this.exclusionTriggers;
+        return exclusionTriggers;
     }
 
     /**
@@ -335,9 +320,9 @@ public class Notification
      * @param exclusionTrigger the new exclusion trigger {@code String}.
      */
     public void setExclusionTrigger(int index, String exclusionTrigger) {
-        if (index >= 0 && index < this.exclusionTriggers.size() &&
-                !this.exclusionTriggers.contains(exclusionTrigger)) {
-            this.exclusionTriggers.set(index, exclusionTrigger);
+        if (index >= 0 && index < exclusionTriggers.size() &&
+                !exclusionTriggers.contains(exclusionTrigger)) {
+            exclusionTriggers.set(index, exclusionTrigger);
         }
     }
 
@@ -347,8 +332,8 @@ public class Notification
      * @param exclusionTrigger the exclusion trigger {@code String} to add.
      */
     public void addExclusionTrigger(String exclusionTrigger) {
-        if (!this.exclusionTriggers.contains(exclusionTrigger)) {
-            this.exclusionTriggers.add(exclusionTrigger);
+        if (!exclusionTriggers.contains(exclusionTrigger)) {
+            exclusionTriggers.add(exclusionTrigger);
         }
     }
 
@@ -358,8 +343,8 @@ public class Notification
      * @param index the index of the exclusion trigger to remove.
      */
     public void removeExclusionTrigger(int index) {
-        if (index >= 0 && index < this.exclusionTriggers.size()) {
-            this.exclusionTriggers.remove(index);
+        if (index >= 0 && index < exclusionTriggers.size()) {
+            exclusionTriggers.remove(index);
         }
     }
 
@@ -372,8 +357,8 @@ public class Notification
      * otherwise.
      */
     public String getResponseMessage(int index) {
-        if (index >= 0 && index < this.responseMessages.size()) {
-            return this.responseMessages.get(index);
+        if (index >= 0 && index < responseMessages.size()) {
+            return responseMessages.get(index);
         }
         return null;
     }
@@ -383,7 +368,7 @@ public class Notification
      */
     public List<String> getResponseMessages()
     {
-        return this.responseMessages;
+        return responseMessages;
     }
 
     /**
@@ -394,9 +379,9 @@ public class Notification
      * @param responseMessage the new response message {@code String}.
      */
     public void setResponseMessage(int index, String responseMessage) {
-        if (index >= 0 && index < this.responseMessages.size() &&
-                !this.responseMessages.contains(responseMessage)) {
-            this.responseMessages.set(index, responseMessage);
+        if (index >= 0 && index < responseMessages.size() &&
+                !responseMessages.contains(responseMessage)) {
+            responseMessages.set(index, responseMessage);
         }
     }
 
@@ -406,8 +391,8 @@ public class Notification
      * @param responseMessage the response message {@code String} to add.
      */
     public void addResponseMessage(String responseMessage) {
-        if (!this.responseMessages.contains(responseMessage)) {
-            this.responseMessages.add(responseMessage);
+        if (!responseMessages.contains(responseMessage)) {
+            responseMessages.add(responseMessage);
         }
     }
 
@@ -417,8 +402,8 @@ public class Notification
      * @param index the index of the response message to remove.
      */
     public void removeResponseMessage(int index) {
-        if (index >= 0 && index < this.responseMessages.size()) {
-            this.responseMessages.remove(index);
+        if (index >= 0 && index < responseMessages.size()) {
+            responseMessages.remove(index);
         }
     }
 
@@ -441,13 +426,8 @@ public class Notification
      * Removes all blank non-primary triggers.
      */
     public void purgeTriggers() {
-        Iterator<String> iter = this.triggers.iterator();
-        iter.next(); // Skip the primary trigger.
-        while (iter.hasNext()) {
-            if (iter.next().isBlank()) {
-                iter.remove();
-            }
-        }
+        triggers.removeIf(String::isBlank);
+        if (triggers.isEmpty()) triggers.add("");
     }
 
     /**
@@ -463,14 +443,16 @@ public class Notification
      * Removes all blank exclusion triggers.
      */
     public void purgeExclusionTriggers() {
-        this.exclusionTriggers.removeIf(String::isBlank);
+        exclusionTriggers.removeIf(String::isBlank);
+        if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
     }
 
     /**
      * Removes all blank response messages.
      */
     public void purgeResponseMessages() {
-        this.responseMessages.removeIf(String::isBlank);
+        responseMessages.removeIf(String::isBlank);
+        if (responseMessages.isEmpty()) responseEnabled = false;
     }
 
     /**

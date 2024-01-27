@@ -1,6 +1,7 @@
 package notryken.chatnotify.gui.component.listwidget;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -78,19 +79,28 @@ public class NotifConfigListWidget extends ConfigListWidget {
 
         addEntry(new Entry.SoundConfigEntry(entryX, entryWidth, entryHeight, notif, this));
         addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, notif, this));
-        addEntry(new Entry.FormatConfigEntry1(entryX, entryWidth, entryHeight, notif, this));
-        addEntry(new Entry.FormatConfigEntry2(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.FormatConfigEntry1(entryX, entryWidth, entryHeight, notif));
+        addEntry(new Entry.FormatConfigEntry2(entryX, entryWidth, entryHeight, notif));
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Advanced Settings"), null, -1));
 
-        addEntry(new Entry.AdvancedConfigButton(entryX, entryWidth, entryHeight, this));
+        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+                Component.literal("Here be Dragons!"), null, -1,
+                (button) -> openAdvancedConfig()));
     }
 
     @Override
-    public NotifConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
-        return new NotifConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public NotifConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
+        NotifConfigListWidget newListWidget = new NotifConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
+        newListWidget.setScrollAmount(scrollAmount);
+        return newListWidget;
+    }
+
+    @Override
+    public void onClose() {
+        notif.autoDisable();
     }
 
     private void openColorConfig() {
@@ -149,7 +159,8 @@ public class NotifConfigListWidget extends ConfigListWidget {
                         (trigger) -> notif.setTrigger(index, trigger.strip()));
                 elements.add(triggerEditBox);
 
-                if (index > 0) {
+                // Only show the delete button if it makes sense to delete.
+                if (!notif.triggerIsKey && (index > 0 || notif.getTriggers().size() > 1)) {
                     elements.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         notif.removeTrigger(index);
@@ -207,15 +218,14 @@ public class NotifConfigListWidget extends ConfigListWidget {
                         .size(mainButtonWidth, height)
                         .build());
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
                         .withInitialValue(notif.getControl(2))
                         .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
                                 Component.empty(),
-                                (button, status) -> {
-                                    notif.setControl(2, status);
-                                    listWidget.reload();
-                                }));
+                                (button, status) -> notif.setControl(2, status)));
             }
         }
 
@@ -261,101 +271,87 @@ public class NotifConfigListWidget extends ConfigListWidget {
                         .size(reloadButtonWidth, height)
                         .build());
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
                         .withInitialValue(notif.getControl(0))
                         .create(x + width - statusButtonWidth, 0,
                                 statusButtonWidth, height, Component.empty(),
-                                (button, status) -> {
-                                    notif.setControl(0, status);
-                                    listWidget.reload();
-                                }));
+                                (button, status) -> notif.setControl(0, status)));
             }
         }
 
         private static class FormatConfigEntry1 extends Entry {
-            FormatConfigEntry1(int x, int width, int height, Notification notif,
-                               NotifConfigListWidget listWidget) {
+            FormatConfigEntry1(int x, int width, int height, Notification notif) {
                 super();
 
                 int spacing = 5;
                 int buttonWidth = (width - spacing * 2) / 3;
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on")
+                                .withStyle(ChatFormatting.BOLD)
+                                .withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off")
+                                        .withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.getFormatControl(0))
-                        .create(x, 0, buttonWidth, height, Component.literal("Bold")
-                                .withStyle(Style.EMPTY.withBold(
-                                        notif.getFormatControl(0))),
-                                (button, status) -> {
-                                    notif.setFormatControl(0, status);
-                                    listWidget.reload();
-                                }));
+                        .create(x, 0, buttonWidth, height,
+                                Component.literal("Bold"),
+                                (button, status) -> notif.setFormatControl(0, status)));
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on")
+                                .withStyle(ChatFormatting.ITALIC)
+                                .withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off")
+                                        .withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.getFormatControl(1))
                         .create(x + width / 2 - buttonWidth / 2, 0, buttonWidth, height,
-                                Component.literal("Italic")
-                                        .withStyle(Style.EMPTY.withItalic(
-                                                notif.getFormatControl(1))),
-                                (button, status) -> {
-                                    notif.setFormatControl(1, status);
-                                    listWidget.reload();
-                                }));
+                                Component.literal("Italic"),
+                                (button, status) -> notif.setFormatControl(1, status)));
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on")
+                                .withStyle(ChatFormatting.UNDERLINE)
+                                .withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off")
+                                        .withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.getFormatControl(2))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                Component.literal("Underline")
-                                        .withStyle(Style.EMPTY.withUnderlined(
-                                                notif.getFormatControl(2))),
-                                (button, status) -> {
-                                    notif.setFormatControl(2, status);
-                                    listWidget.reload();
-                                }));
+                                Component.literal("Underline"),
+                                (button, status) -> notif.setFormatControl(2, status)));
             }
         }
 
         private static class FormatConfigEntry2 extends Entry {
-            FormatConfigEntry2(int x, int width, int height, Notification notif,
-                               NotifConfigListWidget listWidget) {
+            FormatConfigEntry2(int x, int width, int height, Notification notif) {
                 super();
 
                 int spacing = 6;
                 int buttonWidth = (width - spacing) / 2;
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on")
+                                .withStyle(ChatFormatting.STRIKETHROUGH)
+                                .withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off")
+                                        .withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.getFormatControl(3))
                         .create(x, 0, buttonWidth, height,
-                                Component.literal("Strikethrough")
-                                        .withStyle(Style.EMPTY.withStrikethrough(
-                                                notif.getFormatControl(3))),
-                                (button, status) -> {
-                                    notif.setFormatControl(3, status);
-                                    listWidget.reload();
-                                }));
+                                Component.literal("Strikethrough"),
+                                (button, status) -> notif.setFormatControl(3, status)));
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on")
+                                .withStyle(ChatFormatting.OBFUSCATED)
+                                .withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off")
+                                        .withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.getFormatControl(4))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                Component.literal("Obfuscate")
-                                        .withStyle(Style.EMPTY.withObfuscated(
-                                                notif.getFormatControl(4))),
-                                (button, status) -> {
-                                    notif.setFormatControl(4, status);
-                                    listWidget.reload();
-                                }));
-            }
-        }
-
-        private static class AdvancedConfigButton extends Entry {
-            AdvancedConfigButton(int x, int width, int height, NotifConfigListWidget listWidget) {
-                super();
-                elements.add(Button.builder(
-                        Component.literal("Here be Dragons!"),
-                                (button) -> listWidget.openAdvancedConfig())
-                        .pos(x, 0)
-                        .size(width, height)
-                        .build());
+                                Component.literal("Obfuscate"),
+                                (button, status) -> notif.setFormatControl(4, status)));
             }
         }
     }

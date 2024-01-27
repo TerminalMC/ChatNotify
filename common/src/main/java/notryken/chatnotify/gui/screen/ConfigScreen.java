@@ -28,7 +28,7 @@ public class ConfigScreen extends OptionsSubScreen {
 
     @Override
     protected void init() {
-        listWidget = listWidget.resize(width, height, listTop, listBottom.get(), listItemHeight);
+        listWidget = listWidget.resize(width, height, listTop, listBottom.get(), listItemHeight, listWidget.getScrollAmount());
         listWidget.setScreen(this);
         addRenderableWidget(listWidget);
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,
@@ -43,6 +43,12 @@ public class ConfigScreen extends OptionsSubScreen {
         renderDirtBackground(context);
         context.drawCenteredString(font, title, width / 2, 5, 0xffffff);
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public void onClose() {
+        listWidget.onClose();
+        super.onClose();
     }
 
     public void reloadListWidget() {

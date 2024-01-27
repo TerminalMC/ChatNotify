@@ -41,9 +41,11 @@ public class PrefixConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public PrefixConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
-        return new PrefixConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public PrefixConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
+        PrefixConfigListWidget newListWidget = new PrefixConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth);
+        newListWidget.setScrollAmount(scrollAmount);
+        return newListWidget;
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {

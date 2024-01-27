@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.config.serialize.ConfigDeserializer;
 import notryken.chatnotify.config.serialize.GhettoAsciiWriter;
+import notryken.chatnotify.config.serialize.NotificationDeserializer;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -17,6 +18,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
+ * ChatNotify configuration options class with default values and validation.
+ * <p>
  * Includes derivative work of code used by
  * <a href="https://github.com/CaffeineMC/sodium-fabric/">Sodium</a>
  */
@@ -30,17 +33,22 @@ public class Config {
     public static final Notification DEFAULT_USERNAME_NOTIF = new Notification(
             true, new ArrayList<>(List.of(true, false, true)), new ArrayList<>(List.of("username")),
             false, DEFAULT_COLOR, new ArrayList<>(List.of(false, false, false, false, false)),
-            1f, 1f, DEFAULT_SOUND, true, false,
+            1f, 1f, DEFAULT_SOUND, false,
             false, new ArrayList<>(), false, new ArrayList<>());
     public static final Notification DEFAULT_BLANK_NOTIF = new Notification(
             true, new ArrayList<>(List.of(true, false, true)), new ArrayList<>(List.of("")),
             false, DEFAULT_COLOR, new ArrayList<>(List.of(false, false, false, false, false)),
-            1f, 1f, DEFAULT_SOUND, false, false,
+            1f, 1f, DEFAULT_SOUND, false,
             false, new ArrayList<>(), false, new ArrayList<>());
     public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
-    private static final Gson GSON = new GsonBuilder()
+
+    public static final Gson CONFIG_GSON = new GsonBuilder()
             .registerTypeAdapter(Config.class, new ConfigDeserializer())
             .setPrettyPrinting().create();
+    public static final Gson NOTIFICATION_GSON = new GsonBuilder()
+            .registerTypeAdapter(Notification.class, new NotificationDeserializer())
+            .create();
+
 
     // Not saved, not modifiable by user
     private static String username;
@@ -68,7 +76,7 @@ public class Config {
     }
 
     /**
-     * Parameterized constructor.
+     * <b>Note:</b> Not validated.
      */
     public Config(boolean ignoreOwnMessages, SoundSource notifSoundSource,
                   ArrayList<String> messagePrefixes, ArrayList<Notification> notifications) {
@@ -101,9 +109,9 @@ public class Config {
      * @param prefix the new prefix {@code String}.
      */
     public void setPrefix(int index, String prefix) {
-        if (index >= 0 && index < this.messagePrefixes.size() &&
-                !this.messagePrefixes.contains(prefix)) {
-            this.messagePrefixes.set(index, prefix);
+        if (index >= 0 && index < messagePrefixes.size() &&
+                !messagePrefixes.contains(prefix)) {
+            messagePrefixes.set(index, prefix);
         }
     }
 
@@ -112,8 +120,8 @@ public class Config {
      * @param prefix the prefix {@code String} to add.
      */
     public void addPrefix(String prefix) {
-        if (!this.messagePrefixes.contains(prefix)) {
-            this.messagePrefixes.add(prefix);
+        if (!messagePrefixes.contains(prefix)) {
+            messagePrefixes.add(prefix);
         }
     }
 
@@ -122,8 +130,8 @@ public class Config {
      * @param index the index of the prefix to remove.
      */
     public void removePrefix(int index) {
-        if (index >= 0 && index < this.messagePrefixes.size()) {
-            this.messagePrefixes.remove(index);
+        if (index >= 0 && index < messagePrefixes.size()) {
+            messagePrefixes.remove(index);
         }
     }
 
@@ -133,7 +141,7 @@ public class Config {
      * @return the size of the {@code Notification} list.
      */
     public int getNumNotifs() {
-        return this.notifications.size();
+        return notifications.size();
     }
 
     /**
@@ -209,6 +217,7 @@ public class Config {
     /**
      * Setter, also sets the first trigger of the username {@code Notification}
      * to the specified username.
+     * <p>
      * <b>Note:</b> Will fail without error if the specified username is
      * {@code null} or blank.
      * @param pUsername the user's in-game name.
@@ -236,62 +245,84 @@ public class Config {
 
     /**
      * Removes all blank message prefixes and sorts the remainder by decreasing
-     * order of length, removes all non-persistent {@code Notification}s with
-     * empty primary triggers, removes all empty secondary triggers, exclusion
-     * triggers, and response messages from the remaining {@code Notification}s,
-     * and disables all {@code Notification}s that have no enabled controls.
+     * order of length, removes all {@code Notification}s with blank or no
+     * primary triggers, exlusion triggers and response messages, and removes
+     * all blank secondary triggers, exclusion triggers, and response messages
+     * from the remaining {@code Notification}s, and disables all
+     * {@code Notification}s that have no enabled controls.
      */
     public void validate() {
+
         validateUsernameNotif();
 
         messagePrefixes.removeIf(String::isBlank);
         messagePrefixes.sort(Comparator.comparingInt(String::length).reversed());
 
         Notification notif;
-        Iterator<Notification> iter1 = notifications.iterator();
-        iter1.next(); // Skip the username notification.
-        while (iter1.hasNext()) {
-            notif = iter1.next();
-            if (notif.getTrigger().isBlank() && !notif.persistent) {
-                iter1.remove();
-            }
-        }
+        List<Notification> lowPriorityNotifList = new ArrayList<>();
+        Iterator<Notification> notifListIter = notifications.iterator();
 
-        /*
-        Move all triggers activated by the "." (any message) key trigger to the
-        low-priority end, so that they do not block other notifications from
-        activating.
-         */
-        List<Notification> anyMsgNotifList = new ArrayList<>();
-        Iterator<Notification> iter2 = notifications.iterator();
-        while (iter2.hasNext()) {
-            notif = iter2.next();
+        // Username notification
+        notif = notifListIter.next();
+        notif.purgeTriggers();
+        notif.purgeResponseMessages();
+        notif.purgeResponseMessages();
+        notif.autoDisable();
+
+        // All other notifications
+        while (notifListIter.hasNext()) {
+            notif = notifListIter.next();
+
             notif.purgeTriggers();
-            notif.fixKeyTriggerCase();
             notif.purgeExclusionTriggers();
             notif.purgeResponseMessages();
-            notif.autoDisable();
-            if (notif.triggerIsKey && notif.getTrigger().equals(".")) {
-                anyMsgNotifList.add(notif);
-                iter2.remove();
+
+            if (notif.getTriggers().size() == 1 &&
+                    notif.getTrigger().isBlank() &&
+                    notif.getExclusionTriggers().isEmpty() &&
+                    notif.getResponseMessages().isEmpty()) {
+                notifListIter.remove();
+            }
+            else {
+                notif.fixKeyTriggerCase();
+                notif.autoDisable();
+                /*
+                Move all notifications activated by the "." (any message) key
+                trigger to the low-priority end of the list, so that they do not
+                prevent more-specific notifications from activating.
+                */
+                if (notif.triggerIsKey && notif.getTrigger().equals(".")) {
+                    lowPriorityNotifList.add(notif);
+                    notifListIter.remove();
+                }
             }
         }
-        notifications.addAll(anyMsgNotifList);
+        notifications.addAll(lowPriorityNotifList);
     }
 
     // Load and save
 
+    /**
+     * Attempts to load configuration from the default file.
+     */
     public static Config load() {
         return load(DEFAULT_FILE_NAME);
     }
 
+    /**
+     * Attempts to load configuration from the specified filename. If
+     * unsuccessful, returns default configuration.
+     * @param name the configuration file name.
+     * @return the configuration loaded from the specified file if possible,
+     * default configuration otherwise.
+     */
     public static Config load(String name) {
         configPath = Path.of("config").resolve(name);
         Config config;
 
         if (Files.exists(configPath)) {
             try (FileReader reader = new FileReader(configPath.toFile())) {
-                config = GSON.fromJson(reader, Config.class);
+                config = CONFIG_GSON.fromJson(reader, Config.class);
             } catch (IOException e) {
                 throw new RuntimeException("Unable to parse config", e);
             }
@@ -304,6 +335,8 @@ public class Config {
     }
 
     public void writeChanges() {
+        validate();
+
         Path dir = configPath.getParent();
 
         try {
@@ -318,7 +351,7 @@ public class Config {
 
             // Write the file to the temporary location
             FileWriter out = new FileWriter(tempPath.toFile());
-            GSON.toJson(this, new GhettoAsciiWriter(out));
+            CONFIG_GSON.toJson(this, new GhettoAsciiWriter(out));
             out.close();
 
             // Atomically replace the old config file (if it exists) with the temporary file

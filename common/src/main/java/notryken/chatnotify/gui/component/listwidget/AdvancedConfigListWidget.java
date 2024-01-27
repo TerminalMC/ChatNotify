@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
 
@@ -25,11 +24,11 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                                     int entryRelX, int entryWidth, int entryHeight,
                                     int scrollWidth, Notification notif) {
         super(minecraft, width, height, top, bottom, itemHeight,
-                width / 2 + entryRelX, entryWidth, entryHeight, scrollWidth);
+                entryRelX, entryWidth, entryHeight, scrollWidth);
         this.notif = notif;
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("WARNING").withStyle(Style.EMPTY.withColor(ChatFormatting.RED)),
+                Component.literal("WARNING").withStyle(ChatFormatting.RED),
                 null, -1));
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -44,7 +43,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 Component.literal("Notification Exclusion Triggers"), null, -1));
         addEntry(new Entry.ExclusionToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
-        if (this.notif.exclusionEnabled) {
+        if (notif.exclusionEnabled) {
             for (int i = 0; i < this.notif.getExclusionTriggers().size(); i ++) {
                 addEntry(new Entry.ExclusionTriggerField(entryX, entryWidth, entryHeight, notif, this, i));
             }
@@ -60,8 +59,8 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 Component.literal("Auto Response Messages"), null, -1));
         addEntry(new Entry.ResponseToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
-        if (this.notif.responseEnabled) {
-            for (int i = 0; i < this.notif.getResponseMessages().size(); i ++) {
+        if (notif.responseEnabled) {
+            for (int i = 0; i < notif.getResponseMessages().size(); i ++) {
                 addEntry(new Entry.ResponseMessageField(entryX, entryWidth, entryHeight, notif, this, i));
             }
             addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
@@ -88,12 +87,20 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 Component.literal("Reset All Advanced Options"), Tooltip.create(
                 Component.literal("Resets all advanced settings for ALL notifications.")),
                 -1,
-                (button) -> {
-                    for (Notification notif2 : ChatNotify.config().getNotifs()) {
-                        notif2.resetAdvanced();
-                    }
-                    reload();
-                }));
+                (button) -> minecraft.setScreen(new ConfirmScreen(
+                        (value) -> {
+                            if (value) {
+                                for (Notification notif2 : ChatNotify.config().getNotifs()) {
+                                    notif2.resetAdvanced();
+                                }
+                                minecraft.setScreen(null);
+                            }
+                            else {
+                                reload();
+                            }},
+                        Component.literal("Advanced Options Reset"),
+                        Component.literal("Are you sure you want to reset all advanced settings " +
+                                "for ALL notifications?")))));
 
         addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Nuclear Reset"), Tooltip.create(
@@ -115,9 +122,11 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public AdvancedConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
-        return new AdvancedConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public AdvancedConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
+        AdvancedConfigListWidget newListWidget = new AdvancedConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
+        newListWidget.setScrollAmount(scrollAmount);
+        return newListWidget;
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
@@ -127,10 +136,11 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                               AdvancedConfigListWidget listWidget) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
-                        Component.literal("Enabled"), Component.literal("Disabled"))
+                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.regexEnabled)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
-                                "If enabled, all triggers for this notification will be " +
+                                "If ON, all triggers for this notification will be " +
                                 "processed as complete regular expressions.")))
                         .create(x, 0, width, height, Component.literal("Regex"),
                                 (button, status) -> {
@@ -145,7 +155,8 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                               AdvancedConfigListWidget listWidget) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
-                        Component.literal("Enabled"), Component.literal("Disabled"))
+                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.exclusionEnabled)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "If an exclusion trigger is detected in a message, " +
@@ -192,7 +203,8 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
             {
                 super();
                 elements.add(CycleButton.booleanBuilder(
-                        Component.literal("Enabled"), Component.literal("Disabled"))
+                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.responseEnabled)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "Chat messages or commands to be sent by the client " +

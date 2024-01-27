@@ -71,7 +71,10 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
     }
 
     // Abstract methods
-    public abstract ConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight);
+    public abstract ConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight,
+                                            double scrollAmount);
+
+    public void onClose() {}
 
     /**
      * Base implementation of ChatNotify options list widget entry, with common

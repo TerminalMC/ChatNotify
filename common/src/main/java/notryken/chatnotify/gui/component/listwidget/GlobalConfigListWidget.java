@@ -1,5 +1,6 @@
 package notryken.chatnotify.gui.component.listwidget;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -36,8 +37,8 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notifications \u2139"),
-                Tooltip.create(Component.literal("Notifications are checked in sequential order as " +
-                        "displayed below. A message can activate at most 1 notification.")), -1));
+                Tooltip.create(Component.literal("Incoming messages will activate the first " +
+                        "enabled notification with a matching trigger.")), -1));
 
         int max = ChatNotify.config().getNumNotifs();
         for (int i = 0; i < max; i++) {
@@ -49,9 +50,11 @@ public class GlobalConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public GlobalConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight) {
-        return new GlobalConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public GlobalConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
+        GlobalConfigListWidget newListWidget = new GlobalConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth);
+        newListWidget.setScrollAmount(scrollAmount);
+        return newListWidget;
     }
 
     private void moveNotifUp(int index) {
@@ -95,11 +98,12 @@ public class GlobalConfigListWidget extends ConfigListWidget {
         private static class IgnoreToggleEntry extends Entry {
             IgnoreToggleEntry(int x, int width, int height) {
                 super();
-                elements.add(CycleButton.booleanBuilder(Component.nullToEmpty("No"),
-                                Component.nullToEmpty("Yes"))
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.off").withStyle(ChatFormatting.RED),
+                                Component.translatable("options.on").withStyle(ChatFormatting.GREEN))
                         .withInitialValue(ChatNotify.config().ignoreOwnMessages)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
-                                "Allows or prevents your own messages triggering notifications.")))
+                                "Turn OFF to prevent your own messages activating notifications.")))
                         .create(x, 0, width, height, Component.literal("Check Own Messages"),
                                 (button, status) -> ChatNotify.config().ignoreOwnMessages = status));
             }
@@ -163,9 +167,11 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                         .size(mainButtonWidth, height)
                         .build());
 
-                elements.add(CycleButton.onOffBuilder()
+                elements.add(CycleButton.booleanBuilder(
+                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
-                        .withInitialValue(notif.getEnabled())
+                        .withInitialValue(notif.isEnabled())
                         .create(x + mainButtonWidth + spacing, 0, statusButtonWidth, height,
                                 Component.empty(),
                                 (button, status) -> notif.setEnabled(status)));

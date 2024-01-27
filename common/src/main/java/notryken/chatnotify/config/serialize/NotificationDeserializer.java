@@ -31,7 +31,6 @@ public class NotificationDeserializer implements JsonDeserializer<Notification> 
         float soundVolume;
         float soundPitch;
         ResourceLocation sound;
-        boolean persistent;
         boolean regexEnabled;
         boolean exclusionEnabled;
         ArrayList<String> exclusionTriggers = new ArrayList<>();
@@ -196,14 +195,6 @@ public class NotificationDeserializer implements JsonDeserializer<Notification> 
         }
 
         try {
-            persistent = jsonObject.get("persistent").getAsBoolean();
-        }
-        catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
-            persistent = false;
-        }
-
-        try {
             regexEnabled = jsonObject.get("regexEnabled").getAsBoolean();
         }
         catch (JsonParseException | NullPointerException |
@@ -254,7 +245,7 @@ public class NotificationDeserializer implements JsonDeserializer<Notification> 
 
         return new Notification(enabled, controls, triggers, triggerIsKey,
                 color, formatControls, soundVolume, soundPitch, sound,
-                persistent, regexEnabled, exclusionEnabled, exclusionTriggers,
+                regexEnabled, exclusionEnabled, exclusionTriggers,
                 responseEnabled, responseMessages);
     }
 }
