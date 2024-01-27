@@ -2,6 +2,7 @@ package notryken.chatnotify.config;
 
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import notryken.chatnotify.util.MiscUtil;
 import notryken.chatnotify.util.SoundUtil;
 
 import java.util.*;
@@ -175,26 +176,22 @@ public class Notification {
 
     /**
      * Sets the trigger at the specified index to the specified value, if the
-     * index is valid and the {@code Notification} does not already contain the
-     * trigger.
+     * index is valid.
      * @param index the index of the trigger to set.
      * @param trigger the new trigger {@code String}.
      */
     public void setTrigger(int index, String trigger) {
-        if (index >= 0 && index < triggers.size() && !triggers.contains(trigger)) {
+        if (index >= 0 && index < triggers.size()) {
             triggers.set(index, trigger);
         }
     }
 
     /**
-     * Adds the specified trigger, if the {@code Notification} does not already
-     * contain it.
+     * Adds the specified trigger.
      * @param trigger the trigger {@code String} to add.
      */
     public void addTrigger(String trigger) {
-        if (!triggers.contains(trigger)) {
-            triggers.add(trigger);
-        }
+        triggers.add(trigger);
     }
 
     /**
@@ -313,28 +310,22 @@ public class Notification {
     }
 
     /**
-     * Sets the exclusion trigger at the specified index to the specified
-     * value, if the index is valid and the {@code Notification} does not
-     * already contain the exclusion trigger.
+     * Sets the exclusion trigger at the specified index to the specified value.
      * @param index the index of the trigger to set.
      * @param exclusionTrigger the new exclusion trigger {@code String}.
      */
     public void setExclusionTrigger(int index, String exclusionTrigger) {
-        if (index >= 0 && index < exclusionTriggers.size() &&
-                !exclusionTriggers.contains(exclusionTrigger)) {
+        if (index >= 0 && index < exclusionTriggers.size()) {
             exclusionTriggers.set(index, exclusionTrigger);
         }
     }
 
     /**
-     * Adds the specified exclusion trigger, if the {@code Notification} does
-     * not already contain it.
+     * Adds the specified exclusion trigger.
      * @param exclusionTrigger the exclusion trigger {@code String} to add.
      */
     public void addExclusionTrigger(String exclusionTrigger) {
-        if (!exclusionTriggers.contains(exclusionTrigger)) {
-            exclusionTriggers.add(exclusionTrigger);
-        }
+        exclusionTriggers.add(exclusionTrigger);
     }
 
     /**
@@ -372,28 +363,22 @@ public class Notification {
     }
 
     /**
-     * Sets the response message at the specified index to the specified
-     * value, if the index is valid and the {@code Notification} does not
-     * already contain the message.
+     * Sets the response message at the specified index to the specified value.
      * @param index the index of the message to set.
      * @param responseMessage the new response message {@code String}.
      */
     public void setResponseMessage(int index, String responseMessage) {
-        if (index >= 0 && index < responseMessages.size() &&
-                !responseMessages.contains(responseMessage)) {
+        if (index >= 0 && index < responseMessages.size()) {
             responseMessages.set(index, responseMessage);
         }
     }
 
     /**
-     * Adds the specified response message, if the {@code Notification} does not
-     * already contain it.
+     * Adds the specified response message.
      * @param responseMessage the response message {@code String} to add.
      */
     public void addResponseMessage(String responseMessage) {
-        if (!responseMessages.contains(responseMessage)) {
-            responseMessages.add(responseMessage);
-        }
+        responseMessages.add(responseMessage);
     }
 
     /**
@@ -423,10 +408,11 @@ public class Notification {
     }
 
     /**
-     * Removes all blank non-primary triggers.
+     * Removes all blank and duplicate non-primary triggers.
      */
     public void purgeTriggers() {
         triggers.removeIf(String::isBlank);
+        MiscUtil.removeDuplicates(triggers);
         if (triggers.isEmpty()) triggers.add("");
     }
 
@@ -440,18 +426,20 @@ public class Notification {
     }
 
     /**
-     * Removes all blank exclusion triggers.
+     * Removes all blank and duplicate exclusion triggers.
      */
     public void purgeExclusionTriggers() {
         exclusionTriggers.removeIf(String::isBlank);
+        MiscUtil.removeDuplicates(exclusionTriggers);
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
     }
 
     /**
-     * Removes all blank response messages.
+     * Removes all blank and duplicate response messages.
      */
     public void purgeResponseMessages() {
         responseMessages.removeIf(String::isBlank);
+        MiscUtil.removeDuplicates(responseMessages);
         if (responseMessages.isEmpty()) responseEnabled = false;
     }
 

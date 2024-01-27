@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.config.serialize.ConfigDeserializer;
 import notryken.chatnotify.config.serialize.GhettoAsciiWriter;
 import notryken.chatnotify.config.serialize.NotificationDeserializer;
+import notryken.chatnotify.util.MiscUtil;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -103,26 +104,22 @@ public class Config {
     }
 
     /**
-     * Sets the prefix at the specified index to the specified value, if the
-     * index is valid and the prefix does not already exist.
+     * Sets the prefix at the specified index to the specified value.
      * @param index the index of the prefix to set.
      * @param prefix the new prefix {@code String}.
      */
     public void setPrefix(int index, String prefix) {
-        if (index >= 0 && index < messagePrefixes.size() &&
-                !messagePrefixes.contains(prefix)) {
+        if (index >= 0 && index < messagePrefixes.size()) {
             messagePrefixes.set(index, prefix);
         }
     }
 
     /**
-     * Adds the specified prefix, if it does not already exist.
+     * Adds the specified prefix.
      * @param prefix the prefix {@code String} to add.
      */
     public void addPrefix(String prefix) {
-        if (!messagePrefixes.contains(prefix)) {
-            messagePrefixes.add(prefix);
-        }
+        messagePrefixes.add(prefix);
     }
 
     /**
@@ -244,34 +241,31 @@ public class Config {
     }
 
     /**
-     * Removes all blank message prefixes and sorts the remainder by decreasing
-     * order of length, removes all {@code Notification}s with blank or no
-     * primary triggers, exlusion triggers and response messages, and removes
-     * all blank secondary triggers, exclusion triggers, and response messages
-     * from the remaining {@code Notification}s, and disables all
-     * {@code Notification}s that have no enabled controls.
+     * Cleanup and validate all settings and notifications.
      */
     public void validate() {
 
         validateUsernameNotif();
 
+        // Prefixes
         messagePrefixes.removeIf(String::isBlank);
+        MiscUtil.removeDuplicates(messagePrefixes);
         messagePrefixes.sort(Comparator.comparingInt(String::length).reversed());
 
         Notification notif;
         List<Notification> lowPriorityNotifList = new ArrayList<>();
-        Iterator<Notification> notifListIter = notifications.iterator();
+        Iterator<Notification> iterNotifs = notifications.iterator();
 
         // Username notification
-        notif = notifListIter.next();
+        notif = iterNotifs.next();
         notif.purgeTriggers();
         notif.purgeResponseMessages();
         notif.purgeResponseMessages();
         notif.autoDisable();
 
         // All other notifications
-        while (notifListIter.hasNext()) {
-            notif = notifListIter.next();
+        while (iterNotifs.hasNext()) {
+            notif = iterNotifs.next();
 
             notif.purgeTriggers();
             notif.purgeExclusionTriggers();
@@ -281,7 +275,7 @@ public class Config {
                     notif.getTrigger().isBlank() &&
                     notif.getExclusionTriggers().isEmpty() &&
                     notif.getResponseMessages().isEmpty()) {
-                notifListIter.remove();
+                iterNotifs.remove();
             }
             else {
                 notif.fixKeyTriggerCase();
@@ -293,7 +287,7 @@ public class Config {
                 */
                 if (notif.triggerIsKey && notif.getTrigger().equals(".")) {
                     lowPriorityNotifList.add(notif);
-                    notifListIter.remove();
+                    iterNotifs.remove();
                 }
             }
         }
