@@ -57,8 +57,10 @@ public class ColorConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public ColorConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
-        ColorConfigListWidget newListWidget = new ColorConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public ColorConfigListWidget resize(int width, int height, int top, int bottom,
+                                        int itemHeight, double scrollAmount) {
+        ColorConfigListWidget newListWidget = new ColorConfigListWidget(
+                minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;

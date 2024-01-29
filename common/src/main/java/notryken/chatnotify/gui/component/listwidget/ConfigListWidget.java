@@ -18,13 +18,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Base implementation of ChatNotify options list widget.
+ * A {@code ConfigListWidget} is tightly coupled to a {@code ConfigScreen}, and
+ * is used to avoid the requirement for each different configuration screen
+ * to require a unique {@code Screen} implementation.
  * <p>
  * A {@code ConfigListWidget} has a list of {@code ConfigListWidget.Entry}
  * objects, which are drawn onto the screen top-down in the order that they
  * are stored, with standard spacing.
  * <p>
- * <b>Note:</b> if you want multiple components (e.g. buttons, text fields) to
+ * <b>Note:</b> If you want multiple components (e.g. buttons, text fields) to
  * appear side-by-side rather than spaced vertically, you must add them all to a
  * single Entry's list of {@code AbstractWidgets}.
  */

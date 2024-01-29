@@ -13,6 +13,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
+/**
+ * A {@code ConfigScreen} contains one tightly-coupled {@code ConfigListWidget},
+ * which is used to display all configuration options required for the screen.
+ */
 public class ConfigScreen extends OptionsSubScreen {
 
     protected ConfigListWidget listWidget;

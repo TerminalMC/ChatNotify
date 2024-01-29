@@ -18,20 +18,21 @@ import java.util.Locale;
 import static notryken.chatnotify.ChatNotify.recentMessages;
 
 /**
- * Minecraft provides no reliable way to identify which player sent a given chat message, or
- * even determine whether the message came from a player at all.
+ * Minecraft provides no reliable way to identify which player sent a given chat
+ * message, or even determine whether the message came from a player at all.
  * <p>
- * As a workaround, ChatNotify uses mixins in all message and command-sending methods of
- * ClientPacketListener, to temporarily store all outgoing messages and commands, so that they
- * can be compared to incoming messages to determine whether a given incoming message was sent
- * by the user.
+ * As a workaround, ChatNotify uses mixins in all message and command-sending
+ * methods of ClientPacketListener, to temporarily store all outgoing messages
+ * and commands, so that they can be compared to incoming messages to determine
+ * whether a given incoming message was sent by the user.
  * <p>
- * All messages and commands are converted to lowercase before being stored, as a workaround
- * for server-side caps filters.
+ * All messages and commands are converted to lowercase before being stored, as
+ * a workaround for server-side caps filters.
  * <p>
- * Stored messages are normally removed by MessageProcessor when the matching message is
- * received, but in case of a message 'going missing', removeOldMessages is called in each
- * send mixin, and removes all messages that have been stored for more than 5 seconds.
+ * Stored messages are normally removed by MessageProcessor when the matching
+ * message is received, but in case of a message 'going missing',
+ * removeOldMessages is called in each send mixin, and removes all messages that
+ * have been stored for more than 5 seconds.
  */
 @Mixin(ClientPacketListener.class)
 public abstract class MixinClientPacketListener {

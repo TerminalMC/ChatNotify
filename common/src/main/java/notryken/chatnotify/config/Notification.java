@@ -408,11 +408,14 @@ public class Notification {
     }
 
     /**
-     * Removes all blank and duplicate non-primary triggers.
+     * Removes all blank and duplicate non-primary triggers. Comparison is
+     * case-sensitive if regexEnabled is {@code true}, case-insensitive
+     * otherwise.
      */
     public void purgeTriggers() {
         triggers.removeIf(String::isBlank);
-        MiscUtil.removeDuplicates(triggers);
+        if (regexEnabled) MiscUtil.removeDuplicates(triggers);
+        else MiscUtil.removeDuplicatesCaseInsensitive(triggers);
         if (triggers.isEmpty()) triggers.add("");
     }
 
@@ -426,11 +429,14 @@ public class Notification {
     }
 
     /**
-     * Removes all blank and duplicate exclusion triggers.
+     * Removes all blank and duplicate exclusion triggers. Comparison is
+     * case-sensitive if regexEnabled is {@code true}, case-insensitive
+     * otherwise.
      */
     public void purgeExclusionTriggers() {
         exclusionTriggers.removeIf(String::isBlank);
-        MiscUtil.removeDuplicates(exclusionTriggers);
+        if (regexEnabled) MiscUtil.removeDuplicates(exclusionTriggers);
+        else MiscUtil.removeDuplicatesCaseInsensitive(exclusionTriggers);
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
     }
 

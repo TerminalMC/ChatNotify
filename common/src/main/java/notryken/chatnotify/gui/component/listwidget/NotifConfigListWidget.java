@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * {@code ConfigListWidget} containing controls for the specified
- * {@code Notification}, including references to other screens.
+ * {@code Notification}, including references to sub-screens.
  */
 public class NotifConfigListWidget extends ConfigListWidget {
     private final Notification notif;
@@ -91,8 +91,10 @@ public class NotifConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public NotifConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
-        NotifConfigListWidget newListWidget = new NotifConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public NotifConfigListWidget resize(int width, int height, int top, int bottom,
+                                        int itemHeight, double scrollAmount) {
+        NotifConfigListWidget newListWidget = new NotifConfigListWidget(
+                minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;

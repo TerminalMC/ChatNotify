@@ -13,8 +13,8 @@ import notryken.chatnotify.config.Notification;
 
 /**
  * {@code ConfigListWidget} containing controls for advanced settings of the
- * specified {@code Notification}, including regex toggle, exclusion triggers
- * and automatic response messages.
+ * specified {@code Notification}, including regex toggle, exclusion triggers,
+ * automatic response messages and reset buttons.
  */
 public class AdvancedConfigListWidget extends ConfigListWidget {
     private final Notification notif;
@@ -122,8 +122,10 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public AdvancedConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
-        AdvancedConfigListWidget newListWidget = new AdvancedConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public AdvancedConfigListWidget resize(int width, int height, int top, int bottom,
+                                           int itemHeight, double scrollAmount) {
+        AdvancedConfigListWidget newListWidget = new AdvancedConfigListWidget(
+                minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;

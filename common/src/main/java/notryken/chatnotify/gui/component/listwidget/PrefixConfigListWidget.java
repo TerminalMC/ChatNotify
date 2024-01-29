@@ -10,8 +10,7 @@ import notryken.chatnotify.ChatNotify;
 import java.util.Locale;
 
 /**
- * {@code ConfigListWidget} containing controls for ChatNotify message modifier
- * prefixes.
+ * {@code ConfigListWidget} containing controls for message modifier prefixes.
  */
 public class PrefixConfigListWidget extends ConfigListWidget {
     public PrefixConfigListWidget(Minecraft minecraft, int width, int height,
@@ -41,8 +40,10 @@ public class PrefixConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public PrefixConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
-        PrefixConfigListWidget newListWidget = new PrefixConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public PrefixConfigListWidget resize(int width, int height, int top, int bottom,
+                                         int itemHeight, double scrollAmount) {
+        PrefixConfigListWidget newListWidget = new PrefixConfigListWidget(
+                minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;

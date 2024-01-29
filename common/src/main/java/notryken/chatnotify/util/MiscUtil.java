@@ -1,28 +1,42 @@
 package notryken.chatnotify.util;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class MiscUtil {
 
     /**
      * Removes all duplicate {@code String}s from the specified
      * {@code ArrayList}.
-     * @param originalList the {@code ArrayList} to process.
+     * @param list the {@code ArrayList} to process.
      */
-    public static void removeDuplicates(ArrayList<String> originalList) {
+    public static void removeDuplicates(ArrayList<String> list) {
         ArrayList<String> newList = new ArrayList<>();
-        Iterator<String> iterPrefixes = originalList.iterator();
-        while (iterPrefixes.hasNext()) {
-            String prefix = iterPrefixes.next();
-            if (newList.contains(prefix)) {
-                iterPrefixes.remove();
-            }
-            else {
-                newList.add(prefix);
-            }
+        for (String str : list) {
+            if (!newList.contains(str)) newList.add(str);
         }
-        originalList.clear();
-        originalList.addAll(newList);
+        list.clear();
+        list.addAll(newList);
+    }
+
+    /**
+     * Removes all duplicate {@code String}s from the specified
+     * {@code ArrayList}, case-insensitive.
+     * @param list the {@code ArrayList} to process.
+     */
+    public static void removeDuplicatesCaseInsensitive(
+            ArrayList<String> list) {
+        ArrayList<String> newList = new ArrayList<>();
+        for (String str0 : list) {
+            boolean match = false;
+            for (String str1 : newList) {
+                if (str1.equalsIgnoreCase(str0)) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) newList.add(str0);
+        }
+        list.clear();
+        list.addAll(newList);
     }
 }

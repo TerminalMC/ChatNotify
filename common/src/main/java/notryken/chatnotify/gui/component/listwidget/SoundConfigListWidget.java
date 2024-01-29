@@ -147,8 +147,10 @@ public class SoundConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public SoundConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
-        SoundConfigListWidget newListWidget = new SoundConfigListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public SoundConfigListWidget resize(int width, int height, int top, int bottom,
+                                        int itemHeight, double scrollAmount) {
+        SoundConfigListWidget newListWidget = new SoundConfigListWidget(
+                minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
