@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import notryken.chatnotify.ChatNotify;
 import notryken.chatnotify.config.Notification;
 import notryken.chatnotify.gui.component.widget.SilentButton;
-import notryken.chatnotify.util.SoundUtil;
 
 /**
  * {@code ConfigListWidget} containing controls for sound of the specified
@@ -186,7 +185,7 @@ public class SoundConfigListWidget extends ConfigListWidget {
                         Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
                 soundField.setValue(notif.getSound().toString());
-                soundField.setResponder((sound) -> notif.setSound(SoundUtil.parseSound(sound.strip())));
+                soundField.setResponder((sound) -> notif.setSound(sound.strip()));
                 elements.add(soundField);
             }
 
@@ -201,7 +200,7 @@ public class SoundConfigListWidget extends ConfigListWidget {
                 super();
                 elements.add(new SilentButton(x, 0, width, height, Component.literal(soundName),
                         (button) -> {
-                            notif.setSound(SoundUtil.parseSound(sound));
+                            notif.setSound(sound);
                             listWidget.refreshSoundField();
                             listWidget.playNotifSound();
                         }));

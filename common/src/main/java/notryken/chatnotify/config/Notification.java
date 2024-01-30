@@ -2,7 +2,7 @@ package notryken.chatnotify.config;
 
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import notryken.chatnotify.util.MiscUtil;
+import notryken.chatnotify.util.ListUtil;
 import notryken.chatnotify.util.SoundUtil;
 
 import java.util.*;
@@ -253,13 +253,11 @@ public class Notification {
         return sound;
     }
 
-    /**
-     * If the specified sound is invalid, uses a default. Also enables sound.
-     * @param sound the {@code ResourceLocation} of the sound.
-     */
-    public void setSound(ResourceLocation sound) {
-        this.sound = SoundUtil.validSound(sound) ? sound : Config.DEFAULT_SOUND;
-        setControl(2, true);
+    public void setSound(String soundName) {
+        sound = ResourceLocation.tryParse(soundName);
+        if (sound == null) {
+            sound = Config.DEFAULT_SOUND;
+        }
     }
 
     public float getSoundVolume() {
@@ -414,8 +412,8 @@ public class Notification {
      */
     public void purgeTriggers() {
         triggers.removeIf(String::isBlank);
-        if (regexEnabled) MiscUtil.removeDuplicates(triggers);
-        else MiscUtil.removeDuplicatesCaseInsensitive(triggers);
+        if (regexEnabled) ListUtil.removeDuplicates(triggers);
+        else ListUtil.removeDuplicatesCaseInsensitive(triggers);
         if (triggers.isEmpty()) triggers.add("");
     }
 
@@ -435,8 +433,8 @@ public class Notification {
      */
     public void purgeExclusionTriggers() {
         exclusionTriggers.removeIf(String::isBlank);
-        if (regexEnabled) MiscUtil.removeDuplicates(exclusionTriggers);
-        else MiscUtil.removeDuplicatesCaseInsensitive(exclusionTriggers);
+        if (regexEnabled) ListUtil.removeDuplicates(exclusionTriggers);
+        else ListUtil.removeDuplicatesCaseInsensitive(exclusionTriggers);
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
     }
 
@@ -445,7 +443,7 @@ public class Notification {
      */
     public void purgeResponseMessages() {
         responseMessages.removeIf(String::isBlank);
-        MiscUtil.removeDuplicates(responseMessages);
+        ListUtil.removeDuplicates(responseMessages);
         if (responseMessages.isEmpty()) responseEnabled = false;
     }
 

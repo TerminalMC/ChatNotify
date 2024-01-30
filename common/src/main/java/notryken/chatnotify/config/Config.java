@@ -8,7 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import notryken.chatnotify.config.serialize.ConfigDeserializer;
 import notryken.chatnotify.config.serialize.GhettoAsciiWriter;
 import notryken.chatnotify.config.serialize.NotificationDeserializer;
-import notryken.chatnotify.util.MiscUtil;
+import notryken.chatnotify.util.ListUtil;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -249,7 +249,7 @@ public class Config {
 
         // Prefixes
         messagePrefixes.removeIf(String::isBlank);
-        MiscUtil.removeDuplicates(messagePrefixes);
+        ListUtil.removeDuplicates(messagePrefixes);
         messagePrefixes.sort(Comparator.comparingInt(String::length).reversed());
 
         Notification notif;

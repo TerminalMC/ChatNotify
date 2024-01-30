@@ -2,7 +2,7 @@ package notryken.chatnotify.util;
 
 import java.util.ArrayList;
 
-public class MiscUtil {
+public class ListUtil {
 
     /**
      * Removes all duplicate {@code String}s from the specified

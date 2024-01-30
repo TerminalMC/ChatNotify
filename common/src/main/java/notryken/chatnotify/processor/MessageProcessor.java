@@ -1,4 +1,4 @@
-package notryken.chatnotify.util;
+package notryken.chatnotify.processor;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
