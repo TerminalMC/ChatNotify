@@ -3,7 +3,6 @@ package notryken.chatnotify.config;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import notryken.chatnotify.util.ListUtil;
-import notryken.chatnotify.util.SoundUtil;
 
 import java.util.*;
 
