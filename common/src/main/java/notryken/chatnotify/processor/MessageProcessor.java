@@ -28,11 +28,8 @@ import java.util.regex.PatternSyntaxException;
 import static notryken.chatnotify.ChatNotify.config;
 import static notryken.chatnotify.ChatNotify.recentMessages;
 
-/**
- * Complete message processing algorithm for {@code ChatNotify}, designed to
- * read an incoming message, identify the relevant {@code Notification}
- * (if any), and complete all notification actions, including playing a sound
- * and modifying the message style (as applicable).
+/*
+ * Message processing algorithm, starting at messageProcessor().
  */
 public class MessageProcessor {
 

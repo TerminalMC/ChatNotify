@@ -33,7 +33,7 @@ public class Config {
     public static final TextColor DEFAULT_COLOR = TextColor.fromRgb(16761856);
     public static final Notification DEFAULT_USERNAME_NOTIF = new Notification(
             true, new ArrayList<>(List.of(true, false, true)),
-            new ArrayList<>(List.of("profileName", "displayName")), false, DEFAULT_COLOR,
+            new ArrayList<>(List.of("Profile name", "Display name")), false, DEFAULT_COLOR,
             new ArrayList<>(List.of(false, false, false, false, false)),
             1f, 1f, DEFAULT_SOUND, false,
             false, new ArrayList<>(), false, new ArrayList<>());
@@ -46,9 +46,11 @@ public class Config {
 
     public static final Gson CONFIG_GSON = new GsonBuilder()
             .registerTypeAdapter(Config.class, new ConfigDeserializer())
-            .setPrettyPrinting().create();
+            .setPrettyPrinting()
+            .create();
     public static final Gson NOTIFICATION_GSON = new GsonBuilder()
             .registerTypeAdapter(Notification.class, new NotificationDeserializer())
+            .setPrettyPrinting()
             .create();
 
 
@@ -56,7 +58,9 @@ public class Config {
     private static Path configPath;
 
     // Saved, not modifiable by user
-    private final String version = "001";
+    // 001 is initial version
+    // 002 adds display name trigger to username notification
+    private final String version = "002";
 
     // Saved, modifiable by user
     public boolean ignoreOwnMessages;
@@ -317,6 +321,9 @@ public class Config {
         return config;
     }
 
+    /**
+     * Writes the config to the global configPath.
+     */
     public void writeChanges() {
         validate();
 

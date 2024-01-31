@@ -73,8 +73,8 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
     }
 
     // Abstract methods
-    public abstract ConfigListWidget resize(int width, int height, int top, int bottom, int itemHeight,
-                                            double scrollAmount);
+    public abstract ConfigListWidget resize(int width, int height, int top, int bottom,
+                                            int itemHeight, double scrollAmount);
 
     public void onClose() {}
 

@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  * ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag) logs
  * the message and then passes it to ChatComponent#addMessage(Component,
  * MessageSignature, int, GuiMessageTag, boolean). The latter method is also
- * used for chat refresh, so the former method is the earliest method call
+ * used for chat refresh, so the former method is the only suitable method
  * common to all incoming message routes.
  */
 @Mixin(value = ChatComponent.class)
