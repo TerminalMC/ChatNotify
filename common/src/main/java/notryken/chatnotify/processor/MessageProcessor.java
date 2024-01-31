@@ -14,10 +14,13 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import notryken.chatnotify.ChatNotify;
-import notryken.chatnotify.config.Config;
 import notryken.chatnotify.config.Notification;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -27,7 +30,7 @@ import static notryken.chatnotify.ChatNotify.recentMessages;
 
 /**
  * Complete message processing algorithm for {@code ChatNotify}, designed to
- * read all incoming messages, identify the relevant {@code Notification}
+ * read an incoming message, identify the relevant {@code Notification}
  * (if any), and complete all notification actions, including playing a sound
  * and modifying the message style (as applicable).
  */
@@ -40,18 +43,16 @@ public class MessageProcessor {
      * was required.
      */
     public static Component processMessage(Component msg) {
-//        ChatNotify.LOG.info("debug::Processing message: '{}'", msg);
-
-        Component modMsgStr = null;
-
         String msgStr = msg.getString();
+        if (msgStr.isBlank()) return msg; // Ignore blank messages
         String checkedMsgStr = checkOwner(msgStr);
+        Component modifiedMsg = null;
 
         if (checkedMsgStr != null) {
-            modMsgStr = tryNotify(msg.copy(), msgStr, checkedMsgStr);
+            modifiedMsg = tryNotify(msg.copy(), msgStr, checkedMsgStr);
         }
 
-        return (modMsgStr == null ? msg : modMsgStr);
+        return (modifiedMsg == null ? msg : modifiedMsg);
     }
 
     /**
@@ -61,36 +62,35 @@ public class MessageProcessor {
      * {@code strMsg} is identified as sent by the user if it contains a stored
      * message (or command) sent by the user, and has a prefix that is both not
      * contained in the stored message, and contains (according to
-     * {@code msgContainsStr()}) a trigger of the username {@code Notification}
-     * (e.g. the player's username).
+     * {@code msgContainsStr()}) a trigger of the username {@code Notification}.
      * <p>
      * If {@code strMsg} is positively identified, it is set to {@code null} if
      * the configuration {@code ignoreOwnMessages} is true, else the part of the
-     * prefix that matched a username {@code Notification} trigger is removed.
+     * prefix that matched a trigger is removed.
      * <p>
      * <b>Note:</b> This approach is imperfect and may fail if, for example,
      * two messages are sent, the first contains the second, and the return of
-     * the second message occurs first.
+     * the second message arrives first.
      * @param msgStr the message {@code String} to process.
-     * @return the processed version of {@code strMsg} (can be null).
+     * @return the processed version of {@code strMsg}.
      */
-    private static String checkOwner(String msgStr) {
-//        ChatNotify.LOG.info("debug::Checking ownership of message");
-        // Stored messages are always converted to lowercase
+    private static @Nullable String checkOwner(String msgStr) {
+        // Stored messages are always converted to lowercase, convert to match.
         String msgStrLow = msgStr.toLowerCase(Locale.ROOT);
-        Config config = ChatNotify.config();
-
+        // Check for a matching stored message
         for (int i = 0; i < recentMessages.size(); i++) {
             int lastMatchIdx = msgStrLow.lastIndexOf(recentMessages.get(i).getSecond());
             if (lastMatchIdx > 0) {
-//                ChatNotify.LOG.info("debug::Message matched recent message: '{}'", msgStrLow.lastIndexOf(recentMessages.get(i).getSecond()));
+                // Check for a trigger in the part before the match
                 String prefix = msgStr.substring(0, lastMatchIdx);
-                for (String username : config.getNotif(0).getTriggers()) {
-                    Pair<Integer,Integer> prefixMatch = msgContainsStr(prefix, username, false);
+                for (String trigger : ChatNotify.config().getNotif(0).getTriggers()) {
+                    Pair<Integer,Integer> prefixMatch = msgContainsStr(prefix, trigger, false);
                     if (prefixMatch != null) {
-//                        ChatNotify.LOG.info("debug::Message matched trigger: '{}'", username);
+                        // Both conditions are now satisfied
+                        // Remove the matching stored message
                         recentMessages.remove(i);
-                        if (config.ignoreOwnMessages) {
+                        // Modify the message string
+                        if (ChatNotify.config().ignoreOwnMessages) {
                             msgStr = null;
                         }
                         else {
@@ -106,10 +106,14 @@ public class MessageProcessor {
     }
 
     /**
-     * For each trigger of each {@code Notification}, checks whether the given
-     * message matches the trigger according to {@code msgContainsStr()}.
+     * For each trigger of each ChatNotify {@code Notification}, checks whether
+     * the trigger matches the given message using {@code msgContainsStr()}.
+     * <p>
      * When a trigger matches, checks the exclusion triggers of the
      * {@code Notification} to determine whether to activate the notification.
+     * <p>
+     * If the notification should be activated, attempts to complete the
+     * relevant notification actions.
      * <p>
      * <b>Note:</b> For performance and simplicity reasons, this method only
      * allows one notification to be triggered by a given message.
@@ -119,19 +123,17 @@ public class MessageProcessor {
      * @return a re-styled copy of {@code msg}, or null if no trigger matched.
      */
     private static Component tryNotify(Component message, String msgStr, String checkedMsgStr) {
-//        ChatNotify.LOG.info("debug::Attempting notification");
-
         for (Notification notif : ChatNotify.config().getNotifs()) {
             if (notif.isEnabled()) {
                 /*
                 triggerIsKey indicates that the Notification should only be
                 triggered by messages with a TranslatableContents key matching
                 a trigger of the Notification.
+                The exception to this is the key ".", which should trigger its
+                notification irrespective of the message content.
                  */
                 if (notif.triggerIsKey) {
-//                    ChatNotify.LOG.info("debug::triggerIsKey true");
                     if (notif.getTrigger().equals(".")) {
-//                        ChatNotify.LOG.info("debug::Triggered by "." key");
                         playSound(notif);
                         sendResponses(notif);
                         return simpleRestyle(message, notif);
@@ -139,7 +141,6 @@ public class MessageProcessor {
                     else {
                         if (message.getContents() instanceof TranslatableContents ttc) {
                             if (!notif.getTrigger().isBlank() && ttc.getKey().contains(notif.getTrigger())) {
-//                            ChatNotify.LOG.info("debug::Message matches key: '{}'", notif.getTrigger());
                                 playSound(notif);
                                 sendResponses(notif);
                                 return simpleRestyle(message, notif);
@@ -147,16 +148,12 @@ public class MessageProcessor {
                         }
                     }
                 } else {
-//                    ChatNotify.LOG.info("debug::triggerIsKey false");
                     for (String trigger : notif.getTriggers()) {
-//                        ChatNotify.LOG.info("debug::Checking trigger: '{}'", trigger);
-
                         // Check trigger
-                        // Note: use msgStr if regexEnabled
+                        // Note: Use the unmodified msgStr if regexEnabled
                         if (!trigger.isBlank() && msgContainsStr(
                                 (notif.regexEnabled ? msgStr : checkedMsgStr),
                                 trigger, notif.regexEnabled) != null) {
-//                            ChatNotify.LOG.info("debug::Trigger matched");
                             // Matched trigger, check exclusions
                             boolean exclude = false;
                             if (notif.exclusionEnabled) {
@@ -164,14 +161,11 @@ public class MessageProcessor {
                                     if (msgContainsStr((notif.regexEnabled ? msgStr : checkedMsgStr),
                                             exTrig, notif.regexEnabled) != null) {
                                         exclude = true;
-//                                        ChatNotify.LOG.info("debug::Exclusion trigger matched: '{}'", exTrig);
                                         break;
                                     }
                                 }
                             }
-
                             if (!exclude) {
-                                // Complete notification and exit
                                 playSound(notif);
                                 sendResponses(notif);
                                 return (notif.regexEnabled ? simpleRestyle(message, notif) :
@@ -193,8 +187,8 @@ public class MessageProcessor {
      * @param strMsg the {@code String} to search in.
      * @param str the {@code String} or regex to search with.
      * @param strIsRegex control flag for whether to compile str as a pattern.
-     * @return n integer array [start,end] of the match, or null if not found
-     * or if strIsRegex is true and str does not represent a valid regex.
+     * @return n integer array [start,end] of the match, or {@code null} if not
+     * found or if strIsRegex is true and str does not represent a valid regex.
      */
     private static Pair<Integer,Integer> msgContainsStr(String strMsg, String str, boolean strIsRegex) {
         try {
@@ -217,7 +211,6 @@ public class MessageProcessor {
      */
     private static void playSound(Notification notif) {
         if (notif.getControl(2)) {
-//            ChatNotify.LOG.info("debug::Playing sound");
             Minecraft.getInstance().getSoundManager().play(
                     new SimpleSoundInstance(
                             notif.getSound(), config().notifSoundSource,
@@ -237,7 +230,6 @@ public class MessageProcessor {
             Minecraft client = Minecraft.getInstance();
             Screen oldScreen = client.screen;
             for (String response : notif.getResponseMessages()) {
-//                ChatNotify.LOG.info("debug::Sending response message");
                 client.setScreen(new ChatScreen(response));
                 if (client.screen instanceof ChatScreen cs) {
                     cs.handleChatInput(response, true);
@@ -277,9 +269,7 @@ public class MessageProcessor {
      */
     private static Component simpleRestyle(Component msg, Notification notif) {
         if (notif.getControl(0) || notif.getControl(1)) {
-//            ChatNotify.LOG.info("debug::Simple restyle original: '{}'", msg);
             msg = msg.copy().setStyle(applyStyle(msg.getStyle(), getStyle(notif)));
-//            ChatNotify.LOG.info("debug::Simple restyle final: '{}'", msg);
         }
         return msg;
     }
@@ -297,9 +287,7 @@ public class MessageProcessor {
      */
     private static Component complexRestyle(Component msg, String trigger, Notification notif) {
         if (notif.getControl(0) || notif.getControl(1)) {
-//            ChatNotify.LOG.info("debug::Complex restyle original: '{}'", msg);
             msg = restyleComponent(msg.copy(), trigger, getStyle(notif));
-//            ChatNotify.LOG.info("debug::Complex restyle final: '{}'", msg);
         }
         return msg;
     }
@@ -319,16 +307,13 @@ public class MessageProcessor {
             msg = restyleContents(msg, trigger, style);
         }
         else if (msg.getContents() instanceof TranslatableContents contents) {
-//            ChatNotify.LOG.info("debug::TranslatableContents found: '{}'", contents);
             // Recurse for all args
             Object[] args = contents.getArgs();
             for (int i = 0; i < contents.getArgs().length; i++) {
                 if (args[i] instanceof Component argText) {
-//                    ChatNotify.LOG.info("debug::Restyle Component arg: '{}'", argText.getString());
                     args[i] = restyleComponent(argText.copy(), trigger, style);
                 }
                 else if (args[i] instanceof String argString) {
-//                    ChatNotify.LOG.info("debug::Restyle String arg: '{}'", argString);
                     args[i] = Component.literal(argString).setStyle(style);
                 }
             }
@@ -339,9 +324,7 @@ public class MessageProcessor {
         }
         else {
             // Recurse for all siblings
-//            ChatNotify.LOG.info("debug::restyleComponent recurse");
             msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
-//            ChatNotify.LOG.info("debug::restyleComponent recurse finish");
         }
         return msg;
     }
@@ -356,24 +339,19 @@ public class MessageProcessor {
      */
     private static MutableComponent restyleContents(MutableComponent msg, String trigger, Style style) {
         if (msg.getContents() instanceof LiteralContents contents) {
-//            ChatNotify.LOG.info("debug::Restyle Contents: '{}'", msg);
 
             // Only process if the message or its siblings contain the match
             String msgStr = contents.text();
             Pair<Integer,Integer> triggerMatch = msgContainsStr(msgStr, trigger, false);
 
             if (triggerMatch == null) {
-//                ChatNotify.LOG.info("debug::restyleContents match not found");
-//                ChatNotify.LOG.info("debug::restyleContents no-trigger restyleComponent");
                 msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
             }
             else {
-//                ChatNotify.LOG.info("debug::restyleContents match found");
                 List<Component> siblings = msg.getSiblings();
 
                 if (siblings.isEmpty())
                 {
-//                    ChatNotify.LOG.info("debug::No siblings");
                     int matchFirst = triggerMatch.getFirst();
                     int matchLast = triggerMatch.getSecond();
 
@@ -382,15 +360,10 @@ public class MessageProcessor {
                     so it is deconstructed and the parts individually re-styled
                     before being re-built into a new MutableComponent.
                      */
-//                    ChatNotify.LOG.info("debug::Restyle matched contents");
-//                    ChatNotify.LOG.info("debug::Original msgStr: '{}'", msgStr);
-//                    ChatNotify.LOG.info("debug::Trigger: '{}'", trigger);
-//                    ChatNotify.LOG.info("debug::Matched from {} ({}) to {} ({})", matchFirst, msgStr.charAt(matchFirst), matchLast, msgStr.charAt(matchLast-1));
 
                     if (msgStr.contains("§")) {
 
                         String activeCodes = activeFormatCodes(msgStr.substring(0, matchLast-trigger.length()));
-//                        ChatNotify.LOG.info("debug::Active codes: '{}'", activeCodes);
 
                         String msgTriggerFull = msgStr.substring(matchFirst,matchLast);
                         int realStart = startIgnoreCodes(msgTriggerFull, msgTriggerFull.length()-trigger.length());
@@ -400,8 +373,6 @@ public class MessageProcessor {
                         String msgEnd = msgStr.substring(matchLast);
 
                         msgStr = msgStart + '\u00a7' + 'r' + msgTrigger + activeCodes + msgEnd;
-
-//                        ChatNotify.LOG.info("debug::Modified msgStr: '{}'", msgStr);
 
                         matchLast = matchLast-realStart+2;
                     }
@@ -431,19 +402,15 @@ public class MessageProcessor {
                     }
 
                     if (siblings.size() == 1) {
-//                        ChatNotify.LOG.info("debug::Only one sibling; promoting");
                         msg = siblings.get(0).copy();
                     }
                     else {
-//                        ChatNotify.LOG.info("debug::Siblings: '{}'", siblings);
                         MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
                         newMessage.siblings.addAll(siblings);
                         msg = newMessage;
                     }
                 }
                 else {
-//                    ChatNotify.LOG.info("debug::Siblings found");
-
                     /*
                     If the message has siblings, it cannot be directly
                     re-styled. Instead, it is replaced by a new, empty
@@ -460,7 +427,6 @@ public class MessageProcessor {
                     replacement.setStyle(msg.getStyle());
                     replacement.siblings.addAll(siblings);
 
-//                    ChatNotify.LOG.info("debug::restyleContents empty-parent restyleComponent");
                     msg = restyleComponent(replacement, trigger, style);
                 }
             }
@@ -475,7 +441,6 @@ public class MessageProcessor {
      * @return the active format codes as a {@code String}.
      */
     private static String activeFormatCodes(String msgStr) {
-//        ChatNotify.LOG.info("debug::Scanning for codes in string '{}'", msgStr);
         List<ChatFormatting> activeCodes = new ArrayList<>();
         for (int i = 0; i < msgStr.length(); i++) {
             char c = msgStr.charAt(i);

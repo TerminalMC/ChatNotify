@@ -32,8 +32,9 @@ public class Config {
     public static final SoundSource DEFAULT_SOUND_SOURCE = SoundSource.PLAYERS;
     public static final TextColor DEFAULT_COLOR = TextColor.fromRgb(16761856);
     public static final Notification DEFAULT_USERNAME_NOTIF = new Notification(
-            true, new ArrayList<>(List.of(true, false, true)), new ArrayList<>(List.of("username")),
-            false, DEFAULT_COLOR, new ArrayList<>(List.of(false, false, false, false, false)),
+            true, new ArrayList<>(List.of(true, false, true)),
+            new ArrayList<>(List.of("profileName", "displayName")), false, DEFAULT_COLOR,
+            new ArrayList<>(List.of(false, false, false, false, false)),
             1f, 1f, DEFAULT_SOUND, false,
             false, new ArrayList<>(), false, new ArrayList<>());
     public static final Notification DEFAULT_BLANK_NOTIF = new Notification(
@@ -52,7 +53,6 @@ public class Config {
 
 
     // Not saved, not modifiable by user
-    private static String username;
     private static Path configPath;
 
     // Saved, not modifiable by user
@@ -85,6 +85,24 @@ public class Config {
         this.notifSoundSource = notifSoundSource;
         this.messagePrefixes = messagePrefixes;
         this.notifications = notifications;
+    }
+
+    // Username
+
+    /**
+     * Sets the first trigger of the username {@code Notification} to the
+     * specified name.
+     */
+    public void setProfileName(String profileName) {
+        notifications.get(0).setTrigger(profileName);
+    }
+
+    /**
+     * Sets the second trigger of the username {@code Notification} to the
+     * specified name.
+     */
+    public void setDisplayName(String displayName) {
+        notifications.get(0).setTrigger(1, displayName);
     }
 
     // Message prefix get and set
@@ -211,41 +229,12 @@ public class Config {
         }
     }
 
-    /**
-     * Setter, also sets the first trigger of the username {@code Notification}
-     * to the specified username.
-     * <p>
-     * <b>Note:</b> Will fail without error if the specified username is
-     * {@code null} or blank.
-     * @param pUsername the user's in-game name.
-     */
-    public void setUsername(String pUsername) {
-        if (pUsername != null && !pUsername.isBlank()) {
-            username = pUsername;
-            validateUsernameNotif();
-        }
-    }
-
     // Validation
-
-    /**
-     * Validates the username {@code Notification} and sets the first trigger
-     * to the value of the stored username, if any.
-     */
-    public void validateUsernameNotif() {
-        Notification notif = notifications.get(0);
-        notif.triggerIsKey = false;
-        if (username != null) {
-            notif.setTrigger(username);
-        }
-    }
 
     /**
      * Cleanup and validate all settings and notifications.
      */
     public void validate() {
-
-        validateUsernameNotif();
 
         // Prefixes
         messagePrefixes.removeIf(String::isBlank);
@@ -258,7 +247,7 @@ public class Config {
 
         // Username notification
         notif = iterNotifs.next();
-        notif.purgeTriggers();
+        notif.purgeTriggersFrom(2);
         notif.purgeResponseMessages();
         notif.purgeResponseMessages();
         notif.autoDisable();

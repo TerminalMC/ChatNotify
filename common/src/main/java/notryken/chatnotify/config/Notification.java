@@ -417,6 +417,22 @@ public class Notification {
     }
 
     /**
+     * Removes all blank and duplicate triggers, excluding those before the
+     * specified index. Comparison is case-sensitive if regexEnabled is
+     * {@code true}, case-insensitive otherwise.
+     */
+    public void purgeTriggersFrom(int start) {
+        triggers.removeIf(String::isBlank);
+        if (regexEnabled) ListUtil.removeDuplicatesFrom(triggers, start);
+        else ListUtil.removeDuplicatesCaseInsensitiveFrom(triggers, start);
+        if (triggers.isEmpty()) {
+            for (int i = 0; i < start; i++) {
+                triggers.add("");
+            }
+        }
+    }
+
+    /**
      * If configured for key-activation, converts all keys to lowercase.
      */
     public void fixKeyTriggerCase() {

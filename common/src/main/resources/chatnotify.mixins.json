@@ -8,7 +8,6 @@
     ],
     "client": [
         "MixinChatComponent",
-        "MixinChatListener",
         "MixinClientPacketListener",
         "MixinOptionInstance"
     ],

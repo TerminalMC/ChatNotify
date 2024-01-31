@@ -90,7 +90,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
                 Component.translatable("screen.chatnotify.title.notif"),
                 new NotifConfigListWidget(minecraft, screen.width, screen.height, y0, y1, 
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
-                        ChatNotify.config().getNotif(index))));
+                        ChatNotify.config().getNotif(index), index == 0)));
     }
 
     public static class Entry extends ConfigListWidget.Entry {

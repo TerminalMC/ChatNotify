@@ -23,14 +23,17 @@ import java.util.List;
  */
 public class NotifConfigListWidget extends ConfigListWidget {
     private final Notification notif;
+    private final boolean isUsernameNotif;
 
     public NotifConfigListWidget(Minecraft minecraft, int width, int height,
                                  int top, int bottom, int itemHeight,
                                  int entryRelX, int entryWidth, int entryHeight,
-                                 int scrollWidth, Notification notif) {
+                                 int scrollWidth, Notification notif,
+                                 boolean isUsernameNotif) {
         super(minecraft, width, height, top, bottom, itemHeight, 
                 entryRelX, entryWidth, entryHeight, scrollWidth);
         this.notif = notif;
+        this.isUsernameNotif = isUsernameNotif;
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Trigger \u2139"),
@@ -38,7 +41,10 @@ public class NotifConfigListWidget extends ConfigListWidget {
                         "that, if detected in a chat message, will activate the notification. " +
                         "NOT case-sensitive.")), -1));
 
-        addEntry(new Entry.TriggerTypeEntry(entryX, entryWidth, entryHeight, notif, this));
+        // Username notification can't be key-triggered
+        if (!this.isUsernameNotif) {
+            addEntry(new Entry.TriggerTypeEntry(entryX, entryWidth, entryHeight, notif, this));
+        }
 
         if (notif.triggerIsKey) {
             addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -95,7 +101,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                         int itemHeight, double scrollAmount) {
         NotifConfigListWidget newListWidget = new NotifConfigListWidget(
                 minecraft, width, height, top, bottom, itemHeight,
-                entryRelX, entryWidth, entryHeight, scrollWidth, notif);
+                entryRelX, entryWidth, entryHeight, scrollWidth, notif, isUsernameNotif);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
@@ -159,10 +165,19 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 triggerEditBox.setValue(notif.getTrigger(index));
                 triggerEditBox.setResponder(
                         (trigger) -> notif.setTrigger(index, trigger.strip()));
+                // First two triggers of username notification are uneditable
+                if (listWidget.isUsernameNotif && index <= 1) {
+                    triggerEditBox.setEditable(false);
+                    triggerEditBox.active = false;
+                    triggerEditBox.setTooltip(Tooltip.create(Component.literal(
+                            index == 0 ? "Profile name" : "Display name")));
+                    triggerEditBox.setTooltipDelay(500);
+                }
                 elements.add(triggerEditBox);
 
                 // Only show the delete button if it makes sense to delete.
-                if (!notif.triggerIsKey && (index > 0 || notif.getTriggers().size() > 1)) {
+                if (!notif.triggerIsKey && notif.getTriggers().size() > 1 &&
+                        (index > 1 || (!listWidget.isUsernameNotif && index > 0))) {
                     elements.add(Button.builder(Component.literal("X"),
                                     (button) -> {
                                         notif.removeTrigger(index);

@@ -62,6 +62,10 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
             if (notifications.isEmpty()) {
                 throw new JsonParseException("Empty notification array.");
             }
+            // Display name added in v1.2.0
+            if (notifications.get(0).getTriggers().size() == 1) {
+                notifications.get(0).addTrigger("Display name");
+            }
         }
         catch (JsonParseException | NullPointerException |
                UnsupportedOperationException | IllegalStateException e) {

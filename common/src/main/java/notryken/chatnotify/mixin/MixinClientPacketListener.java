@@ -3,8 +3,9 @@ package notryken.chatnotify.mixin;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import notryken.chatnotify.ChatNotify;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -15,85 +16,125 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Locale;
 
-import static notryken.chatnotify.ChatNotify.recentMessages;
-
-/**
- * Minecraft provides no reliable way to identify which player sent a given chat
- * message, or even determine whether the message came from a player at all.
- * <p>
- * As a workaround, ChatNotify uses mixins in all message and command-sending
- * methods of ClientPacketListener, to temporarily store all outgoing messages
- * and commands, so that they can be compared to incoming messages to determine
- * whether a given incoming message was sent by the user.
- * <p>
- * All messages and commands are converted to lowercase before being stored, as
- * a workaround for server-side caps filters.
- * <p>
- * Stored messages are normally removed by MessageProcessor when the matching
- * message is received, but in case of a message 'going missing',
- * removeOldMessages is called in each send mixin, and removes all messages that
- * have been stored for more than 5 seconds.
+/*
+ * If an incoming message is the return of a message sent by the user,
+ * ChatNotify must either;
+ * a) Not process the message, if the control ignoreOwnMessages is TRUE, or
+ * b) Remove the first occurrence of the user's name from the message before
+ *    checking it for triggers (else every message sent by the user would
+ *    activate only the username notification).
+ *
+ * Player-sent messages can be stripped of identifying data by mods or plugins,
+ * or can be converted to server-sent messages, so it is not possible to
+ * reliably determine the sender using message data.
+ *
+ * It is possible to make use of message sender data where it exists, as an
+ * example refer to https://github.com/dzwdz/chat_heads. However, as ChatNotify
+ * only needs to determine whether a message is sent by the user (not the more
+ * general 'who sent this message?'), an alternate heuristic approach is used:
+ *
+ * 1. Mixins are used to store outgoing message and command strings in a list.
+ * 2. If an incoming message string contains a string in the list, and the
+ *    part of the string preceding the match contains a trigger string of the
+ *    username Notification, the message is identified as sent by the user,
+ *    and the matched string removed from the list.
+ * 3. When any outgoing message or command is recorded, all list entries older
+ *    than 5 seconds are removed, as it can be assumed that those generated no
+ *    matching return message.
+ *
+ * Note that some outgoing messages may have modifier prefixes such as ! or
+ * /shout that cause them to behave differently (e.g. go to global rather than
+ * party chat on a server), but will not appear in the return message.
+ * Thus, before a message is stored, it is checked against the ChatNotify list
+ * of prefixes (which can be edited by the user), and the first matching prefix
+ * (if any) is cut from the message.
  */
-@Mixin(ClientPacketListener.class)
+@Mixin(value = ClientPacketListener.class, priority = 980)
 public abstract class MixinClientPacketListener {
+
+    // Username-update mixins //////////////////////////////////////////////////
+
     /**
-     * This is one of the earliest opportunities to get a non-null value of the Player.
-     * Used to verify or correct the username notification.
+     * Update profileName.
      */
     @Inject(method = "handleLogin", at = @At("TAIL"))
-    public void onGameJoin(ClientboundLoginPacket packet, CallbackInfo ci) {
-        Player player = Minecraft.getInstance().player;
-        assert player != null;
-        ChatNotify.config().setUsername(player.getName().getString());
+    public void getProfileName(ClientboundLoginPacket packet, CallbackInfo ci) {
+        String name = Minecraft.getInstance().player.getName().getString();
+        ChatNotify.config().setProfileName(name);
+        ChatNotify.config().setDisplayName(name);
     }
 
-    // Chat message and command storage mixins
+    /**
+     * Update displayName.
+     * <p>
+     * This is a proactive-update approach. A possible reactive-update approach
+     * would be to use the following access on each message check.
+     * <p>
+     * {@code String displayname = minecraft.getConnection().getPlayerInfo(
+     *         minecraft.player.getUUID()).getProfile().getName();}
+     */
+    @Inject(method = "applyPlayerInfoUpdate", at = @At("TAIL"))
+    private void getDisplayName(ClientboundPlayerInfoUpdatePacket.Action action,
+                                ClientboundPlayerInfoUpdatePacket.Entry entry,
+                                PlayerInfo playerInfo, CallbackInfo ci) {
+        if (action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME) &&
+                playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())) {
+            if (entry.displayName() != null) ChatNotify.config().setDisplayName(entry.displayName().getString());
+        }
+    }
+
+    // Chat message and command storage mixins /////////////////////////////////
 
     @Inject(method = "sendChat", at = @At("HEAD"))
-    public void sendChatMessage(String content, CallbackInfo ci) {
-        chatNotify$storeMessage(content);
+    public void getMessage(String message, CallbackInfo ci) {
+        chatNotify$storeMessage(message);
     }
 
     @Inject(method = "sendCommand", at = @At("HEAD"))
-    public void sendChatCommand(String command, CallbackInfo ci) {
+    public void getCommand(String command, CallbackInfo ci) {
         chatNotify$storeCommand(command);
     }
 
     @Inject(method = "sendUnsignedCommand", at = @At("HEAD"))
-    public void sendCommand(String command, CallbackInfoReturnable<Boolean> cir) {
+    public void getUnsignedCommand(String command, CallbackInfoReturnable<Boolean> cir) {
         chatNotify$storeCommand(command);
     }
 
-    @Unique
-    private void chatNotify$storeMessage(String content) {
-        long currentTime = System.currentTimeMillis();
-        chatNotify$removeOldMessages(currentTime - 5000);
+    // Storage methods /////////////////////////////////////////////////////////
 
-        content = content.toLowerCase(Locale.ROOT);
+    @Unique
+    private void chatNotify$storeMessage(String message) {
+        long time = System.currentTimeMillis();
+        chatNotify$removeOldMessages(time);
+
+        message = message.toLowerCase(Locale.ROOT);
         String plainMsg = "";
 
+        // If message starts with a prefix, remove the prefix.
         for (String prefix : ChatNotify.config().getPrefixes()) {
-            if (content.startsWith(prefix)) {
-                plainMsg = content.replaceFirst(prefix, "").strip();
+            if (message.startsWith(prefix)) {
+                plainMsg = message.replaceFirst(prefix, "").strip();
                 break;
             }
         }
-
-        recentMessages.add(Pair.of(currentTime, plainMsg.isEmpty() ? content : plainMsg));
+        // Always store the message
+        ChatNotify.recentMessages.add(Pair.of(time + 5000, plainMsg.isEmpty() ? message : plainMsg));
     }
 
     @Unique
     private void chatNotify$storeCommand(String command) {
-        long currentTime = System.currentTimeMillis();
-        chatNotify$removeOldMessages(currentTime - 5000);
+        long time = System.currentTimeMillis();
+        chatNotify$removeOldMessages(time);
 
-        command = "/" + command.toLowerCase(Locale.ROOT);
+        // The command '/' is removed before this point, so add it back.
+        command = '/' + command.toLowerCase(Locale.ROOT);
 
+        // If command starts with a prefix, remove the prefix and store command.
         for (String prefix : ChatNotify.config().getPrefixes()) {
             if (command.startsWith(prefix)) {
                 command = command.replaceFirst(prefix, "").strip();
                 if (!command.isEmpty()) {
-                    recentMessages.add(Pair.of(currentTime, command));
+                    ChatNotify.recentMessages.add(Pair.of(time + 5000, command));
                 }
                 break;
             }
@@ -101,7 +142,7 @@ public abstract class MixinClientPacketListener {
     }
 
     @Unique
-    private void chatNotify$removeOldMessages(long oldTime) {
-        recentMessages.removeIf(pair -> pair.getFirst() < oldTime);
+    private void chatNotify$removeOldMessages(long time) { // No see
+        ChatNotify.recentMessages.removeIf(pair -> pair.getFirst() < time);
     }
 }
