@@ -66,6 +66,7 @@ subprojects {
                 "mod_author": mod_author,
                 "mod_credits": mod_credits,
                 "mod_license": mod_license,
+                "java_version": java_version,
                 "minecraft_version": minecraft_version,
                 "minecraft_version_range_fabric": minecraft_version_range_fabric,
                 "minecraft_version_range_forge": minecraft_version_range_forge,

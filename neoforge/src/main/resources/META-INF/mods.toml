@@ -9,7 +9,7 @@ issueTrackerURL="${issues_url}" #optional: none
   displayName="${mod_name}" #optional: modId
   description='''${mod_description}''' # optional: "MISSING DESCRIPTION"
   logoFile="icon.png" #optional: none
-  features={ java_version="[17,)" }
+  features={ java_version="[${java_version},)" }
   credits="${mod_credits}" #optional: none
   authors="${mod_author}" #optional: none
   displayURL="${homepage_url}" #optional: none
