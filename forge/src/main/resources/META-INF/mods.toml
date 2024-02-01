@@ -15,9 +15,9 @@ issueTrackerURL="${issues_url}" #optional: none
   displayURL="${homepage_url}" #optional: none
 
 [[mixins]]
-  config="chatnotify.mixins.json"
+  config="${mod_id}.mixins.json"
 [[mixins]]
-  config="chatnotify.forge.mixins.json"
+  config="${mod_id}.forge.mixins.json"
 
 [[dependencies.${mod_id}]] #optional
   modId="forge"
