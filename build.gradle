@@ -71,6 +71,7 @@ subprojects {
                 "minecraft_version_range_fabric": minecraft_version_range_fabric,
                 "minecraft_version_range_forge": minecraft_version_range_forge,
                 "fabric_loader_version": fabric_loader_version,
+                "fabric_loader_version_range": fabric_loader_version_range,
                 "fabric_api_version": fabric_api_version,
                 "forge_version": forge_version,
                 "forge_loader_version_range": forge_loader_version_range,
