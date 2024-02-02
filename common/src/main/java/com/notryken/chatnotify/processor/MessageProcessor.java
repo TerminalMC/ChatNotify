@@ -123,11 +123,11 @@ public class MessageProcessor {
         for (Notification notif : ChatNotify.config().getNotifs()) {
             if (notif.isEnabled()) {
                 /*
-                triggerIsKey indicates that the Notification should only be
-                triggered by messages with a TranslatableContents key matching
-                a trigger of the Notification.
-                The exception to this is the key ".", which should trigger its
-                notification irrespective of the message content.
+                 * triggerIsKey indicates that the Notification should only be
+                 * triggered by messages with a TranslatableContents key
+                 * matching a trigger of the Notification.
+                 * The exception to this is the key ".", which should trigger
+                 * its notification irrespective of the message content.
                  */
                 if (notif.triggerIsKey) {
                     if (notif.getTrigger().equals(".")) {
@@ -307,8 +307,8 @@ public class MessageProcessor {
             // Recurse for all args
             Object[] args = contents.getArgs();
             for (int i = 0; i < contents.getArgs().length; i++) {
-                if (args[i] instanceof Component argText) {
-                    args[i] = restyleComponent(argText.copy(), trigger, style);
+                if (args[i] instanceof Component argComponent) {
+                    args[i] = restyleComponent(argComponent.copy(), trigger, style);
                 }
                 else if (args[i] instanceof String argString) {
                     args[i] = restyleComponent(Component.literal(argString), trigger, style);
@@ -328,104 +328,89 @@ public class MessageProcessor {
 
     /**
      * If the contents of the specified {@code MutableComponent} is an instance
-     * of {@code LiteralContents},
+     * of {@code LiteralContents}, deconstructs, restyles and reconstructs
+     * the {@code} MutableComponent with the objective of applying the specified
+     * {@code Style} to only the occurrence of the specified trigger.
      * @param msg the {@code MutableComponent} to restyle.
-     * @param trigger the {@code String} to restyle.
+     * @param trigger the {@code String} to restyle within the
+     *                {@code MutableComponent}.
      * @param style the {@code Style} to apply.
      * @return the {@code MutableComponent}, restyled if possible.
      */
-    private static MutableComponent restyleContents(MutableComponent msg, String trigger, Style style) {
-        if (msg.getContents() instanceof LiteralContents contents) {
+    private static MutableComponent restyleContents(MutableComponent msg,
+                                                    String trigger, Style style) {
+        if (!(msg.getContents() instanceof LiteralContents contents)) return msg;
 
-            // Only process if the message or its siblings contain the match
-            String msgStr = contents.text();
-            Pair<Integer,Integer> triggerMatch = msgContainsStr(msgStr, trigger, false);
+        String msgStr = contents.text();
+        Pair<Integer,Integer> triggerMatch = msgContainsStr(msgStr, trigger, false);
 
-            if (triggerMatch == null) {
-                msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
-            }
-            else {
-                List<Component> siblings = msg.getSiblings();
+        if (triggerMatch == null) {
+            // Trigger not found, try siblings
+            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
+        }
+        else {
+            // Trigger found, restyle
+            List<Component> siblings = msg.getSiblings();
 
-                if (siblings.isEmpty())
-                {
-                    int matchFirst = triggerMatch.getFirst();
-                    int matchLast = triggerMatch.getSecond();
+            if (siblings.isEmpty()) {
+                // Split, restyle and reconstruct
 
-                    /*
-                    If no siblings, the match must exist in the LiteralContents,
-                    so it is deconstructed and the parts individually re-styled
-                    before being re-built into a new MutableComponent.
-                     */
+                int matchFirst = triggerMatch.getFirst();
+                int matchLast = triggerMatch.getSecond();
 
-                    if (msgStr.contains("§")) {
+                // Some magic to deal with format codes
+                if (msgStr.contains("§")) {
+                    String activeCodes = activeFormatCodes(msgStr.substring(0, matchLast-trigger.length()));
 
-                        String activeCodes = activeFormatCodes(msgStr.substring(0, matchLast-trigger.length()));
+                    String msgTriggerFull = msgStr.substring(matchFirst,matchLast);
+                    int realStart = startIgnoreCodes(msgTriggerFull, msgTriggerFull.length()-trigger.length());
 
-                        String msgTriggerFull = msgStr.substring(matchFirst,matchLast);
-                        int realStart = startIgnoreCodes(msgTriggerFull, msgTriggerFull.length()-trigger.length());
+                    String msgStart = msgStr.substring(0, matchFirst);
+                    String msgTrigger = msgTriggerFull.substring(realStart);
+                    String msgEnd = msgStr.substring(matchLast);
 
-                        String msgStart = msgStr.substring(0, matchFirst);
-                        String msgTrigger = msgTriggerFull.substring(realStart);
-                        String msgEnd = msgStr.substring(matchLast);
+                    msgStr = msgStart + '\u00a7' + 'r' + msgTrigger + activeCodes + msgEnd;
 
-                        msgStr = msgStart + '\u00a7' + 'r' + msgTrigger + activeCodes + msgEnd;
+                    matchLast = matchLast-realStart+2;
+                }
 
-                        matchLast = matchLast-realStart+2;
-                    }
+                // msgStr before match
+                if (matchFirst != 0) {
+                    siblings.add(Component.literal(msgStr.substring(0, matchFirst))
+                            .setStyle(msg.getStyle()));
+                }
 
-                    /*
-                    Split msgStr around the match and add the parts as
-                    Components.
-                     */
+                // Match
+                siblings.add(Component.literal(msgStr.substring(matchFirst, matchLast))
+                        .setStyle(applyStyle(msg.getStyle(), style)));
 
-                    // msgStr after match
-                    if (matchLast != msgStr.length()) {
-                        siblings.add(0, Component.literal(
-                                        msgStr.substring(matchLast))
-                                .setStyle(msg.getStyle()));
-                    }
+                // msgStr after match
+                if (matchLast != msgStr.length()) {
+                    siblings.add(Component.literal(msgStr.substring(matchLast))
+                            .setStyle(msg.getStyle()));
+                }
 
-                    // Match
-                    siblings.add(0, Component.literal(msgStr.substring(
-                            matchFirst, matchLast)).setStyle(
-                                    applyStyle(msg.getStyle(), style)));
-
-                    // msgStr before match
-                    if (matchFirst != 0) {
-                        siblings.add(0, Component.literal(
-                                        msgStr.substring(0, matchFirst))
-                                .setStyle(msg.getStyle()));
-                    }
-
-                    if (siblings.size() == 1) {
-                        msg = siblings.get(0).copy();
-                    }
-                    else {
-                        MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
-                        newMessage.siblings.addAll(siblings);
-                        msg = newMessage;
-                    }
+                if (siblings.size() == 1) {
+                    msg = siblings.get(0).copy();
                 }
                 else {
-                    /*
-                    If the message has siblings, it cannot be directly
-                    re-styled. Instead, it is replaced by a new, empty
-                    MutableComponent, with the original LiteralContents added as
-                    the first sibling, and all other siblings subsequently
-                    added in their original order. The new MutableComponent is
-                    then recursively processed.
-                     */
-
-                    MutableComponent replacement = MutableComponent.create(ComponentContents.EMPTY);
-
-                    siblings.add(0, MutableComponent.create(msg.getContents()));
-
-                    replacement.setStyle(msg.getStyle());
-                    replacement.siblings.addAll(siblings);
-
-                    msg = restyleComponent(replacement, trigger, style);
+                    MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
+                    newMessage.siblings.addAll(siblings);
+                    msg = newMessage;
                 }
+            }
+            else {
+                // Unable to restyle without affecting siblings, so add contents
+                // as first sibling of a new MutableComponent, followed by other
+                // siblings in original order, then restyle that.
+
+                MutableComponent replacement = MutableComponent.create(ComponentContents.EMPTY);
+                replacement.setStyle(msg.getStyle());
+
+                siblings.add(0, MutableComponent.create(msg.getContents()));
+                replacement.siblings.addAll(siblings);
+
+                msg = restyleComponent(replacement, trigger, style);
             }
         }
         return msg;
@@ -491,7 +476,7 @@ public class MessageProcessor {
     }
 
     /**
-     * For each non-{@code null}, {@code true} or default field of
+     * For each non-{@code null}, {@code true} or non-default field of
      * {@code newStyle}, overrides the corresponding {@code oldStyle} field.
      * @param oldStyle the {@code Style} to apply to.
      * @param newStyle the {@code Style} to apply.
