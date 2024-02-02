@@ -17,10 +17,19 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
                               JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = jsonGuiEventListener.getAsJsonObject();
 
+        boolean mixinEarly;
         boolean ignoreOwnMessages;
         SoundSource notifSoundSource;
         ArrayList<String> messagePrefixes = new ArrayList<>();
         ArrayList<Notification> notifications = new ArrayList<>();
+
+        try {
+            mixinEarly = jsonObject.get("mixinEarly").getAsBoolean();
+        }
+        catch (JsonParseException | NullPointerException |
+               UnsupportedOperationException | IllegalStateException e) {
+            mixinEarly = false;
+        }
 
         try {
             ignoreOwnMessages = jsonObject.get("ignoreOwnMessages").getAsBoolean();
@@ -73,6 +82,7 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
             notifications.add(Config.DEFAULT_USERNAME_NOTIF);
         }
 
-        return new Config(ignoreOwnMessages, notifSoundSource, messagePrefixes, notifications);
+        return new Config(mixinEarly, ignoreOwnMessages, notifSoundSource,
+                messagePrefixes, notifications);
     }
 }

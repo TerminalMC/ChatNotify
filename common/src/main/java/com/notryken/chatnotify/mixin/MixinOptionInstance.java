@@ -26,14 +26,12 @@ public class MixinOptionInstance {
     @Shadow
     @Final
     @Mutable
-    private
-    OptionInstance.ValueSet<Double> values;
+    private OptionInstance.ValueSet<Double> values;
 
     @Shadow
     @Final
     @Mutable
-    private
-    Codec<Double> codec;
+    private Codec<Double> codec;
 
     /**
      * Increases the maximum value of the chat height focused slider.

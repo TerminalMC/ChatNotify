@@ -60,9 +60,11 @@ public class Config {
     // Saved, not modifiable by user
     // 001 is initial version
     // 002 adds display name trigger to username notification
-    private final String version = "002";
+    // 003 adds the "mixinEarly" boolean
+    private final String version = "003";
 
     // Saved, modifiable by user
+    public boolean mixinEarly;
     public boolean ignoreOwnMessages;
     public SoundSource notifSoundSource;
     private final ArrayList<String> messagePrefixes;
@@ -73,6 +75,7 @@ public class Config {
      * in-game name.
      */
     public Config() {
+        mixinEarly = false;
         ignoreOwnMessages = false;
         notifSoundSource = DEFAULT_SOUND_SOURCE;
         messagePrefixes = new ArrayList<>(DEFAULT_PREFIXES);
@@ -83,8 +86,9 @@ public class Config {
     /**
      * <b>Note:</b> Not validated.
      */
-    public Config(boolean ignoreOwnMessages, SoundSource notifSoundSource,
+    public Config(boolean mixinEarly, boolean ignoreOwnMessages, SoundSource notifSoundSource,
                   ArrayList<String> messagePrefixes, ArrayList<Notification> notifications) {
+        this.mixinEarly = mixinEarly;
         this.ignoreOwnMessages = ignoreOwnMessages;
         this.notifSoundSource = notifSoundSource;
         this.messagePrefixes = messagePrefixes;

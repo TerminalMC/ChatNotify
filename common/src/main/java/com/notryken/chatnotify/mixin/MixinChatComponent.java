@@ -1,11 +1,13 @@
 package com.notryken.chatnotify.mixin;
 
+import com.notryken.chatnotify.ChatNotify;
 import com.notryken.chatnotify.processor.MessageProcessor;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /*
  * Minecraft handles different message packet types in different ways. The
@@ -28,19 +30,22 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  * <p>
  * ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag) logs
  * the message and then passes it to ChatComponent#addMessage(Component,
- * MessageSignature, int, GuiMessageTag, boolean). The latter method is also
- * used for chat refresh, so the former method is the only suitable method
- * common to all incoming message routes.
+ * MessageSignature, int, GuiMessageTag, boolean).
  */
-@Mixin(value = ChatComponent.class)
+
+@Mixin(value = ChatComponent.class, priority = 800)
 public class MixinChatComponent {
-    @ModifyArg(
+
+    @ModifyVariable(
             method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/components/ChatComponent;addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V"),
-            index = 0)
+            at = @At("HEAD"),
+            argsOnly = true)
     private Component replaceMessage(Component message) {
-        return MessageProcessor.processMessage(message);
+        if (!ChatNotify.config().mixinEarly) {
+            return MessageProcessor.processMessage(message);
+        }
+        else {
+            return message;
+        }
     }
 }

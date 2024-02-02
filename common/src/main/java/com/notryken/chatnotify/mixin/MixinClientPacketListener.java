@@ -49,8 +49,9 @@ import java.util.Locale;
  * of prefixes (which can be edited by the user), and the first matching prefix
  * (if any) is cut from the message.
  */
-@Mixin(value = ClientPacketListener.class, priority = 980)
-public abstract class MixinClientPacketListener {
+
+@Mixin(value = ClientPacketListener.class, priority = 800)
+public class MixinClientPacketListener {
 
     // Username-update mixins //////////////////////////////////////////////////
 
