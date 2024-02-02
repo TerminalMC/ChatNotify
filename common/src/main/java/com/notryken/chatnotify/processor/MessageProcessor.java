@@ -311,7 +311,7 @@ public class MessageProcessor {
                     args[i] = restyleComponent(argText.copy(), trigger, style);
                 }
                 else if (args[i] instanceof String argString) {
-                    args[i] = Component.literal(argString).setStyle(style);
+                    args[i] = restyleComponent(Component.literal(argString), trigger, style);
                 }
             }
             // Reconstruct
