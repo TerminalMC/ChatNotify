@@ -35,8 +35,7 @@ public class Notification {
                  TextColor color, ArrayList<Boolean> formatControls,
                  float soundVolume, float soundPitch, ResourceLocation sound, boolean regexEnabled,
                  boolean exclusionEnabled, ArrayList<String> exclusionTriggers,
-                 boolean responseEnabled, ArrayList<String> responseMessages)
-    {
+                 boolean responseEnabled, ArrayList<String> responseMessages) {
         this.enabled = enabled;
         this.controls = controls;
         this.triggers = triggers;

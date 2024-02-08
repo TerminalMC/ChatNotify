@@ -37,11 +37,6 @@ public class Config {
             new ArrayList<>(List.of(false, false, false, false, false)),
             1f, 1f, DEFAULT_SOUND, false,
             false, new ArrayList<>(), false, new ArrayList<>());
-    public static final Notification DEFAULT_BLANK_NOTIF = new Notification(
-            true, new ArrayList<>(List.of(true, false, true)), new ArrayList<>(List.of("")),
-            false, DEFAULT_COLOR, new ArrayList<>(List.of(false, false, false, false, false)),
-            1f, 1f, DEFAULT_SOUND, false,
-            false, new ArrayList<>(), false, new ArrayList<>());
     public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
 
     public static final Gson CONFIG_GSON = new GsonBuilder()
@@ -188,7 +183,11 @@ public class Config {
      * Adds a new {@code Notification} with default values.
      */
     public void addNotif() {
-        notifications.add(DEFAULT_BLANK_NOTIF);
+        notifications.add(new Notification(true, new ArrayList<>(List.of(true, false, true)),
+                new ArrayList<>(List.of("")), false, DEFAULT_COLOR,
+                new ArrayList<>(List.of(false, false, false, false, false)),
+                1f, 1f, DEFAULT_SOUND, false,
+                false, new ArrayList<>(), false, new ArrayList<>()));
     }
 
     /**
