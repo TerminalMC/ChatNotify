@@ -147,9 +147,6 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
         else if (notifications.get(0).triggers.size() < 2) {
             notifications.set(0, Notification.createUserNotification());
         }
-        else {
-            notifications.get(0).triggers.add(1, new Trigger("Display name"));
-        }
 
         return new Config(mixinEarly, checkOwnMessages, soundSource, messagePrefixes, notifications);
     }
