@@ -1,6 +1,8 @@
 package com.notryken.chatnotify.gui.component.listwidget;
 
 import com.notryken.chatnotify.config.Notification;
+import com.notryken.chatnotify.config.Trigger;
+import com.notryken.chatnotify.gui.screen.ConfigScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -8,6 +10,7 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import com.notryken.chatnotify.ChatNotify;
 
@@ -44,13 +47,14 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
         addEntry(new Entry.ExclusionToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.exclusionEnabled) {
-            for (int i = 0; i < this.notif.getExclusionTriggers().size(); i ++) {
-                addEntry(new Entry.ExclusionTriggerField(entryX, entryWidth, entryHeight, notif, this, i));
+            for (int i = 0; i < this.notif.exclusionTriggers.size(); i ++) {
+                addEntry(new Entry.ExclusionTriggerField(entryX, entryWidth, entryHeight,
+                        this, notif, notif.exclusionTriggers.get(i), i));
             }
             addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
-                        notif.addExclusionTrigger("");
+                        notif.exclusionTriggers.add(new Trigger());
                         reload();
                     }));
         }
@@ -60,13 +64,13 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
         addEntry(new Entry.ResponseToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.responseEnabled) {
-            for (int i = 0; i < notif.getResponseMessages().size(); i ++) {
+            for (int i = 0; i < notif.responseMessages.size(); i ++) {
                 addEntry(new Entry.ResponseMessageField(entryX, entryWidth, entryHeight, notif, this, i));
             }
             addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
-                        notif.addResponseMessage("");
+                        notif.responseMessages.add("");
                         reload();
                     }));
         }
@@ -118,7 +122,6 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                         Component.literal("Nuclear Reset"),
                         Component.literal("Are you sure you want to delete all ChatNotify " +
                                 "notifications and reset all settings?")))));
-
     }
 
     @Override
@@ -131,6 +134,13 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
         return newListWidget;
     }
 
+    private void openKeyConfig(Trigger trigger) {
+        minecraft.setScreen(new ConfigScreen(minecraft.screen,
+                Component.translatable("screen.chatnotify.title.key"),
+                new KeyConfigListWidget(minecraft, screen.width, screen.height, y0, y1,
+                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
+    }
+
     private abstract static class Entry extends ConfigListWidget.Entry {
 
         private static class RegexToggleButton extends Entry {
@@ -138,15 +148,23 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                               AdvancedConfigListWidget listWidget) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
-                        .withInitialValue(notif.regexEnabled)
-                        .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
-                                "If ON, all triggers for this notification will be " +
-                                "processed as complete regular expressions.")))
+                        Component.translatable("Allowed").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("Disabled").withStyle(ChatFormatting.RED))
+                        .withInitialValue(notif.allowRegex)
+                        .withTooltip(
+                                (status) -> {
+                                    if (status) {
+                                        return Tooltip.create(Component.literal("Use the .* " +
+                                                "button next to each trigger to enable/disable regex."));
+                                    }
+                                    else {
+                                        return Tooltip.create(Component.literal("Regex is disabled " +
+                                                "for all triggers."));
+                                    }
+                                })
                         .create(x, 0, width, height, Component.literal("Regex"),
                                 (button, status) -> {
-                                    notif.regexEnabled = status;
+                                    notif.allowRegex = status;
                                     listWidget.reload();
                                 }));
             }
@@ -173,24 +191,104 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
 
         private static class ExclusionTriggerField extends Entry {
 
-            ExclusionTriggerField(int x, int width, int height, Notification notif,
-                                  AdvancedConfigListWidget listWidget, int index) {
+            ExclusionTriggerField(int x, int width, int height, AdvancedConfigListWidget listWidget,
+                                  Notification notif, Trigger trigger, int index) {
                 super();
 
                 int spacing = 5;
+                int regexButtonWidth = 15;
+                int keyButtonWidth = notif.allowRegex ? 15 : 20;
                 int removeButtonWidth = 20;
 
                 EditBox triggerEditBox = new EditBox(Minecraft.getInstance().font,
-                        x, 0, width, height, Component.literal("Exclusion Trigger"));
+                        x, 0, width, height, Component.literal("Notification Trigger"));
                 triggerEditBox.setMaxLength(120);
-                triggerEditBox.setValue(notif.getExclusionTrigger(index));
-                triggerEditBox.setResponder((trigger) ->
-                        notif.setExclusionTrigger(index, trigger.strip()));
-                elements.add(triggerEditBox);
+                triggerEditBox.setValue(trigger.string);
+                triggerEditBox.setResponder((string) -> trigger.string = string.strip());
 
-                elements.add(Button.builder(Component.literal("X"),
+                Button keyButton;
+                if (notif.allowRegex) {
+                    Button regexButton;
+                    if (trigger.isKey()) {
+                        regexButton = Button.builder(Component.literal(".*")
+                                                .withStyle(ChatFormatting.GRAY),
+                                        (button) -> {})
+                                .pos(x - spacing - regexButtonWidth - regexButtonWidth, 0)
+                                .size(regexButtonWidth, height)
+                                .build();
+                        regexButton.setTooltip(Tooltip.create(Component.literal(
+                                "Regex Disabled [Key trigger]")));
+                        regexButton.setTooltipDelay(500);
+                    }
+                    else if (trigger.isRegex) {
+                        regexButton = Button.builder(Component.literal(".*")
+                                                .withStyle(ChatFormatting.GREEN),
+                                        (button) -> {
+                                            trigger.isRegex = false;
+                                            listWidget.reload();
+                                        })
+                                .pos(x - spacing - regexButtonWidth - regexButtonWidth, 0)
+                                .size(regexButtonWidth, height)
+                                .build();
+                        regexButton.setTooltip(Tooltip.create(Component.literal(
+                                "Regex Enabled")));
+                        regexButton.setTooltipDelay(500);
+                    }
+                    else {
+                        regexButton = Button.builder(Component.literal(".*")
+                                                .withStyle(ChatFormatting.RED),
+                                        (button) -> {
+                                            trigger.isRegex = true;
+                                            listWidget.reload();
+                                        })
+                                .pos(x - spacing - regexButtonWidth - regexButtonWidth, 0)
+                                .size(regexButtonWidth, height)
+                                .build();
+                        regexButton.setTooltip(Tooltip.create(Component.literal(
+                                "Regex Disabled")));
+                        regexButton.setTooltipDelay(500);
+                    }
+                    elements.add(regexButton);
+                }
+                if (trigger.isKey()) {
+                    keyButton = Button.builder(Component.literal("\uD83D\uDD11")
+                                            .withStyle(ChatFormatting.GREEN),
+                                    (button) -> {
+                                        if (Screen.hasShiftDown()) {
+                                            trigger.setIsKey(false);
+                                            listWidget.reload();
+                                        } else {
+                                            listWidget.openKeyConfig(trigger);
+                                        }})
+                            .pos(x - spacing - keyButtonWidth, 0)
+                            .size(keyButtonWidth, height)
+                            .build();
+                    keyButton.setTooltip(Tooltip.create(Component.literal(
+                            "Translation key trigger")));
+                    keyButton.setTooltipDelay(500);
+                }
+                else {
+                    keyButton = Button.builder(Component.literal("\uD83D\uDD11")
+                                            .withStyle(ChatFormatting.RED),
+                                    (button) -> {
+                                        if (Screen.hasShiftDown()) {
+                                            trigger.setIsKey(true);
+                                            listWidget.reload();
+                                        } else {
+                                            listWidget.openKeyConfig(trigger);
+                                        }})
+                            .pos(x - spacing - keyButtonWidth, 0)
+                            .size(keyButtonWidth, height)
+                            .build();
+                    keyButton.setTooltip(Tooltip.create(Component.literal(
+                            "Normal trigger")));
+                    keyButton.setTooltipDelay(500);
+                }
+                elements.add(keyButton);
+                elements.add(triggerEditBox);
+                elements.add(Button.builder(Component.literal("\u274C"),
                                 (button) -> {
-                                    notif.removeExclusionTrigger(index);
+                                    notif.exclusionTriggers.remove(index);
                                     listWidget.reload();
                                 })
                         .pos(x + width + spacing, 0)
@@ -210,8 +308,7 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                         .withInitialValue(notif.responseEnabled)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "Chat messages or commands to be sent by the client " +
-                                        "immediately when this notification is activated. " +
-                                        "Use with caution.")))
+                                        "immediately when this notification is activated.")))
                         .create(x, 0, width, height, Component.literal("Response Messages"),
                                 (button, status) -> {
                                     notif.responseEnabled = status;
@@ -227,19 +324,60 @@ public class AdvancedConfigListWidget extends ConfigListWidget {
                 super();
 
                 int spacing = 5;
+                int moveButtonWidth = 12;
                 int removeButtonWidth = 20;
+
+                elements.add(Button.builder(Component.literal("\u2191"),
+                                (button) -> {
+                                    if (Screen.hasShiftDown()) {
+                                        if (index > 0) {
+                                            notif.responseMessages.add(0, notif.responseMessages.get(index));
+                                            notif.responseMessages.remove(index + 1);
+                                            listWidget.reload();
+                                        }
+                                    } else {
+                                        if (index > 0) {
+                                            String temp = notif.responseMessages.get(index);
+                                            notif.responseMessages.set(index, notif.responseMessages.get(index - 1));
+                                            notif.responseMessages.set(index - 1, temp);
+                                            listWidget.reload();
+                                        }
+                                    }})
+                        .pos(x - 2 * moveButtonWidth - spacing, 0)
+                        .size(moveButtonWidth, height)
+                        .build());
+
+                elements.add(Button.builder(Component.literal("\u2193"),
+                                (button) -> {
+                                    if (Screen.hasShiftDown()) {
+                                        if (index < notif.responseMessages.size() - 1) {
+                                            notif.responseMessages.add(notif.responseMessages.get(index));
+                                            notif.responseMessages.remove(index);
+                                            listWidget.reload();
+                                        }
+                                    } else {
+                                        if (index < notif.responseMessages.size() - 1) {
+                                            String temp = notif.responseMessages.get(index);
+                                            notif.responseMessages.set(index, notif.responseMessages.get(index + 1));
+                                            notif.responseMessages.set(index + 1, temp);
+                                            listWidget.reload();
+                                        }
+                                    }})
+                        .pos(x - moveButtonWidth - spacing, 0)
+                        .size(moveButtonWidth, height)
+                        .build());
 
                 EditBox messageEditBox = new EditBox(Minecraft.getInstance().font,
                         x, 0, width, height, Component.literal("Response Message"));
                 messageEditBox.setMaxLength(120);
-                messageEditBox.setValue(notif.getResponseMessage(index));
+                messageEditBox.setValue(notif.responseMessages.get(index));
                 messageEditBox.setResponder((message) ->
-                        notif.setResponseMessage(index, message.strip()));
+                        notif.responseMessages.set(index, message.strip()));
                 elements.add(messageEditBox);
 
-                elements.add(Button.builder(Component.literal("X"),
+                elements.add(Button.builder(Component.literal("\u274C"),
                                 (button) -> {
-                                    notif.removeResponseMessage(index);
+                                    notif.responseMessages.remove(index);
                                     listWidget.reload();
                                 })
                         .pos(x + width + spacing, 0)

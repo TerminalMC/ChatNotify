@@ -2,6 +2,7 @@
   "screen.chatnotify.title.default": "Chat Notify",
   "screen.chatnotify.title.prefix": "Message Prefix Settings",
   "screen.chatnotify.title.notif": "Notification Settings",
+  "screen.chatnotify.title.key": "Notification Trigger Type",
   "screen.chatnotify.title.sound": "Notification Sound Settings",
   "screen.chatnotify.title.color": "Notification Color",
   "screen.chatnotify.title.advanced": "Advanced Settings"

@@ -1,10 +1,12 @@
 package com.notryken.chatnotify.processor;
 
 import com.mojang.datafixers.util.Pair;
+import com.notryken.chatnotify.ChatNotify;
+import com.notryken.chatnotify.config.Notification;
+import com.notryken.chatnotify.config.TextStyle;
+import com.notryken.chatnotify.config.Trigger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
@@ -13,14 +15,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import com.notryken.chatnotify.ChatNotify;
-import com.notryken.chatnotify.config.Notification;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -29,7 +28,7 @@ import static com.notryken.chatnotify.ChatNotify.config;
 import static com.notryken.chatnotify.ChatNotify.recentMessages;
 
 /*
- * Message processing algorithm, starting at messageProcessor().
+ * Message processing algorithm, starting at processMessage().
  */
 public class MessageProcessor {
 
@@ -80,14 +79,14 @@ public class MessageProcessor {
             if (lastMatchIdx > 0) {
                 // Check for a trigger in the part before the match
                 String prefix = msgStr.substring(0, lastMatchIdx);
-                for (String trigger : ChatNotify.config().getNotif(0).getTriggers()) {
-                    Pair<Integer,Integer> prefixMatch = msgContainsStr(prefix, trigger, false);
+                for (Trigger trigger : config().getNotifs().get(0).triggers) {
+                    Pair<Integer,Integer> prefixMatch = msgContainsStr(prefix, trigger.string, false);
                     if (prefixMatch != null) {
                         // Both conditions are now satisfied
                         // Remove the matching stored message
                         recentMessages.remove(i);
                         // Modify the message string
-                        if (ChatNotify.config().ignoreOwnMessages) {
+                        if (!ChatNotify.config().checkOwnMessages) {
                             msgStr = null;
                         }
                         else {
@@ -122,58 +121,49 @@ public class MessageProcessor {
     private static Component tryNotify(Component message, String msgStr, String checkedMsgStr) {
         for (Notification notif : ChatNotify.config().getNotifs()) {
             if (notif.isEnabled()) {
-                /*
-                 * triggerIsKey indicates that the Notification should only be
-                 * triggered by messages with a TranslatableContents key
-                 * matching a trigger of the Notification.
-                 * The exception to this is the key ".", which should trigger
-                 * its notification irrespective of the message content.
-                 */
-                if (notif.triggerIsKey) {
-                    if (notif.getTrigger().equals(".")) {
-                        playSound(notif);
-                        sendResponses(notif);
-                        return simpleRestyle(message, notif);
-                    }
-                    else {
-                        if (message.getContents() instanceof TranslatableContents ttc) {
-                            if (!notif.getTrigger().isBlank() && ttc.getKey().contains(notif.getTrigger())) {
-                                playSound(notif);
-                                sendResponses(notif);
-                                return simpleRestyle(message, notif);
-                            }
-                        }
-                    }
-                } else {
-                    for (String trigger : notif.getTriggers()) {
-                        // Check trigger
-                        // Note: Use the unmodified msgStr if regexEnabled
-                        if (!trigger.isBlank() && msgContainsStr(
-                                (notif.regexEnabled ? msgStr : checkedMsgStr),
-                                trigger, notif.regexEnabled) != null) {
-                            // Matched trigger, check exclusions
-                            boolean exclude = false;
-                            if (notif.exclusionEnabled) {
-                                for (String exTrig : notif.getExclusionTriggers()) {
-                                    if (msgContainsStr((notif.regexEnabled ? msgStr : checkedMsgStr),
-                                            exTrig, notif.regexEnabled) != null) {
-                                        exclude = true;
-                                        break;
-                                    }
+                for (Trigger trigger : notif.triggers) {
+                    if (triggerMatched(notif, trigger, message, msgStr, checkedMsgStr)) {
+                        boolean excluded = false;
+                        if (notif.exclusionEnabled) {
+                            for (Trigger exclTrigger : notif.exclusionTriggers) {
+                                if (triggerMatched(notif, exclTrigger, message, msgStr, checkedMsgStr)) {
+                                    excluded = true;
+                                    break;
                                 }
                             }
-                            if (!exclude) {
-                                playSound(notif);
-                                sendResponses(notif);
-                                return (notif.regexEnabled ? simpleRestyle(message, notif) :
-                                        complexRestyle(message, trigger, notif));
-                            }
+                        }
+                        if (!excluded) {
+                            playSound(notif);
+                            sendResponses(notif);
+                            return (trigger.isKey() || trigger.isRegex) ?
+                                    simpleRestyle(message, notif) :
+                                    complexRestyle(message, trigger.string, notif);
                         }
                     }
                 }
             }
         }
         return null;
+    }
+
+    private static boolean triggerMatched(Notification notif, Trigger trigger,
+                                          Component message, String msgStr, String checkedMsgStr) {
+        boolean match = false;
+        if (trigger.isKey()) {
+            if (trigger.string.equals(".")) {
+                match = true;
+            }
+            else if (message.getContents() instanceof TranslatableContents tc) {
+                if (tc.getKey().contains(trigger.string)) {
+                    match = true;
+                }
+            }
+        }
+        else if (msgContainsStr(notif.allowRegex && trigger.isRegex ? msgStr : checkedMsgStr,
+                trigger.string, notif.allowRegex && trigger.isRegex) != null) {
+            match = true;
+        }
+        return match;
     }
 
     /**
@@ -196,7 +186,7 @@ public class MessageProcessor {
                 return Pair.of(matcher.start(), matcher.end());
             }
         } catch (PatternSyntaxException e) {
-            ChatNotify.LOG.warn("Error processing regex: " + e);
+            ChatNotify.LOG.warn("ChatNotify: Error processing regex: " + e);
         }
         return null;
     }
@@ -207,11 +197,11 @@ public class MessageProcessor {
      * @param notif the {@code Notification}.
      */
     private static void playSound(Notification notif) {
-        if (notif.getControl(2)) {
+        if (notif.sound.isEnabled()) {
             Minecraft.getInstance().getSoundManager().play(
                     new SimpleSoundInstance(
-                            notif.getSound(), config().notifSoundSource,
-                            notif.getSoundVolume(), notif.getSoundPitch(),
+                            notif.sound.getResourceLocation(), config().soundSource,
+                            notif.sound.getVolume(), notif.sound.getPitch(),
                             SoundInstance.createUnseededRandom(), false, 0,
                             SoundInstance.Attenuation.NONE, 0, 0, 0, true));
         }
@@ -224,35 +214,15 @@ public class MessageProcessor {
      */
     private static void sendResponses(Notification notif) {
         if (notif.responseEnabled) {
-            Minecraft client = Minecraft.getInstance();
-            Screen oldScreen = client.screen;
-            for (String response : notif.getResponseMessages()) {
-                client.setScreen(new ChatScreen(response));
-                if (client.screen instanceof ChatScreen cs) {
-                    cs.handleChatInput(response, true);
+            Minecraft minecraft = Minecraft.getInstance();
+            for (String response : notif.responseMessages) {
+                if (response.startsWith("/")) {
+                    minecraft.player.connection.sendCommand(response.substring(1));
+                } else {
+                    minecraft.player.connection.sendChat(response);
                 }
-                client.setScreen(oldScreen);
             }
         }
-    }
-
-    /**
-     * Constructs a {@code Style} from the text color and format fields of the
-     * specified {@code Notification}.
-     * @param notif the {@code Notification}.
-     * @return the created {@code Style}.
-     */
-    private static Style getStyle(Notification notif) {
-        return Style.create(
-                ((!notif.getControl(0)) ?
-                        Optional.empty() : Optional.of(notif.getColor())),
-                Optional.of(notif.getFormatControl(0)),
-                Optional.of(notif.getFormatControl(1)),
-                Optional.of(notif.getFormatControl(2)),
-                Optional.of(notif.getFormatControl(3)),
-                Optional.of(notif.getFormatControl(4)),
-                Optional.empty(),
-                Optional.empty());
     }
 
     /**
@@ -265,8 +235,8 @@ public class MessageProcessor {
      * @return the restyled {@code Component}.
      */
     private static Component simpleRestyle(Component msg, Notification notif) {
-        if (notif.getControl(0) || notif.getControl(1)) {
-            msg = msg.copy().setStyle(applyStyle(msg.getStyle(), getStyle(notif)));
+        if (notif.textStyle.isEnabled()) {
+            msg = msg.copy().setStyle(applyStyle(msg.getStyle(), notif.textStyle));
         }
         return msg;
     }
@@ -283,8 +253,8 @@ public class MessageProcessor {
      * @return the restyled {@code Component}.
      */
     private static Component complexRestyle(Component msg, String trigger, Notification notif) {
-        if (notif.getControl(0) || notif.getControl(1)) {
-            msg = restyleComponent(msg.copy(), trigger, getStyle(notif));
+        if (notif.textStyle.isEnabled()) {
+            msg = restyleComponent(msg.copy(), trigger, notif.textStyle);
         }
         return msg;
     }
@@ -294,24 +264,25 @@ public class MessageProcessor {
      * find and restyle only the specified trigger.
      * @param msg the {@code MutableComponent} to restyle.
      * @param trigger the {@code String} to restyle.
-     * @param style the {@code Style} to apply.
+     * @param textStyle the {@code TextStyle} to apply.
      * @return the {@code MutableComponent}, restyled if possible.
      */
-    private static MutableComponent restyleComponent(MutableComponent msg, String trigger, Style style) {
+    private static MutableComponent restyleComponent(MutableComponent msg, String trigger,
+                                                     TextStyle textStyle) {
 
         if (msg.getContents() instanceof LiteralContents) {
             // LiteralContents is typically the lowest level
-            msg = restyleContents(msg, trigger, style);
+            msg = restyleContents(msg, trigger, textStyle);
         }
         else if (msg.getContents() instanceof TranslatableContents contents) {
             // Recurse for all args
             Object[] args = contents.getArgs();
             for (int i = 0; i < contents.getArgs().length; i++) {
                 if (args[i] instanceof Component argComponent) {
-                    args[i] = restyleComponent(argComponent.copy(), trigger, style);
+                    args[i] = restyleComponent(argComponent.copy(), trigger, textStyle);
                 }
                 else if (args[i] instanceof String argString) {
-                    args[i] = restyleComponent(Component.literal(argString), trigger, style);
+                    args[i] = restyleComponent(Component.literal(argString), trigger, textStyle);
                 }
             }
             // Reconstruct
@@ -321,7 +292,7 @@ public class MessageProcessor {
         }
         else {
             // Recurse for all siblings
-            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
+            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, textStyle));
         }
         return msg;
     }
@@ -334,11 +305,11 @@ public class MessageProcessor {
      * @param msg the {@code MutableComponent} to restyle.
      * @param trigger the {@code String} to restyle within the
      *                {@code MutableComponent}.
-     * @param style the {@code Style} to apply.
+     * @param textStyle the {@code TextStyle} to apply.
      * @return the {@code MutableComponent}, restyled if possible.
      */
     private static MutableComponent restyleContents(MutableComponent msg,
-                                                    String trigger, Style style) {
+                                                    String trigger, TextStyle textStyle) {
         if (!(msg.getContents() instanceof LiteralContents contents)) return msg;
 
         String msgStr = contents.text();
@@ -346,7 +317,7 @@ public class MessageProcessor {
 
         if (triggerMatch == null) {
             // Trigger not found, try siblings
-            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
+            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, textStyle));
         }
         else {
             // Trigger found, restyle
@@ -363,7 +334,8 @@ public class MessageProcessor {
                     String activeCodes = activeFormatCodes(msgStr.substring(0, matchLast-trigger.length()));
 
                     String msgTriggerFull = msgStr.substring(matchFirst,matchLast);
-                    int realStart = startIgnoreCodes(msgTriggerFull, msgTriggerFull.length()-trigger.length());
+                    int realStart = startIgnoreCodes(msgTriggerFull,
+                            msgTriggerFull.length() - trigger.length());
 
                     String msgStart = msgStr.substring(0, matchFirst);
                     String msgTrigger = msgTriggerFull.substring(realStart);
@@ -382,7 +354,7 @@ public class MessageProcessor {
 
                 // Match
                 siblings.add(Component.literal(msgStr.substring(matchFirst, matchLast))
-                        .setStyle(applyStyle(msg.getStyle(), style)));
+                        .setStyle(applyStyle(msg.getStyle(), textStyle)));
 
                 // msgStr after match
                 if (matchLast != msgStr.length()) {
@@ -410,7 +382,7 @@ public class MessageProcessor {
                 siblings.add(0, MutableComponent.create(msg.getContents()));
                 replacement.siblings.addAll(siblings);
 
-                msg = restyleComponent(replacement, trigger, style);
+                msg = restyleComponent(replacement, trigger, textStyle);
             }
         }
         return msg;
@@ -476,40 +448,19 @@ public class MessageProcessor {
     }
 
     /**
-     * For each non-{@code null}, {@code true} or non-default field of
-     * {@code newStyle}, overrides the corresponding {@code oldStyle} field.
-     * @param oldStyle the {@code Style} to apply to.
-     * @param newStyle the {@code Style} to apply.
-     * @return {@code oldStyle}, with {@code newStyle} applied.
+     * For each enabled field of {@code textStyle}, overrides the corresponding
+     * {@code style} field.
+     * @param style the {@code Style} to apply to.
+     * @param textStyle the {@code TextStyle} to apply.
+     * @return {@code style}, with {@code textStyle} applied.
      */
-    private static Style applyStyle(Style oldStyle, Style newStyle)
-    {
-        Style result = oldStyle
-                .withBold((newStyle.isBold() ||
-                        oldStyle.isBold()))
-                .withItalic((newStyle.isItalic() ||
-                        oldStyle.isItalic()))
-                .withUnderlined((newStyle.isUnderlined() ||
-                        oldStyle.isUnderlined()))
-                .withStrikethrough((newStyle.isStrikethrough() ||
-                        oldStyle.isStrikethrough()))
-                .withObfuscated((newStyle.isObfuscated() ||
-                        oldStyle.isObfuscated()));
-        if (newStyle.getColor() != null) {
-            result = result.withColor(newStyle.getColor());
-        }
-        if (newStyle.getClickEvent() != null) {
-            result = result.withClickEvent(newStyle.getClickEvent());
-        }
-        if (newStyle.getHoverEvent() != null) {
-            result = result.withHoverEvent(newStyle.getHoverEvent());
-        }
-        if (newStyle.getInsertion() != null) {
-            result = result.withInsertion(newStyle.getInsertion());
-        }
-        if (newStyle.getFont() != Style.DEFAULT_FONT) {
-            result = result.withFont(newStyle.getFont());
-        }
-        return result;
+    private static Style applyStyle(Style style, TextStyle textStyle) {
+        if (textStyle.bold.isEnabled()) style = style.withBold(textStyle.bold.isOn());
+        if (textStyle.italic.isEnabled()) style = style.withItalic(textStyle.italic.isOn());
+        if (textStyle.underlined.isEnabled()) style = style.withUnderlined(textStyle.underlined.isOn());
+        if (textStyle.strikethrough.isEnabled()) style = style.withStrikethrough(textStyle.strikethrough.isOn());
+        if (textStyle.obfuscated.isEnabled()) style = style.withObfuscated(textStyle.obfuscated.isOn());
+        if (textStyle.doColor) style = style.withColor(textStyle.getTextColor());
+        return style;
     }
 }

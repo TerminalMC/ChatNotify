@@ -31,29 +31,29 @@ public class ColorConfigListWidget extends ConfigListWidget {
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Text Color")
-                        .setStyle(Style.EMPTY.withColor(this.notif.getColor())),
+                        .setStyle(Style.EMPTY.withColor(this.notif.textStyle.getTextColor())),
                 null, -1));
 
-        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Red: ", notif::getColorInt,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Red: ", () -> notif.textStyle.color,
                 (color) -> {
-                    notif.setColorInt(ColorUtil.withRed.applyAsInt(notif.getColorInt(), color));
+                    notif.textStyle.color = ColorUtil.withRed.applyAsInt(notif.textStyle.color, color);
                     refreshColorIndicator();
                 },
                 ColorUtil.toRed, ColorUtil.fromRed));
-        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Green: ", notif::getColorInt,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Green: ", () -> notif.textStyle.color,
                 (color) -> {
-                    notif.setColorInt(ColorUtil.withGreen.applyAsInt(notif.getColorInt(), color));
+                    notif.textStyle.color = ColorUtil.withGreen.applyAsInt(notif.textStyle.color, color);
                     refreshColorIndicator();
                 },
                 ColorUtil.toGreen, ColorUtil.fromGreen));
-        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Blue: ", notif::getColorInt,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Blue: ", () -> notif.textStyle.color,
                 (color) -> {
-                    notif.setColorInt(ColorUtil.withBlue.applyAsInt(notif.getColorInt(), color));
+                    notif.textStyle.color = ColorUtil.withBlue.applyAsInt(notif.textStyle.color, color);
                     refreshColorIndicator();
                 },
                 ColorUtil.toBlue, ColorUtil.fromBlue));
 
-        addEntry(new Entry.ColorSelectionEntry(entryX, entryWidth, notif::setColorInt, this));
+        addEntry(new Entry.ColorSelectionEntry(entryX, entryWidth, (value) -> notif.textStyle.color = value, this));
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ColorConfigListWidget extends ConfigListWidget {
         remove(0);
         addEntryToTop(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Text Color")
-                        .setStyle(Style.EMPTY.withColor(this.notif.getColor())),
+                        .setStyle(Style.EMPTY.withColor(this.notif.textStyle.getTextColor())),
                 null, -1));
     }
 

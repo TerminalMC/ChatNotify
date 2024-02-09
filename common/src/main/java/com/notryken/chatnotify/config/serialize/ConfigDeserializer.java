@@ -1,88 +1,108 @@
 package com.notryken.chatnotify.config.serialize;
 
 import com.google.gson.*;
-import com.notryken.chatnotify.config.Config;
-import com.notryken.chatnotify.config.Notification;
+import com.notryken.chatnotify.config.*;
 import net.minecraft.sounds.SoundSource;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-/**
- * {@code Config} deserializer. Backwards-compatible to ChatNotify v1.0.2.
- */
 public class ConfigDeserializer implements JsonDeserializer<Config> {
     @Override
-    public Config deserialize(JsonElement jsonGuiEventListener, Type type,
+    public Config deserialize(JsonElement json, Type typeOfT,
                               JsonDeserializationContext context) throws JsonParseException {
-        JsonObject jsonObject = jsonGuiEventListener.getAsJsonObject();
+        JsonObject configObject = json.getAsJsonObject();
 
         boolean mixinEarly;
-        boolean ignoreOwnMessages;
-        SoundSource notifSoundSource;
-        ArrayList<String> messagePrefixes = new ArrayList<>();
+        boolean checkOwnMessages;
+        SoundSource soundSource;
+        ArrayList<String> prefixes = new ArrayList<>();
         ArrayList<Notification> notifications = new ArrayList<>();
 
-        try {
-            mixinEarly = jsonObject.get("mixinEarly").getAsBoolean();
-        }
-        catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
-            mixinEarly = false;
+        mixinEarly = configObject.get("mixinEarly").getAsBoolean();
+
+        checkOwnMessages = configObject.get("checkOwnMessages").getAsBoolean();
+
+        soundSource = SoundSource.valueOf(configObject.get("soundSource").getAsString());
+
+        for (JsonElement je : configObject.get("prefixes").getAsJsonArray()) {
+            prefixes.add(je.getAsString());
         }
 
-        try {
-            ignoreOwnMessages = jsonObject.get("ignoreOwnMessages").getAsBoolean();
-        }
-        catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
-            ignoreOwnMessages = false;
-        }
+        for (JsonElement je : configObject.get("notifications").getAsJsonArray()) {
+            JsonObject notifObject = je.getAsJsonObject();
 
-        try {
-            String sourceStr = jsonObject.get("notifSoundSource").getAsString();
-            notifSoundSource = SoundSource.valueOf(sourceStr);
-        }
-        catch (JsonParseException | NullPointerException | UnsupportedOperationException |
-               IllegalArgumentException | IllegalStateException e) {
-            notifSoundSource = Config.DEFAULT_SOUND_SOURCE;
-        }
+            boolean enabled;
+            boolean allowRegex;
+            boolean exclusionEnabled;
+            boolean responseEnabled;
+            Sound sound;
+            TextStyle textStyle;
+            ArrayList<Trigger> triggers = new ArrayList<>();
+            ArrayList<Trigger> exclusionTriggers = new ArrayList<>();
+            ArrayList<String> responseMessages = new ArrayList<>();
 
+            enabled = notifObject.get("enabled").getAsBoolean();
+            allowRegex = notifObject.get("allowRegex").getAsBoolean();
+            exclusionEnabled = notifObject.get("exclusionEnabled").getAsBoolean();
+            responseEnabled = notifObject.get("responseEnabled").getAsBoolean();
 
-        try {
-            JsonArray prefixArray = jsonObject.get("messagePrefixes").getAsJsonArray();
-            for (JsonElement je : prefixArray) {
-                messagePrefixes.add(je.getAsString());
+            JsonObject soundObject = notifObject.get("sound").getAsJsonObject();
+            sound = new Sound(
+                    soundObject.get("enabled").getAsBoolean(),
+                    soundObject.get("id").getAsString(),
+                    soundObject.get("volume").getAsFloat(),
+                    soundObject.get("pitch").getAsFloat());
+
+            JsonObject textStyleObject = notifObject.get("textStyle").getAsJsonObject();
+            textStyle = new TextStyle(
+                    textStyleObject.get("doColor").getAsBoolean(),
+                    textStyleObject.get("color").getAsInt(),
+                    new TriState(TriState.State.valueOf(textStyleObject.get("bold")
+                            .getAsJsonObject().get("state").getAsString())),
+                    new TriState(TriState.State.valueOf(textStyleObject.get("italic")
+                            .getAsJsonObject().get("state").getAsString())),
+                    new TriState(TriState.State.valueOf(textStyleObject.get("underlined")
+                            .getAsJsonObject().get("state").getAsString())),
+                    new TriState(TriState.State.valueOf(textStyleObject.get("strikethrough")
+                            .getAsJsonObject().get("state").getAsString())),
+                    new TriState(TriState.State.valueOf(textStyleObject.get("obfuscated")
+                            .getAsJsonObject().get("state").getAsString())));
+
+            for (JsonElement je2 : notifObject.get("triggers").getAsJsonArray()) {
+                JsonObject triggerObject = je2.getAsJsonObject();
+                triggers.add(new Trigger(
+                        triggerObject.get("string").getAsString(),
+                        triggerObject.get("enabled").getAsBoolean(),
+                        triggerObject.get("isKey").getAsBoolean(),
+                        triggerObject.get("isRegex").getAsBoolean()));
             }
-        } catch (JsonParseException | NullPointerException |
-                 UnsupportedOperationException | IllegalStateException e) {
-            messagePrefixes = new ArrayList<>(Config.DEFAULT_PREFIXES);
+
+            for (JsonElement je2 : notifObject.get("exclusionTriggers").getAsJsonArray()) {
+                JsonObject exclTriggerObject = je2.getAsJsonObject();
+                exclusionTriggers.add(new Trigger(
+                        exclTriggerObject.get("string").getAsString(),
+                        exclTriggerObject.get("enabled").getAsBoolean(),
+                        exclTriggerObject.get("isKey").getAsBoolean(),
+                        exclTriggerObject.get("isRegex").getAsBoolean()));
+            }
+
+            for (JsonElement je2 : notifObject.get("responseMessages").getAsJsonArray()) {
+                responseMessages.add(je2.getAsString());
+            }
+
+            notifications.add(new Notification(enabled, allowRegex, exclusionEnabled, responseEnabled,
+                    sound, textStyle, triggers, exclusionTriggers, responseMessages));
         }
 
-        try {
-            JsonArray notifArray = jsonObject.get("notifications").getAsJsonArray();
-
-            for (JsonElement je : notifArray) {
-                Notification notif = Config.NOTIFICATION_GSON.fromJson(je, Notification.class);
-                if (notif != null) {
-                    notifications.add(notif);
-                }
-            }
-            if (notifications.isEmpty()) {
-                throw new JsonParseException("Empty notification array.");
-            }
-            // Display name added in v1.2.0
-            if (notifications.get(0).getTriggers().size() == 1) {
-                notifications.get(0).addTrigger("Display name");
-            }
+        // Ensure username Notification is valid
+        if (notifications.isEmpty()) {
+            notifications.add(Notification.createUserNotification());
         }
-        catch (JsonParseException | NullPointerException |
-               UnsupportedOperationException | IllegalStateException e) {
-            notifications = new ArrayList<>();
-            notifications.add(Config.DEFAULT_USERNAME_NOTIF);
+        else if (notifications.get(0).triggers.size() < 2) {
+            notifications.set(0, Notification.createUserNotification());
         }
 
-        return new Config(mixinEarly, ignoreOwnMessages, notifSoundSource,
-                messagePrefixes, notifications);
+        return new Config(mixinEarly, checkOwnMessages, soundSource, prefixes, notifications);
     }
 }

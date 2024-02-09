@@ -29,19 +29,19 @@ public class SoundConfigListWidget extends ConfigListWidget {
 
         addEntry(new ConfigListWidget.Entry.DoubleSliderEntry(entryX, 0, entryWidth, entryHeight, 0, 1, 2,
                 "Volume: ", null, "OFF", null,
-                () -> (double)notif.getSoundVolume(),
-                (value) -> notif.setSoundVolume(value.floatValue())));
+                () -> (double)notif.sound.getVolume(),
+                (value) -> notif.sound.setVolume(value.floatValue())));
 
         addEntry(new ConfigListWidget.Entry.DoubleSliderEntry(entryX, 0, entryWidth, entryHeight, 0.5, 2, 2,
                 "Pitch: ", null, null, null,
-                () -> (double)notif.getSoundPitch(),
-                (value) -> notif.setSoundPitch(value.floatValue())));
+                () -> (double)notif.sound.getPitch(),
+                (value) -> notif.sound.setPitch(value.floatValue())));
 
         addEntry(new ConfigListWidget.Entry.SilentActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("> Click to Test Sound <"),
                 Tooltip.create(Component.literal("Volume category currently set to ")
                         .append(Component.translatable("soundCategory."
-                                + ChatNotify.config().notifSoundSource.getName()))), -1,
+                                + ChatNotify.config().soundSource.getName()))), -1,
                 button -> playNotifSound()));
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -164,9 +164,9 @@ public class SoundConfigListWidget extends ConfigListWidget {
 
     private void playNotifSound() {
         minecraft.getSoundManager().play(
-                new SimpleSoundInstance(notif.getSound(),
-                        ChatNotify.config().notifSoundSource,
-                        notif.getSoundVolume(), notif.getSoundPitch(),
+                new SimpleSoundInstance(notif.sound.getResourceLocation(),
+                        ChatNotify.config().soundSource,
+                        notif.sound.getVolume(), notif.sound.getPitch(),
                         SoundInstance.createUnseededRandom(), false, 0,
                         SoundInstance.Attenuation.NONE, 0, 0, 0, true));
 
@@ -184,13 +184,13 @@ public class SoundConfigListWidget extends ConfigListWidget {
                 soundField = new EditBox(Minecraft.getInstance().font, x, 0, width, height,
                         Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
-                soundField.setValue(notif.getSound().toString());
-                soundField.setResponder((sound) -> notif.setSound(sound.strip()));
+                soundField.setValue(notif.sound.getId());
+                soundField.setResponder((sound) -> notif.sound.setId(sound.strip()));
                 elements.add(soundField);
             }
 
             public void updateValue() {
-                soundField.setValue(notif.getSound().toString());
+                soundField.setValue(notif.sound.getId());
             }
         }
 
@@ -200,7 +200,7 @@ public class SoundConfigListWidget extends ConfigListWidget {
                 super();
                 elements.add(new SilentButton(x, 0, width, height, Component.literal(soundName),
                         (button) -> {
-                            notif.setSound(sound);
+                            notif.sound.setId(sound);
                             listWidget.refreshSoundField();
                             listWidget.playNotifSound();
                         }));

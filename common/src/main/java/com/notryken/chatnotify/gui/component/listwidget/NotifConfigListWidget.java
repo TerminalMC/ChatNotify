@@ -1,7 +1,8 @@
 package com.notryken.chatnotify.gui.component.listwidget;
 
-import com.mojang.datafixers.util.Pair;
 import com.notryken.chatnotify.config.Notification;
+import com.notryken.chatnotify.config.TriState;
+import com.notryken.chatnotify.config.Trigger;
 import com.notryken.chatnotify.gui.screen.ConfigScreen;
 import com.notryken.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
@@ -11,11 +12,10 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-
-import java.util.List;
 
 /**
  * {@code ConfigListWidget} containing controls for the specified
@@ -36,49 +36,19 @@ public class NotifConfigListWidget extends ConfigListWidget {
         this.isUsernameNotif = isUsernameNotif;
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Notification Trigger \u2139"),
-                Tooltip.create(Component.literal("A trigger is a word or series of words " +
-                        "that, if detected in a chat message, will activate the notification. " +
-                        "NOT case-sensitive.")), -1));
+                Component.literal("Notification Triggers"), null, -1));
 
-        // Username notification can't be key-triggered
-        if (!this.isUsernameNotif) {
-            addEntry(new Entry.TriggerTypeEntry(entryX, entryWidth, entryHeight, notif, this));
+        for (int i = 0; i < notif.triggers.size(); i++) {
+            addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight,
+                    this, notif, notif.triggers.get(i), i));
         }
+        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+                Component.literal("+"), null, -1,
+                (button) -> {
+                    notif.triggers.add(new Trigger());
+                    reload();
+                }));
 
-        if (notif.triggerIsKey) {
-            addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                    Component.literal("<< Key triggers may not work on some servers >>"),
-                    null, -1));
-
-            addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight, notif, this, 0));
-
-            List<Pair<String,String>> keys = List.of(
-                    new Pair<>(".", "Any Message"),
-                    new Pair<>("commands.message.display", "Private Message"),
-                    new Pair<>("multiplayer.player.joined", "Player Joined"),
-                    new Pair<>("multiplayer.player.left", "Player Left"),
-                    new Pair<>("chat.type.advancement", "Advancement"),
-                    new Pair<>("death.", "Player/Pet Died")
-            );
-            for (int i = 0; i < keys.size(); i++) {
-                // Number of key-description pairs must be even
-                addEntry(new Entry.KeyTriggerEntry(entryX, entryWidth, entryHeight, notif, this, keys.get(i), keys.get(i+1)));
-                i++;
-            }
-        }
-        else {
-            int max = notif.getTriggers().size();
-            for (int i = 0; i < max; i++) {
-                addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight, notif, this, i));
-            }
-            addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
-                    Component.literal("+"), null, -1,
-                    (button) -> {
-                        notif.addTrigger("");
-                        reload();
-                    }));
-        }
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Options"), null, -1));
@@ -88,11 +58,9 @@ public class NotifConfigListWidget extends ConfigListWidget {
         addEntry(new Entry.FormatConfigEntry1(entryX, entryWidth, entryHeight, notif));
         addEntry(new Entry.FormatConfigEntry2(entryX, entryWidth, entryHeight, notif));
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Advanced Settings"), null, -1));
-
         addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
-                Component.literal("Here be Dragons!"), null, -1,
+                Component.literal("Advanced Settings"),
+                Tooltip.create(Component.literal("Here be Dragons!")), 500,
                 (button) -> openAdvancedConfig()));
     }
 
@@ -109,6 +77,13 @@ public class NotifConfigListWidget extends ConfigListWidget {
     @Override
     public void onClose() {
         notif.autoDisable();
+    }
+
+    private void openKeyConfig(Trigger trigger) {
+        minecraft.setScreen(new ConfigScreen(minecraft.screen,
+                Component.translatable("screen.chatnotify.title.key"),
+                new KeyConfigListWidget(minecraft, screen.width, screen.height, y0, y1,
+                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
     }
 
     private void openColorConfig() {
@@ -134,88 +109,122 @@ public class NotifConfigListWidget extends ConfigListWidget {
 
     private abstract static class Entry extends ConfigListWidget.Entry {
 
-        private static class TriggerTypeEntry extends Entry {
-            TriggerTypeEntry(int x, int width, int height, Notification notif,
-                             NotifConfigListWidget listWidget) {
-                super();
-                elements.add(CycleButton.booleanBuilder(
-                        Component.literal("Event Key"), Component.literal("Word/Phrase"))
-                                .withInitialValue(notif.triggerIsKey)
-                                .create(x, 0, width, height,
-                                        Component.literal("Type"),
-                                        (button, status) -> {
-                                    notif.triggerIsKey = status;
-                                    listWidget.reload();
-                                }));
-            }
-        }
-
         private static class TriggerFieldEntry extends Entry {
 
-            TriggerFieldEntry(int x, int width, int height, Notification notif,
-                              NotifConfigListWidget listWidget, int index) {
+            TriggerFieldEntry(int x, int width, int height, NotifConfigListWidget listWidget,
+                              Notification notif, Trigger trigger, int index) {
                 super();
 
                 int spacing = 5;
+                int regexButtonWidth = 15;
+                int keyButtonWidth = notif.allowRegex ? 15 : 20;
                 int removeButtonWidth = 20;
 
                 EditBox triggerEditBox = new EditBox(Minecraft.getInstance().font,
                         x, 0, width, height, Component.literal("Notification Trigger"));
                 triggerEditBox.setMaxLength(120);
-                triggerEditBox.setValue(notif.getTrigger(index));
-                triggerEditBox.setResponder(
-                        (trigger) -> notif.setTrigger(index, trigger.strip()));
-                // First two triggers of username notification are uneditable
+                triggerEditBox.setValue(trigger.string);
+                triggerEditBox.setResponder((string) -> trigger.string = string.strip());
+
                 if (listWidget.isUsernameNotif && index <= 1) {
                     triggerEditBox.setEditable(false);
                     triggerEditBox.active = false;
                     triggerEditBox.setTooltip(Tooltip.create(Component.literal(
                             index == 0 ? "Profile name" : "Display name")));
                     triggerEditBox.setTooltipDelay(500);
+                    elements.add(triggerEditBox);
                 }
-                elements.add(triggerEditBox);
-
-                // Only show the delete button if it makes sense to delete.
-                if (!notif.triggerIsKey && notif.getTriggers().size() > 1 &&
-                        (index > 1 || (!listWidget.isUsernameNotif && index > 0))) {
-                    elements.add(Button.builder(Component.literal("X"),
+                else {
+                    Button keyButton;
+                    if (notif.allowRegex) {
+                        Button regexButton;
+                        if (trigger.isKey()) {
+                            regexButton = Button.builder(Component.literal(".*")
+                                                    .withStyle(ChatFormatting.GRAY),
+                                            (button) -> {})
+                                    .pos(x - spacing - regexButtonWidth - regexButtonWidth, 0)
+                                    .size(regexButtonWidth, height)
+                                    .build();
+                            regexButton.setTooltip(Tooltip.create(Component.literal(
+                                    "Regex Disabled [Key trigger]")));
+                            regexButton.setTooltipDelay(500);
+                            regexButton.active = false;
+                        }
+                        else if (trigger.isRegex) {
+                            regexButton = Button.builder(Component.literal(".*")
+                                                    .withStyle(ChatFormatting.GREEN),
+                                            (button) -> {
+                                                trigger.isRegex = false;
+                                                listWidget.reload();
+                                            })
+                                    .pos(x - spacing - regexButtonWidth - regexButtonWidth, 0)
+                                    .size(regexButtonWidth, height)
+                                    .build();
+                            regexButton.setTooltip(Tooltip.create(Component.literal(
+                                    "Regex Enabled")));
+                            regexButton.setTooltipDelay(500);
+                        }
+                        else {
+                            regexButton = Button.builder(Component.literal(".*")
+                                                    .withStyle(ChatFormatting.RED),
+                                            (button) -> {
+                                                trigger.isRegex = true;
+                                                listWidget.reload();
+                                            })
+                                    .pos(x - spacing - regexButtonWidth - regexButtonWidth, 0)
+                                    .size(regexButtonWidth, height)
+                                    .build();
+                            regexButton.setTooltip(Tooltip.create(Component.literal(
+                                    "Regex Disabled")));
+                            regexButton.setTooltipDelay(500);
+                        }
+                        elements.add(regexButton);
+                    }
+                    if (trigger.isKey()) {
+                        keyButton = Button.builder(Component.literal("\uD83D\uDD11")
+                                                .withStyle(ChatFormatting.GREEN),
+                                        (button) -> {
+                                            if (Screen.hasShiftDown()) {
+                                                trigger.setIsKey(false);
+                                                listWidget.reload();
+                                            } else {
+                                                listWidget.openKeyConfig(trigger);
+                                            }})
+                                .pos(x - spacing - keyButtonWidth, 0)
+                                .size(keyButtonWidth, height)
+                                .build();
+                        keyButton.setTooltip(Tooltip.create(Component.literal(
+                                "Translation Key trigger")));
+                        keyButton.setTooltipDelay(500);
+                    }
+                    else {
+                        keyButton = Button.builder(Component.literal("\uD83D\uDD11")
+                                                .withStyle(ChatFormatting.RED),
+                                        (button) -> {
+                                            if (Screen.hasShiftDown()) {
+                                                trigger.setIsKey(true);
+                                                listWidget.reload();
+                                            } else {
+                                                listWidget.openKeyConfig(trigger);
+                                            }})
+                                .pos(x - spacing - keyButtonWidth, 0)
+                                .size(keyButtonWidth, height)
+                                .build();
+                        keyButton.setTooltip(Tooltip.create(Component.literal(
+                                "Normal trigger")));
+                        keyButton.setTooltipDelay(500);
+                    }
+                    elements.add(keyButton);
+                    elements.add(triggerEditBox);
+                    elements.add(Button.builder(Component.literal("\u274C"),
                                     (button) -> {
-                                        notif.removeTrigger(index);
+                                        notif.triggers.remove(index);
                                         listWidget.reload();
                                     })
                             .pos(x + width + spacing, 0)
                             .size(removeButtonWidth, height)
                             .build());
                 }
-            }
-        }
-
-        private static class KeyTriggerEntry extends Entry {
-            KeyTriggerEntry(int x, int width, int height, Notification notif,
-                            NotifConfigListWidget listWidget,
-                            Pair<String,String> keyLeft, Pair<String,String>  keyRight) {
-                super();
-
-                int spacing = 6;
-                int buttonWidth = width / 2 - spacing;
-
-                elements.add(Button.builder(Component.literal(keyLeft.getSecond()),
-                                (button) -> {
-                                    notif.setTrigger(keyLeft.getFirst());
-                                    listWidget.reload();
-                                })
-                        .pos(x, 0)
-                        .size(buttonWidth, height)
-                        .build());
-
-                elements.add(Button.builder(Component.literal(keyRight.getSecond()),
-                                (button) -> {
-                                    notif.setTrigger(keyRight.getFirst());
-                                    listWidget.reload();
-                                })
-                        .pos(x + buttonWidth + spacing, 0)
-                        .size(buttonWidth, height)
-                        .build());
             }
         }
 
@@ -229,7 +238,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 int mainButtonWidth = width - statusButtonWidth - spacing;
 
                 elements.add(Button.builder(
-                                Component.literal("Sound: " + notif.getSound().toString()),
+                                Component.literal("Sound: " + notif.sound.getId()),
                                 (button) -> listWidget.openSoundConfig())
                         .pos(x, 0)
                         .size(mainButtonWidth, height)
@@ -239,10 +248,10 @@ public class NotifConfigListWidget extends ConfigListWidget {
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
                                 Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
-                        .withInitialValue(notif.getControl(2))
+                        .withInitialValue(notif.sound.isEnabled())
                         .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
                                 Component.empty(),
-                                (button, status) -> notif.setControl(2, status)));
+                                (button, status) -> notif.sound.setEnabled(status)));
             }
         }
 
@@ -260,7 +269,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
 
                 String mainButtonMessage = "Text Color";
                 Button mainButton = Button.builder(Component.literal(mainButtonMessage)
-                                        .setStyle(Style.EMPTY.withColor(notif.getColor())),
+                                        .setStyle(Style.EMPTY.withColor(notif.textStyle.getTextColor())),
                                 (button) -> listWidget.openColorConfig())
                         .pos(x, 0)
                         .size(mainButtonWidth, height)
@@ -273,12 +282,12 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 colorEditBox.setResponder(strColor -> {
                     TextColor color = ColorUtil.parseColor(strColor);
                     if (color != null) {
-                        notif.setColor(color);
+                        notif.textStyle.color = color.getValue();
                         mainButton.setMessage(Component.literal(mainButtonMessage)
-                                .setStyle(Style.EMPTY.withColor(notif.getColor())));
+                                .setStyle(Style.EMPTY.withColor(notif.textStyle.getTextColor())));
                     }
                 });
-                colorEditBox.setValue(notif.getColor().formatValue());
+                colorEditBox.setValue(notif.textStyle.getTextColor().formatValue());
                 elements.add(colorEditBox);
 
                 elements.add(Button.builder(Component.literal("\ud83d\uddd8"),
@@ -292,10 +301,10 @@ public class NotifConfigListWidget extends ConfigListWidget {
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
                                 Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
-                        .withInitialValue(notif.getControl(0))
+                        .withInitialValue(notif.textStyle.doColor)
                         .create(x + width - statusButtonWidth, 0,
                                 statusButtonWidth, height, Component.empty(),
-                                (button, status) -> notif.setControl(0, status)));
+                                (button, status) -> notif.textStyle.doColor = status));
             }
         }
 
@@ -306,38 +315,53 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 int spacing = 5;
                 int buttonWidth = (width - spacing * 2) / 3;
 
-                elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on")
-                                .withStyle(ChatFormatting.BOLD)
-                                .withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off")
-                                        .withStyle(ChatFormatting.RED))
-                        .withInitialValue(notif.getFormatControl(0))
+                CycleButton<TriState.State> boldButton = CycleButton.<TriState.State>builder(
+                        (state) -> getMessage(state, ChatFormatting.BOLD))
+                        .withValues(TriState.State.values())
+                        .withInitialValue(notif.textStyle.bold.getState())
+                        .withTooltip(this::getTooltip)
                         .create(x, 0, buttonWidth, height,
                                 Component.literal("Bold"),
-                                (button, status) -> notif.setFormatControl(0, status)));
+                                (button, state) -> notif.textStyle.bold.state = state);
+                boldButton.setTooltipDelay(500);
+                elements.add(boldButton);
 
-                elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on")
-                                .withStyle(ChatFormatting.ITALIC)
-                                .withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off")
-                                        .withStyle(ChatFormatting.RED))
-                        .withInitialValue(notif.getFormatControl(1))
+                CycleButton<TriState.State> italicButton = CycleButton.<TriState.State>builder(
+                        (state) -> getMessage(state, ChatFormatting.ITALIC))
+                        .withValues(TriState.State.values())
+                        .withInitialValue(notif.textStyle.italic.getState())
+                        .withTooltip(this::getTooltip)
                         .create(x + width / 2 - buttonWidth / 2, 0, buttonWidth, height,
                                 Component.literal("Italic"),
-                                (button, status) -> notif.setFormatControl(1, status)));
+                                (button, state) -> notif.textStyle.italic.state = state);
+                italicButton.setTooltipDelay(500);
+                elements.add(italicButton);
 
-                elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on")
-                                .withStyle(ChatFormatting.UNDERLINE)
-                                .withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off")
-                                        .withStyle(ChatFormatting.RED))
-                        .withInitialValue(notif.getFormatControl(2))
+                CycleButton<TriState.State> underlineButton = CycleButton.<TriState.State>builder(
+                        (state) -> getMessage(state, ChatFormatting.UNDERLINE))
+                        .withValues(TriState.State.values())
+                        .withInitialValue(notif.textStyle.underlined.getState())
+                        .withTooltip(this::getTooltip)
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 Component.literal("Underline"),
-                                (button, status) -> notif.setFormatControl(2, status)));
+                                (button, state) -> notif.textStyle.underlined.state = state);
+                underlineButton.setTooltipDelay(500);
+                elements.add(underlineButton);
+            }
+
+            private Component getMessage(TriState.State state, ChatFormatting format) {
+                return switch(state) {
+                    case OFF -> Component.literal("OFF").withStyle(ChatFormatting.RED);
+                    case ON -> Component.literal("ON").withStyle(ChatFormatting.GREEN)
+                            .withStyle(format);
+                    default -> Component.literal("/").withStyle(ChatFormatting.GRAY);
+                };
+            }
+
+            private Tooltip getTooltip(TriState.State state) {
+                if (state.equals(TriState.State.DISABLED)) return
+                        Tooltip.create(Component.literal("Use existing format"));
+                return null;
             }
         }
 
@@ -348,27 +372,42 @@ public class NotifConfigListWidget extends ConfigListWidget {
                 int spacing = 6;
                 int buttonWidth = (width - spacing) / 2;
 
-                elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on")
-                                .withStyle(ChatFormatting.STRIKETHROUGH)
-                                .withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off")
-                                        .withStyle(ChatFormatting.RED))
-                        .withInitialValue(notif.getFormatControl(3))
+                CycleButton<TriState.State> strikethroughButton = CycleButton.<TriState.State>builder(
+                        (state) -> getMessage(state, ChatFormatting.STRIKETHROUGH))
+                        .withValues(TriState.State.values())
+                        .withInitialValue(notif.textStyle.strikethrough.getState())
+                        .withTooltip(this::getTooltip)
                         .create(x, 0, buttonWidth, height,
                                 Component.literal("Strikethrough"),
-                                (button, status) -> notif.setFormatControl(3, status)));
+                                (button, state) -> notif.textStyle.strikethrough.state = state);
+                strikethroughButton.setTooltipDelay(500);
+                elements.add(strikethroughButton);
 
-                elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on")
-                                .withStyle(ChatFormatting.OBFUSCATED)
-                                .withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off")
-                                        .withStyle(ChatFormatting.RED))
-                        .withInitialValue(notif.getFormatControl(4))
+                CycleButton<TriState.State> obfuscateButton = CycleButton.<TriState.State>builder(
+                        (state) -> getMessage(state, ChatFormatting.OBFUSCATED))
+                        .withValues(TriState.State.values())
+                        .withInitialValue(notif.textStyle.obfuscated.getState())
+                        .withTooltip(this::getTooltip)
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 Component.literal("Obfuscate"),
-                                (button, status) -> notif.setFormatControl(4, status)));
+                                (button, state) -> notif.textStyle.obfuscated.state = state);
+                obfuscateButton.setTooltipDelay(500);
+                elements.add(obfuscateButton);
+            }
+
+            private Component getMessage(TriState.State state, ChatFormatting format) {
+                return switch(state) {
+                    case OFF -> Component.literal("OFF").withStyle(ChatFormatting.RED);
+                    case ON -> Component.literal("ON").withStyle(ChatFormatting.GREEN)
+                            .withStyle(format);
+                    default -> Component.literal("/").withStyle(ChatFormatting.GRAY);
+                };
+            }
+
+            private Tooltip getTooltip(TriState.State state) {
+                if (state.equals(TriState.State.DISABLED)) return
+                        Tooltip.create(Component.literal("Use existing format"));
+                return null;
             }
         }
     }

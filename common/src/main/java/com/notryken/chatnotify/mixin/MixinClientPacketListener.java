@@ -112,7 +112,7 @@ public class MixinClientPacketListener {
         String plainMsg = "";
 
         // If message starts with a prefix, remove the prefix.
-        for (String prefix : ChatNotify.config().getPrefixes()) {
+        for (String prefix : ChatNotify.config().prefixes) {
             if (message.startsWith(prefix)) {
                 plainMsg = message.replaceFirst(prefix, "").strip();
                 break;
@@ -131,7 +131,7 @@ public class MixinClientPacketListener {
         command = '/' + command.toLowerCase(Locale.ROOT);
 
         // If command starts with a prefix, remove the prefix and store command.
-        for (String prefix : ChatNotify.config().getPrefixes()) {
+        for (String prefix : ChatNotify.config().prefixes) {
             if (command.startsWith(prefix)) {
                 command = command.replaceFirst(prefix, "").strip();
                 if (!command.isEmpty()) {

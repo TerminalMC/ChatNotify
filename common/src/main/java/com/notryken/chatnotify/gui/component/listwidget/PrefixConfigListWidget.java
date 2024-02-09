@@ -27,14 +27,14 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                         "For example, '!' or '/shout' may be used on some servers to communicate " +
                         "in global chat. This may be useful for preventing spurious notifications.")), -1));
 
-        int max = ChatNotify.config().getPrefixes().size();
+        int max = ChatNotify.config().prefixes.size();
         for (int i = 0; i < max; i++) {
             addEntry(new Entry.PrefixFieldEntry(entryX, entryWidth, entryHeight, this, i));
         }
         addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
-                    ChatNotify.config().addPrefix("");
+                    ChatNotify.config().prefixes.add("");
                     reload();
                 }));
     }
@@ -62,15 +62,15 @@ public class PrefixConfigListWidget extends ConfigListWidget {
                         Minecraft.getInstance().font, x, 0, width, height,
                         Component.literal("Message Prefix"));
                 prefixEditBox.setMaxLength(20);
-                prefixEditBox.setValue(ChatNotify.config().getPrefix(index));
+                prefixEditBox.setValue(ChatNotify.config().prefixes.get(index));
                 prefixEditBox.setResponder(
-                        (prefix) -> ChatNotify.config().setPrefix(
+                        (prefix) -> ChatNotify.config().prefixes.set(
                                 index, prefix.strip().toLowerCase(Locale.ROOT)));
                 elements.add(prefixEditBox);
 
-                elements.add(Button.builder(Component.literal("X"),
+                elements.add(Button.builder(Component.literal("\u274C"),
                                 (button) -> {
-                                    ChatNotify.config().removePrefix(index);
+                                    ChatNotify.config().prefixes.remove(index);
                                     listWidget.reload();
                                 })
                         .pos(x + width + spacing, 0)
