@@ -151,22 +151,24 @@ public class MessageProcessor {
         for (Notification notif : ChatNotify.config().getNotifs()) {
             if (notif.isEnabled()) {
                 for (Trigger trigger : notif.triggers) {
-                    if (triggerMatched(notif, trigger, message, msgStr, checkedMsgStr)) {
-                        boolean excluded = false;
-                        if (notif.exclusionEnabled) {
-                            for (Trigger exclTrigger : notif.exclusionTriggers) {
-                                if (triggerMatched(notif, exclTrigger, message, msgStr, checkedMsgStr)) {
-                                    excluded = true;
-                                    break;
+                    if (!trigger.string.isBlank()) {
+                        if (triggerMatched(notif, trigger, message, msgStr, checkedMsgStr)) {
+                            boolean excluded = false;
+                            if (notif.exclusionEnabled) {
+                                for (Trigger exclTrigger : notif.exclusionTriggers) {
+                                    if (triggerMatched(notif, exclTrigger, message, msgStr, checkedMsgStr)) {
+                                        excluded = true;
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        if (!excluded) {
-                            playSound(notif);
-                            sendResponses(notif);
-                            return (trigger.isKey() || trigger.isRegex) ?
-                                    simpleRestyle(message, notif) :
-                                    complexRestyle(message, trigger.string, notif);
+                            if (!excluded) {
+                                playSound(notif);
+                                sendResponses(notif);
+                                return (trigger.isKey() || trigger.isRegex) ?
+                                        simpleRestyle(message, notif) :
+                                        complexRestyle(message, trigger.string, notif);
+                            }
                         }
                     }
                 }
