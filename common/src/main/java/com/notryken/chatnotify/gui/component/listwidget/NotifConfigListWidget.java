@@ -32,6 +32,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
                                  boolean isUsernameNotif) {
         super(minecraft, width, height, top, bottom, itemHeight, 
                 entryRelX, entryWidth, entryHeight, scrollWidth);
+        notif.editing = true;
         this.notif = notif;
         this.isUsernameNotif = isUsernameNotif;
 
@@ -76,6 +77,7 @@ public class NotifConfigListWidget extends ConfigListWidget {
 
     @Override
     public void onClose() {
+        notif.editing = false;
         notif.autoDisable();
     }
 

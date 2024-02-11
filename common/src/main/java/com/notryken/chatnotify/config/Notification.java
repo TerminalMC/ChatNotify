@@ -7,6 +7,9 @@ import java.util.*;
  * all ChatNotify user-notification functions.
  */
 public class Notification {
+    // Not saved, not modifiable by user
+    public transient boolean editing = false;
+
     // Saved, modifiable by user
     private boolean enabled;
     public boolean allowRegex;

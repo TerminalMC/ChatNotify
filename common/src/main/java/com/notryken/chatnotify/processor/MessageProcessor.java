@@ -149,7 +149,7 @@ public class MessageProcessor {
      */
     private static Component tryNotify(Component message, String msgStr, String checkedMsgStr) {
         for (Notification notif : ChatNotify.config().getNotifs()) {
-            if (notif.isEnabled()) {
+            if (notif.isEnabled() && !notif.editing) {
                 for (Trigger trigger : notif.triggers) {
                     if (!trigger.string.isBlank()) {
                         if (triggerMatched(notif, trigger, message, msgStr, checkedMsgStr)) {
