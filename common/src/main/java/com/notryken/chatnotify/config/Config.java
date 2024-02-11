@@ -214,8 +214,8 @@ public class Config {
 
     public static @NotNull Config load() {
         long time = System.currentTimeMillis();
-
         ChatNotify.LOG.info("ChatNotify: Loading config from file...");
+
         Config config = load(DEFAULT_FILE_NAME, CONFIG_GSON);
 
         if (config == null) {
@@ -255,6 +255,9 @@ public class Config {
      * Writes the config to the global configPath.
      */
     public void writeToFile() {
+        long time = System.currentTimeMillis();
+        ChatNotify.LOG.info("ChatNotify: Saving config to file...");
+
         validate();
 
         Path dir = configPath.getParent();
@@ -277,6 +280,9 @@ public class Config {
 
             // Atomically replace the old config file (if it exists) with the temporary file
             Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+
+            ChatNotify.LOG.info("ChatNotify: Configuration saved in {} ms",
+                    System.currentTimeMillis() - time);
         }
         catch (IOException e) {
             throw new RuntimeException("ChatNotify: Unable to update config file. Reason:", e);

@@ -25,7 +25,7 @@ public class ConfigScreen extends OptionsSubScreen {
     public final Supplier<Integer> listBottom = () -> height - 32;
     public final int listItemHeight = 25;
 
-    public ConfigScreen(Screen lastScreen, Component title, @Nullable ConfigListWidget listWidget) {
+    public ConfigScreen(Screen lastScreen, Component title, ConfigListWidget listWidget) {
         super(lastScreen, Minecraft.getInstance().options, title);
         this.listWidget = listWidget;
     }
