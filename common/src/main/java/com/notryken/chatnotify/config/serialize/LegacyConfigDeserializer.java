@@ -18,13 +18,13 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
 
         boolean mixinEarly; // v1.2.0-pre.2
         boolean checkOwnMessages;
+        boolean debugShowKey = false; // Config v2, not in legacy
         SoundSource soundSource; // v1.1.0
         ArrayList<String> messagePrefixes = new ArrayList<>();
         ArrayList<Notification> notifications = new ArrayList<>();
 
-        mixinEarly = configObject.has("mixinEarly") ?
-                configObject.get("mixinEarly").getAsBoolean() :
-                false;
+        mixinEarly = configObject.has("mixinEarly") &&
+                configObject.get("mixinEarly").getAsBoolean();
 
         checkOwnMessages = !configObject.get("ignoreOwnMessages").getAsBoolean();
 
@@ -148,6 +148,7 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
             notifications.set(0, Notification.createUserNotification());
         }
 
-        return new Config(mixinEarly, checkOwnMessages, soundSource, messagePrefixes, notifications);
+        return new Config(mixinEarly, checkOwnMessages, debugShowKey,
+                soundSource, messagePrefixes, notifications);
     }
 }

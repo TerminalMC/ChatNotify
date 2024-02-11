@@ -51,11 +51,12 @@ public class Config {
     /*
      * Versions prior to 1 are strings "001", "002" and "003".
      */
-    private final int version = 1;
+    private final int version = 2;
 
     // Saved, modifiable by user
     public boolean mixinEarly;
     public boolean checkOwnMessages;
+    public boolean debugShowKey;
     public SoundSource soundSource;
     public final ArrayList<String> prefixes;
     private final ArrayList<Notification> notifications;
@@ -64,16 +65,18 @@ public class Config {
     public Config() {
         mixinEarly = false;
         checkOwnMessages = true;
+        debugShowKey = false;
         soundSource = DEFAULT_SOUND_SOURCE;
         prefixes = new ArrayList<>(DEFAULT_PREFIXES);
         notifications = new ArrayList<>();
         notifications.add(Notification.createUserNotification());
     }
 
-    public Config(boolean mixinEarly, boolean checkOwnMessages, SoundSource soundSource,
-                  ArrayList<String> prefixes, ArrayList<Notification> notifications) {
+    public Config(boolean mixinEarly, boolean checkOwnMessages, boolean debugShowKey,
+                  SoundSource soundSource, ArrayList<String> prefixes, ArrayList<Notification> notifications) {
         this.mixinEarly = mixinEarly;
         this.checkOwnMessages = checkOwnMessages;
+        this.debugShowKey = debugShowKey;
         this.soundSource = soundSource;
         this.prefixes = prefixes;
         this.notifications = notifications;

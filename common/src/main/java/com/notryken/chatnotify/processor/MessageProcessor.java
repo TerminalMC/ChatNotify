@@ -9,10 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +36,10 @@ public class MessageProcessor {
      * was required.
      */
     public static Component processMessage(Component msg) {
+        if (config().debugShowKey) {
+            msg = addKeyInfo(msg);
+        }
+
         String msgStr = msg.getString();
         if (msgStr.isBlank()) return msg; // Ignore blank messages
         String checkedMsgStr = checkOwner(msgStr);
@@ -49,6 +50,34 @@ public class MessageProcessor {
         }
 
         return (modifiedMsg == null ? msg : modifiedMsg);
+    }
+
+    public static Component addKeyInfo(Component msg) {
+        Style newStyle;
+        // Create new Hover and Click events
+        if (msg.getContents() instanceof TranslatableContents tc) {
+            newStyle = Style.EMPTY
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            Component.literal("Key: " + tc.getKey())
+                                    .append(Component.literal("\n[Click to Copy]")
+                                            .withStyle(ChatFormatting.GOLD))))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
+                            tc.getKey()));
+        }
+        else {
+            newStyle = Style.EMPTY
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            Component.literal("Message is not translatable")
+                                    .withStyle(ChatFormatting.GRAY)));
+        }
+        // Overwrite existing events
+        return overwriteStyle(newStyle, msg.copy());
+    }
+
+    public static MutableComponent overwriteStyle(Style style, MutableComponent msg) {
+        msg.setStyle(style.applyTo(msg.getStyle()));
+        msg.getSiblings().replaceAll((sibling) -> overwriteStyle(style, sibling.copy()));
+        return msg;
     }
 
     /**

@@ -13,17 +13,23 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
                               JsonDeserializationContext context) throws JsonParseException {
         JsonObject configObject = json.getAsJsonObject();
 
+        int version;
         boolean mixinEarly;
         boolean checkOwnMessages;
+        boolean debugShowKey;
         SoundSource soundSource;
         ArrayList<String> prefixes = new ArrayList<>();
         ArrayList<Notification> notifications = new ArrayList<>();
+
+        version = configObject.get("version").getAsInt();
 
         mixinEarly = configObject.get("mixinEarly").getAsBoolean();
 
         checkOwnMessages = configObject.get("checkOwnMessages").getAsBoolean();
 
         soundSource = SoundSource.valueOf(configObject.get("soundSource").getAsString());
+
+        debugShowKey = version != 1 && configObject.get("debugShowKey").getAsBoolean();
 
         for (JsonElement je : configObject.get("prefixes").getAsJsonArray()) {
             prefixes.add(je.getAsString());
@@ -103,6 +109,7 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
             notifications.set(0, Notification.createUserNotification());
         }
 
-        return new Config(mixinEarly, checkOwnMessages, soundSource, prefixes, notifications);
+        return new Config(mixinEarly, debugShowKey, checkOwnMessages,
+                soundSource, prefixes, notifications);
     }
 }

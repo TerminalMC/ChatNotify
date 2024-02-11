@@ -32,7 +32,7 @@ public class GlobalConfigListWidget extends ConfigListWidget {
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Global Options"), null, -1));
 
-        addEntry(new Entry.MixinOptionEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.OwnMsgToggleEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.PrefixConfigEntry(entryX, entryWidth, entryHeight, this));
@@ -107,17 +107,31 @@ public class GlobalConfigListWidget extends ConfigListWidget {
 
     public static class Entry extends ConfigListWidget.Entry {
 
-        private static class MixinOptionEntry extends Entry {
-            MixinOptionEntry(int x, int width, int height) {
+        private static class MixinAndKeyDebugEntry extends Entry {
+            MixinAndKeyDebugEntry(int x, int width, int height) {
                 super();
+
+                int spacing = 4;
+                int buttonWidth = (width - spacing) / 2;
+
                 elements.add(CycleButton.booleanBuilder(
                                 Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
                                 Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(ChatNotify.config().mixinEarly)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "If ChatNotify is not detecting incoming messages, try changing this.")))
-                        .create(x, 0, width, height, Component.literal("Early Mixin"),
+                        .create(x, 0, buttonWidth, height, Component.literal("Early Mixin"),
                                 (button, status) -> ChatNotify.config().mixinEarly = status));
+
+                elements.add(CycleButton.booleanBuilder(
+                                Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
+                        .withInitialValue(ChatNotify.config().debugShowKey)
+                        .withTooltip((value) -> Tooltip.create(Component.literal(("Turn ON to show " +
+                                "translation key info of new messages when you hover over them in chat." +
+                                "\nTurn OFF if not in use."))))
+                        .create(x + buttonWidth + spacing, 0, buttonWidth, height, Component.literal("Debug Keys"),
+                                (button, status) -> ChatNotify.config().debugShowKey = status));
             }
         }
 
