@@ -351,8 +351,8 @@ public class NotifConfigListWidget extends ConfigListWidget {
 
             private Component getMessage(TriState.State state, ChatFormatting format) {
                 return switch(state) {
-                    case OFF -> Component.literal("OFF").withStyle(ChatFormatting.RED);
-                    case ON -> Component.literal("ON").withStyle(ChatFormatting.GREEN)
+                    case OFF -> Component.translatable("options.off").withStyle(ChatFormatting.RED);
+                    case ON -> Component.translatable("options.on").withStyle(ChatFormatting.GREEN)
                             .withStyle(format);
                     default -> Component.literal("/").withStyle(ChatFormatting.GRAY);
                 };
@@ -397,8 +397,8 @@ public class NotifConfigListWidget extends ConfigListWidget {
 
             private Component getMessage(TriState.State state, ChatFormatting format) {
                 return switch(state) {
-                    case OFF -> Component.literal("OFF").withStyle(ChatFormatting.RED);
-                    case ON -> Component.literal("ON").withStyle(ChatFormatting.GREEN)
+                    case OFF -> Component.translatable("options.off").withStyle(ChatFormatting.RED);
+                    case ON -> Component.translatable("options.on").withStyle(ChatFormatting.GREEN)
                             .withStyle(format);
                     default -> Component.literal("/").withStyle(ChatFormatting.GRAY);
                 };
