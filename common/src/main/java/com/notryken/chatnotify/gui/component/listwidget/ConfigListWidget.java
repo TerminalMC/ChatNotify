@@ -52,12 +52,14 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
 
     @Override
     public int getRowWidth() {
-        return scrollWidth; // Sets the position of the scrollbar
+        // Sets the clickable width
+        return scrollWidth;
     }
 
     @Override
     protected int getScrollbarPosition() {
-        return super.getScrollbarPosition() + y0;
+        // Sets the scrollbar position
+        return width / 2 + scrollWidth / 2;
     }
 
     /**
