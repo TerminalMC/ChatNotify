@@ -7,6 +7,8 @@ import com.notryken.chatnotify.config.TextStyle;
 import com.notryken.chatnotify.config.Trigger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.*;
@@ -246,13 +248,14 @@ public class MessageProcessor {
     private static void sendResponses(Notification notif) {
         if (notif.responseEnabled) {
             Minecraft minecraft = Minecraft.getInstance();
+            Screen oldScreen = minecraft.screen;
+            minecraft.setScreen(new ChatScreen(""));
             for (String response : notif.responseMessages) {
-                if (response.startsWith("/")) {
-                    minecraft.player.connection.sendCommand(response.substring(1));
-                } else {
-                    minecraft.player.connection.sendChat(response);
+                if (minecraft.screen instanceof ChatScreen cs) {
+                    cs.handleChatInput(response, false);
                 }
             }
+            minecraft.setScreen(oldScreen);
         }
     }
 
