@@ -1,4 +1,4 @@
-<div align="center"><center>
+<div align="center">
 
 ## Chat Notify
 
@@ -13,7 +13,7 @@
 
 Allows the user to set up audio and visual notifications for when specified words or phrases appear in chat.
 
-</center></div>
+</div>
 
 ### Features and Usage
 
@@ -28,15 +28,10 @@ Allows the user to set up audio and visual notifications for when specified word
 
 <img alt="Configuration" src="https://i.postimg.cc/c4qmv2Cj/2023-11-20-15-14-12.png" width="637">
 
-### Credits
-
-- ChatNotify includes derivative work of code from the following projects:
-  - [Sodium](https://github.com/CaffeineMC/sodium-fabric/)
-
 ### License
 
-Except where otherwise stated, ChatNotify source files are provided under the terms of the GNU Lesser General Public 
-License, version 3. For more information, refer to the provided LICENSE file.
+Except where otherwise stated, ChatNotify source files are provided under the terms of the Apache License 2.0. 
+For more information, refer to the provided LICENSE file.
 
 ### Contact
 

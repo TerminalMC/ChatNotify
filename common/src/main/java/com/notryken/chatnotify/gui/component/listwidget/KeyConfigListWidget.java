@@ -1,3 +1,8 @@
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.notryken.chatnotify.gui.component.listwidget;
 
 import com.notryken.chatnotify.config.Trigger;
