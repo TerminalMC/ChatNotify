@@ -14,10 +14,10 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
 /**
- * {@code ConfigListWidget} containing options for keys for the specified
- * trigger of the specified {@code Notification}.
+ * Contains a text field for a {@link Trigger}, and a list of potential
+ * translation key triggers.
  */
-public class KeyConfigListWidget extends ConfigListWidget {
+public class KeyOptionsListWidget extends OptionsListWidget {
     private final Trigger trigger;
 
     public static final String[][] chatKeys = {
@@ -27,20 +27,17 @@ public class KeyConfigListWidget extends ConfigListWidget {
             {"chat.type.announcement", "Server Chat Message"},
             {"chat.type.admin", "Operator Info Chat Message"},
     };
-
     public static final String[][] playerKeys = {
             {"multiplayer.player.joined", "Player Joined"},
             {"multiplayer.player.left", "Player Left"},
             {"death.", "Player/Pet Died"},
     };
-
     public static final String[][] advancementKeys = {
             {"chat.type.advancement", "Any Advancement"},
             {"chat.type.advancement.task", "Task Advancement"},
             {"chat.type.advancement.goal", "Goal Advancement"},
             {"chat.type.advancement.challenge", "Challenge Advancement"},
     };
-
     public static final String[][] commandKeys = {
             {"commands.", "Any Command Feedback"},
             {"commands.message.display", "Any Private Message"},
@@ -48,12 +45,10 @@ public class KeyConfigListWidget extends ConfigListWidget {
             {"commands.message.display.outgoing", "Outgoing Private Message"},
     };
 
-    public KeyConfigListWidget(Minecraft minecraft, int width, int height,
-                               int top, int bottom, int itemHeight,
-                               int entryRelX, int entryWidth, int entryHeight,
-                               int scrollWidth, Trigger trigger) {
-        super(minecraft, width, height, top, bottom, itemHeight,
-                entryRelX, entryWidth, entryHeight, scrollWidth);
+    public KeyOptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
+                                int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                                int scrollWidth, Trigger trigger) {
+        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.trigger = trigger;
 
         addEntry(new Entry.TriggerTypeEntry(entryX, entryWidth, entryHeight, this, trigger));
@@ -61,17 +56,17 @@ public class KeyConfigListWidget extends ConfigListWidget {
         addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight, trigger));
 
         if (trigger.isKey()) {
-            addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("Key Options \u2139"), Tooltip.create(Component.literal(
-                    "You can find a full list of translation keys in Minecraft lang .json files, " +
-                            "path assets/minecraft/lang/ in the Minecraft .jar")), 500));
+                    "You can find a full list of translation keys in Minecraft's language .json files, " +
+                            "path assets/minecraft/lang/ in the Minecraft jar")), 500));
 
             for (String[] s : chatKeys) {
                 addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this,
                         trigger, s[0], s[1]));
             }
 
-            addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("--------------------"), null, -1));
 
             for (String[] s : playerKeys) {
@@ -79,7 +74,7 @@ public class KeyConfigListWidget extends ConfigListWidget {
                         trigger, s[0], s[1]));
             }
 
-            addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("--------------------"), null, -1));
 
             for (String[] s : advancementKeys) {
@@ -87,7 +82,7 @@ public class KeyConfigListWidget extends ConfigListWidget {
                         trigger, s[0], s[1]));
             }
 
-            addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("--------------------"), null, -1));
 
             for (String[] s : commandKeys) {
@@ -98,19 +93,19 @@ public class KeyConfigListWidget extends ConfigListWidget {
     }
 
     @Override
-    public ConfigListWidget resize(int width, int height, int top, int bottom,
-                                   int itemHeight, double scrollAmount) {
-        KeyConfigListWidget newListWidget = new KeyConfigListWidget(
+    public OptionsListWidget resize(int width, int height, int top, int bottom,
+                                    int itemHeight, double scrollAmount) {
+        KeyOptionsListWidget newListWidget = new KeyOptionsListWidget(
                 minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, trigger);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
 
-    private abstract static class Entry extends ConfigListWidget.Entry {
+    private abstract static class Entry extends OptionsListWidget.Entry {
 
         private static class TriggerTypeEntry extends Entry {
-            TriggerTypeEntry(int x, int width, int height, KeyConfigListWidget listWidget, Trigger trigger) {
+            TriggerTypeEntry(int x, int width, int height, KeyOptionsListWidget listWidget, Trigger trigger) {
                 super();
                 CycleButton<Boolean> triggerTypeButton = CycleButton.booleanBuilder(
                                 Component.literal("Translation Key \u2139"), Component.literal("Normal \u2139"))
@@ -139,7 +134,7 @@ public class KeyConfigListWidget extends ConfigListWidget {
             }
         }
 
-        private static class TriggerFieldEntry extends KeyConfigListWidget.Entry {
+        private static class TriggerFieldEntry extends KeyOptionsListWidget.Entry {
             TriggerFieldEntry(int x, int width, int height, Trigger trigger) {
                 super();
 
@@ -152,8 +147,8 @@ public class KeyConfigListWidget extends ConfigListWidget {
             }
         }
 
-        private static class KeyOption extends KeyConfigListWidget.Entry {
-            KeyOption(int x, int width, int height, KeyConfigListWidget listWidget,
+        private static class KeyOption extends KeyOptionsListWidget.Entry {
+            KeyOption(int x, int width, int height, KeyOptionsListWidget listWidget,
                       Trigger trigger, String value, String label) {
                 super();
                 elements.add(Button.builder(Component.literal(label),

@@ -15,8 +15,8 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 /**
- * 0-255 slider for a channel (red, green or blue) of an RGB color. Slider message
- * color will track the slider value.
+ * 0-255 slider for a channel (red, green or blue) of an RGB color. Slider
+ * message color tracks the slider value.
  */
 public class RgbChannelSlider extends DoubleSlider {
     private final IntUnaryOperator toChannel;

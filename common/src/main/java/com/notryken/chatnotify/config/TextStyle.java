@@ -5,25 +5,40 @@
 
 package com.notryken.chatnotify.config;
 
+import com.google.gson.*;
+import com.notryken.chatnotify.config.util.JsonRequired;
+import com.notryken.chatnotify.config.util.JsonValidator;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 public class TextStyle {
-    public static final int DEFAULT_COLOR = 16761856;
+    public final int version = 1;
 
-    public boolean doColor;
-    public int color;
-    public TriState bold;
-    public TriState italic;
-    public TriState underlined;
-    public TriState strikethrough;
-    public TriState obfuscated;
+    @JsonRequired public boolean doColor;
+    @JsonRequired public int color;
+    @JsonRequired public TriState bold;
+    @JsonRequired public TriState italic;
+    @JsonRequired public TriState underlined;
+    @JsonRequired public TriState strikethrough;
+    @JsonRequired public TriState obfuscated;
 
     public TextStyle() {
         this.doColor = true;
-        this.color = DEFAULT_COLOR;
+        this.color = Config.DEFAULT_COLOR;
+        this.bold = new TriState();
+        this.italic = new TriState();
+        this.underlined = new TriState();
+        this.strikethrough = new TriState();
+        this.obfuscated = new TriState();
+    }
+
+    public TextStyle(int color) {
+        this.doColor = true;
+        this.color = color;
         this.bold = new TriState();
         this.italic = new TriState();
         this.underlined = new TriState();
@@ -65,5 +80,24 @@ public class TextStyle {
                 Optional.ofNullable(obfuscated.isEnabled() ? obfuscated.isOn() : null),
                 Optional.empty(),
                 Optional.empty());
+    }
+
+    public static class Deserializer implements JsonDeserializer<TextStyle> {
+        @Override
+        public @Nullable TextStyle deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
+            JsonObject obj = json.getAsJsonObject();
+
+            boolean doColor = obj.get("doColor").getAsBoolean();
+            int color = obj.get("color").getAsInt();
+            TriState bold = new TriState(TriState.State.valueOf(obj.get("bold").getAsString()));
+            TriState italic = new TriState(TriState.State.valueOf(obj.get("italic").getAsString()));
+            TriState underlined = new TriState(TriState.State.valueOf(obj.get("underlined").getAsString()));
+            TriState strikethrough = new TriState(TriState.State.valueOf(obj.get("strikethrough").getAsString()));
+            TriState obfuscated = new TriState(TriState.State.valueOf(obj.get("obfuscated").getAsString()));
+
+            return new JsonValidator<TextStyle>().validateNonNull(
+                    new TextStyle(doColor, color, bold, italic, underlined, strikethrough, obfuscated));
+        }
     }
 }

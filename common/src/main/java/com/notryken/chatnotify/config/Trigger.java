@@ -5,31 +5,40 @@
 
 package com.notryken.chatnotify.config;
 
+import com.google.gson.*;
+import com.notryken.chatnotify.ChatNotify;
+import com.notryken.chatnotify.config.util.JsonRequired;
+import com.notryken.chatnotify.config.util.JsonValidator;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Type;
 import java.util.Locale;
 
 public class Trigger {
-    public String string;
-    public boolean enabled;
-    private boolean isKey;
-    public boolean isRegex;
+    public final int version = 1;
+
+    @JsonRequired public boolean enabled;
+    @JsonRequired public String string;
+    @JsonRequired private boolean isKey;
+    @JsonRequired public boolean isRegex;
 
     public Trigger() {
-        this.string = "";
         this.enabled = true;
+        this.string = "";
         this.isKey = false;
         this.isRegex = false;
     }
 
     public Trigger(String string) {
-        this.string = string;
         this.enabled = true;
+        this.string = string;
         this.isKey = false;
         this.isRegex = false;
     }
 
-    public Trigger(String string, boolean enabled, boolean isKey, boolean isRegex) {
-        this.string = string;
+    public Trigger(boolean enabled, String string, boolean isKey, boolean isRegex) {
         this.enabled = enabled;
+        this.string = string;
         this.isKey = isKey;
         this.isRegex = isRegex;
     }
@@ -46,5 +55,27 @@ public class Trigger {
     public void setIsKey(boolean isKey) {
         this.isKey = isKey;
         if (isKey) string = string.toLowerCase(Locale.ROOT);
+    }
+
+    public static class Deserializer implements JsonDeserializer<Trigger> {
+        @Override
+        public @Nullable Trigger deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
+            JsonObject obj = json.getAsJsonObject();
+
+            try {
+                boolean enabled = obj.get("enabled").getAsBoolean();
+                String string = obj.get("string").getAsString();
+                boolean isKey = obj.get("isKey").getAsBoolean();
+                boolean isRegex = obj.get("isRegex").getAsBoolean();
+
+                return new JsonValidator<Trigger>().validateNonNull(
+                        new Trigger(enabled, string, isKey, isRegex));
+            }
+            catch (Exception e) {
+                ChatNotify.LOG.warn("Unable to deserialize Trigger", e);
+                return null;
+            }
+        }
     }
 }

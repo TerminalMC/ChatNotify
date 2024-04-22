@@ -5,27 +5,25 @@
 
 package com.notryken.chatnotify.config;
 
+import com.google.gson.*;
+import com.notryken.chatnotify.config.util.JsonRequired;
+import com.notryken.chatnotify.config.util.JsonValidator;
 import net.minecraft.resources.ResourceLocation;
 
+import java.lang.reflect.Type;
+
 public class Sound {
+    public final int version = 1;
     public static final String DEFAULT_SOUND_ID = "block.note_block.bell";
 
-    private boolean enabled;
-    private String id;
-    private float volume;
-    private float pitch;
+    @JsonRequired private boolean enabled;
+    @JsonRequired private String id;
+    @JsonRequired private float volume;
+    @JsonRequired private float pitch;
 
     public Sound() {
         this.enabled = true;
         this.id = DEFAULT_SOUND_ID;
-        this.volume = 1f;
-        this.pitch = 1f;
-    }
-
-    public Sound(String id) {
-        if (!validId(id)) throw new IllegalArgumentException("Specified id is not a valid sound.");
-        this.enabled = true;
-        this.id = id;
         this.volume = 1f;
         this.pitch = 1f;
     }
@@ -36,6 +34,13 @@ public class Sound {
         this.id = id;
         setVolume(volume);
         setPitch(pitch);
+    }
+
+    public Sound(Sound pSound) {
+        this.enabled = pSound.enabled;
+        this.id = pSound.id;
+        this.volume = pSound.volume;
+        this.pitch = pSound.pitch;
     }
 
     public boolean isEnabled() {
@@ -69,7 +74,6 @@ public class Sound {
         return ResourceLocation.tryParse(id);
     }
 
-
     public float getVolume() {
         return volume;
     }
@@ -80,7 +84,6 @@ public class Sound {
         this.volume = volume;
     }
 
-
     public float getPitch() {
         return pitch;
     }
@@ -89,5 +92,22 @@ public class Sound {
         if (pitch < 0.5 || pitch > 2) throw new IllegalArgumentException(
                 "Value out of range. Expected 0.5-2, got " + pitch);
         this.pitch = pitch;
+    }
+
+    public static class Deserializer implements JsonDeserializer<Sound> {
+        @Override
+        public Sound deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
+            JsonObject obj = json.getAsJsonObject();
+
+            boolean enabled = obj.get("enabled").getAsBoolean();
+            String id = obj.get("id").getAsString();
+            if (!validId(id)) id = DEFAULT_SOUND_ID;
+            float volume = obj.get("volume").getAsFloat();
+            float pitch = obj.get("pitch").getAsFloat();
+
+            return new JsonValidator<Sound>().validateNonNull(
+                    new Sound(enabled, id, volume, pitch));
+        }
     }
 }

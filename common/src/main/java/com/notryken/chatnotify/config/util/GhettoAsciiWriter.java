@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.config.serialize;
+package com.notryken.chatnotify.config.util;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -13,7 +13,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import com.notryken.chatnotify.gui.component.widget.DoubleSlider;
 import com.notryken.chatnotify.gui.component.widget.SilentButton;
-import com.notryken.chatnotify.gui.screen.ConfigScreen;
+import com.notryken.chatnotify.gui.screen.OptionsScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,21 +23,21 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A {@code ConfigListWidget} is tightly coupled to a {@code ConfigScreen}, and
- * is used to avoid the requirement for each different configuration screen
- * to require a unique {@code Screen} implementation.
- * <p>
- * A {@code ConfigListWidget} has a list of {@code ConfigListWidget.Entry}
- * objects, which are drawn onto the screen top-down in the order that they
- * are stored, with standard spacing.
- * <p>
- * <b>Note:</b> If you want multiple components (e.g. buttons, text fields) to
- * appear side-by-side rather than spaced vertically, you must add them all to a
- * single Entry's list of {@code AbstractWidgets}.
+ * An OptionsListWidget is tightly coupled to a generic {@link OptionsScreen},
+ * allowing many unique options screens to use a single Screen implementation,
+ * with different OptionsListWidgets.
+ *
+ * <p>An OptionsListWidget has a list of {@link Entry} objects, which are drawn
+ * onto the screen top-down in the order that they are stored, with standard
+ * spacing specified by the parent {@link OptionsScreen}.
+ *
+ * <p><b>Note:</b> If you want multiple components (e.g. buttons, text fields)
+ * to appear side-by-side, you must add them all to a single {@link Entry}'s
+ * list of widgets.
  */
-public abstract class ConfigListWidget extends ContainerObjectSelectionList<ConfigListWidget.Entry> {
+public abstract class OptionsListWidget extends ContainerObjectSelectionList<OptionsListWidget.Entry> {
+    protected OptionsScreen screen;
 
-    protected ConfigScreen screen;
     // Standard positional and dimensional values used by entries
     protected final int entryRelX;
     protected final int entryX;
@@ -45,9 +45,10 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
     protected final int entryHeight;
     protected final int scrollWidth;
 
-    public ConfigListWidget(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight,
-                            int entryRelX, int entryWidth, int entryHeight, int scrollWidth) {
-        super(minecraft, width, height, top, bottom, itemHeight);
+    public OptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
+                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                             int scrollWidth) {
+        super(mc, width, height, top, bottom, itemHeight);
         this.entryRelX = entryRelX;
         this.entryX = width / 2 + entryRelX;
         this.entryWidth = entryWidth;
@@ -57,37 +58,39 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
 
     @Override
     public int getRowWidth() {
-        // Sets the clickable width
+        // Set the clickable width
         return scrollWidth;
     }
 
     @Override
     protected int getScrollbarPosition() {
-        // Sets the scrollbar position
+        // Set the scrollbar position
         return width / 2 + scrollWidth / 2;
     }
 
     /**
-     * Must be called when the {@code ConfigListWidget} is added to a
-     * {@code Screen}, else breaks.
+     * Must be called when an OptionsListWidget is added to an
+     * {@link OptionsScreen}, else breaks.
      */
-    public void setScreen(ConfigScreen screen) {
+    public void setScreen(OptionsScreen screen) {
         this.screen = screen;
     }
 
+    /**
+     *
+     */
     public void reload() {
         screen.reloadListWidget();
     }
 
     // Abstract methods
-    public abstract ConfigListWidget resize(int width, int height, int top, int bottom,
-                                            int itemHeight, double scrollAmount);
+    public abstract OptionsListWidget resize(int width, int height, int top, int bottom,
+                                             int itemHeight, double scrollAmount);
 
     public void onClose() {}
 
     /**
-     * Base implementation of ChatNotify options list widget entry, with common
-     * entries.
+     * Base implementation of options list widget entry, with common entries.
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
 
@@ -116,8 +119,6 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
                 button.render(context, mouseX, mouseY, tickDelta);
             });
         }
-
-        // Common Entry implementations
 
         public static class TextEntry extends Entry {
             public TextEntry(int x, int width, int height, Component message,

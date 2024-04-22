@@ -5,14 +5,13 @@
 
 package com.notryken.chatnotify.gui.component.listwidget;
 
+import com.notryken.chatnotify.gui.component.widget.RgbChannelSlider;
+import com.notryken.chatnotify.util.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import com.notryken.chatnotify.config.Notification;
-import com.notryken.chatnotify.gui.component.widget.RgbChannelSlider;
-import com.notryken.chatnotify.util.ColorUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -20,66 +19,65 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 /**
- * {@code ConfigListWidget} containing controls for text color of the
- * specified {@code Notification}.
+ * Contains channel sliders and quick-select buttons for an RGB color.
  */
-public class ColorConfigListWidget extends ConfigListWidget {
-    public final Notification notif;
+public class ColorOptionsListWidget extends OptionsListWidget {
+    public final Supplier<Integer> src;
+    public final Consumer<Integer> dest;
 
-    public ColorConfigListWidget(Minecraft minecraft, int width, int height,
-                                 int top, int bottom, int itemHeight,
-                                 int entryRelX, int entryWidth, int entryHeight,
-                                 int scrollWidth, Notification notif) {
-        super(minecraft, width, height, top, bottom, itemHeight, 
-                entryRelX, entryWidth, entryHeight, scrollWidth);
-        this.notif = notif;
+    public ColorOptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
+                                  int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                                  int scrollWidth, Supplier<Integer> src, Consumer<Integer> dest) {
+        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        this.src = src;
+        this.dest = dest;
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Notification Text Color")
-                        .setStyle(Style.EMPTY.withColor(this.notif.textStyle.getTextColor())),
+        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                Component.literal("Example Text")
+                        .setStyle(Style.EMPTY.withColor(src.get())),
                 null, -1));
 
-        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Red: ", () -> notif.textStyle.color,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Red: ", src,
                 (color) -> {
-                    notif.textStyle.color = ColorUtil.withRed.applyAsInt(notif.textStyle.color, color);
+                    dest.accept(ColorUtil.withRed.applyAsInt(src.get(), color));
                     refreshColorIndicator();
                 },
                 ColorUtil.toRed, ColorUtil.fromRed));
-        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Green: ", () -> notif.textStyle.color,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Green: ", src,
                 (color) -> {
-                    notif.textStyle.color = ColorUtil.withGreen.applyAsInt(notif.textStyle.color, color);
+                    dest.accept(ColorUtil.withGreen.applyAsInt(src.get(), color));
                     refreshColorIndicator();
                 },
                 ColorUtil.toGreen, ColorUtil.fromGreen));
-        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Blue: ", () -> notif.textStyle.color,
+        addEntry(new Entry.RgbSliderEntry(entryX, entryWidth, entryHeight, "Blue: ", src,
                 (color) -> {
-                    notif.textStyle.color = ColorUtil.withBlue.applyAsInt(notif.textStyle.color, color);
+                    dest.accept(ColorUtil.withBlue.applyAsInt(src.get(), color));
                     refreshColorIndicator();
                 },
                 ColorUtil.toBlue, ColorUtil.fromBlue));
 
-        addEntry(new Entry.ColorSelectionEntry(entryX, entryWidth, (value) -> notif.textStyle.color = value, this));
+        addEntry(new Entry.ColorSelectionEntry(entryX, entryWidth, dest, this));
     }
 
     @Override
-    public ColorConfigListWidget resize(int width, int height, int top, int bottom,
-                                        int itemHeight, double scrollAmount) {
-        ColorConfigListWidget newListWidget = new ColorConfigListWidget(
+    public ColorOptionsListWidget resize(int width, int height, int top, int bottom,
+                                         int itemHeight, double scrollAmount) {
+        ColorOptionsListWidget newListWidget = new ColorOptionsListWidget(
                 minecraft, width, height, top, bottom, itemHeight,
-                entryRelX, entryWidth, entryHeight, scrollWidth, notif);
+                entryRelX, entryWidth, entryHeight, scrollWidth, src, dest);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
 
     public void refreshColorIndicator() {
         remove(0);
-        addEntryToTop(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntryToTop(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Text Color")
-                        .setStyle(Style.EMPTY.withColor(this.notif.textStyle.getTextColor())),
+                        .setStyle(Style.EMPTY.withColor(src.get())),
                 null, -1));
     }
 
-    private abstract static class Entry extends ConfigListWidget.Entry {
+    private abstract static class Entry extends OptionsListWidget.Entry {
 
         protected static class RgbSliderEntry extends Entry {
             public RgbSliderEntry(int x, int width, int height, @Nullable String message,
@@ -111,7 +109,7 @@ public class ColorConfigListWidget extends ConfigListWidget {
                     0};
 
             public ColorSelectionEntry(int x, int width, Consumer<Integer> dest,
-                                       ColorConfigListWidget listWidget) {
+                                       ColorOptionsListWidget listWidget) {
                 super();
 
                 int buttonWidth = width / colors.length;

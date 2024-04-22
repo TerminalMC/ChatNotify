@@ -18,7 +18,8 @@
     "depends": {
         "fabricloader": "${fabric_loader_version_range}",
         "minecraft": "${minecraft_version_range_fabric}",
-        "java": ">=${java_version}"
+        "java": ">=${java_version}",
+        "fabric-lifecycle-events-v1": "*"
     },
     "recommends": {
         "modmenu": ">=${modmenu_version}"

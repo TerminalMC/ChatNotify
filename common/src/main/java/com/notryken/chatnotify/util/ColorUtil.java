@@ -27,11 +27,11 @@ public class ColorUtil {
 
 
     /**
-     * Parses and validates a {@code String} representing a hex color.
-     * Note: requires a full-length hex code with leading # (7 chars total)
-     * @param strColor the {@code String} to parse.
-     * @return the validated {@code TextColor}, or null if the {@code String} is
-     * invalid.
+     * Converts a hex color string into a {@link TextColor}.
+     * <p>Note: requires a full-length hex code with leading # (7 chars total).
+     * @param strColor the color string.
+     * @return the resulting {@link TextColor} if the string is a valid color,
+     * {@code null} otherwise.
      */
     public static TextColor parseColor(String strColor) {
         if (strColor.startsWith("#") && strColor.length() == 7) {

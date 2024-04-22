@@ -6,6 +6,7 @@
 package com.notryken.chatnotify.mixin;
 
 import com.mojang.datafixers.util.Pair;
+import com.notryken.chatnotify.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -66,8 +67,8 @@ public class MixinClientPacketListener {
     @Inject(method = "handleLogin", at = @At("TAIL"))
     public void getProfileName(ClientboundLoginPacket packet, CallbackInfo ci) {
         String name = Minecraft.getInstance().player.getName().getString();
-        ChatNotify.config().setProfileName(name);
-        ChatNotify.config().setDisplayName(name);
+        Config.get().setProfileName(name);
+        Config.get().setDisplayName(name);
     }
 
     /**
@@ -85,7 +86,7 @@ public class MixinClientPacketListener {
                                 PlayerInfo playerInfo, CallbackInfo ci) {
         if (action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME) &&
                 playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())) {
-            if (entry.displayName() != null) ChatNotify.config().setDisplayName(entry.displayName().getString());
+            if (entry.displayName() != null) Config.get().setDisplayName(entry.displayName().getString());
         }
     }
 
@@ -117,7 +118,7 @@ public class MixinClientPacketListener {
         String plainMsg = "";
 
         // If message starts with a prefix, remove the prefix.
-        for (String prefix : ChatNotify.config().prefixes) {
+        for (String prefix : Config.get().prefixes) {
             if (message.startsWith(prefix)) {
                 plainMsg = message.replaceFirst(prefix, "").strip();
                 break;
@@ -136,7 +137,7 @@ public class MixinClientPacketListener {
         command = '/' + command.toLowerCase(Locale.ROOT);
 
         // If command starts with a prefix, remove the prefix and store command.
-        for (String prefix : ChatNotify.config().prefixes) {
+        for (String prefix : Config.get().prefixes) {
             if (command.startsWith(prefix)) {
                 command = command.replaceFirst(prefix, "").strip();
                 if (!command.isEmpty()) {

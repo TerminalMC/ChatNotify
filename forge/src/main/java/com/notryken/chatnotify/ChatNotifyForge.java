@@ -5,19 +5,31 @@
 
 package com.notryken.chatnotify;
 
+import com.notryken.chatnotify.gui.screen.GlobalOptionsScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import com.notryken.chatnotify.gui.screen.GlobalConfigScreen;
 
 @Mod(ChatNotify.MOD_ID)
+@Mod.EventBusSubscriber(modid = ChatNotify.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ChatNotifyForge {
     public ChatNotifyForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory(
-                        (minecraft, parent) -> new GlobalConfigScreen(parent))
+                        (minecraft, parent) -> new GlobalOptionsScreen(parent))
                 );
 
         ChatNotify.init();
+    }
+
+    @SubscribeEvent
+    public static void clientTickEvent(TickEvent.ClientTickEvent event) {
+        if(event.phase.equals(TickEvent.Phase.END)) {
+            ChatNotify.onEndTick(Minecraft.getInstance());
+        }
     }
 }

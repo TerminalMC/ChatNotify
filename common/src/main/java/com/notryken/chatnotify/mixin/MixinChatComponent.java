@@ -6,6 +6,7 @@
 package com.notryken.chatnotify.mixin;
 
 import com.notryken.chatnotify.ChatNotify;
+import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.processor.MessageProcessor;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.Component;
@@ -43,9 +44,10 @@ public class MixinChatComponent {
     @ModifyVariable(
             method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V",
             at = @At("HEAD"),
-            argsOnly = true)
+            argsOnly = true
+    )
     private Component replaceMessage(Component message) {
-        if (!ChatNotify.config().mixinEarly) {
+        if (!Config.get().mixinEarly) {
             return MessageProcessor.processMessage(message);
         }
         else {

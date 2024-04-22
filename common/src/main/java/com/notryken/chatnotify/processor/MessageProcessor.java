@@ -7,9 +7,7 @@ package com.notryken.chatnotify.processor;
 
 import com.mojang.datafixers.util.Pair;
 import com.notryken.chatnotify.ChatNotify;
-import com.notryken.chatnotify.config.Notification;
-import com.notryken.chatnotify.config.TextStyle;
-import com.notryken.chatnotify.config.Trigger;
+import com.notryken.chatnotify.config.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -28,7 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static com.notryken.chatnotify.ChatNotify.config;
 import static com.notryken.chatnotify.ChatNotify.recentMessages;
 
 /*
@@ -39,11 +36,11 @@ public class MessageProcessor {
     /**
      * Initiates the message processing algorithm.
      * @param msg The original message.
-     * @return A modified copy of {@code msg}, or the original if no modifying
+     * @return A modified copy of the message, or the original if no modifying
      * was required.
      */
     public static Component processMessage(Component msg) {
-        if (config().debugShowKey) {
+        if (Config.get().debugShowKey) {
             msg = addKeyInfo(msg);
         }
 
@@ -88,23 +85,23 @@ public class MessageProcessor {
     }
 
     /**
-     * Determines whether {@code strMsg} was sent by the user and modifies it if
+     * Determines whether the message was sent by the user and modifies it if
      * necessary to prevent unwanted notifications.
-     * <p>
-     * {@code strMsg} is identified as sent by the user if it contains a stored
+     *
+     * <p>The message is identified as sent by the user if it contains a stored
      * message (or command) sent by the user, and has a prefix that is both not
      * contained in the stored message, and contains (according to
-     * {@code msgContainsStr()}) a trigger of the username {@code Notification}.
-     * <p>
-     * If {@code strMsg} is positively identified, it is set to {@code null} if
-     * the configuration {@code ignoreOwnMessages} is true, else the part of the
+     * msgContainsStr) a trigger of the username notification.
+     *
+     * <p>If the message is positively identified, it is set to {@code null} if
+     * ChatNotify is configured to ignore such messages, else the part of the
      * prefix that matched a trigger is removed.
-     * <p>
-     * <b>Note:</b> This approach is imperfect and may fail if, for example,
+     *
+     * <p><b>Note:</b> This approach is imperfect and may fail if, for example,
      * two messages are sent, the first contains the second, and the return of
      * the second message arrives first.
-     * @param msgStr the message {@code String} to process.
-     * @return the processed version of {@code strMsg}.
+     * @param msgStr the message to process.
+     * @return the processed version of the message.
      */
     private static @Nullable String checkOwner(String msgStr) {
         // Stored messages are always converted to lowercase, convert to match.
@@ -115,14 +112,14 @@ public class MessageProcessor {
             if (lastMatchIdx > 0) {
                 // Check for a trigger in the part before the match
                 String prefix = msgStr.substring(0, lastMatchIdx);
-                for (Trigger trigger : config().getNotifs().get(0).triggers) {
+                for (Trigger trigger : Config.get().getNotifs().get(0).triggers) {
                     Pair<Integer,Integer> prefixMatch = msgContainsStr(prefix, trigger.string, false);
                     if (prefixMatch != null) {
                         // Both conditions are now satisfied
                         // Remove the matching stored message
                         recentMessages.remove(i);
                         // Modify the message string
-                        if (!ChatNotify.config().checkOwnMessages) {
+                        if (!Config.get().checkOwnMessages) {
                             msgStr = null;
                         }
                         else {
@@ -138,32 +135,32 @@ public class MessageProcessor {
     }
 
     /**
-     * For each trigger of each ChatNotify {@code Notification}, checks whether
-     * the trigger matches the given message using {@code msgContainsStr()}.
-     * <p>
-     * When a trigger matches, checks the exclusion triggers of the
-     * {@code Notification} to determine whether to activate the notification.
-     * <p>
-     * If the notification should be activated, attempts to complete the
+     * For each trigger of each ChatNotify Notification, checks whether
+     * the trigger matches the given message using msgContainsStr.
+     *
+     * <p>When a trigger matches, checks the exclusion triggers of the
+     * Notification to determine whether to activate the notification.
+     *
+     * <p>If the notification should be activated, attempts to complete the
      * relevant notification actions.
-     * <p>
-     * <b>Note:</b> For performance and simplicity reasons, this method only
+     *
+     * <p><b>Note:</b> For performance and simplicity reasons, this method only
      * allows one notification to be triggered by a given message.
-     * @param message the original message {@code Component}.
-     * @param msgStr the message {@code String}.
-     * @param checkedMsgStr the owner-checked version of {@code msgStr}.
-     * @return a re-styled copy of {@code msg}, or null if no trigger matched.
+     * @param message the original message.
+     * @param msgStr the original message string.
+     * @param checkedMsgStr the owner-checked message string.
+     * @return a re-styled copy of the message, or null if no trigger matched.
      */
     private static Component tryNotify(Component message, String msgStr, String checkedMsgStr) {
-        for (Notification notif : ChatNotify.config().getNotifs()) {
+        for (Notification notif : Config.get().getNotifs()) {
             if (notif.isEnabled() && !notif.editing) {
                 for (Trigger trigger : notif.triggers) {
                     if (!trigger.string.isBlank()) {
-                        if (triggerMatched(notif, trigger, message, msgStr, checkedMsgStr)) {
+                        if (triggerMatched(trigger, message, msgStr, checkedMsgStr)) {
                             boolean excluded = false;
                             if (notif.exclusionEnabled) {
                                 for (Trigger exclTrigger : notif.exclusionTriggers) {
-                                    if (triggerMatched(notif, exclTrigger, message, msgStr, checkedMsgStr)) {
+                                    if (triggerMatched(exclTrigger, message, msgStr, checkedMsgStr)) {
                                         excluded = true;
                                         break;
                                     }
@@ -173,8 +170,8 @@ public class MessageProcessor {
                                 playSound(notif);
                                 sendResponses(notif);
                                 return (trigger.isKey() || trigger.isRegex) ?
-                                        simpleRestyle(message, notif) :
-                                        complexRestyle(message, trigger.string, notif);
+                                        simpleRestyle(message, notif.textStyle) :
+                                        complexRestyle(message, trigger.string, notif.textStyle);
                             }
                         }
                     }
@@ -184,8 +181,8 @@ public class MessageProcessor {
         return null;
     }
 
-    private static boolean triggerMatched(Notification notif, Trigger trigger,
-                                          Component message, String msgStr, String checkedMsgStr) {
+    private static boolean triggerMatched(Trigger trigger, Component message,
+                                          String msgStr, String checkedMsgStr) {
         boolean match = false;
         if (trigger.isKey()) {
             if (trigger.string.equals(".")) {
@@ -197,22 +194,22 @@ public class MessageProcessor {
                 }
             }
         }
-        else if (msgContainsStr(notif.allowRegex && trigger.isRegex ? msgStr : checkedMsgStr,
-                trigger.string, notif.allowRegex && trigger.isRegex) != null) {
+        else if (msgContainsStr(Config.get().allowRegex && trigger.isRegex ? msgStr : checkedMsgStr,
+                trigger.string, Config.get().allowRegex && trigger.isRegex) != null) {
             match = true;
         }
         return match;
     }
 
     /**
-     * If {@code strIsRegex} is {@code true}, attempts to compile {@code str}
-     * as a regex pattern. Else, compiles
+     * If strIsRegex is {@code true}, attempts to compile str as a regex
+     * pattern. Else, compiles
      * {@code (?<!\w)((\W?|(§[a-z0-9])+)(?i)<str>\W?)(?!\w)}. Uses the compiled
-     * pattern to search {@code strMsg}.
-     * @param strMsg the {@code String} to search in.
-     * @param str the {@code String} or regex to search with.
+     * pattern to search strMsg.
+     * @param strMsg the string to search in.
+     * @param str the string to search for, or regex to search with.
      * @param strIsRegex control flag for whether to compile str as a pattern.
-     * @return n integer array [start,end] of the match, or {@code null} if not
+     * @return an integer array [start,end] of the match, or {@code null} if not
      * found or if strIsRegex is true and str does not represent a valid regex.
      */
     private static Pair<Integer,Integer> msgContainsStr(String strMsg, String str, boolean strIsRegex) {
@@ -230,15 +227,15 @@ public class MessageProcessor {
     }
 
     /**
-     * Plays the sound of the specified {@code Notification}, if the relevant
-     * control is enabled.
-     * @param notif the {@code Notification}.
+     * Plays the sound of the specified notification, if the relevant control is
+     * enabled.
+     * @param notif the Notification.
      */
     private static void playSound(Notification notif) {
         if (notif.sound.isEnabled()) {
             Minecraft.getInstance().getSoundManager().play(
                     new SimpleSoundInstance(
-                            notif.sound.getResourceLocation(), config().soundSource,
+                            notif.sound.getResourceLocation(), Config.get().soundSource,
                             notif.sound.getVolume(), notif.sound.getPitch(),
                             SoundInstance.createUnseededRandom(), false, 0,
                             SoundInstance.Attenuation.NONE, 0, 0, 0, true));
@@ -246,54 +243,51 @@ public class MessageProcessor {
     }
 
     /**
-     * Sends all response messages of the specified {@code Notification}, if the
+     * Sends all response messages of the specified notification, if the
      * relevant control is enabled.
-     * @param notif the {@code Notification}.
+     * @param notif the Notification.
      */
     private static void sendResponses(Notification notif) {
         if (notif.responseEnabled) {
             Minecraft minecraft = Minecraft.getInstance();
             Screen oldScreen = minecraft.screen;
             minecraft.setScreen(new ChatScreen(""));
-            for (String response : notif.responseMessages) {
-                if (minecraft.screen instanceof ChatScreen cs) {
-                    cs.handleChatInput(response, false);
-                }
+            for (ResponseMessage msg : notif.responseMessages) {
+                msg.countdown = msg.delayTicks;
+                ChatNotify.responseMessages.add(msg);
             }
             minecraft.setScreen(oldScreen);
         }
     }
 
     /**
-     * If the color or format controls of the specified {@code Notification} are
-     * enabled, uses {@code applyStyle()} to destructively fill the style of
-     * the specified {@code Component} with the {@code Style} of the
-     * {@code Notification}.
-     * @param msg the {@code Component} to restyle.
-     * @param notif the {@code Notification} to draw the {@code Style} from.
-     * @return the restyled {@code Component}.
+     * If the color or format controls of the specified notification are
+     * enabled, uses applyStyle to destructively fill the style of the specified
+     * message with the style of the notification.
+     * @param msg the message to restyle.
+     * @param style the TextStyle to apply.
+     * @return the restyled message.
      */
-    private static Component simpleRestyle(Component msg, Notification notif) {
-        if (notif.textStyle.isEnabled()) {
-            msg = msg.copy().setStyle(applyStyle(msg.getStyle(), notif.textStyle));
+    private static Component simpleRestyle(Component msg, TextStyle style) {
+        if (style.isEnabled()) {
+            msg = msg.copy().setStyle(applyStyle(msg.getStyle(), style));
         }
         return msg;
     }
 
     /**
-     * If the color or format controls of the specified {@code Notification} are
+     * If the color or format controls of the specified Notification are
      * enabled, initiates a recursive {@code Component} break-down algorithm
      * to restyle only the part of the specified {@code Component} that matches
      * the specified trigger.
-     * @param msg the {@code Component} to restyle.
-     * @param trigger the {@code String} to restyle in the specified
-     * {@code Component}.
-     * @param notif the {@code Notification} to draw the {@code Style} from.
-     * @return the restyled {@code Component}.
+     * @param msg the message to restyle.
+     * @param trigger the string to restyle within the message.
+     * @param style the TextStyle to apply.
+     * @return the restyled message.
      */
-    private static Component complexRestyle(Component msg, String trigger, Notification notif) {
-        if (notif.textStyle.isEnabled()) {
-            msg = restyleComponent(msg.copy(), trigger, notif.textStyle);
+    private static Component complexRestyle(Component msg, String trigger, TextStyle style) {
+        if (style.isEnabled()) {
+            msg = restyleComponent(msg.copy(), trigger, style);
         }
         return msg;
     }

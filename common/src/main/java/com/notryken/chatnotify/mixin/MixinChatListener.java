@@ -6,10 +6,12 @@
 package com.notryken.chatnotify.mixin;
 
 import com.notryken.chatnotify.ChatNotify;
+import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.processor.MessageProcessor;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
@@ -24,7 +26,8 @@ public class MixinChatListener {
     @ModifyVariable(
             method = "handleDisguisedChatMessage",
             at = @At("HEAD"),
-            argsOnly = true)
+            argsOnly = true
+    )
     private Component replaceDisguisedChatMessage(Component message) {
         return chatNotify$replaceMessage(message);
     }
@@ -32,7 +35,8 @@ public class MixinChatListener {
     @ModifyVariable(
             method = "handleSystemMessage",
             at = @At("HEAD"),
-            argsOnly = true)
+            argsOnly = true
+    )
     private Component replaceSystemMessage(Component message) {
         return chatNotify$replaceMessage(message);
     }
@@ -41,14 +45,16 @@ public class MixinChatListener {
     @ModifyVariable(
             method = "showMessageToPlayer",
             at = @At("HEAD"),
-            argsOnly = true)
+            argsOnly = true
+    )
     private Component replaceMessageToPlayer(Component message) {
         return chatNotify$replaceMessage(message);
     }
 
 
+    @Unique
     private static Component chatNotify$replaceMessage(Component message) {
-        if (ChatNotify.config().mixinEarly) {
+        if (Config.get().mixinEarly) {
             return MessageProcessor.processMessage(message);
         }
         else {
