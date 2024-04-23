@@ -54,7 +54,8 @@ public class OptionsScreen extends OptionsSubScreen {
 
     public void reloadListWidget() {
         clearWidgets();
-        listWidget = listWidget.resize(width, height, listTop, listBottom.get(), listItemHeight, listWidget.getScrollAmount());
+        listWidget = listWidget.resize(width, height, listTop, listBottom.get(),
+                listItemHeight, listWidget.getScrollAmount());
         listWidget.setScreen(this);
         addRenderableWidget(listWidget);
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,
