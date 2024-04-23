@@ -50,6 +50,7 @@ subprojects {
     }
 
     processResources {
+
         def expandProps = [
                 "project_group": project.group,
                 "mod_version": mod_version,
@@ -59,22 +60,22 @@ subprojects {
                 "mod_description": mod_description,
                 "mod_icon": "assets/" + mod_id + "/icon.png",
                 "mod_owner": mod_owner,
-                "mod_authors_list": mod_authors.split(",").collect { "\"$it\"" }.join(','),
-                "mod_contributors_list": mod_contributors.split(",").collect { "\"$it\"" }.join(','),
+                "mod_authors_list": toList(mod_authors),
+                "mod_contributors_list": toList(mod_contributors),
                 "mod_authors_string": mod_authors.replace(",", ", "),
                 "mod_contributors_string": mod_contributors.replace(",", ", "),
                 "mod_license": mod_license,
                 "mod_environment": mod_environment,
                 "java_version": java_version,
-                "java_versions_fabric": java_versions_fabric,
+                "java_versions_fabric_list": toList(java_versions_fabric),
                 "java_versions_neoforge": java_versions_neoforge,
                 "minecraft_version": minecraft_version,
-                "minecraft_versions_fabric": minecraft_versions_fabric,
+                "minecraft_versions_fabric_list": toList(minecraft_versions_fabric),
                 "minecraft_versions_neoforge": minecraft_versions_neoforge,
                 "fabric_loader_version": fabric_loader_version,
-                "fabric_loader_versions": fabric_loader_versions,
+                "fabric_loader_versions_list": toList(fabric_loader_versions),
                 "fabric_api_version": fabric_api_version,
-                "fabric_api_versions": fabric_api_versions,
+                "fabric_api_versions_list": toList(fabric_api_versions),
                 "forge_loader_versions": forge_loader_versions,
                 "forge_version": forge_version,
                 "forge_versions": forge_versions,
@@ -82,7 +83,7 @@ subprojects {
 //                "neoforge_version": neoforge_version,
 //                "neoforge_versions": neoforge_versions,
                 "modmenu_version": modmenu_version,
-                "modmenu_versions": modmenu_versions,
+                "modmenu_versions_list": toList(modmenu_versions),
                 "homepage_url": homepage_url,
                 "sources_url": sources_url,
                 "issues_url": issues_url,
@@ -108,4 +109,8 @@ subprojects {
 //            rename { "${it}_${mod_name}" }
 //        }
 //    }
+}
+
+static def toList(String versions) {
+    return versions.split(",").collect { "\"$it\"" }.join(',')
 }
