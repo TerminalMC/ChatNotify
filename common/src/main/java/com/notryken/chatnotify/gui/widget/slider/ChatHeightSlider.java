@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component;
+package com.notryken.chatnotify.gui.widget.slider;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

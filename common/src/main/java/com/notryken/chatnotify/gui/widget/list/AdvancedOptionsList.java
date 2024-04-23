@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.listwidget;
+package com.notryken.chatnotify.gui.widget.list;
 
 import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.config.Notification;
@@ -24,16 +24,16 @@ import net.minecraft.network.chat.Component;
  * Contains controls for advanced options of a {@link Notification}, including
  * exclusion triggers, response messages, and reset options.
  */
-public class AdvancedOptionsListWidget extends OptionsListWidget {
+public class AdvancedOptionsList extends OptionsList {
     private final Notification notif;
 
-    public AdvancedOptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
-                                     int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                                     int scrollWidth, Notification notif) {
+    public AdvancedOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+                               int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                               int scrollWidth, Notification notif) {
         super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.notif = notif;
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Exclusion Triggers \u2139"),
                 Tooltip.create(Component.literal("If an exclusion trigger is detected in a " +
                         "message, it will prevent this notification from activating.")), -1));
@@ -44,7 +44,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                 addEntry(new Entry.ExclusionTriggerField(entryX, entryWidth, entryHeight,
                         this, notif, notif.exclusionTriggers.get(i), i));
             }
-            addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+            addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.exclusionTriggers.add(new Trigger());
@@ -52,19 +52,23 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                     }));
         }
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Auto Response Messages \u2139"),
                 Tooltip.create(Component.literal("Chat messages or commands to be sent when " +
-                        "this notification is activated.\n").append(Component.literal(
-                                "Warning: Can crash the game, use with caution.")
-                        .withStyle(ChatFormatting.RED))), -1));
+                                "this notification is activated.\n")
+                        .append(Component.literal("Warning: Can crash the game, use with caution.")
+                        .withStyle(ChatFormatting.RED))
+                        .append(Config.get().allowRegex ? "\nNote: You can reference trigger regex capturing " +
+                                "groups by using '(i)' in the response message, with i being the group number " +
+                                "(e.g. '(0)' for the whole match)."
+                                : "")), -1));
         addEntry(new Entry.ResponseToggleButton(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.responseEnabled) {
             for (int i = 0; i < notif.responseMessages.size(); i ++) {
                 addEntry(new Entry.ResponseMessageField(entryX, entryWidth, entryHeight, this, notif, i));
             }
-            addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+            addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.responseMessages.add(new ResponseMessage());
@@ -72,10 +76,10 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                     }));
         }
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Broken Everything?"), null, -1));
 
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Reset Advanced Options"), Tooltip.create(
                         Component.literal("Resets all advanced settings for THIS notification.")),
                 -1,
@@ -84,7 +88,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                     reload();
                 }));
 
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Reset All Advanced Options"), Tooltip.create(
                 Component.literal("Resets all advanced settings for ALL notifications.")),
                 -1,
@@ -103,7 +107,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                         Component.literal("Are you sure you want to reset all advanced settings " +
                                 "for ALL notifications?")))));
 
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Nuclear Reset"), Tooltip.create(
                 Component.literal("Deletes all notifications and resets all settings.")),
                 -1,
@@ -122,9 +126,9 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
     }
 
     @Override
-    public AdvancedOptionsListWidget resize(int width, int height, int top, int bottom,
-                                            int itemHeight, double scrollAmount) {
-        AdvancedOptionsListWidget newListWidget = new AdvancedOptionsListWidget(
+    public AdvancedOptionsList resize(int width, int height, int top, int bottom,
+                                      int itemHeight, double scrollAmount) {
+        AdvancedOptionsList newListWidget = new AdvancedOptionsList(
                 minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
         newListWidget.setScrollAmount(scrollAmount);
@@ -134,15 +138,15 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.key"),
-                new KeyOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new KeyOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
     }
 
-    private abstract static class Entry extends OptionsListWidget.Entry {
+    private abstract static class Entry extends OptionsList.Entry {
 
         private static class ExclusionToggleButton extends Entry {
             ExclusionToggleButton(int x, int width, int height, Notification notif,
-                              AdvancedOptionsListWidget listWidget) {
+                              AdvancedOptionsList listWidget) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
@@ -158,7 +162,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
 
         private static class ExclusionTriggerField extends Entry {
 
-            ExclusionTriggerField(int x, int width, int height, AdvancedOptionsListWidget listWidget,
+            ExclusionTriggerField(int x, int width, int height, AdvancedOptionsList listWidget,
                                   Notification notif, Trigger trigger, int index) {
                 super();
 
@@ -176,7 +180,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                 Button keyButton;
                 if (Config.get().allowRegex) {
                     Button regexButton;
-                    if (trigger.isKey()) {
+                    if (trigger.isKey) {
                         regexButton = Button.builder(Component.literal(".*")
                                                 .withStyle(ChatFormatting.GRAY),
                                         (button) -> {})
@@ -217,12 +221,12 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                     }
                     elements.add(regexButton);
                 }
-                if (trigger.isKey()) {
+                if (trigger.isKey) {
                     keyButton = Button.builder(Component.literal("\uD83D\uDD11")
                                             .withStyle(ChatFormatting.GREEN),
                                     (button) -> {
                                         if (Screen.hasShiftDown()) {
-                                            trigger.setIsKey(false);
+                                            trigger.isKey = false;
                                             listWidget.reload();
                                         } else {
                                             listWidget.openKeyConfig(trigger);
@@ -239,7 +243,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
                                             .withStyle(ChatFormatting.RED),
                                     (button) -> {
                                         if (Screen.hasShiftDown()) {
-                                            trigger.setIsKey(true);
+                                            trigger.isKey = true;
                                             listWidget.reload();
                                         } else {
                                             listWidget.openKeyConfig(trigger);
@@ -266,7 +270,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
 
         private static class ResponseToggleButton extends Entry {
             ResponseToggleButton(int x, int width, int height, Notification notif,
-                                 AdvancedOptionsListWidget listWidget)
+                                 AdvancedOptionsList listWidget)
             {
                 super();
                 elements.add(CycleButton.booleanBuilder(
@@ -283,7 +287,7 @@ public class AdvancedOptionsListWidget extends OptionsListWidget {
 
         private static class ResponseMessageField extends Entry {
 
-            ResponseMessageField(int x, int width, int height, AdvancedOptionsListWidget listWidget,
+            ResponseMessageField(int x, int width, int height, AdvancedOptionsList listWidget,
                                  Notification notif, int index) {
                 super();
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.listwidget;
+package com.notryken.chatnotify.gui.widget.list;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,8 +11,8 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
-import com.notryken.chatnotify.gui.component.widget.DoubleSlider;
-import com.notryken.chatnotify.gui.component.widget.SilentButton;
+import com.notryken.chatnotify.gui.widget.slider.DoubleSlider;
+import com.notryken.chatnotify.gui.widget.button.SilentButton;
 import com.notryken.chatnotify.gui.screen.OptionsScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,11 +23,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * An OptionsListWidget is tightly coupled to a generic {@link OptionsScreen},
+ * An OptionsList is tightly coupled to a generic {@link OptionsScreen},
  * allowing many unique options screens to use a single Screen implementation,
- * with different OptionsListWidgets.
+ * with different OptionsLists.
  *
- * <p>An OptionsListWidget has a list of {@link Entry} objects, which are drawn
+ * <p>An OptionsList has a list of {@link Entry} objects, which are drawn
  * onto the screen top-down in the order that they are stored, with standard
  * spacing specified by the parent {@link OptionsScreen}.
  *
@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  * to appear side-by-side, you must add them all to a single {@link Entry}'s
  * list of widgets.
  */
-public abstract class OptionsListWidget extends ContainerObjectSelectionList<OptionsListWidget.Entry> {
+public abstract class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
     protected OptionsScreen screen;
 
     // Standard positional and dimensional values used by entries
@@ -45,9 +45,9 @@ public abstract class OptionsListWidget extends ContainerObjectSelectionList<Opt
     protected final int entryHeight;
     protected final int scrollWidth;
 
-    public OptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
-                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                             int scrollWidth) {
+    public OptionsList(Minecraft mc, int width, int height, int top, int bottom,
+                       int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                       int scrollWidth) {
         super(mc, width, height, top, bottom, itemHeight);
         this.entryRelX = entryRelX;
         this.entryX = width / 2 + entryRelX;
@@ -69,7 +69,7 @@ public abstract class OptionsListWidget extends ContainerObjectSelectionList<Opt
     }
 
     /**
-     * Must be called when an OptionsListWidget is added to an
+     * Must be called when an OptionsList is added to an
      * {@link OptionsScreen}, else breaks.
      */
     public void setScreen(OptionsScreen screen) {
@@ -84,8 +84,8 @@ public abstract class OptionsListWidget extends ContainerObjectSelectionList<Opt
     }
 
     // Abstract methods
-    public abstract OptionsListWidget resize(int width, int height, int top, int bottom,
-                                             int itemHeight, double scrollAmount);
+    public abstract OptionsList resize(int width, int height, int top, int bottom,
+                                       int itemHeight, double scrollAmount);
 
     public void onClose() {}
 

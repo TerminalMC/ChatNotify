@@ -6,7 +6,7 @@
 package com.notryken.chatnotify.mixin;
 
 import com.mojang.serialization.Codec;
-import com.notryken.chatnotify.gui.component.ChatHeightSlider;
+import com.notryken.chatnotify.gui.widget.slider.ChatHeightSlider;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/*
+/**
  * Boosts the chat height slider.
  */
 @Mixin(OptionInstance.class)

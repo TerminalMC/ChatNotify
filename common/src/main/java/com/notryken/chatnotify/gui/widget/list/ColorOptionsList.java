@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.listwidget;
+package com.notryken.chatnotify.gui.widget.list;
 
-import com.notryken.chatnotify.gui.component.widget.RgbChannelSlider;
+import com.notryken.chatnotify.gui.widget.slider.RgbChannelSlider;
 import com.notryken.chatnotify.util.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -21,18 +21,18 @@ import java.util.function.Supplier;
 /**
  * Contains channel sliders and quick-select buttons for an RGB color.
  */
-public class ColorOptionsListWidget extends OptionsListWidget {
+public class ColorOptionsList extends OptionsList {
     public final Supplier<Integer> src;
     public final Consumer<Integer> dest;
 
-    public ColorOptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
-                                  int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                                  int scrollWidth, Supplier<Integer> src, Consumer<Integer> dest) {
+    public ColorOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+                            int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                            int scrollWidth, Supplier<Integer> src, Consumer<Integer> dest) {
         super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.src = src;
         this.dest = dest;
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Example Text")
                         .setStyle(Style.EMPTY.withColor(src.get())),
                 null, -1));
@@ -60,9 +60,9 @@ public class ColorOptionsListWidget extends OptionsListWidget {
     }
 
     @Override
-    public ColorOptionsListWidget resize(int width, int height, int top, int bottom,
-                                         int itemHeight, double scrollAmount) {
-        ColorOptionsListWidget newListWidget = new ColorOptionsListWidget(
+    public ColorOptionsList resize(int width, int height, int top, int bottom,
+                                   int itemHeight, double scrollAmount) {
+        ColorOptionsList newListWidget = new ColorOptionsList(
                 minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, src, dest);
         newListWidget.setScrollAmount(scrollAmount);
@@ -71,13 +71,13 @@ public class ColorOptionsListWidget extends OptionsListWidget {
 
     public void refreshColorIndicator() {
         remove(0);
-        addEntryToTop(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntryToTop(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Text Color")
                         .setStyle(Style.EMPTY.withColor(src.get())),
                 null, -1));
     }
 
-    private abstract static class Entry extends OptionsListWidget.Entry {
+    private abstract static class Entry extends OptionsList.Entry {
 
         protected static class RgbSliderEntry extends Entry {
             public RgbSliderEntry(int x, int width, int height, @Nullable String message,
@@ -109,7 +109,7 @@ public class ColorOptionsListWidget extends OptionsListWidget {
                     0};
 
             public ColorSelectionEntry(int x, int width, Consumer<Integer> dest,
-                                       ColorOptionsListWidget listWidget) {
+                                       ColorOptionsList listWidget) {
                 super();
 
                 int buttonWidth = width / colors.length;

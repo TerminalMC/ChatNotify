@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.listwidget;
+package com.notryken.chatnotify.gui.widget.list;
 
 import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.config.Notification;
@@ -27,26 +27,26 @@ import net.minecraft.network.chat.TextColor;
  * Contains controls for options of a {@link Notification}, and buttons linking
  * to other screens.
  */
-public class NotifOptionsListWidget extends OptionsListWidget {
+public class NotifOptionsList extends OptionsList {
     private final Notification notif;
     private final boolean isUsername;
 
-    public NotifOptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
-                                  int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                                  int scrollWidth, Notification notif, boolean isUsername) {
+    public NotifOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+                            int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                            int scrollWidth, Notification notif, boolean isUsername) {
         super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         notif.editing = true;
         this.notif = notif;
         this.isUsername = isUsername;
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Triggers"), null, -1));
 
         for (int i = 0; i < notif.triggers.size(); i++) {
             addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight,
                     this, notif, notif.triggers.get(i), i));
         }
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     notif.triggers.add(new Trigger());
@@ -54,7 +54,7 @@ public class NotifOptionsListWidget extends OptionsListWidget {
                 }));
 
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notification Options"), null, -1));
 
         addEntry(new Entry.SoundConfigEntry(entryX, entryWidth, entryHeight, notif, this));
@@ -62,16 +62,16 @@ public class NotifOptionsListWidget extends OptionsListWidget {
         addEntry(new Entry.FormatConfigEntry1(entryX, entryWidth, entryHeight, notif));
         addEntry(new Entry.FormatConfigEntry2(entryX, entryWidth, entryHeight, notif));
 
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Advanced Settings"),
                 Tooltip.create(Component.literal("Here be Dragons!")), 500,
                 (button) -> openAdvancedConfig()));
     }
 
     @Override
-    public NotifOptionsListWidget resize(int width, int height, int top, int bottom,
-                                         int itemHeight, double scrollAmount) {
-        NotifOptionsListWidget newListWidget = new NotifOptionsListWidget(
+    public NotifOptionsList resize(int width, int height, int top, int bottom,
+                                   int itemHeight, double scrollAmount) {
+        NotifOptionsList newListWidget = new NotifOptionsList(
                 minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif, isUsername);
         newListWidget.setScrollAmount(scrollAmount);
@@ -87,14 +87,14 @@ public class NotifOptionsListWidget extends OptionsListWidget {
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.key"),
-                new KeyOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new KeyOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
     }
 
     private void openColorConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.color"),
-                new ColorOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new ColorOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         () -> notif.textStyle.color, (color) -> notif.textStyle.color = color)));
     }
@@ -102,22 +102,22 @@ public class NotifOptionsListWidget extends OptionsListWidget {
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.sound"),
-                new SoundOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new SoundOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif.sound)));
     }
 
     private void openAdvancedConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.advanced"),
-                new AdvancedOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new AdvancedOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif)));
     }
 
-    private abstract static class Entry extends OptionsListWidget.Entry {
+    private abstract static class Entry extends OptionsList.Entry {
 
         private static class TriggerFieldEntry extends Entry {
 
-            TriggerFieldEntry(int x, int width, int height, NotifOptionsListWidget listWidget,
+            TriggerFieldEntry(int x, int width, int height, NotifOptionsList listWidget,
                               Notification notif, Trigger trigger, int index) {
                 super();
 
@@ -152,7 +152,7 @@ public class NotifOptionsListWidget extends OptionsListWidget {
                                 .create(x - spacing - smallButtonWidth * 2, 0, smallButtonWidth, height,
                                         Component.empty(), (button, status) -> trigger.isRegex = status);
                         regexButton.setTooltipDelay(500);
-                        if (trigger.isKey()) {
+                        if (trigger.isKey) {
                             regexButton.setMessage(Component.literal(".*"));
                             regexButton.setTooltip(Tooltip.create(Component.literal(
                                     "Regex Disabled [Key Trigger]")));
@@ -164,14 +164,14 @@ public class NotifOptionsListWidget extends OptionsListWidget {
                     CycleButton<Boolean> keyButton = CycleButton.booleanBuilder(
                             Component.literal("\uD83D\uDD11").withStyle(ChatFormatting.GREEN),
                                     Component.literal("\uD83D\uDD11").withStyle(ChatFormatting.RED))
-                            .withInitialValue(trigger.isKey())
+                            .withInitialValue(trigger.isKey)
                             .displayOnlyValue()
                             .withTooltip((status) -> Tooltip.create(Component.literal(
                                     status ? "Translation Key Trigger" : "Normal Trigger")))
                             .create(x - spacing - smallButtonWidth, 0, smallButtonWidth, height, Component.empty(),
                                     (button, status) -> {
                                         if (Screen.hasShiftDown()) {
-                                            trigger.setIsKey(status);
+                                            trigger.isKey = status;
                                             listWidget.reload();
                                         } else {
                                             listWidget.openKeyConfig(trigger);
@@ -195,7 +195,7 @@ public class NotifOptionsListWidget extends OptionsListWidget {
 
         private static class SoundConfigEntry extends Entry {
             SoundConfigEntry(int x, int width, int height, Notification notif,
-                             NotifOptionsListWidget listWidget) {
+                             NotifOptionsList listWidget) {
                 super();
 
                 int spacing = 5;
@@ -221,7 +221,7 @@ public class NotifOptionsListWidget extends OptionsListWidget {
         }
 
         private static class ColorConfigEntry extends Entry {
-            ColorConfigEntry(int x, int width, int height, Notification notif, NotifOptionsListWidget listWidget) {
+            ColorConfigEntry(int x, int width, int height, Notification notif, NotifOptionsList listWidget) {
                 super();
 
                 Font activeFont = Minecraft.getInstance().font;

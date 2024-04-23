@@ -1,47 +1,43 @@
 plugins {
-    // Required for NeoGradle
-//    id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.7"
+    id "java"
+    id "java-library"
+    id "idea"
+    id "maven-publish"
+//    id "org.jetbrains.gradle.plugin.idea-ext" version "${ideaext_version}" // Required for NeoGradle
 }
 
 subprojects {
-    apply plugin: 'java'
+    version = mod_version
+    group = mod_group
 
-    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-    java.withSourcesJar()
-    java.withJavadocJar()
-        
+    apply plugin: "java"
+    apply plugin: "java-library"
+    apply plugin: "idea"
+    apply plugin: "maven-publish"
+
+    java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.valueOf(java_version))
+
     jar {
         from(rootProject.file("LICENSE")) {
             rename { "${it}_${mod_name}" }
         }
         manifest {
             attributes([
-                'Specification-Title'     : mod_name,
-                'Specification-Vendor'    : mod_author,
-                'Specification-Version'   : project.jar.archiveVersion,
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_author,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'Timestamp'               : System.currentTimeMillis(),
-                'Built-On-Java'           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
-                'Built-On-Minecraft'      : minecraft_version
+                    "Specification-Title"     : mod_name,
+                    "Specification-Vendor"    : mod_owner,
+                    "Specification-Version"   : project.jar.archiveVersion,
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : project.jar.archiveVersion,
+                    "Implementation-Vendor"   : mod_owner,
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                    "Timestamp"               : System.currentTimeMillis(),
+                    "Built-On-Java"           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                    "Built-On-Minecraft"      : minecraft_version
             ])
         }
     }
 
-    sourcesJar {
-        from(rootProject.file("LICENSE")) {
-            rename { "${it}_${mod_name}" }
-        }
-    }
-
     repositories {
-        mavenCentral()
-        maven {
-            name = 'Sponge / Mixin'
-            url = 'https://repo.spongepowered.org/repository/maven-public/'
-        }
         maven {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
@@ -49,53 +45,67 @@ subprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
-    
-        it.options.encoding = 'UTF-8'
-        it.options.getRelease().set(17)
+        it.options.encoding = "UTF-8"
+        it.options.getRelease().set(Integer.valueOf(java_version))
     }
 
     processResources {
         def expandProps = [
                 "project_group": project.group,
-                "version": version,
+                "mod_version": mod_version,
                 "mod_group": mod_group,
                 "mod_id": mod_id,
-                "mod_environment": mod_environment,
                 "mod_name": mod_name,
                 "mod_description": mod_description,
-                "mod_author": mod_author,
-                "mod_credits": mod_credits,
+                "mod_icon": "assets/" + mod_id + "/icon.png",
+                "mod_owner": mod_owner,
+                "mod_authors_list": mod_authors.split(",").collect { "\"$it\"" }.join(','),
+                "mod_contributors_list": mod_contributors.split(",").collect { "\"$it\"" }.join(','),
+                "mod_authors_string": mod_authors.replace(",", ", "),
+                "mod_contributors_string": mod_contributors.replace(",", ", "),
                 "mod_license": mod_license,
+                "mod_environment": mod_environment,
                 "java_version": java_version,
+                "java_versions_fabric": java_versions_fabric,
+                "java_versions_neoforge": java_versions_neoforge,
                 "minecraft_version": minecraft_version,
-                "minecraft_version_range_fabric": minecraft_version_range_fabric,
-                "minecraft_version_range_forge": minecraft_version_range_forge,
+                "minecraft_versions_fabric": minecraft_versions_fabric,
+                "minecraft_versions_neoforge": minecraft_versions_neoforge,
                 "fabric_loader_version": fabric_loader_version,
-                "fabric_loader_version_range": fabric_loader_version_range,
+                "fabric_loader_versions": fabric_loader_versions,
                 "fabric_api_version": fabric_api_version,
-                "forge_loader_version_range": forge_loader_version_range,
+                "fabric_api_versions": fabric_api_versions,
+                "forge_loader_versions": forge_loader_versions,
                 "forge_version": forge_version,
-                "forge_version_range": forge_version_range,
-//                "neoforge_loader_version_range": neoforge_loader_version_range,
+                "forge_versions": forge_versions,
+//                "neoforge_loader_versions": neoforge_loader_versions,
 //                "neoforge_version": neoforge_version,
-//                "neoforge_version_range": neoforge_version_range,
+//                "neoforge_versions": neoforge_versions,
                 "modmenu_version": modmenu_version,
+                "modmenu_versions": modmenu_versions,
                 "homepage_url": homepage_url,
                 "sources_url": sources_url,
                 "issues_url": issues_url,
                 "contact_url": contact_url
         ]
 
-        filesMatching(['pack.mcmeta', '*.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/mods.toml", "*.mixins.json"]) {
             expand expandProps
         }
         inputs.properties(expandProps)
     }
 
-    // Disables Gradle's custom module metadata from being published to maven. The
-    // metadata includes mapped dependencies which are not reasonably consumable by
-    // other mod developers.
     tasks.withType(GenerateModuleMetadata).configureEach {
         enabled = false
     }
+
+    // Sources and Javadoc
+//    java.withSourcesJar()
+//    java.withJavadocJar()
+//
+//    sourcesJar {
+//        from(rootProject.file("LICENSE")) {
+//            rename { "${it}_${mod_name}" }
+//        }
+//    }
 }

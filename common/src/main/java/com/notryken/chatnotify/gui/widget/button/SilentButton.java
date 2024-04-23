@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.widget;
+package com.notryken.chatnotify.gui.widget.button;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.sounds.SoundManager;

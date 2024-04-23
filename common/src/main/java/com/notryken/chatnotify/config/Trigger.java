@@ -12,14 +12,13 @@ import com.notryken.chatnotify.config.util.JsonValidator;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.Locale;
 
 public class Trigger {
     public final int version = 1;
 
     @JsonRequired public boolean enabled;
     @JsonRequired public String string;
-    @JsonRequired private boolean isKey;
+    @JsonRequired public boolean isKey;
     @JsonRequired public boolean isRegex;
 
     public Trigger() {
@@ -41,20 +40,6 @@ public class Trigger {
         this.string = string;
         this.isKey = isKey;
         this.isRegex = isRegex;
-    }
-
-
-    public boolean isKey() {
-        return isKey;
-    }
-
-    /**
-     * If {@code isKey} is {@code true}, converts the trigger string to
-     * lowercase.
-     */
-    public void setIsKey(boolean isKey) {
-        this.isKey = isKey;
-        if (isKey) string = string.toLowerCase(Locale.ROOT);
     }
 
     public static class Deserializer implements JsonDeserializer<Trigger> {

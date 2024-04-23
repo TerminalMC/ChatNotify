@@ -90,11 +90,11 @@ public class TextStyle {
 
             boolean doColor = obj.get("doColor").getAsBoolean();
             int color = obj.get("color").getAsInt();
-            TriState bold = new TriState(TriState.State.valueOf(obj.get("bold").getAsString()));
-            TriState italic = new TriState(TriState.State.valueOf(obj.get("italic").getAsString()));
-            TriState underlined = new TriState(TriState.State.valueOf(obj.get("underlined").getAsString()));
-            TriState strikethrough = new TriState(TriState.State.valueOf(obj.get("strikethrough").getAsString()));
-            TriState obfuscated = new TriState(TriState.State.valueOf(obj.get("obfuscated").getAsString()));
+            TriState bold = new TriState(TriState.State.valueOf(obj.getAsJsonObject("bold").get("state").getAsString()));
+            TriState italic = new TriState(TriState.State.valueOf(obj.getAsJsonObject("italic").get("state").getAsString()));
+            TriState underlined = new TriState(TriState.State.valueOf(obj.getAsJsonObject("underlined").get("state").getAsString()));
+            TriState strikethrough = new TriState(TriState.State.valueOf(obj.getAsJsonObject("strikethrough").get("state").getAsString()));
+            TriState obfuscated = new TriState(TriState.State.valueOf(obj.getAsJsonObject("obfuscated").get("state").getAsString()));
 
             return new JsonValidator<TextStyle>().validateNonNull(
                     new TextStyle(doColor, color, bold, italic, underlined, strikethrough, obfuscated));

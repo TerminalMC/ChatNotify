@@ -6,7 +6,6 @@
 package com.notryken.chatnotify.config;
 
 import com.google.gson.*;
-import com.google.gson.annotations.JsonAdapter;
 import com.notryken.chatnotify.ChatNotify;
 import com.notryken.chatnotify.config.util.GhettoAsciiWriter;
 import com.notryken.chatnotify.config.util.JsonRequired;
@@ -218,12 +217,7 @@ public class Config {
         }
     }
 
-    // Validation
-
-    /**
-     * Cleanup and validate all settings and notifications.
-     */
-    public void validate() {
+    public void cleanup() {
         // Remove blank prefixes and sort by decreasing length
         prefixes.removeIf(String::isBlank);
         prefixes.sort(Comparator.comparingInt(String::length).reversed());
@@ -313,6 +307,7 @@ public class Config {
 
     public static void save() {
         if (instance == null) return;
+        instance.cleanup();
         try {
             if (!Files.isDirectory(DIR_PATH)) {
                 Files.createDirectories(DIR_PATH);

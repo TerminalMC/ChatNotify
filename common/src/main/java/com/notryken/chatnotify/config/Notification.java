@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -113,19 +114,25 @@ public class Notification {
     }
 
     /**
-     * Removes all blank triggers.
+     * Removes all blank triggers, and converts all key triggers to lowercase.
      */
     public void purgeTriggers() {
         triggers.removeIf(trigger -> trigger.string.isBlank());
+        for (Trigger t : triggers) {
+            if (t.isKey) t.string = t.string.toLowerCase(Locale.ROOT);
+        }
     }
 
     /**
-     * Removes all blank exclusion triggers, and disables exclusion if there are
-     * none remaining.
+     * Removes all blank exclusion triggers, converts all key triggers to
+     * lowercase, and disables exclusion if there are none remaining.
      */
     public void purgeExclusionTriggers() {
         exclusionTriggers.removeIf(trigger -> trigger.string.isBlank());
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
+        for (Trigger t : exclusionTriggers) {
+            if (t.isKey) t.string = t.string.toLowerCase(Locale.ROOT);
+        }
     }
 
     /**

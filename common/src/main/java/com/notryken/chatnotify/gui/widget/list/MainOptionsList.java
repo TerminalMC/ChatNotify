@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.listwidget;
+package com.notryken.chatnotify.gui.widget.list;
 
 import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.config.Notification;
@@ -25,17 +25,17 @@ import java.util.List;
  * Contains a button linking to global options, and a dynamic list of buttons
  * linking to different {@link Notification}s.
  */
-public class MainListWidget extends OptionsListWidget {
+public class MainOptionsList extends OptionsList {
 
-    public MainListWidget(Minecraft mc, int width, int height, int top, int bottom,
-                          int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                          int scrollWidth) {
+    public MainOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+                           int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                           int scrollWidth) {
         super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
 
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Global Options"), null, -1, (button -> openGlobalConfig())));
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Notifications \u2139"),
                 Tooltip.create(Component.literal("Incoming messages will activate the first " +
                         "enabled notification that has a matching trigger.")), -1));
@@ -44,7 +44,7 @@ public class MainListWidget extends OptionsListWidget {
         for (int i = 0; i < notifs.size(); i++) {
             addEntry(new Entry.NotifConfigEntry(entryX, entryWidth, entryHeight, this, notifs, i));
         }
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().addNotif();
@@ -53,8 +53,8 @@ public class MainListWidget extends OptionsListWidget {
     }
 
     @Override
-    public MainListWidget resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
-        MainListWidget newListWidget = new MainListWidget(minecraft, width, height, top, bottom, itemHeight,
+    public MainOptionsList resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
+        MainOptionsList newListWidget = new MainOptionsList(minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
@@ -63,24 +63,24 @@ public class MainListWidget extends OptionsListWidget {
     private void openGlobalConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.global"),
-                new GlobalOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new GlobalOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth)));
     }
 
     private void openNotificationConfig(int index) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.notif"),
-                new NotifOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new NotifOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         Config.get().getNotifs().get(index), index == 0)));
     }
 
-    public static class Entry extends OptionsListWidget.Entry {
+    public static class Entry extends OptionsList.Entry {
 
         private static class NotifConfigEntry extends Entry {
             private final int mainButtonWidth;
 
-            NotifConfigEntry(int x, int width, int height, MainListWidget listWidget,
+            NotifConfigEntry(int x, int width, int height, MainOptionsList listWidget,
                              List<Notification> notifs, int index) {
                 super();
 
@@ -164,7 +164,7 @@ public class MainListWidget extends OptionsListWidget {
                     for (int i = 0; i < notif.triggers.size(); i++) {
                         Trigger trigger = notif.triggers.get(i);
                         String triggerStr;
-                        if (trigger.isKey()) {
+                        if (trigger.isKey) {
                             triggerStr = "[Key] " + (trigger.string.equals(".") ? "Any Message" : trigger.string);
                         }
                         else {

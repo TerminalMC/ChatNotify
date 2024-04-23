@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.listwidget;
+package com.notryken.chatnotify.gui.widget.list;
 
 import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.gui.screen.OptionsScreen;
@@ -25,10 +25,10 @@ import java.util.Locale;
 /**
  * Contains global configuration options.
  */
-public class GlobalOptionsListWidget extends OptionsListWidget {
-    public GlobalOptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
-                                   int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                                   int scrollWidth) {
+public class GlobalOptionsList extends OptionsList {
+    public GlobalOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                             int scrollWidth) {
         super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
 
         addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
@@ -37,7 +37,7 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight));
 
-        addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Message Modifier Prefixes \u2139"),
                 Tooltip.create(Component.literal("A message prefix is a character or " +
                         "sequence of characters that you type before a message to modify it. " +
@@ -48,7 +48,7 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
         for (int i = 0; i < max; i++) {
             addEntry(new Entry.PrefixFieldEntry(entryX, entryWidth, entryHeight, this, i));
         }
-        addEntry(new OptionsListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().prefixes.add("");
@@ -57,9 +57,9 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
     }
 
     @Override
-    public GlobalOptionsListWidget resize(int width, int height, int top, int bottom,
-                                          int itemHeight, double scrollAmount) {
-        GlobalOptionsListWidget newListWidget = new GlobalOptionsListWidget(
+    public GlobalOptionsList resize(int width, int height, int top, int bottom,
+                                    int itemHeight, double scrollAmount) {
+        GlobalOptionsList newListWidget = new GlobalOptionsList(
                 minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth);
         newListWidget.setScrollAmount(scrollAmount);
@@ -69,7 +69,7 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
     private void openColorConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.color"),
-                new ColorOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new ColorOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         () -> Config.get().defaultColor, (color) -> Config.get().defaultColor = color)));
     }
@@ -77,13 +77,13 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.sound"),
-                new SoundOptionsListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new SoundOptionsList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, Config.get().defaultSound)));
     }
 
-    private abstract static class Entry extends OptionsListWidget.Entry {
+    private abstract static class Entry extends OptionsList.Entry {
 
-        private static class MixinAndKeyDebugEntry extends MainListWidget.Entry {
+        private static class MixinAndKeyDebugEntry extends MainOptionsList.Entry {
             MixinAndKeyDebugEntry(int x, int width, int height) {
                 super();
 
@@ -111,7 +111,7 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
             }
         }
 
-        private static class SelfCheckAndRegexEntry extends MainListWidget.Entry {
+        private static class SelfCheckAndRegexEntry extends MainOptionsList.Entry {
             SelfCheckAndRegexEntry(int x, int width, int height) {
                 super();
 
@@ -141,8 +141,8 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
             }
         }
 
-        private static class DefaultColorEntry extends MainListWidget.Entry {
-            DefaultColorEntry(int x, int width, int height, GlobalOptionsListWidget listWidget) {
+        private static class DefaultColorEntry extends MainOptionsList.Entry {
+            DefaultColorEntry(int x, int width, int height, GlobalOptionsList listWidget) {
                 super();
 
                 Font activeFont = Minecraft.getInstance().font;
@@ -184,8 +184,8 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
             }
         }
 
-        private static class DefaultSoundEntry extends MainListWidget.Entry {
-            DefaultSoundEntry(int x, int width, int height, GlobalOptionsListWidget listWidget) {
+        private static class DefaultSoundEntry extends MainOptionsList.Entry {
+            DefaultSoundEntry(int x, int width, int height, GlobalOptionsList listWidget) {
                 super();
                 elements.add(Button.builder(
                         Component.literal("Default Sound: " + Config.get().defaultSound.getId()),
@@ -196,7 +196,7 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
             }
         }
 
-        private static class SoundSourceEntry extends MainListWidget.Entry {
+        private static class SoundSourceEntry extends MainOptionsList.Entry {
             SoundSourceEntry(int x, int width, int height) {
                 super();
                 elements.add(CycleButton.<SoundSource>builder(source -> Component.translatable(
@@ -212,7 +212,7 @@ public class GlobalOptionsListWidget extends OptionsListWidget {
         }
 
         private static class PrefixFieldEntry extends Entry {
-            PrefixFieldEntry(int x, int width, int height, GlobalOptionsListWidget listWidget, int index) {
+            PrefixFieldEntry(int x, int width, int height, GlobalOptionsList listWidget, int index) {
                 super();
 
                 int spacing = 5;

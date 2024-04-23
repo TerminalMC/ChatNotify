@@ -7,6 +7,7 @@ package com.notryken.chatnotify;
 
 import com.notryken.chatnotify.gui.screen.GlobalOptionsScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.event.TickEvent;
@@ -26,10 +27,13 @@ public class ChatNotifyForge {
         ChatNotify.init();
     }
 
-    @SubscribeEvent
-    public static void clientTickEvent(TickEvent.ClientTickEvent event) {
-        if(event.phase.equals(TickEvent.Phase.END)) {
-            ChatNotify.onEndTick(Minecraft.getInstance());
+    @Mod.EventBusSubscriber(modid = ChatNotify.MOD_ID, value = Dist.CLIENT)
+    static class ClientEventHandler {
+        @SubscribeEvent
+        public static void clientTickEvent(TickEvent.ClientTickEvent event) {
+            if(event.phase.equals(TickEvent.Phase.END)) {
+                ChatNotify.onEndTick(Minecraft.getInstance());
+            }
         }
     }
 }

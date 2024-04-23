@@ -12,6 +12,7 @@ public class ResponseMessage {
     public final int version = 1;
 
     public transient int countdown;
+    public transient String sendingString;
 
     @JsonRequired public boolean enabled;
     @JsonRequired public String string;

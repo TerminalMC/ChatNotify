@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.notryken.chatnotify.gui.component.listwidget;
+package com.notryken.chatnotify.gui.widget.list;
 
 import com.notryken.chatnotify.config.Trigger;
 import net.minecraft.client.Minecraft;
@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
  * Contains a text field for a {@link Trigger}, and a list of potential
  * translation key triggers.
  */
-public class KeyOptionsListWidget extends OptionsListWidget {
+public class KeyOptionsList extends OptionsList {
     private final Trigger trigger;
 
     public static final String[][] chatKeys = {
@@ -45,9 +45,9 @@ public class KeyOptionsListWidget extends OptionsListWidget {
             {"commands.message.display.outgoing", "Outgoing Private Message"},
     };
 
-    public KeyOptionsListWidget(Minecraft mc, int width, int height, int top, int bottom,
-                                int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                                int scrollWidth, Trigger trigger) {
+    public KeyOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+                          int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                          int scrollWidth, Trigger trigger) {
         super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.trigger = trigger;
 
@@ -55,8 +55,8 @@ public class KeyOptionsListWidget extends OptionsListWidget {
 
         addEntry(new Entry.TriggerFieldEntry(entryX, entryWidth, entryHeight, trigger));
 
-        if (trigger.isKey()) {
-            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        if (trigger.isKey) {
+            addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("Key Options \u2139"), Tooltip.create(Component.literal(
                     "You can find a full list of translation keys in Minecraft's language .json files, " +
                             "path assets/minecraft/lang/ in the Minecraft jar")), 500));
@@ -66,7 +66,7 @@ public class KeyOptionsListWidget extends OptionsListWidget {
                         trigger, s[0], s[1]));
             }
 
-            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("--------------------"), null, -1));
 
             for (String[] s : playerKeys) {
@@ -74,7 +74,7 @@ public class KeyOptionsListWidget extends OptionsListWidget {
                         trigger, s[0], s[1]));
             }
 
-            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("--------------------"), null, -1));
 
             for (String[] s : advancementKeys) {
@@ -82,7 +82,7 @@ public class KeyOptionsListWidget extends OptionsListWidget {
                         trigger, s[0], s[1]));
             }
 
-            addEntry(new OptionsListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                     Component.literal("--------------------"), null, -1));
 
             for (String[] s : commandKeys) {
@@ -93,23 +93,23 @@ public class KeyOptionsListWidget extends OptionsListWidget {
     }
 
     @Override
-    public OptionsListWidget resize(int width, int height, int top, int bottom,
-                                    int itemHeight, double scrollAmount) {
-        KeyOptionsListWidget newListWidget = new KeyOptionsListWidget(
+    public OptionsList resize(int width, int height, int top, int bottom,
+                              int itemHeight, double scrollAmount) {
+        KeyOptionsList newListWidget = new KeyOptionsList(
                 minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, trigger);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
 
-    private abstract static class Entry extends OptionsListWidget.Entry {
+    private abstract static class Entry extends OptionsList.Entry {
 
         private static class TriggerTypeEntry extends Entry {
-            TriggerTypeEntry(int x, int width, int height, KeyOptionsListWidget listWidget, Trigger trigger) {
+            TriggerTypeEntry(int x, int width, int height, KeyOptionsList listWidget, Trigger trigger) {
                 super();
                 CycleButton<Boolean> triggerTypeButton = CycleButton.booleanBuilder(
                                 Component.literal("Translation Key \u2139"), Component.literal("Normal \u2139"))
-                        .withInitialValue(trigger.isKey())
+                        .withInitialValue(trigger.isKey)
                         .withTooltip((value) -> {
                             if (value) {
                                 return Tooltip.create(Component.literal("This type of trigger " +
@@ -126,7 +126,7 @@ public class KeyOptionsListWidget extends OptionsListWidget {
                         })
                         .create(x, 0, width, height, Component.literal("Trigger Type"),
                                 (button, status) -> {
-                                    trigger.setIsKey(status);
+                                    trigger.isKey = status;
                                     listWidget.reload();
                                 });
                 triggerTypeButton.setTooltipDelay(500);
@@ -134,7 +134,7 @@ public class KeyOptionsListWidget extends OptionsListWidget {
             }
         }
 
-        private static class TriggerFieldEntry extends KeyOptionsListWidget.Entry {
+        private static class TriggerFieldEntry extends KeyOptionsList.Entry {
             TriggerFieldEntry(int x, int width, int height, Trigger trigger) {
                 super();
 
@@ -147,8 +147,8 @@ public class KeyOptionsListWidget extends OptionsListWidget {
             }
         }
 
-        private static class KeyOption extends KeyOptionsListWidget.Entry {
-            KeyOption(int x, int width, int height, KeyOptionsListWidget listWidget,
+        private static class KeyOption extends KeyOptionsList.Entry {
+            KeyOption(int x, int width, int height, KeyOptionsList listWidget,
                       Trigger trigger, String value, String label) {
                 super();
                 elements.add(Button.builder(Component.literal(label),
