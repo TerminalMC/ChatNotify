@@ -5,39 +5,41 @@
 
 package com.notryken.chatnotify.mixin;
 
-import com.notryken.chatnotify.ChatNotify;
 import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.processor.MessageProcessor;
+import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/*
+/**
  * Minecraft handles different message packet types in different ways. The
- * mc1.20.1 call stack look something like this:
- * <p>
- * ClientPacketListener#handleDisguisedChat
- * -> ChatListener#handleDisguisedChatMessage
- * -> ChatComponent#addMessage(Component)
- * -> ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)
- * <p>
- * ClientPacketListener#handleSystemChat
- * -> ChatListener#handleSystemMessage
- * -> ChatComponent#addMessage(Component)
- * -> ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)
- * <p>
- * ClientPacketListener#handlePlayerChat
- * -> ChatListener#handlePlayerChatMessage
- * -> ChatListener#showMessageToPlayer
- * -> ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)
- * <p>
- * ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag) logs
- * the message and then passes it to ChatComponent#addMessage(Component,
- * MessageSignature, int, GuiMessageTag, boolean).
+ * mc1.20.1 call stacks look something like this:
+ *
+ * <p>{@link ClientPacketListener#handleDisguisedChat}
+ * <p>-> {@link ChatListener#handleDisguisedChatMessage}
+ * <p>-> {@link ChatComponent#addMessage(Component)}
+ * <p>-> {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
+ *
+ * <p>{@link ClientPacketListener#handleSystemChat}
+ * <p>-> {@link ChatListener#handleSystemMessage}
+ * <p>-> {@link ChatComponent#addMessage(Component)}
+ * <p>-> {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
+ *
+ * <p>{@link ClientPacketListener#handlePlayerChat}
+ * <p>-> {@link ChatListener#handlePlayerChatMessage}
+ * <p>-> {@link ChatListener#showMessageToPlayer}
+ * <p>-> {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
+ *
+ * <p>{@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
+ * logs the message and then passes it to
+ * {@link ChatComponent#addMessage(Component, MessageSignature, int, GuiMessageTag, boolean)}.
  */
-
 @Mixin(value = ChatComponent.class, priority = 800)
 public class MixinChatComponent {
 

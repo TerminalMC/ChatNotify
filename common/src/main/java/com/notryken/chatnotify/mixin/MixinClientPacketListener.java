@@ -25,10 +25,10 @@ import java.util.Locale;
 /*
  * If an incoming message is the return of a message sent by the user,
  * ChatNotify must either;
- * a) Not process the message, if the control ignoreOwnMessages is TRUE, or
+ * a) Not process the message, if the config checkOwnMessages is FALSE, or
  * b) Remove the first occurrence of the user's name from the message before
  *    checking it for triggers (else every message sent by the user would
- *    activate only the username notification).
+ *    activate the username notification).
  *
  * Player-sent messages can be stripped of identifying data by mods or plugins,
  * or can be converted to server-sent messages, so it is not possible to
@@ -42,7 +42,7 @@ import java.util.Locale;
  * 1. Mixins are used to store outgoing message and command strings in a list.
  * 2. If an incoming message string contains a string in the list, and the
  *    part of the string preceding the match contains a trigger string of the
- *    username Notification, the message is identified as sent by the user,
+ *    username notification, the message is identified as sent by the user,
  *    and the matched string removed from the list.
  * 3. When any outgoing message or command is recorded, all list entries older
  *    than 5 seconds are removed, as it can be assumed that those generated no
@@ -59,7 +59,7 @@ import java.util.Locale;
 @Mixin(value = ClientPacketListener.class, priority = 800)
 public class MixinClientPacketListener {
 
-    // Username-update mixins //////////////////////////////////////////////////
+    // Username-update mixins
 
     /**
      * Update profileName.
@@ -73,12 +73,12 @@ public class MixinClientPacketListener {
 
     /**
      * Update displayName.
-     * <p>
-     * This is a proactive-update approach. A possible reactive-update approach
-     * would be to use the following access on each message check.
-     * <p>
-     * {@code String displayname = minecraft.getConnection().getPlayerInfo(
-     *         minecraft.player.getUUID()).getProfile().getName();}
+     *
+     * <p>This is a proactive-update approach. A possible reactive-update
+     * approach would be to use the following access on each message check.
+     *
+     * <p>{@code String displayname = minecraft.getConnection().getPlayerInfo(
+     * minecraft.player.getUUID()).getProfile().getName();}
      */
     @Inject(method = "applyPlayerInfoUpdate", at = @At("TAIL"))
     private void getDisplayName(ClientboundPlayerInfoUpdatePacket.Action action,
@@ -90,7 +90,7 @@ public class MixinClientPacketListener {
         }
     }
 
-    // Chat message and command storage mixins /////////////////////////////////
+    // Chat message and command storage mixins
 
     @Inject(method = "sendChat", at = @At("HEAD"))
     public void getMessage(String message, CallbackInfo ci) {
@@ -107,11 +107,11 @@ public class MixinClientPacketListener {
         chatNotify$storeCommand(command);
     }
 
-    // Storage methods /////////////////////////////////////////////////////////
+    // Storage methods
 
     @Unique
     private void chatNotify$storeMessage(String message) {
-        long time = System.currentTimeMillis();
+        long time = System.nanoTime();
         chatNotify$removeOldMessages(time);
 
         message = message.toLowerCase(Locale.ROOT);
@@ -124,8 +124,7 @@ public class MixinClientPacketListener {
                 break;
             }
         }
-        // Always store the message
-        ChatNotify.recentMessages.add(Pair.of(time + 5000, plainMsg.isEmpty() ? message : plainMsg));
+        ChatNotify.recentMessages.add(Pair.of(time + 5000000000L, plainMsg.isEmpty() ? message : plainMsg));
     }
 
     @Unique
@@ -133,15 +132,16 @@ public class MixinClientPacketListener {
         long time = System.currentTimeMillis();
         chatNotify$removeOldMessages(time);
 
-        // The command '/' is removed before this point, so add it back.
+        // The command '/' is removed before this point, so add it back before
+        // checking against prefixes.
         command = '/' + command.toLowerCase(Locale.ROOT);
 
-        // If command starts with a prefix, remove the prefix and store command.
+        // If command starts with a prefix, cut the prefix and store the command
         for (String prefix : Config.get().prefixes) {
             if (command.startsWith(prefix)) {
                 command = command.replaceFirst(prefix, "").strip();
                 if (!command.isEmpty()) {
-                    ChatNotify.recentMessages.add(Pair.of(time + 5000, command));
+                    ChatNotify.recentMessages.add(Pair.of(time + 5000000000L, command));
                 }
                 break;
             }
@@ -149,7 +149,7 @@ public class MixinClientPacketListener {
     }
 
     @Unique
-    private void chatNotify$removeOldMessages(long time) { // No see
+    private void chatNotify$removeOldMessages(long time) { // no see
         ChatNotify.recentMessages.removeIf(pair -> pair.getFirst() < time);
     }
 }

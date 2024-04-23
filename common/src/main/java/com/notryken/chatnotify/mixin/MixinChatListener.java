@@ -15,11 +15,10 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/*
- * Check MixinChatComponent for an overview of Minecraft's message handling
- * call stack.
+/**
+ * Refer to {@link MixinChatComponent} for an overview of Minecraft's message
+ * handling call stacks.
  */
-
 @Mixin(value = ChatListener.class, priority = 800)
 public class MixinChatListener {
 
