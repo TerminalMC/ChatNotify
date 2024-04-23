@@ -171,11 +171,11 @@ public class AdvancedOptionsList extends OptionsList {
                 int keyButtonWidth = Config.get().allowRegex ? 15 : 20;
                 int removeButtonWidth = 20;
 
-                EditBox triggerEditBox = new EditBox(Minecraft.getInstance().font,
+                EditBox triggerField = new EditBox(Minecraft.getInstance().font,
                         x, 0, width, height, Component.literal("Notification Trigger"));
-                triggerEditBox.setMaxLength(120);
-                triggerEditBox.setValue(trigger.string);
-                triggerEditBox.setResponder((string) -> trigger.string = string.strip());
+                triggerField.setMaxLength(120);
+                triggerField.setValue(trigger.string);
+                triggerField.setResponder((string) -> trigger.string = string.strip());
 
                 Button keyButton;
                 if (Config.get().allowRegex) {
@@ -256,7 +256,7 @@ public class AdvancedOptionsList extends OptionsList {
                     keyButton.setTooltipDelay(500);
                 }
                 elements.add(keyButton);
-                elements.add(triggerEditBox);
+                elements.add(triggerField);
                 elements.add(Button.builder(Component.literal("\u274C"),
                                 (button) -> {
                                     notif.exclusionTriggers.remove(index);
@@ -299,31 +299,31 @@ public class AdvancedOptionsList extends OptionsList {
                 int msgFieldWidth = width - timeFieldWidth - spacing;
                 ResponseMessage resMsg = notif.responseMessages.get(index);
 
-                EditBox messageEditBox = new EditBox(Minecraft.getInstance().font,
+                EditBox messageField = new EditBox(Minecraft.getInstance().font,
                         x, 0, msgFieldWidth, height, Component.literal("Response Message"));
-                messageEditBox.setMaxLength(256);
-                messageEditBox.setValue(resMsg.string);
-                messageEditBox.setResponder((val) -> resMsg.string = val.strip());
-                elements.add(messageEditBox);
+                messageField.setMaxLength(256);
+                messageField.setValue(resMsg.string);
+                messageField.setResponder((val) -> resMsg.string = val.strip());
+                elements.add(messageField);
 
-                EditBox timeEditBox = new EditBox(Minecraft.getInstance().font,
+                EditBox timeField = new EditBox(Minecraft.getInstance().font,
                         x + width - timeFieldWidth, 0, timeFieldWidth, height,
                         Component.literal("Delay Ticks"));
-                timeEditBox.setTooltip(Tooltip.create(Component.literal(
+                timeField.setTooltip(Tooltip.create(Component.literal(
                         "Time in ticks to wait before sending.")));
-                timeEditBox.setTooltipDelay(500);
-                timeEditBox.setMaxLength(5);
-                timeEditBox.setValue(String.valueOf(resMsg.delayTicks));
-                timeEditBox.setResponder((val) -> {
+                timeField.setTooltipDelay(500);
+                timeField.setMaxLength(5);
+                timeField.setValue(String.valueOf(resMsg.delayTicks));
+                timeField.setResponder((val) -> {
                     try {
                         resMsg.delayTicks = Integer.parseInt(val.strip());
-                        timeEditBox.setTextColor(16777215);
+                        timeField.setTextColor(16777215);
                     }
                     catch (NumberFormatException ignored) {
-                        timeEditBox.setTextColor(16711680);
+                        timeField.setTextColor(16711680);
                     }
                 });
-                elements.add(timeEditBox);
+                elements.add(timeField);
 
                 if (Config.get().allowRegex) {
                     if (Config.get().allowRegex) {

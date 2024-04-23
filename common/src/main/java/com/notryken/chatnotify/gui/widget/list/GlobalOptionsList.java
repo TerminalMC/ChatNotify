@@ -160,10 +160,10 @@ public class GlobalOptionsList extends OptionsList {
                         .build();
                 elements.add(mainButton);
 
-                EditBox colorEditBox = new EditBox(activeFont, x + mainButtonWidth + spacing, 0,
+                EditBox colorField = new EditBox(activeFont, x + mainButtonWidth + spacing, 0,
                         colorFieldWidth, height, Component.literal("Hex Color"));
-                colorEditBox.setMaxLength(7);
-                colorEditBox.setResponder(strColor -> {
+                colorField.setMaxLength(7);
+                colorField.setResponder(strColor -> {
                     TextColor color = ColorUtil.parseColor(strColor);
                     if (color != null) {
                         Config.get().defaultColor = color.getValue();
@@ -172,8 +172,8 @@ public class GlobalOptionsList extends OptionsList {
                                 .setStyle(Style.EMPTY.withColor(color)));
                     }
                 });
-                colorEditBox.setValue(TextColor.fromRgb(Config.get().defaultColor).formatValue());
-                elements.add(colorEditBox);
+                colorField.setValue(TextColor.fromRgb(Config.get().defaultColor).formatValue());
+                elements.add(colorField);
 
                 elements.add(Button.builder(Component.literal("\ud83d\uddd8"),
                                 (button) -> listWidget.reload())
@@ -218,15 +218,15 @@ public class GlobalOptionsList extends OptionsList {
                 int spacing = 5;
                 int removeButtonWidth = 24;
 
-                EditBox prefixEditBox = new EditBox(
+                EditBox prefixField = new EditBox(
                         Minecraft.getInstance().font, x, 0, width, height,
                         Component.literal("Message Prefix"));
-                prefixEditBox.setMaxLength(20);
-                prefixEditBox.setValue(Config.get().prefixes.get(index));
-                prefixEditBox.setResponder(
+                prefixField.setMaxLength(20);
+                prefixField.setValue(Config.get().prefixes.get(index));
+                prefixField.setResponder(
                         (prefix) -> Config.get().prefixes.set(
                                 index, prefix.strip().toLowerCase(Locale.ROOT)));
-                elements.add(prefixEditBox);
+                elements.add(prefixField);
 
                 elements.add(Button.builder(Component.literal("\u274C"),
                                 (button) -> {

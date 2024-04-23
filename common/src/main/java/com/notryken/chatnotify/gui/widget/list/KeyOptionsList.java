@@ -138,12 +138,12 @@ public class KeyOptionsList extends OptionsList {
             TriggerFieldEntry(int x, int width, int height, Trigger trigger) {
                 super();
 
-                EditBox triggerEditBox = new EditBox(Minecraft.getInstance().font, x, 0, width, height,
+                EditBox triggerField = new EditBox(Minecraft.getInstance().font, x, 0, width, height,
                         Component.literal("Notification Trigger"));
-                triggerEditBox.setMaxLength(120);
-                triggerEditBox.setValue(trigger.string);
-                triggerEditBox.setResponder((string) -> trigger.string = string.strip());
-                elements.add(triggerEditBox);
+                triggerField.setMaxLength(120);
+                triggerField.setValue(trigger.string);
+                triggerField.setResponder((string) -> trigger.string = string.strip());
+                elements.add(triggerField);
             }
         }
 

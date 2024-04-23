@@ -125,20 +125,20 @@ public class NotifOptionsList extends OptionsList {
                 int smallButtonWidth = 15;
                 int removeButtonWidth = 20;
 
-                EditBox triggerEditBox = new EditBox(Minecraft.getInstance().font,
+                EditBox triggerField = new EditBox(Minecraft.getInstance().font,
                         x, 0, width, height, Component.literal("Notification Trigger"));
-                triggerEditBox.setMaxLength(120);
-                triggerEditBox.setValue(trigger.string);
-                triggerEditBox.setResponder((string) -> trigger.string = string.strip());
+                triggerField.setMaxLength(120);
+                triggerField.setValue(trigger.string);
+                triggerField.setResponder((string) -> trigger.string = string.strip());
 
                 if (listWidget.isUsername && index <= 1) {
-                    triggerEditBox.setEditable(false);
-                    triggerEditBox.active = false;
-                    triggerEditBox.setTooltip(Tooltip.create(Component.literal(
+                    triggerField.setEditable(false);
+                    triggerField.active = false;
+                    triggerField.setTooltip(Tooltip.create(Component.literal(
                             (index == 0 ? "Profile name" : "Display name") +
                             "\n(updated automatically)")));
-                    triggerEditBox.setTooltipDelay(500);
-                    elements.add(triggerEditBox);
+                    triggerField.setTooltipDelay(500);
+                    elements.add(triggerField);
                 }
                 else {
                     if (Config.get().allowRegex) {
@@ -180,7 +180,7 @@ public class NotifOptionsList extends OptionsList {
                     elements.add(keyButton);
 
                     elements.add(keyButton);
-                    elements.add(triggerEditBox);
+                    elements.add(triggerField);
                     elements.add(Button.builder(Component.literal("\u274C"),
                                     (button) -> {
                                         notif.triggers.remove(index);
@@ -241,10 +241,10 @@ public class NotifOptionsList extends OptionsList {
                         .build();
                 elements.add(mainButton);
 
-                EditBox colorEditBox = new EditBox(activeFont, x + mainButtonWidth + spacing, 0,
+                EditBox colorField = new EditBox(activeFont, x + mainButtonWidth + spacing, 0,
                         colorFieldWidth, height, Component.literal("Hex Color"));
-                colorEditBox.setMaxLength(7);
-                colorEditBox.setResponder(strColor -> {
+                colorField.setMaxLength(7);
+                colorField.setResponder(strColor -> {
                     TextColor color = ColorUtil.parseColor(strColor);
                     if (color != null) {
                         notif.textStyle.color = color.getValue();
@@ -253,8 +253,8 @@ public class NotifOptionsList extends OptionsList {
                                 .setStyle(Style.EMPTY.withColor(notif.textStyle.getTextColor())));
                     }
                 });
-                colorEditBox.setValue(notif.textStyle.getTextColor().formatValue());
-                elements.add(colorEditBox);
+                colorField.setValue(notif.textStyle.getTextColor().formatValue());
+                elements.add(colorField);
 
                 elements.add(Button.builder(Component.literal("\ud83d\uddd8"),
                                 (button) -> listWidget.reload())

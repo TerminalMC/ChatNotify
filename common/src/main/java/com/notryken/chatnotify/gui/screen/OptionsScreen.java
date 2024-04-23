@@ -40,16 +40,16 @@ public class OptionsScreen extends OptionsSubScreen {
     }
 
     @Override
+    public void onClose() {
+        listWidget.onClose();
+        super.onClose();
+    }
+
+    @Override
     public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         renderDirtBackground(context);
         context.drawCenteredString(font, title, width / 2, 5, 0xffffff);
         super.render(context, mouseX, mouseY, delta);
-    }
-
-    @Override
-    public void onClose() {
-        listWidget.onClose();
-        super.onClose();
     }
 
     public void reloadListWidget() {

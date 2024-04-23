@@ -79,8 +79,8 @@ public class Sound {
     }
 
     public void setVolume(float volume) {
-        if (volume < 0 || volume > 2) throw new IllegalArgumentException(
-                "Value out of range. Expected 0-2, got " + volume);
+        if (volume < 0 || volume > 1) throw new IllegalArgumentException(
+                "Value out of range. Expected 0-1, got " + volume);
         this.volume = volume;
     }
 

@@ -217,7 +217,14 @@ public class SoundOptionsList extends OptionsList {
                         Component.literal("Notification Sound"));
                 soundField.setMaxLength(120);
                 soundField.setValue(sound.getId());
-                soundField.setResponder((soundId) -> sound.setId(soundId.strip()));
+                soundField.setResponder((soundId) -> {
+                    if (sound.setId(soundId.strip())) {
+                        soundField.setTextColor(16777215);
+                    }
+                    else {
+                        soundField.setTextColor(16711680);
+                    }
+                });
                 elements.add(soundField);
             }
 

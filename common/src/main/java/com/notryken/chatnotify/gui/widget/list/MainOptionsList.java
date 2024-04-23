@@ -18,6 +18,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.StringDecomposer;
 
 import java.util.List;
 
@@ -91,7 +92,7 @@ public class MainOptionsList extends OptionsList {
                 int removeButtonWidth = 24;
                 Notification notif = notifs.get(index);
 
-                elements.add(Button.builder(getMessage(notif),
+                elements.add(Button.builder(getMessage(notif, index == 0),
                                 (button) -> listWidget.openNotificationConfig(index))
                         .pos(x, 0)
                         .size(mainButtonWidth, height)
@@ -150,7 +151,7 @@ public class MainOptionsList extends OptionsList {
                 }
             }
 
-            private MutableComponent getMessage(Notification notif) {
+            private MutableComponent getMessage(Notification notif, boolean isUser) {
                 MutableComponent message;
                 int maxWidth = (int)(mainButtonWidth * 0.8);
                 Font font = Minecraft.getInstance().font;
@@ -175,8 +176,18 @@ public class MainOptionsList extends OptionsList {
                             messageBuilder.append(triggerStr);
                         }
                         else if (font.width(messageBuilder.toString()) + font.width(triggerStr) <= maxWidth) {
-                            messageBuilder.append(", ");
-                            messageBuilder.append(triggerStr);
+                            if (isUser) {
+                                // Ignore duplicate trigger of username notification
+                                triggerStr = StringDecomposer.getPlainText(Component.literal(triggerStr));
+                                if (!messageBuilder.toString().contains(triggerStr)) {
+                                    messageBuilder.append(", ");
+                                    messageBuilder.append(triggerStr);
+                                }
+                            }
+                            else {
+                                messageBuilder.append(", ");
+                                messageBuilder.append(triggerStr);
+                            }
                         }
                         else {
                             messageBuilder.append(" [+");
