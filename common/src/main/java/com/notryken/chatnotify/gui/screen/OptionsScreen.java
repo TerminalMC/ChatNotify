@@ -42,6 +42,7 @@ public class OptionsScreen extends OptionsSubScreen {
     @Override
     public void onClose() {
         listWidget.onClose();
+        if (super.lastScreen instanceof OptionsScreen screen) screen.reloadListWidget();
         super.onClose();
     }
 
