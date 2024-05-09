@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.StringDecomposer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -160,6 +161,7 @@ public class MainOptionsList extends OptionsList {
                     message = Component.literal("> Click to Configure <");
                 }
                 else {
+                    List<String> messageList = new ArrayList<>();
                     StringBuilder messageBuilder = new StringBuilder();
 
                     for (int i = 0; i < notif.triggers.size(); i++) {
@@ -174,12 +176,13 @@ public class MainOptionsList extends OptionsList {
 
                         if (i == 0) {
                             messageBuilder.append(triggerStr);
+                            messageList.add(triggerStr);
                         }
                         else if (font.width(messageBuilder.toString()) + font.width(triggerStr) <= maxWidth) {
                             if (isUser) {
-                                // Ignore duplicate trigger of username notification
+                                // Ignore duplicate triggers
                                 triggerStr = StringDecomposer.getPlainText(Component.literal(triggerStr));
-                                if (!messageBuilder.toString().contains(triggerStr)) {
+                                if (!messageList.contains(triggerStr)) {
                                     messageBuilder.append(", ");
                                     messageBuilder.append(triggerStr);
                                 }
