@@ -37,8 +37,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * <p>-> {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
  *
  * <p>{@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
- * logs the message and then passes it to
- * {@link ChatComponent#addMessage(Component, MessageSignature, int, GuiMessageTag, boolean)}.
+ * logs the message and adds it to the message queues.
  */
 @Mixin(value = ChatComponent.class, priority = 800)
 public class MixinChatComponent {

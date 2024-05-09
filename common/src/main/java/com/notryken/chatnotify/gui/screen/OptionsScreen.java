@@ -38,6 +38,13 @@ public class OptionsScreen extends OptionsSubScreen {
     }
 
     @Override
+    public void resize(@NotNull Minecraft mc, int width, int height) {
+        super.resize(mc, width, height);
+        clearWidgets();
+        init();
+    }
+
+    @Override
     public void onClose() {
         listWidget.onClose();
         if (super.lastScreen instanceof OptionsScreen screen) screen.reloadListWidget();
@@ -48,11 +55,6 @@ public class OptionsScreen extends OptionsSubScreen {
     public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         context.drawCenteredString(font, title, width / 2, 5, 0xffffff);
-    }
-
-    @Override
-    public void renderBackground(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(context);
     }
 
     public void reloadListWidget() {

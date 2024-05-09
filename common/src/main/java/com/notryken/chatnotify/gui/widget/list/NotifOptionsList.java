@@ -23,6 +23,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 
+import java.time.Duration;
+
 /**
  * Contains controls for options of a {@link Notification}, and buttons linking
  * to other screens.
@@ -137,7 +139,7 @@ public class NotifOptionsList extends OptionsList {
                     triggerField.setTooltip(Tooltip.create(Component.literal(
                             (index == 0 ? "Profile name" : "Display name") +
                             "\n(updated automatically)")));
-                    triggerField.setTooltipDelay(500);
+                    triggerField.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(triggerField);
                 }
                 else {
@@ -151,7 +153,7 @@ public class NotifOptionsList extends OptionsList {
                                         status ? "Regex Enabled" : "Regex Disabled")))
                                 .create(x - spacing - smallButtonWidth * 2, 0, smallButtonWidth, height,
                                         Component.empty(), (button, status) -> trigger.isRegex = status);
-                        regexButton.setTooltipDelay(500);
+                        regexButton.setTooltipDelay(Duration.ofMillis(500));
                         if (trigger.isKey) {
                             regexButton.setMessage(Component.literal(".*"));
                             regexButton.setTooltip(Tooltip.create(Component.literal(
@@ -176,7 +178,7 @@ public class NotifOptionsList extends OptionsList {
                                         } else {
                                             listWidget.openKeyConfig(trigger);
                                         }});
-                    keyButton.setTooltipDelay(500);
+                    keyButton.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(keyButton);
 
                     elements.add(keyButton);
@@ -289,7 +291,7 @@ public class NotifOptionsList extends OptionsList {
                         .create(x, 0, buttonWidth, height,
                                 Component.literal("Bold"),
                                 (button, state) -> notif.textStyle.bold.state = state);
-                boldButton.setTooltipDelay(500);
+                boldButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(boldButton);
 
                 CycleButton<TriState.State> italicButton = CycleButton.<TriState.State>builder(
@@ -300,7 +302,7 @@ public class NotifOptionsList extends OptionsList {
                         .create(x + width / 2 - buttonWidth / 2, 0, buttonWidth, height,
                                 Component.literal("Italic"),
                                 (button, state) -> notif.textStyle.italic.state = state);
-                italicButton.setTooltipDelay(500);
+                italicButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(italicButton);
 
                 CycleButton<TriState.State> underlineButton = CycleButton.<TriState.State>builder(
@@ -311,7 +313,7 @@ public class NotifOptionsList extends OptionsList {
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 Component.literal("Underline"),
                                 (button, state) -> notif.textStyle.underlined.state = state);
-                underlineButton.setTooltipDelay(500);
+                underlineButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(underlineButton);
             }
 
@@ -346,7 +348,7 @@ public class NotifOptionsList extends OptionsList {
                         .create(x, 0, buttonWidth, height,
                                 Component.literal("Strikethrough"),
                                 (button, state) -> notif.textStyle.strikethrough.state = state);
-                strikethroughButton.setTooltipDelay(500);
+                strikethroughButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(strikethroughButton);
 
                 CycleButton<TriState.State> obfuscateButton = CycleButton.<TriState.State>builder(
@@ -357,7 +359,7 @@ public class NotifOptionsList extends OptionsList {
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 Component.literal("Obfuscate"),
                                 (button, state) -> notif.textStyle.obfuscated.state = state);
-                obfuscateButton.setTooltipDelay(500);
+                obfuscateButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(obfuscateButton);
             }
 

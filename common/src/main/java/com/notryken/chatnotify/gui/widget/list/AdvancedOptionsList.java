@@ -20,6 +20,8 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.time.Duration;
+
 /**
  * Contains controls for advanced options of a {@link Notification}, including
  * exclusion triggers, response messages, and reset options.
@@ -189,7 +191,7 @@ public class AdvancedOptionsList extends OptionsList {
                                 .build();
                         regexButton.setTooltip(Tooltip.create(Component.literal(
                                 "Regex Disabled [Key trigger]")));
-                        regexButton.setTooltipDelay(500);
+                        regexButton.setTooltipDelay(Duration.ofMillis(500));
                     }
                     else if (trigger.isRegex) {
                         regexButton = Button.builder(Component.literal(".*")
@@ -203,7 +205,7 @@ public class AdvancedOptionsList extends OptionsList {
                                 .build();
                         regexButton.setTooltip(Tooltip.create(Component.literal(
                                 "Regex Enabled")));
-                        regexButton.setTooltipDelay(500);
+                        regexButton.setTooltipDelay(Duration.ofMillis(500));
                     }
                     else {
                         regexButton = Button.builder(Component.literal(".*")
@@ -217,7 +219,7 @@ public class AdvancedOptionsList extends OptionsList {
                                 .build();
                         regexButton.setTooltip(Tooltip.create(Component.literal(
                                 "Regex Disabled")));
-                        regexButton.setTooltipDelay(500);
+                        regexButton.setTooltipDelay(Duration.ofMillis(500));
                     }
                     elements.add(regexButton);
                 }
@@ -236,7 +238,7 @@ public class AdvancedOptionsList extends OptionsList {
                             .build();
                     keyButton.setTooltip(Tooltip.create(Component.literal(
                             "Translation key trigger")));
-                    keyButton.setTooltipDelay(500);
+                    keyButton.setTooltipDelay(Duration.ofMillis(500));
                 }
                 else {
                     keyButton = Button.builder(Component.literal("\uD83D\uDD11")
@@ -253,7 +255,7 @@ public class AdvancedOptionsList extends OptionsList {
                             .build();
                     keyButton.setTooltip(Tooltip.create(Component.literal(
                             "Normal trigger")));
-                    keyButton.setTooltipDelay(500);
+                    keyButton.setTooltipDelay(Duration.ofMillis(500));
                 }
                 elements.add(keyButton);
                 elements.add(triggerField);
@@ -311,7 +313,7 @@ public class AdvancedOptionsList extends OptionsList {
                         Component.literal("Delay Ticks"));
                 timeField.setTooltip(Tooltip.create(Component.literal(
                         "Time in ticks to wait before sending.")));
-                timeField.setTooltipDelay(500);
+                timeField.setTooltipDelay(Duration.ofMillis(500));
                 timeField.setMaxLength(5);
                 timeField.setValue(String.valueOf(resMsg.delayTicks));
                 timeField.setResponder((val) -> {
@@ -337,7 +339,7 @@ public class AdvancedOptionsList extends OptionsList {
                                                 "to access regex groups from the trigger." : "Regex Groups Disabled")))
                                 .create(x - spacing - regexButtonWidth, 0, regexButtonWidth, height, Component.empty(),
                                         (button, status) -> resMsg.regexGroups = status);
-                        regexButton.setTooltipDelay(500);
+                        regexButton.setTooltipDelay(Duration.ofMillis(500));
                         elements.add(regexButton);
                     }
                 }

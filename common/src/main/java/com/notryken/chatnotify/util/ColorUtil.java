@@ -36,7 +36,7 @@ public class ColorUtil {
      */
     public static TextColor parseColor(String strColor) {
         if (strColor.startsWith("#") && strColor.length() == 7) {
-            Optional<TextColor> result = TextColor.parseColor(strColor).get().left();
+            Optional<TextColor> result = TextColor.parseColor(strColor).result();
             if (result.isPresent()) return result.get();
         }
         return null;

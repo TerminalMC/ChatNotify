@@ -13,6 +13,8 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
+import java.time.Duration;
+
 /**
  * Contains a text field for a {@link Trigger}, and a list of potential
  * translation key triggers.
@@ -129,7 +131,7 @@ public class KeyOptionsList extends OptionsList {
                                     trigger.isKey = status;
                                     listWidget.reload();
                                 });
-                triggerTypeButton.setTooltipDelay(500);
+                triggerTypeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerTypeButton);
             }
         }
