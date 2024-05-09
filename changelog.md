@@ -1,1 +1,0 @@
-- Adjusted display of username notification
