@@ -25,10 +25,10 @@ public class ColorOptionsList extends OptionsList {
     public final Supplier<Integer> src;
     public final Consumer<Integer> dest;
 
-    public ColorOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+    public ColorOptionsList(Minecraft mc, int width, int height, int y,
                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                             int scrollWidth, Supplier<Integer> src, Consumer<Integer> dest) {
-        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.src = src;
         this.dest = dest;
 
@@ -60,10 +60,10 @@ public class ColorOptionsList extends OptionsList {
     }
 
     @Override
-    public ColorOptionsList resize(int width, int height, int top, int bottom,
+    public ColorOptionsList resize(int width, int height, int y,
                                    int itemHeight, double scrollAmount) {
         ColorOptionsList newListWidget = new ColorOptionsList(
-                minecraft, width, height, top, bottom, itemHeight,
+                minecraft, width, height, y, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, src, dest);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;

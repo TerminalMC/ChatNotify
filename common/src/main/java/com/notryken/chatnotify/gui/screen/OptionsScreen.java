@@ -15,8 +15,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
-
 /**
  * An OptionsScreen contains one tightly-coupled {@link OptionsList},
  * which is used to display all option controls required for the screen.
@@ -26,7 +24,7 @@ public class OptionsScreen extends OptionsSubScreen {
     protected OptionsList listWidget;
 
     public final int listTop = 32;
-    public final Supplier<Integer> listBottom = () -> height - 32;
+    public final int bottomMargin = 32;
     public final int listItemHeight = 25;
 
     public OptionsScreen(Screen lastScreen, Component title, OptionsList listWidget) {
@@ -59,8 +57,8 @@ public class OptionsScreen extends OptionsSubScreen {
 
     public void reloadListWidget() {
         clearWidgets();
-        listWidget = listWidget.resize(width, height, listTop, listBottom.get(),
-                listItemHeight, listWidget.getScrollAmount());
+        listWidget = listWidget.resize(width, height - listTop - bottomMargin,
+                listTop, listItemHeight, listWidget.getScrollAmount());
         listWidget.setScreen(this);
         addRenderableWidget(listWidget);
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,

@@ -31,10 +31,10 @@ public class NotifOptionsList extends OptionsList {
     private final Notification notif;
     private final boolean isUsername;
 
-    public NotifOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+    public NotifOptionsList(Minecraft mc, int width, int height, int y,
                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                             int scrollWidth, Notification notif, boolean isUsername) {
-        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         notif.editing = true;
         this.notif = notif;
         this.isUsername = isUsername;
@@ -69,10 +69,10 @@ public class NotifOptionsList extends OptionsList {
     }
 
     @Override
-    public NotifOptionsList resize(int width, int height, int top, int bottom,
+    public NotifOptionsList resize(int width, int height, int y,
                                    int itemHeight, double scrollAmount) {
         NotifOptionsList newListWidget = new NotifOptionsList(
-                minecraft, width, height, top, bottom, itemHeight,
+                minecraft, width, height, y, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif, isUsername);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
@@ -87,14 +87,14 @@ public class NotifOptionsList extends OptionsList {
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.key"),
-                new KeyOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new KeyOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
     }
 
     private void openColorConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.color"),
-                new ColorOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new ColorOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         () -> notif.textStyle.color, (color) -> notif.textStyle.color = color)));
     }
@@ -102,14 +102,14 @@ public class NotifOptionsList extends OptionsList {
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.sound"),
-                new SoundOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new SoundOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif.sound)));
     }
 
     private void openAdvancedConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.advanced"),
-                new AdvancedOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new AdvancedOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif)));
     }
 

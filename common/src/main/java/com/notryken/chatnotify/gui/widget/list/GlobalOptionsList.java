@@ -26,10 +26,10 @@ import java.util.Locale;
  * Contains global configuration options.
  */
 public class GlobalOptionsList extends OptionsList {
-    public GlobalOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+    public GlobalOptionsList(Minecraft mc, int width, int height, int y,
                              int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                              int scrollWidth) {
-        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
 
         addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.SelfCheckAndRegexEntry(entryX, entryWidth, entryHeight));
@@ -57,10 +57,10 @@ public class GlobalOptionsList extends OptionsList {
     }
 
     @Override
-    public GlobalOptionsList resize(int width, int height, int top, int bottom,
+    public GlobalOptionsList resize(int width, int height, int y,
                                     int itemHeight, double scrollAmount) {
         GlobalOptionsList newListWidget = new GlobalOptionsList(
-                minecraft, width, height, top, bottom, itemHeight,
+                minecraft, width, height, y, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
@@ -69,7 +69,7 @@ public class GlobalOptionsList extends OptionsList {
     private void openColorConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.color"),
-                new ColorOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new ColorOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         () -> Config.get().defaultColor, (color) -> Config.get().defaultColor = color)));
     }
@@ -77,7 +77,7 @@ public class GlobalOptionsList extends OptionsList {
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.sound"),
-                new SoundOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new SoundOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, Config.get().defaultSound)));
     }
 

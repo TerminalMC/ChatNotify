@@ -25,10 +25,10 @@ import net.minecraft.sounds.SoundSource;
 public class SoundOptionsList extends OptionsList {
     private final Sound sound;
 
-    public SoundOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+    public SoundOptionsList(Minecraft mc, int width, int height, int y,
                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                             int scrollWidth, Sound sound) {
-        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.sound = sound;
 
         addEntry(new Entry.SoundFieldEntry(entryX, entryWidth, entryHeight, sound));
@@ -151,10 +151,10 @@ public class SoundOptionsList extends OptionsList {
     }
 
     @Override
-    public SoundOptionsList resize(int width, int height, int top, int bottom,
+    public SoundOptionsList resize(int width, int height, int y,
                                    int itemHeight, double scrollAmount) {
         SoundOptionsList newListWidget = new SoundOptionsList(
-                minecraft, width, height, top, bottom, itemHeight,
+                minecraft, width, height, y, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, sound);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;

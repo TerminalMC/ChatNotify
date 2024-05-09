@@ -29,10 +29,10 @@ import java.util.List;
  */
 public class MainOptionsList extends OptionsList {
 
-    public MainOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+    public MainOptionsList(Minecraft mc, int width, int height, int y,
                            int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                            int scrollWidth) {
-        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
 
         addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("Global Options"), null, -1, (button -> openGlobalConfig())));
@@ -55,8 +55,8 @@ public class MainOptionsList extends OptionsList {
     }
 
     @Override
-    public MainOptionsList resize(int width, int height, int top, int bottom, int itemHeight, double scrollAmount) {
-        MainOptionsList newListWidget = new MainOptionsList(minecraft, width, height, top, bottom, itemHeight,
+    public MainOptionsList resize(int width, int height, int y, int itemHeight, double scrollAmount) {
+        MainOptionsList newListWidget = new MainOptionsList(minecraft, width, height, y, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
@@ -65,14 +65,14 @@ public class MainOptionsList extends OptionsList {
     private void openGlobalConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.global"),
-                new GlobalOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new GlobalOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth)));
     }
 
     private void openNotificationConfig(int index) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.notif"),
-                new NotifOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new NotifOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         Config.get().getNotifs().get(index), index == 0)));
     }

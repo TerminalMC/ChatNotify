@@ -45,10 +45,10 @@ public class KeyOptionsList extends OptionsList {
             {"commands.message.display.outgoing", "Outgoing Private Message"},
     };
 
-    public KeyOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+    public KeyOptionsList(Minecraft mc, int width, int height, int y,
                           int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                           int scrollWidth, Trigger trigger) {
-        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.trigger = trigger;
 
         addEntry(new Entry.TriggerTypeEntry(entryX, entryWidth, entryHeight, this, trigger));
@@ -93,10 +93,10 @@ public class KeyOptionsList extends OptionsList {
     }
 
     @Override
-    public OptionsList resize(int width, int height, int top, int bottom,
+    public OptionsList resize(int width, int height, int y,
                               int itemHeight, double scrollAmount) {
         KeyOptionsList newListWidget = new KeyOptionsList(
-                minecraft, width, height, top, bottom, itemHeight,
+                minecraft, width, height, y, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, trigger);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;

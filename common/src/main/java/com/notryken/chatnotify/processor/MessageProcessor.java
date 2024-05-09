@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.Nullable;
 
@@ -319,8 +319,8 @@ public class MessageProcessor {
     private static MutableComponent restyleComponent(MutableComponent msg, String trigger,
                                                      TextStyle style) {
 
-        if (msg.getContents() instanceof LiteralContents) {
-            // LiteralContents is typically the lowest level
+        if (msg.getContents() instanceof PlainTextContents) {
+            // PlainTextContents is typically the lowest level
             msg = restyleContents(msg, trigger, style);
         }
         else if (msg.getContents() instanceof TranslatableContents contents) {
@@ -347,7 +347,7 @@ public class MessageProcessor {
     }
 
     /**
-     * If the message contents is {@link LiteralContents}, deconstructs,
+     * If the message contents is {@link PlainTextContents}, deconstructs,
      * restyles and reconstructs the message with the objective of applying
      * the specified style only to occurrences of the trigger.
      * @param msg the message to restyle.
@@ -357,7 +357,7 @@ public class MessageProcessor {
      */
     private static MutableComponent restyleContents(MutableComponent msg, String trigger,
                                                     TextStyle style) {
-        if (!(msg.getContents() instanceof LiteralContents contents)) return msg;
+        if (!(msg.getContents() instanceof PlainTextContents contents)) return msg;
 
         String msgStr = contents.text();
         Matcher matcher = strSearch(msgStr, trigger);
@@ -408,7 +408,7 @@ public class MessageProcessor {
                     msg = siblings.get(0).copy();
                 }
                 else {
-                    MutableComponent newMessage = MutableComponent.create(ComponentContents.EMPTY);
+                    MutableComponent newMessage = MutableComponent.create(PlainTextContents.EMPTY);
                     newMessage.siblings.addAll(siblings);
                     msg = newMessage;
                 }
@@ -418,7 +418,7 @@ public class MessageProcessor {
                 // as first sibling of a new MutableComponent, followed by other
                 // siblings in original order, then restyle that.
 
-                MutableComponent replacement = MutableComponent.create(ComponentContents.EMPTY);
+                MutableComponent replacement = MutableComponent.create(PlainTextContents.EMPTY);
                 replacement.setStyle(msg.getStyle());
 
                 siblings.add(0, MutableComponent.create(msg.getContents()));

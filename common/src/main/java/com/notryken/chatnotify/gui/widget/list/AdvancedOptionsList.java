@@ -27,10 +27,10 @@ import net.minecraft.network.chat.Component;
 public class AdvancedOptionsList extends OptionsList {
     private final Notification notif;
 
-    public AdvancedOptionsList(Minecraft mc, int width, int height, int top, int bottom,
+    public AdvancedOptionsList(Minecraft mc, int width, int height, int y,
                                int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                                int scrollWidth, Notification notif) {
-        super(mc, width, height, top, bottom, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
         this.notif = notif;
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -126,10 +126,10 @@ public class AdvancedOptionsList extends OptionsList {
     }
 
     @Override
-    public AdvancedOptionsList resize(int width, int height, int top, int bottom,
+    public AdvancedOptionsList resize(int width, int height, int y,
                                       int itemHeight, double scrollAmount) {
         AdvancedOptionsList newListWidget = new AdvancedOptionsList(
-                minecraft, width, height, top, bottom, itemHeight,
+                minecraft, width, height, y, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, notif);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
@@ -138,7 +138,7 @@ public class AdvancedOptionsList extends OptionsList {
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
                 Component.translatable("screen.chatnotify.title.key"),
-                new KeyOptionsList(minecraft, screen.width, screen.height, y0, y1,
+                new KeyOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
     }
 
