@@ -102,6 +102,8 @@ subprojects {
 //                "neoforge_loader_versions": neoforge_loader_versions,
 //                "neoforge_version": neoforge_version,
 //                "neoforge_versions": neoforge_versions,
+                "modmenu_version": modmenu_version,
+                "modmenu_versions_list": asJsonList(modmenu_versions),
                 "homepage_url": homepage_url,
                 "sources_url": sources_url,
                 "issues_url": issues_url,

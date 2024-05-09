@@ -1,4 +1,4 @@
-<div align="center">
+<div align="center"><center>
 
 ## Chat Notify
 
@@ -13,7 +13,7 @@
 
 Allows the user to set up audio and visual notifications for when specified words or phrases appear in chat.
 
-</div>
+</center></div>
 
 ### Features and Usage
 
