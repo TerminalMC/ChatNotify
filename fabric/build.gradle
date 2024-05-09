@@ -36,11 +36,6 @@ tasks.withType(JavaCompile).configureEach {
 processResources {
     from project(":common").sourceSets.main.resources
 }
-
-// Sources and Javadoc
-//tasks.withType(Javadoc).configureEach {
-//    source(project(":common").sourceSets.main.allJava)
-//}
-//tasks.named("sourcesJar", Jar) {
-//    from(project(":common").sourceSets.main.allSource)
-//}
+tasks.named("sourcesJar", Jar) {
+    from(project(":common").sourceSets.main.allSource)
+}

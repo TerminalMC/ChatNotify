@@ -4,7 +4,12 @@ plugins {
     id "idea"
     id "maven-publish"
 //    id "org.jetbrains.gradle.plugin.idea-ext" version "${ideaext_version}" // Required for NeoGradle
+    id "com.modrinth.minotaur" version "${minotaur_version}"
+    id "com.github.breadmoirai.github-release" version "${githubrelease_version}"
+    id "org.ajoberstar.grgit.service" version "${grgitservice_version}"
 }
+
+import com.modrinth.minotaur.dependencies.ModDependency
 
 subprojects {
     version = mod_version
@@ -14,6 +19,12 @@ subprojects {
     apply plugin: "java-library"
     apply plugin: "idea"
     apply plugin: "maven-publish"
+
+    if (project.name != "common") {
+        apply plugin: "com.modrinth.minotaur"
+        apply plugin: "com.github.breadmoirai.github-release"
+        apply plugin: "org.ajoberstar.grgit.service"
+    }
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.valueOf(java_version))
 
@@ -36,11 +47,21 @@ subprojects {
             ])
         }
     }
+    java.withSourcesJar()
+    sourcesJar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}_${mod_name}" }
+        }
+    }
 
     repositories {
         maven {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
+        }
+        maven {
+            name = "Shedaniel"
+            url = "https://maven.shedaniel.me/"
         }
     }
 
@@ -50,7 +71,6 @@ subprojects {
     }
 
     processResources {
-
         def expandProps = [
                 "project_group": project.group,
                 "mod_version": mod_version,
@@ -60,37 +80,35 @@ subprojects {
                 "mod_description": mod_description,
                 "mod_icon": "assets/" + mod_id + "/icon.png",
                 "mod_owner": mod_owner,
-                "mod_authors_list": toList(mod_authors),
-                "mod_contributors_list": toList(mod_contributors),
+                "mod_authors_list": asJsonList(mod_authors),
+                "mod_contributors_list": asJsonList(mod_contributors),
                 "mod_authors_string": mod_authors.replace(",", ", "),
                 "mod_contributors_string": mod_contributors.replace(",", ", "),
                 "mod_license": mod_license,
                 "mod_environment": mod_environment,
                 "java_version": java_version,
-                "java_versions_fabric_list": toList(java_versions_fabric),
+                "java_versions_fabric_list": asJsonList(java_versions_fabric),
                 "java_versions_neoforge": java_versions_neoforge,
                 "minecraft_version": minecraft_version,
-                "minecraft_versions_fabric_list": toList(minecraft_versions_fabric),
+                "minecraft_versions_fabric_list": asJsonList(minecraft_versions_fabric),
                 "minecraft_versions_neoforge": minecraft_versions_neoforge,
                 "fabric_loader_version": fabric_loader_version,
-                "fabric_loader_versions_list": toList(fabric_loader_versions),
+                "fabric_loader_versions_list": asJsonList(fabric_loader_versions),
                 "fabric_api_version": fabric_api_version,
-                "fabric_api_versions_list": toList(fabric_api_versions),
+                "fabric_api_versions_list": asJsonList(fabric_api_versions),
                 "forge_loader_versions": forge_loader_versions,
                 "forge_version": forge_version,
                 "forge_versions": forge_versions,
 //                "neoforge_loader_versions": neoforge_loader_versions,
 //                "neoforge_version": neoforge_version,
 //                "neoforge_versions": neoforge_versions,
-                "modmenu_version": modmenu_version,
-                "modmenu_versions_list": toList(modmenu_versions),
                 "homepage_url": homepage_url,
                 "sources_url": sources_url,
                 "issues_url": issues_url,
                 "contact_url": contact_url
         ]
 
-        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/mods.toml", "*.mixins.json"]) {
+        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/mods.toml", "*.mixins.json", "assets/"+mod_id+"/lang/*.json"]) {
             expand expandProps
         }
         inputs.properties(expandProps)
@@ -100,17 +118,95 @@ subprojects {
         enabled = false
     }
 
-    // Sources and Javadoc
-//    java.withSourcesJar()
-//    java.withJavadocJar()
-//
-//    sourcesJar {
-//        from(rootProject.file("LICENSE")) {
-//            rename { "${it}_${mod_name}" }
-//        }
-//    }
+    afterEvaluate {
+        if (name != "common") {
+            modrinth {
+                def modrinthToken = dotenv().get("MODRINTH_TOKEN")
+                if (modrinthToken == null) {
+                    getLogger().error(".env missing key: MODRINTH_TOKEN")
+                    return
+                }
+
+                token = modrinthToken
+                projectId = modrinth_id
+                versionNumber = mod_version
+                versionType = release_type
+                versionName = "v${mod_version}-${capsLoader(name)}-${minecraft_version}"
+                changelog = rootProject.file("changelog.md").text
+                uploadFile = name == "fabric" ? remapJar : jar
+                loaders = project.property("release_mod_loaders_${name}").split(",") as List
+                gameVersions = project.property("release_game_versions_${name}").split(",") as List
+
+                def deps = []
+                if (project.hasProperty("release_required_dep_ids_${name}")) {
+                    project.property("release_required_dep_ids_${name}").split(",").each { String id ->
+                        deps << new ModDependency(id, "required")
+                    }
+                }
+                if (project.hasProperty("release_optional_dep_ids_${name}")) {
+                    project.property("release_optional_dep_ids_${name}").split(",").each { String id ->
+                        deps << new ModDependency(id, "optional")
+                    }
+                }
+                if (project.hasProperty("release_incompatible_dep_ids_${name}")) {
+                    project.property("release_incompatible_dep_ids_${name}").split(",").each { String id ->
+                        deps << new ModDependency(id, "incompatible")
+                    }
+                }
+                dependencies = deps
+                syncBodyFrom = rootProject.file("README.md").text
+            }
+            tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
+            tasks.modrinth.dependsOn(build)
+            githubRelease {
+                def githubToken = dotenv().get("GITHUB_TOKEN")
+                if (githubToken == null) {
+                    getLogger().error(".env missing key: GITHUB_TOKEN")
+                    return
+                }
+
+                token = githubToken
+                owner = github_repo_owner
+                repo = github_repo
+                tagName = "v${mod_version}-${name}-${minecraft_version}"
+                prerelease = release_type == "alpha" || release_type == "beta"
+                releaseName = "v${mod_version}-${capsLoader(name)}-${minecraft_version}"
+                body = rootProject.file("changelog.md").text
+                targetCommitish = grgitService.service.get().grgit.branch.current().name
+                overwrite = true
+                releaseAssets = jar.destinationDirectory.asFileTree.files
+            }
+            tasks.githubRelease.dependsOn(build)
+        }
+    }
 }
 
-static def toList(String versions) {
+static asJsonList(String versions) {
     return versions.split(",").collect { "\"$it\"" }.join(',')
+}
+
+static String capsLoader(String loader) {
+    switch(loader) {
+        case "fabric": return "Fabric"
+        case "quilt": return "Quilt"
+        case "forge": return "Forge"
+        case "neoforge": return "NeoForge"
+        default: return loader
+    }
+}
+
+Map<String,String> dotenv() {
+    def map = new HashMap<String,String>()
+    try {
+        file(".env").readLines().each() {
+            if (!it.isBlank() && !it.startsWith("#")) {
+                def pos = it.indexOf("=")
+                def key = it.substring(0, pos)
+                def value = it.substring(pos + 1)
+                map.put(key, value)
+            }
+        }
+    }
+    catch (IOException ignored) {}
+    return map
 }
