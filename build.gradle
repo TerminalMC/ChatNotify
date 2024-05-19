@@ -1,29 +1,29 @@
-plugins {
-    id "java"
-    id "java-library"
-    id "idea"
-    id "maven-publish"
-    id "org.jetbrains.gradle.plugin.idea-ext" version "${ideaext_version}" // Required for NeoGradle
-    id "com.modrinth.minotaur" version "${minotaur_version}"
-    id "com.github.breadmoirai.github-release" version "${githubrelease_version}"
-    id "org.ajoberstar.grgit.service" version "${grgitservice_version}"
-}
-
 import com.modrinth.minotaur.dependencies.ModDependency
+
+plugins {
+    id("java")
+    id("java-library")
+    id("idea")
+    id("maven-publish")
+    id("org.jetbrains.gradle.plugin.idea-ext") version("${ideaext_version}") // Required for NeoGradle
+    id("com.modrinth.minotaur") version("${minotaur_version}")
+    id("com.github.breadmoirai.github-release") version("${githubrelease_version}")
+    id("org.ajoberstar.grgit.service") version("${grgitservice_version}")
+}
 
 subprojects {
     version = mod_version
     group = mod_group
 
-    apply plugin: "java"
-    apply plugin: "java-library"
-    apply plugin: "idea"
-    apply plugin: "maven-publish"
+    apply(plugin: "java")
+    apply(plugin: "java-library")
+    apply(plugin: "idea")
+    apply(plugin: "maven-publish")
 
     if (project.name != "common") {
-        apply plugin: "com.modrinth.minotaur"
-        apply plugin: "com.github.breadmoirai.github-release"
-        apply plugin: "org.ajoberstar.grgit.service"
+        apply(plugin: "com.modrinth.minotaur")
+        apply(plugin: "com.github.breadmoirai.github-release")
+        apply(plugin: "org.ajoberstar.grgit.service")
     }
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.valueOf(java_version))
@@ -107,7 +107,7 @@ subprojects {
                 "contact_url": contact_url
         ]
 
-        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/neoforge.mods.toml", "*.mixins.json", "assets/"+mod_id+"/lang/*.json"]) {
+        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/*mods.toml", "*.mixins.json", "assets/"+mod_id+"/lang/*.json"]) {
             expand expandProps
         }
         inputs.properties(expandProps)
@@ -173,7 +173,7 @@ subprojects {
                 body = rootProject.file("changelog.md").text
                 targetCommitish = grgitService.service.get().grgit.branch.current().name
                 overwrite = true
-                releaseAssets = jar.destinationDirectory.asFileTree.files
+                releaseAssets = List.of(name == "fabric" ? remapJar : jar, sourcesJar)
             }
             tasks.githubRelease.dependsOn(build)
         }
@@ -196,8 +196,8 @@ static String capsLoader(String loader) {
 
 Map<String,String> dotenv() {
     def map = new HashMap<String,String>()
-    try {
-        file(".env").readLines().each() {
+    file(".env").readLines().each() {
+        try {
             if (!it.isBlank() && !it.startsWith("#")) {
                 def pos = it.indexOf("=")
                 def key = it.substring(0, pos)
@@ -205,7 +205,7 @@ Map<String,String> dotenv() {
                 map.put(key, value)
             }
         }
+        catch (IOException ignored) {}
     }
-    catch (IOException ignored) {}
     return map
 }
