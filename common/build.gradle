@@ -1,5 +1,5 @@
 plugins {
-    id "org.spongepowered.gradle.vanilla" version "${vanillagradle_version}"
+    id("org.spongepowered.gradle.vanilla") version("${vanillagradle_version}")
 }
 
 base {
@@ -7,12 +7,15 @@ base {
 }
 
 dependencies {
-    compileOnly "org.spongepowered:mixin:${mixin_version}"
+    compileOnly("org.spongepowered:mixin:${mixin_version}")
+
+    compileOnly("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
+    annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
 }
 
 minecraft {
     version(minecraft_version)
-    if(file("src/main/resources/${mod_id}.accesswidener").exists()){
+    if (file("src/main/resources/${mod_id}.accesswidener").exists()) {
         accessWideners(file("src/main/resources/${mod_id}.accesswidener"))
     }
 }
