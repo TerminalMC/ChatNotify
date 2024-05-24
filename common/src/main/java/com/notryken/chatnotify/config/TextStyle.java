@@ -92,11 +92,11 @@ public class TextStyle {
 
             boolean doColor = obj.get("doColor").getAsBoolean();
             int color = obj.get("color").getAsInt();
-            TriState bold = new TriState(TriState.State.valueOf(obj.getAsJsonObject("bold").get("state").getAsString()));
-            TriState italic = new TriState(TriState.State.valueOf(obj.getAsJsonObject("italic").get("state").getAsString()));
-            TriState underlined = new TriState(TriState.State.valueOf(obj.getAsJsonObject("underlined").get("state").getAsString()));
-            TriState strikethrough = new TriState(TriState.State.valueOf(obj.getAsJsonObject("strikethrough").get("state").getAsString()));
-            TriState obfuscated = new TriState(TriState.State.valueOf(obj.getAsJsonObject("obfuscated").get("state").getAsString()));
+            TriState bold = ctx.deserialize(obj.get("bold"), TriState.class);
+            TriState italic = ctx.deserialize(obj.get("italic"), TriState.class);
+            TriState underlined = ctx.deserialize(obj.get("underlined"), TriState.class);
+            TriState strikethrough = ctx.deserialize(obj.get("strikethrough"), TriState.class);
+            TriState obfuscated = ctx.deserialize(obj.get("obfuscated"), TriState.class);
 
             return new JsonValidator<TextStyle>().validateNonNull(
                     new TextStyle(doColor, color, bold, italic, underlined, strikethrough, obfuscated));
