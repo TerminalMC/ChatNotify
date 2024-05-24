@@ -24,7 +24,7 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
 
         TriState mixinEarly = new TriState(obj.has("mixinEarly")
                 && obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
-        boolean debugShowKey = false;
+        TriState debugShowKey = new TriState();
         boolean checkOwnMessages = !obj.get("ignoreOwnMessages").getAsBoolean();
         SoundSource soundSource = obj.has("notifSoundSource") ?
                 SoundSource.valueOf(obj.get("notifSoundSource").getAsString()) :

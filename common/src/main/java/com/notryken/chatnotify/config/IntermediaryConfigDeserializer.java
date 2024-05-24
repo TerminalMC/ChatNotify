@@ -25,7 +25,7 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
         JsonObject obj = json.getAsJsonObject();
 
         TriState mixinEarly = new TriState(obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
-        boolean debugShowKey = obj.has("debugShowKey") && obj.get("debugShowKey").getAsBoolean();
+        TriState debugShowKey = new TriState(obj.get("debugShowKey").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
         boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
         SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());
         boolean allowRegex = false;

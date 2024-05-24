@@ -39,8 +39,9 @@ public class MessageProcessor {
      * was required.
      */
     public static Component processMessage(Component msg) {
-        if (Config.get().debugShowKey) {
-            msg = addKeyInfo(msg);
+        switch(Config.get().debugShowKey.state) {
+            case ON -> msg = addKeyInfo(msg);
+            case OFF -> msg = addRawInfo(msg);
         }
 
         String msgStr = msg.getString();
@@ -53,32 +54,6 @@ public class MessageProcessor {
         }
 
         return (modifiedMsg == null ? msg : modifiedMsg);
-    }
-
-    public static Component addKeyInfo(Component msg) {
-        Style newStyle;
-        // Create new Hover and Click events
-        if (msg.getContents() instanceof TranslatableContents tc) {
-            newStyle = Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            Component.literal("Key: " + tc.getKey())
-                                    .append(Component.literal("\n[Click to Copy]")
-                                            .withStyle(ChatFormatting.GOLD))))
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
-                            tc.getKey()));
-        }
-        else {
-            newStyle = Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            Component.literal("Message is not translatable")
-                                    .withStyle(ChatFormatting.GRAY)));
-        }
-        // Overwrite existing events
-        return overwriteStyle(newStyle, msg.copy());
-    }
-
-    public static MutableComponent overwriteStyle(Style style, MutableComponent msg) {
-        msg.setStyle(style.applyTo(msg.getStyle()));
-        msg.getSiblings().replaceAll((sibling) -> overwriteStyle(style, sibling.copy()));
-        return msg;
     }
 
     /**
@@ -508,5 +483,48 @@ public class MessageProcessor {
         if (textStyle.obfuscated.isEnabled()) style = style.withObfuscated(textStyle.obfuscated.isOn());
         if (textStyle.doColor) style = style.withColor(textStyle.getTextColor());
         return style;
+    }
+
+    // Debug utils
+
+    public static Component addKeyInfo(Component msg) {
+        Style newStyle;
+        // Create new Hover and Click events
+        if (msg.getContents() instanceof TranslatableContents tc) {
+            newStyle = Style.EMPTY
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            Component.literal("Key: " + tc.getKey())
+                                    .append(Component.literal("\n[Click to Copy]")
+                                            .withStyle(ChatFormatting.GOLD))))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
+                            tc.getKey()));
+        }
+        else {
+            newStyle = Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Component.literal("No Translation Key")
+                            .withStyle(ChatFormatting.GRAY)));
+        }
+        // Overwrite existing events
+        return overwriteStyle(newStyle, msg.copy());
+    }
+
+    public static Component addRawInfo(Component msg) {
+        Style newStyle;
+        // Create new Hover and Click events
+        newStyle = Style.EMPTY.
+                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        Component.literal("[Click to Copy Raw]")
+                                .withStyle(ChatFormatting.GOLD)))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
+                        msg.toString()));
+
+        // Overwrite existing events
+        return overwriteStyle(newStyle, msg.copy());
+    }
+
+    public static MutableComponent overwriteStyle(Style style, MutableComponent msg) {
+        msg.setStyle(style.applyTo(msg.getStyle()));
+        msg.getSiblings().replaceAll((sibling) -> overwriteStyle(style, sibling.copy()));
+        return msg;
     }
 }

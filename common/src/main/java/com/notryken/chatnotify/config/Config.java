@@ -70,7 +70,7 @@ public class Config {
     public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
 
     @JsonRequired public TriState mixinEarly;
-    @JsonRequired public boolean debugShowKey;
+    @JsonRequired public TriState debugShowKey;
     @JsonRequired public boolean checkOwnMessages;
     @JsonRequired public SoundSource soundSource;
     @JsonRequired public boolean allowRegex;
@@ -81,7 +81,7 @@ public class Config {
 
     private Config() {
         this.mixinEarly = new TriState();
-        this.debugShowKey = false;
+        this.debugShowKey = new TriState();
         this.checkOwnMessages = true;
         this.soundSource = DEFAULT_SOUND_SOURCE;
         this.allowRegex = false;
@@ -95,7 +95,7 @@ public class Config {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Config(TriState mixinEarly, boolean debugShowKey, boolean checkOwnMessages,
+    Config(TriState mixinEarly, TriState debugShowKey, boolean checkOwnMessages,
            SoundSource soundSource, boolean allowRegex, int defaultColor, Sound defaultSound,
            List<String> prefixes, List<Notification> notifications) {
         this.mixinEarly = mixinEarly;
@@ -341,7 +341,9 @@ public class Config {
             TriState mixinEarly = version == 1
                     ? new TriState(obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED)
                     : ctx.deserialize(obj.get("mixinEarly"), TriState.class);
-            boolean debugShowKey = obj.get("debugShowKey").getAsBoolean();
+            TriState debugShowKey = version == 1
+                    ? new TriState(obj.get("debugShowKey").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED)
+                    : ctx.deserialize(obj.get("debugShowKey"), TriState.class);
             boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
             SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());
             boolean allowRegex = obj.get("allowRegex").getAsBoolean();

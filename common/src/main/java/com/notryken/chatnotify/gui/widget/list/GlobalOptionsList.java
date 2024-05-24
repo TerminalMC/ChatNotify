@@ -111,15 +111,21 @@ public class GlobalOptionsList extends OptionsList {
                         .create(x, 0, buttonWidth, height, Component.literal("Early Mixin"),
                                 (button, status) -> Config.get().mixinEarly.state = status));
 
-                elements.add(CycleButton.booleanBuilder(
-                                Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
-                        .withInitialValue(Config.get().debugShowKey)
-                        .withTooltip((value) -> Tooltip.create(Component.literal(("If ON, translation key " +
-                                "info of new chat messages will be shown when you hover over them." +
-                                "\nTurn OFF if not in use."))))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height, Component.literal("Debug Keys"),
-                                (button, status) -> Config.get().debugShowKey = status));
+                elements.add(CycleButton.<TriState.State>builder(
+                                (val) -> switch(val) {
+                                    case ON -> Component.literal("Key").withStyle(ChatFormatting.GREEN);
+                                    case OFF -> Component.literal("Raw").withStyle(ChatFormatting.GREEN);
+                                    case DISABLED -> Component.literal("OFF").withStyle(ChatFormatting.RED);
+                                })
+                        .withValues(TriState.State.values())
+                        .withInitialValue(Config.get().debugShowKey.state)
+                        .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
+                            case ON -> "Click on a chat message to copy the translation key.\nDisable if not in use";
+                            case OFF -> "Click on a chat message to copy the raw string.\nDisable if not in use";
+                            case DISABLED -> "Disabled";
+                        })))
+                        .create(x + width - buttonWidth, 0, buttonWidth, height, Component.literal("Debug"),
+                                (button, status) -> Config.get().debugShowKey.state = status));
             }
         }
 
