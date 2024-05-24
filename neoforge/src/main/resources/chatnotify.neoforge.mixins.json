@@ -2,7 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "com.notryken.chatnotify.mixin",
-    "refmap": "chatnotify.refmap.json",
+    "refmap": "${mod_id}.refmap.json",
     "compatibilityLevel": "JAVA_${java_version}",
     "mixins": [
     ],
