@@ -6,7 +6,6 @@
 package com.notryken.chatnotify.mixin;
 
 import com.notryken.chatnotify.ChatNotify;
-import com.notryken.chatnotify.config.Config;
 import com.notryken.chatnotify.processor.MessageProcessor;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
@@ -53,10 +52,9 @@ public class MixinChatListener {
 
     @Unique
     private static Component chatNotify$replaceMessage(Component message) {
-        if (Config.get().mixinEarly) {
+        if (ChatNotify.mixinEarly()) {
             return MessageProcessor.processMessage(message);
-        }
-        else {
+        } else {
             return message;
         }
     }

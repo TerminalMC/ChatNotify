@@ -5,7 +5,7 @@
 
 package com.notryken.chatnotify.mixin;
 
-import com.notryken.chatnotify.config.Config;
+import com.notryken.chatnotify.ChatNotify;
 import com.notryken.chatnotify.processor.MessageProcessor;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -48,11 +48,10 @@ public class MixinChatComponent {
             argsOnly = true
     )
     private Component replaceMessage(Component message) {
-        if (!Config.get().mixinEarly) {
-            return MessageProcessor.processMessage(message);
-        }
-        else {
+        if (ChatNotify.mixinEarly()) {
             return message;
+        } else {
+            return MessageProcessor.processMessage(message);
         }
     }
 }

@@ -22,6 +22,8 @@ import net.minecraft.network.chat.Component;
 
 import java.time.Duration;
 
+import static com.notryken.chatnotify.util.Localization.localized;
+
 /**
  * Contains controls for advanced options of a {@link Notification}, including
  * exclusion triggers, response messages, and reset options.
@@ -139,7 +141,7 @@ public class AdvancedOptionsList extends OptionsList {
 
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.key"),
+                localized("screen", "key"),
                 new KeyOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
     }

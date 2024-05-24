@@ -11,6 +11,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import com.notryken.chatnotify.gui.widget.list.MainOptionsList;
 
+import static com.notryken.chatnotify.util.Localization.localized;
+
 /**
  * <b>Note:</b> If creating a ChatNotify config screen (e.g. for ModMenu
  * integration), instantiate this class, not {@code OptionsScreen}.
@@ -18,7 +20,7 @@ import com.notryken.chatnotify.gui.widget.list.MainOptionsList;
 public class GlobalOptionsScreen extends OptionsScreen {
 
     public GlobalOptionsScreen(Screen lastScreen) {
-        super(lastScreen, Component.translatable("screen.chatnotify.title.default"),
+        super(lastScreen, localized("screen", "default"),
                 new MainOptionsList(Minecraft.getInstance(), 0, 0, 0,
                         0, -120, 240, 20, 320));
     }

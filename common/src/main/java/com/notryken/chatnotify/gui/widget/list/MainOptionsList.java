@@ -23,6 +23,8 @@ import net.minecraft.util.StringDecomposer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.notryken.chatnotify.util.Localization.localized;
+
 /**
  * Contains a button linking to global options, and a dynamic list of buttons
  * linking to different {@link Notification}s.
@@ -64,14 +66,14 @@ public class MainOptionsList extends OptionsList {
 
     private void openGlobalConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.global"),
+                localized("screen", "global"),
                 new GlobalOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth)));
     }
 
     private void openNotificationConfig(int index) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.notif"),
+                localized("screen", "notif"),
                 new NotifOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         Config.get().getNotifs().get(index), index == 0)));

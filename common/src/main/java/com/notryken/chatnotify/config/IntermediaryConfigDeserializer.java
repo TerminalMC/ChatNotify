@@ -24,7 +24,7 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
                               JsonDeserializationContext ctx) throws JsonParseException {
         JsonObject obj = json.getAsJsonObject();
 
-        boolean mixinEarly = obj.get("mixinEarly").getAsBoolean();
+        TriState mixinEarly = new TriState(obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
         boolean debugShowKey = obj.has("debugShowKey") && obj.get("debugShowKey").getAsBoolean();
         boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
         SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());

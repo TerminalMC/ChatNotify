@@ -22,7 +22,8 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
                               JsonDeserializationContext context) throws JsonParseException {
         JsonObject obj = jsonGuiEventListener.getAsJsonObject();
 
-        boolean mixinEarly = obj.has("mixinEarly") && obj.get("mixinEarly").getAsBoolean();
+        TriState mixinEarly = new TriState(obj.has("mixinEarly")
+                && obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
         boolean debugShowKey = false;
         boolean checkOwnMessages = !obj.get("ignoreOwnMessages").getAsBoolean();
         SoundSource soundSource = obj.has("notifSoundSource") ?

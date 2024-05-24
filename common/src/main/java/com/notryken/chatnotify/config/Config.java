@@ -43,7 +43,7 @@ import java.util.*;
  * and earlier versions are deserialized by {@link LegacyConfigDeserializer}.
  */
 public class Config {
-    public final int version = 1;
+    public final int version = 2;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     public static final Gson GSON = new GsonBuilder()
@@ -69,7 +69,7 @@ public class Config {
     public static final SoundSource DEFAULT_SOUND_SOURCE = SoundSource.PLAYERS;
     public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
 
-    @JsonRequired public boolean mixinEarly;
+    @JsonRequired public TriState mixinEarly;
     @JsonRequired public boolean debugShowKey;
     @JsonRequired public boolean checkOwnMessages;
     @JsonRequired public SoundSource soundSource;
@@ -80,7 +80,7 @@ public class Config {
     @JsonRequired private final List<Notification> notifications;
 
     private Config() {
-        this.mixinEarly = false;
+        this.mixinEarly = new TriState();
         this.debugShowKey = false;
         this.checkOwnMessages = true;
         this.soundSource = DEFAULT_SOUND_SOURCE;
@@ -95,7 +95,7 @@ public class Config {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Config(boolean mixinEarly, boolean debugShowKey, boolean checkOwnMessages,
+    Config(TriState mixinEarly, boolean debugShowKey, boolean checkOwnMessages,
            SoundSource soundSource, boolean allowRegex, int defaultColor, Sound defaultSound,
            List<String> prefixes, List<Notification> notifications) {
         this.mixinEarly = mixinEarly;
@@ -336,8 +336,11 @@ public class Config {
         public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
+            int version = obj.get("version").getAsInt();
 
-            boolean mixinEarly = obj.get("mixinEarly").getAsBoolean();
+            TriState mixinEarly = version == 1
+                    ? new TriState(obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED)
+                    : ctx.deserialize(obj.get("mixinEarly"), TriState.class);
             boolean debugShowKey = obj.get("debugShowKey").getAsBoolean();
             boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
             SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());

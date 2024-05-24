@@ -5,7 +5,9 @@
 
 package com.notryken.chatnotify.gui.widget.list;
 
+import com.notryken.chatnotify.ChatNotify;
 import com.notryken.chatnotify.config.Config;
+import com.notryken.chatnotify.config.TriState;
 import com.notryken.chatnotify.gui.screen.OptionsScreen;
 import com.notryken.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
@@ -21,6 +23,8 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundSource;
 
 import java.util.Locale;
+
+import static com.notryken.chatnotify.util.Localization.localized;
 
 /**
  * Contains global configuration options.
@@ -68,7 +72,7 @@ public class GlobalOptionsList extends OptionsList {
 
     private void openColorConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.color"),
+                localized("screen", "color"),
                 new ColorOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         () -> Config.get().defaultColor, (color) -> Config.get().defaultColor = color)));
@@ -76,7 +80,7 @@ public class GlobalOptionsList extends OptionsList {
 
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.sound"),
+                localized("screen", "sound"),
                 new SoundOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, Config.get().defaultSound)));
     }
@@ -90,14 +94,22 @@ public class GlobalOptionsList extends OptionsList {
                 int spacing = 4;
                 int buttonWidth = (width - spacing) / 2;
 
-                elements.add(CycleButton.booleanBuilder(
-                                Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
-                        .withInitialValue(Config.get().mixinEarly)
+                elements.add(CycleButton.<TriState.State>builder(
+                        (val) -> switch(val) {
+                            case ON -> Component.translatable("options.on").withStyle(ChatFormatting.GREEN);
+                            case OFF -> Component.translatable("options.off").withStyle(ChatFormatting.RED);
+                            case DISABLED -> Component.literal("Auto ").append(ChatNotify.hasChatHistoryMod
+                                            ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN)
+                                            : Component.translatable("options.off").withStyle(ChatFormatting.RED));
+                        })
+                        .withValues(TriState.State.values())
+                        .withInitialValue(Config.get().mixinEarly.state)
                         .withTooltip((status) -> Tooltip.create(Component.literal(
-                                "If ChatNotify is not detecting incoming messages, try changing this.")))
+                                "If ChatNotify is not detecting incoming messages, try changing this.\n\n" +
+                                        "Note: Auto mode defaults to OFF but will switch ON if a chat history " +
+                                        "mod is detected, e.g. ChatPatches")))
                         .create(x, 0, buttonWidth, height, Component.literal("Early Mixin"),
-                                (button, status) -> Config.get().mixinEarly = status));
+                                (button, status) -> Config.get().mixinEarly.state = status));
 
                 elements.add(CycleButton.booleanBuilder(
                                 Component.translatable("options.on").withStyle(ChatFormatting.GREEN),

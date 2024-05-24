@@ -25,6 +25,8 @@ import net.minecraft.network.chat.TextColor;
 
 import java.time.Duration;
 
+import static com.notryken.chatnotify.util.Localization.localized;
+
 /**
  * Contains controls for options of a {@link Notification}, and buttons linking
  * to other screens.
@@ -88,14 +90,14 @@ public class NotifOptionsList extends OptionsList {
 
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.key"),
+                localized("screen", "key"),
                 new KeyOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, trigger)));
     }
 
     private void openColorConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.color"),
+                localized("screen", "color"),
                 new ColorOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
                         () -> notif.textStyle.color, (color) -> notif.textStyle.color = color)));
@@ -103,14 +105,14 @@ public class NotifOptionsList extends OptionsList {
 
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.sound"),
+                localized("screen", "sound"),
                 new SoundOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif.sound)));
     }
 
     private void openAdvancedConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                Component.translatable("screen.chatnotify.title.advanced"),
+                localized("screen", "advanced"),
                 new AdvancedOptionsList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, notif)));
     }
@@ -157,7 +159,7 @@ public class NotifOptionsList extends OptionsList {
                         if (trigger.isKey) {
                             regexButton.setMessage(Component.literal(".*"));
                             regexButton.setTooltip(Tooltip.create(Component.literal(
-                                    "Regex Disabled [Key Trigger]")));
+                                    "Regex Disabled for Key-Type Trigger")));
                             regexButton.active = false;
                         }
                         elements.add(regexButton);
