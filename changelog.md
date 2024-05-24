@@ -1,0 +1,3 @@
+- Automatically enable early mixin if ChatPatches is loaded
+- Add a debug option to copy the raw string of chat messages
+- Add a quick-link from global options to Minecraft sound options
