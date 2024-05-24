@@ -17,6 +17,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.SoundOptionsScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -217,6 +218,10 @@ public class GlobalOptionsList extends OptionsList {
         private static class SoundSourceEntry extends MainOptionsList.Entry {
             SoundSourceEntry(int x, int width, int height) {
                 super();
+                int spacing = 5;
+                int volumeButtonWidth = 20;
+                int mainButtonWidth = width - volumeButtonWidth - spacing;
+
                 elements.add(CycleButton.<SoundSource>builder(source -> Component.translatable(
                                 "soundCategory." + source.getName()))
                         .withValues(SoundSource.values())
@@ -224,8 +229,16 @@ public class GlobalOptionsList extends OptionsList {
                         .withTooltip((status) -> Tooltip.create(Component.literal(
                                 "The sound category determines which of Minecraft's volume control " +
                                         "sliders will affect the notification sound.")))
-                        .create(x, 0, width, height, Component.literal("Sound Category"),
+                        .create(x, 0, mainButtonWidth, height, Component.literal("Sound Category"),
                                 (button, status) -> Config.get().soundSource = status));
+
+                elements.add(Button.builder(Component.literal("\uD83D\uDD0A"),
+                                (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
+                                        Minecraft.getInstance().screen, Minecraft.getInstance().options)))
+                        .tooltip(Tooltip.create(Component.literal("Open Minecraft's volume settings")))
+                        .pos(x + width - volumeButtonWidth, 0)
+                        .size(volumeButtonWidth, height)
+                        .build());
             }
         }
 
