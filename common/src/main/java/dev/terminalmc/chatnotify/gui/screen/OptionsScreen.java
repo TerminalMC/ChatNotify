@@ -52,7 +52,9 @@ public class OptionsScreen extends OptionsSubScreen {
     @Override
     public void onClose() {
         listWidget.onClose();
-        if (super.lastScreen instanceof OptionsScreen screen) screen.reloadListWidget();
+        if (super.lastScreen instanceof OptionsScreen screen) {
+            screen.reloadListWidget(width, height);
+        }
         super.onClose();
     }
 
@@ -63,6 +65,10 @@ public class OptionsScreen extends OptionsSubScreen {
     }
 
     public void reloadListWidget() {
+        reloadListWidget(width, height);
+    }
+
+    private void reloadListWidget(int width, int height) {
         clearWidgets();
         listWidget = listWidget.resize(width, height - listTop - bottomMargin,
                 listTop, listItemHeight, listWidget.getScrollAmount());

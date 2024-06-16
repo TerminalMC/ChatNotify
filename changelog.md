@@ -1,0 +1,1 @@
+- Fix options list not resizing correctly on screen switch
