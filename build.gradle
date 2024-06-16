@@ -59,6 +59,10 @@ subprojects {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
         }
+        maven {
+            name = "Shedaniel"
+            url = "https://maven.shedaniel.me/"
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {

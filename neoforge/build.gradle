@@ -14,6 +14,11 @@ dependencies {
     annotationProcessor("io.github.llamalad7:mixinextras-neoforge:${mixinextras_version}")
 }
 
+// Temporary workaround for a NeoGradle bug
+tasks.named("test").configure {
+    enabled = false
+}
+
 if (file("src/main/resources/META-INF/accesstransformer.cfg").exists()) {
     minecraft.accessTransformers.file(file("src/main/resources/META-INF/accesstransformer.cfg"))
 }

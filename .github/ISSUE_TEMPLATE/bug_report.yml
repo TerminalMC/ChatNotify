@@ -8,12 +8,12 @@ body:
       value: >-
         **This issue tracker is not intended for support requests!** Unless you are certain that 
         you have found a defect, and you are able to point to where the problem is, you should not 
-        open an issue. For general support or if you're unsure, please 
-        [ask on Discord](https://discord.gg/sSgQ9AF4mU).
+        open an issue. For general support or if you're unsure, please ask on 
+        [Discord](https://terminalmc.dev/discord).
         <br><br>
         Additionally, please make check the following:
         
-        - **Have you used the [search tool](https://github.com/NotRyken/ChatNotify/issues) to 
+        - **Have you used the [search tool](https://github.com/TerminalMC/ChatNotify/issues) to 
         check whether your issue has already been reported?** If it has been, consider adding more 
         information to the existing issue instead.
         
