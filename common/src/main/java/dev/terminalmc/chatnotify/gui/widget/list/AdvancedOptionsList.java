@@ -102,11 +102,10 @@ public class AdvancedOptionsList extends OptionsList {
                                 for (Notification notif2 : Config.get().getNotifs()) {
                                     notif2.resetAdvanced();
                                 }
-                                mc.setScreen(null);
                             }
-                            else {
-                                reload();
-                            }},
+                            mc.setScreen(screen);
+                            reload();
+                            },
                         Component.literal("Advanced Options Reset"),
                         Component.literal("Are you sure you want to reset all advanced settings " +
                                 "for ALL notifications?")))));
@@ -122,6 +121,7 @@ public class AdvancedOptionsList extends OptionsList {
                                 mc.setScreen(null);
                             }
                             else {
+                                mc.setScreen(screen);
                                 reload();
                             }},
                         Component.literal("Nuclear Reset"),
