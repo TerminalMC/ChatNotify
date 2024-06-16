@@ -38,6 +38,10 @@ public class ChatNotify {
         ChatNotify.hasChatHistoryMod = hasChatHistoryMod;
     }
 
+    public static void onConfigSaved(Config config) {
+        // Cache update method
+    }
+
     public static void onEndTick(Minecraft mc) {
         tickResponseMessages(mc);
     }

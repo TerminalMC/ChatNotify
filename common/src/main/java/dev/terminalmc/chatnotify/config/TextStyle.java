@@ -6,8 +6,6 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
-import dev.terminalmc.chatnotify.config.util.JsonRequired;
-import dev.terminalmc.chatnotify.config.util.JsonValidator;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
@@ -18,14 +16,17 @@ import java.util.Optional;
 public class TextStyle {
     public final int version = 1;
 
-    @JsonRequired public boolean doColor;
-    @JsonRequired public int color;
-    @JsonRequired public TriState bold;
-    @JsonRequired public TriState italic;
-    @JsonRequired public TriState underlined;
-    @JsonRequired public TriState strikethrough;
-    @JsonRequired public TriState obfuscated;
+    public boolean doColor;
+    public int color;
+    public TriState bold;
+    public TriState italic;
+    public TriState underlined;
+    public TriState strikethrough;
+    public TriState obfuscated;
 
+    /**
+     * Creates a default instance.
+     */
     public TextStyle() {
         this.doColor = true;
         this.color = Config.DEFAULT_COLOR;
@@ -36,7 +37,10 @@ public class TextStyle {
         this.obfuscated = new TriState();
     }
 
-    public TextStyle(int color) {
+    /**
+     * Not validated, only for use by self-validating deserializer.
+     */
+    TextStyle(int color) {
         this.doColor = true;
         this.color = color;
         this.bold = new TriState();
@@ -98,8 +102,15 @@ public class TextStyle {
             TriState strikethrough = ctx.deserialize(obj.get("strikethrough"), TriState.class);
             TriState obfuscated = ctx.deserialize(obj.get("obfuscated"), TriState.class);
 
-            return new JsonValidator<TextStyle>().validateNonNull(
-                    new TextStyle(doColor, color, bold, italic, underlined, strikethrough, obfuscated));
+            // Validation
+            if (color < 0 || color > 16777215) throw new JsonParseException("TextStyle #1");
+            if (bold == null) throw new JsonParseException("TextStyle #2");
+            if (italic == null) throw new JsonParseException("TextStyle #3");
+            if (underlined == null) throw new JsonParseException("TextStyle #4");
+            if (strikethrough == null) throw new JsonParseException("TextStyle #5");
+            if (obfuscated == null) throw new JsonParseException("TextStyle #6");
+
+            return new TextStyle(doColor, color, bold, italic, underlined, strikethrough, obfuscated);
         }
     }
 }

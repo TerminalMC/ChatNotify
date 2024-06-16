@@ -7,8 +7,6 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.config.util.JsonRequired;
-import dev.terminalmc.chatnotify.config.util.JsonValidator;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -16,11 +14,14 @@ import java.lang.reflect.Type;
 public class Trigger {
     public final int version = 1;
 
-    @JsonRequired public boolean enabled;
-    @JsonRequired public String string;
-    @JsonRequired public boolean isKey;
-    @JsonRequired public boolean isRegex;
+    public boolean enabled;
+    public String string;
+    public boolean isKey;
+    public boolean isRegex;
 
+    /**
+     * Creates a default instance.
+     */
     public Trigger() {
         this.enabled = true;
         this.string = "";
@@ -28,6 +29,9 @@ public class Trigger {
         this.isRegex = false;
     }
 
+    /**
+     * Creates a default instance with the specified value.
+     */
     public Trigger(String string) {
         this.enabled = true;
         this.string = string;
@@ -35,7 +39,10 @@ public class Trigger {
         this.isRegex = false;
     }
 
-    public Trigger(boolean enabled, String string, boolean isKey, boolean isRegex) {
+    /**
+     * Not validated, only for use by self-validating deserializer.
+     */
+    Trigger(boolean enabled, String string, boolean isKey, boolean isRegex) {
         this.enabled = enabled;
         this.string = string;
         this.isKey = isKey;
@@ -54,8 +61,7 @@ public class Trigger {
                 boolean isKey = obj.get("isKey").getAsBoolean();
                 boolean isRegex = obj.get("isRegex").getAsBoolean();
 
-                return new JsonValidator<Trigger>().validateNonNull(
-                        new Trigger(enabled, string, isKey, isRegex));
+                return new Trigger(enabled, string, isKey, isRegex);
             }
             catch (Exception e) {
                 ChatNotify.LOG.warn("Unable to deserialize Trigger", e);

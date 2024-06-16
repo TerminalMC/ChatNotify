@@ -6,8 +6,6 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
-import dev.terminalmc.chatnotify.config.util.JsonRequired;
-import dev.terminalmc.chatnotify.config.util.JsonValidator;
 import net.minecraft.resources.ResourceLocation;
 
 import java.lang.reflect.Type;
@@ -16,11 +14,14 @@ public class Sound {
     public final int version = 1;
     public static final String DEFAULT_SOUND_ID = "block.note_block.bell";
 
-    @JsonRequired private boolean enabled;
-    @JsonRequired private String id;
-    @JsonRequired private float volume;
-    @JsonRequired private float pitch;
+    private boolean enabled;
+    private String id;
+    private float volume;
+    private float pitch;
 
+    /**
+     * Creates a default instance.
+     */
     public Sound() {
         this.enabled = true;
         this.id = DEFAULT_SOUND_ID;
@@ -28,7 +29,10 @@ public class Sound {
         this.pitch = 1f;
     }
 
-    public Sound(boolean enabled, String id, float volume, float pitch) {
+    /**
+     * Not validated, only for use by self-validating deserializer.
+     */
+    Sound(boolean enabled, String id, float volume, float pitch) {
         if (!validId(id)) throw new IllegalArgumentException("Specified id is not a valid sound.");
         this.enabled = enabled;
         this.id = id;
@@ -102,12 +106,15 @@ public class Sound {
 
             boolean enabled = obj.get("enabled").getAsBoolean();
             String id = obj.get("id").getAsString();
-            if (!validId(id)) id = DEFAULT_SOUND_ID;
             float volume = obj.get("volume").getAsFloat();
             float pitch = obj.get("pitch").getAsFloat();
 
-            return new JsonValidator<Sound>().validateNonNull(
-                    new Sound(enabled, id, volume, pitch));
+            // Validation
+            if (!validId(id)) id = DEFAULT_SOUND_ID;
+            if (volume < 0 || volume > 1) throw new JsonParseException("Sound #1");
+            if (pitch < 0.5 || pitch > 2) throw new JsonParseException("Sound #2");
+
+            return new Sound(enabled, id, volume, pitch);
         }
     }
 }

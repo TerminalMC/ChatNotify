@@ -7,19 +7,15 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.config.util.JsonRequired;
-import dev.terminalmc.chatnotify.config.util.JsonValidator;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 /**
- * A Notification consists of activation criteria and audio/visual notification
- * parameters.
+ * Consists of activation criteria and audio/visual notification parameters.
  */
 public class Notification {
     public final int version = 1;
@@ -28,15 +24,18 @@ public class Notification {
     public transient boolean editing = false;
 
     // Options
-    @JsonRequired private boolean enabled;
-    @JsonRequired public boolean exclusionEnabled;
-    @JsonRequired public boolean responseEnabled;
-    @JsonRequired public final Sound sound;
-    @JsonRequired public final TextStyle textStyle;
-    @JsonRequired public final List<Trigger> triggers;
-    @JsonRequired public final List<Trigger> exclusionTriggers;
-    @JsonRequired public final List<ResponseMessage> responseMessages;
+    private boolean enabled;
+    public boolean exclusionEnabled;
+    public boolean responseEnabled;
+    public final Sound sound;
+    public final TextStyle textStyle;
+    public final List<Trigger> triggers;
+    public final List<Trigger> exclusionTriggers;
+    public final List<ResponseMessage> responseMessages;
 
+    /**
+     * Initializes default configuration with all lists empty.
+     */
     public Notification() {
         this.enabled = true;
         this.exclusionEnabled = false;
@@ -48,9 +47,12 @@ public class Notification {
         this.responseMessages = new ArrayList<>();
     }
 
-    public Notification(boolean enabled, boolean exclusionEnabled, boolean responseEnabled,
-                        Sound sound, TextStyle textStyle, List<Trigger> triggers,
-                        List<Trigger> exclusionTriggers, List<ResponseMessage> responseMessages) {
+    /**
+     * Not validated, only for use by self-validating deserializer.
+     */
+    Notification(boolean enabled, boolean exclusionEnabled, boolean responseEnabled,
+                 Sound sound, TextStyle textStyle, List<Trigger> triggers,
+                 List<Trigger> exclusionTriggers, List<ResponseMessage> responseMessages) {
         this.enabled = enabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
@@ -61,6 +63,10 @@ public class Notification {
         this.responseMessages = responseMessages;
     }
 
+    /**
+     * Creates a notification for the user's name, with two default placeholder
+     * triggers.
+     */
     public static Notification createUser() {
         return new Notification(true, false, false,
                 new Sound(), new TextStyle(), new ArrayList<>(List.of(
@@ -68,6 +74,9 @@ public class Notification {
                 new ArrayList<>(), new ArrayList<>());
     }
 
+    /**
+     * Creates a blank notification with one blank placeholder trigger.
+     */
     public static Notification createBlank(Sound sound, TextStyle textStyle) {
         return new Notification(true, false, false,
                 sound, textStyle, new ArrayList<>(List.of(new Trigger(""))),
@@ -93,6 +102,9 @@ public class Notification {
         }
     }
 
+    /**
+     * Disables this notification if sound and text restyling are both disabled.
+     */
     public void autoDisable() {
         if (!sound.isEnabled() && !textStyle.isEnabled()) {
             enabled = false;
@@ -159,22 +171,28 @@ public class Notification {
                 boolean responseEnabled = obj.get("responseEnabled").getAsBoolean();
                 Sound sound = ctx.deserialize(obj.get("sound"), Sound.class);
                 TextStyle textStyle = ctx.deserialize(obj.get("textStyle"), TextStyle.class);
-                List<Trigger> triggers = new ArrayList<>((List<Trigger>) (List<?>)
-                        obj.getAsJsonArray("triggers")
-                                .asList().stream().map(je -> ctx.deserialize(je, Trigger.class))
-                                .filter(Objects::nonNull).toList());
-                List<Trigger> exclusionTriggers = new ArrayList<>((List<Trigger>) (List<?>)
-                        obj.getAsJsonArray("exclusionTriggers")
-                                .asList().stream().map(je -> ctx.deserialize(je, Trigger.class))
-                                .filter(Objects::nonNull).toList());
-                List<ResponseMessage> responseMessages = new ArrayList<>((List<ResponseMessage>) (List<?>)
-                        obj.getAsJsonArray("responseMessages")
-                                .asList().stream().map(je -> ctx.deserialize(je, ResponseMessage.class))
-                                .filter(Objects::nonNull).toList());
+                List<Trigger> triggers = new ArrayList<>();
+                for (JsonElement je : obj.getAsJsonArray("triggers")) {
+                    Trigger t = ctx.deserialize(je, Trigger.class);
+                    if (t != null) triggers.add(t);
+                }
+                List<Trigger> exclusionTriggers = new ArrayList<>();
+                for (JsonElement je : obj.getAsJsonArray("exclusionTriggers")) {
+                    Trigger t = ctx.deserialize(je, Trigger.class);
+                    if (t != null) exclusionTriggers.add(t);
+                }
+                List<ResponseMessage> responseMessages = new ArrayList<>();
+                for (JsonElement je : obj.getAsJsonArray("responseMessages")) {
+                    ResponseMessage r = ctx.deserialize(je, ResponseMessage.class);
+                    if (r != null) responseMessages.add(r);
+                }
 
-                return new JsonValidator<Notification>().validateNonNull(
-                        new Notification(enabled, exclusionEnabled, responseEnabled, sound,
-                                textStyle, triggers, exclusionTriggers, responseMessages));
+                // Validation
+                if (sound == null) throw new JsonParseException("Notification #1");
+                if (textStyle == null) throw new JsonParseException("Notification #1");
+
+                return new Notification(enabled, exclusionEnabled, responseEnabled, sound,
+                        textStyle, triggers, exclusionTriggers, responseMessages);
             }
             catch (Exception e) {
                 ChatNotify.LOG.warn("Unable to deserialize Notification", e);

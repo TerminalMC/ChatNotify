@@ -7,8 +7,6 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.config.util.JsonRequired;
-import dev.terminalmc.chatnotify.config.util.JsonValidator;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -19,11 +17,14 @@ public class ResponseMessage {
     public transient int countdown;
     public transient String sendingString;
 
-    @JsonRequired public boolean enabled;
-    @JsonRequired public String string;
-    @JsonRequired public boolean regexGroups;
-    @JsonRequired public int delayTicks;
+    public boolean enabled;
+    public String string;
+    public boolean regexGroups;
+    public int delayTicks;
 
+    /**
+     * Creates a default instance.
+     */
     public ResponseMessage() {
         enabled = true;
         string = "";
@@ -31,7 +32,10 @@ public class ResponseMessage {
         delayTicks = 0;
     }
 
-    public ResponseMessage(boolean enabled, String string, boolean regexGroups, int delayTicks) {
+    /**
+     * Not validated, only for use by self-validating deserializer.
+     */
+    ResponseMessage(boolean enabled, String string, boolean regexGroups, int delayTicks) {
         this.enabled = enabled;
         this.string = string;
         this.regexGroups = regexGroups;
@@ -50,8 +54,10 @@ public class ResponseMessage {
                 boolean regexGroups = obj.get("regexGroups").getAsBoolean();
                 int delayTicks = obj.get("delayTicks").getAsInt();
 
-                return new JsonValidator<ResponseMessage>().validateNonNull(
-                        new ResponseMessage(enabled, string, regexGroups, delayTicks));
+                // Validation
+                if (delayTicks < 0) throw new JsonParseException("ResponseMessage #1");
+
+                return new ResponseMessage(enabled, string, regexGroups, delayTicks);
             }
             catch (Exception e) {
                 ChatNotify.LOG.warn("Unable to deserialize ResponseMessage", e);
