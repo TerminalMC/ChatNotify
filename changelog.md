@@ -1,3 +1,0 @@
-- Fix options list not resizing correctly on screen switch
-- Fix options reset screens
-- Add unicode support to trigger check
