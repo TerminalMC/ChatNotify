@@ -385,7 +385,7 @@ public class MessageProcessor {
                 }
 
                 if (siblings.size() == 1) {
-                    msg = siblings.get(0).copy();
+                    msg = siblings.getFirst().copy();
                 }
                 else {
                     MutableComponent newMessage = MutableComponent.create(PlainTextContents.EMPTY);
@@ -401,7 +401,7 @@ public class MessageProcessor {
                 MutableComponent replacement = MutableComponent.create(PlainTextContents.EMPTY);
                 replacement.setStyle(msg.getStyle());
 
-                siblings.add(0, MutableComponent.create(msg.getContents()));
+                siblings.addFirst(MutableComponent.create(msg.getContents()));
                 replacement.siblings.addAll(siblings);
 
                 msg = restyleComponent(replacement, trigger, style);

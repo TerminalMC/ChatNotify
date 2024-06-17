@@ -117,7 +117,7 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
                 }
             }
             textStyle = new TextStyle(
-                    controls.get(0),
+                    controls.getFirst(),
                     color,
                     formatControls.get(0) ? new TriState(TriState.State.ON) : new TriState(TriState.State.DISABLED),
                     formatControls.get(1) ? new TriState(TriState.State.ON) : new TriState(TriState.State.DISABLED),
@@ -145,7 +145,7 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
         if (notifications.isEmpty()) {
             notifications.add(Notification.createUser());
         }
-        else if (notifications.get(0).triggers.size() < 2) {
+        else if (notifications.getFirst().triggers.size() < 2) {
             notifications.set(0, Notification.createUser());
         }
 

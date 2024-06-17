@@ -350,7 +350,7 @@ public class AdvancedOptionsList extends OptionsList {
                                 (button) -> {
                                     if (Screen.hasShiftDown()) {
                                         if (index > 0) {
-                                            notif.responseMessages.add(0, notif.responseMessages.get(index));
+                                            notif.responseMessages.addFirst(notif.responseMessages.get(index));
                                             notif.responseMessages.remove(index + 1);
                                             listWidget.reload();
                                         }

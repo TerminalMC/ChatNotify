@@ -66,7 +66,7 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
         if (notifications.isEmpty()) {
             notifications.add(Notification.createUser());
         }
-        else if (notifications.get(0).triggers.size() < 2) {
+        else if (notifications.getFirst().triggers.size() < 2) {
             notifications.set(0, Notification.createUser());
         }
 

@@ -159,7 +159,7 @@ public class MainOptionsList extends OptionsList {
                 int maxWidth = (int)(mainButtonWidth * 0.8);
                 Font font = Minecraft.getInstance().font;
 
-                if (notif.triggers.isEmpty() || notif.triggers.get(0).string.isBlank()) {
+                if (notif.triggers.isEmpty() || notif.triggers.getFirst().string.isBlank()) {
                     message = Component.literal("> Click to Configure <");
                 }
                 else {
