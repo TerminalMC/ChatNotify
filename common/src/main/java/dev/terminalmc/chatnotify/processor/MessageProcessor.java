@@ -192,8 +192,13 @@ public class MessageProcessor {
      * @return the {@link Matcher} for the search.
      */
     private static Matcher strSearch(String msgStr, String str) {
+        /*
+        U flag for full unicode comparison, performance using randomly-generated
+        100-character msgStr and 10-character str is approx 1.18 microseconds
+        per check without flag, 1.31 microseconds with.
+         */
         return Pattern.compile(
-                "(?<!\\w)((\\W?|(§[a-z0-9])+)(?i)" + Pattern.quote(str) + "\\W?)(?!\\w)")
+                "(?iU)(?<!\\w)((\\W?|(§[a-z0-9])+)" + Pattern.quote(str) + "\\W?)(?!\\w)")
                 .matcher(msgStr);
     }
 
