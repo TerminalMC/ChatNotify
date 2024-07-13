@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * Refer to {@link MixinChatComponent} for an overview of Minecraft's message
  * handling call stacks.
  */
-@Mixin(value = ChatListener.class, priority = 800)
+@Mixin(value = ChatListener.class, priority = 792)
 public class MixinChatListener {
 
     @ModifyVariable(

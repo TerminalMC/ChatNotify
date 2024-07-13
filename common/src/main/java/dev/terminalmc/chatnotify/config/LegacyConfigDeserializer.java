@@ -126,11 +126,11 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
                     formatControls.get(4) ? new TriState(TriState.State.ON) : new TriState(TriState.State.DISABLED));
 
             for (String triggerStr : triggerStrings) {
-                triggers.add(new Trigger(true, triggerStr, triggerIsKey, regexEnabled));
+                triggers.add(new Trigger(true, triggerStr, null, triggerIsKey, regexEnabled));
             }
 
             for (String exclTriggerStr : exclusionTriggerStrings) {
-                exclusionTriggers.add(new Trigger(true, exclTriggerStr, triggerIsKey, regexEnabled));
+                exclusionTriggers.add(new Trigger(true, exclTriggerStr, null, triggerIsKey, regexEnabled));
             }
 
             for (JsonElement je2 : notifObj.get("responseMessages").getAsJsonArray()) {

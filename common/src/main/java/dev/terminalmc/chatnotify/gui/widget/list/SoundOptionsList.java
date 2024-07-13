@@ -7,7 +7,7 @@ package dev.terminalmc.chatnotify.gui.widget.list;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Sound;
-import dev.terminalmc.chatnotify.gui.widget.button.SilentButton;
+import dev.terminalmc.chatnotify.gui.widget.SilentButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -16,8 +16,11 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
+
+import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /**
  * Contains controls for a {@link Sound}.
@@ -25,137 +28,133 @@ import net.minecraft.sounds.SoundSource;
 public class SoundOptionsList extends OptionsList {
     private final Sound sound;
 
-    public SoundOptionsList(Minecraft mc, int width, int height, int y,
-                            int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                            int scrollWidth, Sound sound) {
-        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+    public SoundOptionsList(Minecraft mc, int width, int height, int y, int rowWidth,
+                            int itemHeight, int entryWidth, int entryHeight, Sound sound) {
+        super(mc, width, height, y, rowWidth, itemHeight, entryWidth, entryHeight);
         this.sound = sound;
 
         addEntry(new Entry.SoundFieldEntry(entryX, entryWidth, entryHeight, sound));
 
-        addEntry(new OptionsList.Entry.DoubleSliderEntry(entryX, 0, entryWidth, entryHeight, 0, 1, 2,
-                "Volume: ", null, "OFF", null,
-                () -> (double)sound.getVolume(),
-                (value) -> sound.setVolume(value.floatValue())));
+        addEntry(new OptionsList.Entry.DoubleSliderEntry(entryX, entryWidth, entryHeight, 0, 1, 2,
+                localized("option", "sound.volume").getString(), null,
+                CommonComponents.OPTION_OFF.getString(), null,
+                () -> (double)sound.getVolume(), (value) -> sound.setVolume(value.floatValue())));
 
-        addEntry(new OptionsList.Entry.DoubleSliderEntry(entryX, 0, entryWidth, entryHeight, 0.5, 2, 2,
-                "Pitch: ", null, null, null,
-                () -> (double)sound.getPitch(),
-                (value) -> sound.setPitch(value.floatValue())));
+        addEntry(new OptionsList.Entry.DoubleSliderEntry(entryX, entryWidth, entryHeight, 0.5, 2, 2,
+                localized("option", "sound.pitch").getString(), null, null, null,
+                () -> (double)sound.getPitch(), (value) -> sound.setPitch(value.floatValue())));
 
-        addEntry(new OptionsList.Entry.SilentActionButtonEntry(entryX, 0, entryWidth, entryHeight,
-                Component.literal("> Click to Test Sound <"), null, -1,
+        addEntry(new OptionsList.Entry.SilentActionButtonEntry(entryX, entryWidth, entryHeight,
+                localized("option", "sound.test"), null, -1,
                 button -> playNotifSound()));
 
-        addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Noteblock Sounds"), null, -1));
-        String[][] noteblockSounds = {
-                        {"block.note_block.banjo", "Banjo"},
-                        {"block.note_block.bass", "Bass"},
-                        {"block.note_block.basedrum", "Bass Drum"},
-                        {"block.note_block.bell", "Bell"},
-                        {"block.note_block.bit", "Bit"},
-                        {"block.note_block.chime", "Chime"},
-                        {"block.note_block.cow_bell", "Cow Bell"},
-                        {"block.note_block.didgeridoo", "Didgeridoo"},
-                        {"block.note_block.flute", "Flute"},
-                        {"block.note_block.guitar", "Guitar"},
-                        {"block.note_block.harp", "Harp"},
-                        {"block.note_block.hat", "Hat"},
-                        {"block.note_block.iron_xylophone", "Iron Xylophone"},
-                        {"block.note_block.pling", "Pling"},
-                        {"block.note_block.snare", "Snare"},
-                        {"block.note_block.xylophone", "Xylophone"},
+                localized("option", "sound.group.noteblock"), null, -1));
+        String[] noteblockSounds = {
+                        "block.note_block.banjo",
+                        "block.note_block.bass",
+                        "block.note_block.basedrum",
+                        "block.note_block.bell",
+                        "block.note_block.bit",
+                        "block.note_block.chime",
+                        "block.note_block.cow_bell",
+                        "block.note_block.didgeridoo",
+                        "block.note_block.flute",
+                        "block.note_block.guitar",
+                        "block.note_block.harp",
+                        "block.note_block.hat",
+                        "block.note_block.iron_xylophone",
+                        "block.note_block.pling",
+                        "block.note_block.snare",
+                        "block.note_block.xylophone",
                 };
-        for (String[] s : noteblockSounds) {
-            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, sound, this, s[0], s[1]));
+        for (String s : noteblockSounds) {
+            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, this, sound, s));
         }
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Power/Portal Sounds"), null, -1));
-        String[][] powerSounds = new String[][]{
-                        {"block.beacon.activate", "Beacon Activate"},
-                        {"block.beacon.deactivate", "Beacon Deactivate"},
-                        {"block.beacon.power_select", "Beacon Power Select"},
-                        {"block.conduit.activate", "Conduit Activate"},
-                        {"block.conduit.deactivate", "Conduit Deactivate"},
-                        {"block.end_portal_frame.fill", "End Portal Eye"},
-                        {"block.portal.travel", "Portal Travel"},
-                        {"block.portal.trigger", "Portal Trigger"},
-                        {"entity.enderman.teleport", "Teleport"},
-                        {"item.trident.return", "Trident Return"},
-                        {"entity.elder_guardian.curse", "Elder Guardian Curse"},
-                        {"entity.warden.sonic_boom", "Warden Sonic Boom"},
-                        {"entity.evoker.cast_spell", "Evoker Cast Spell"},
-                        {"entity.evoker.prepare_summon", "Evoker Summon"},
-                        {"entity.evoker.prepare_attack", "Evoker Attack"},
-                        {"entity.zombie_villager.converted", "Villager Cured"},
+                localized("option", "sound.group.power"), null, -1));
+        String[] powerSounds = new String[]{
+                        "block.beacon.activate",
+                        "block.beacon.deactivate",
+                        "block.beacon.power_select",
+                        "block.conduit.activate",
+                        "block.conduit.deactivate",
+                        "block.end_portal_frame.fill",
+                        "block.portal.travel",
+                        "block.portal.trigger",
+                        "entity.enderman.teleport",
+                        "item.trident.return",
+                        "entity.elder_guardian.curse",
+                        "entity.warden.sonic_boom",
+                        "entity.evoker.cast_spell",
+                        "entity.evoker.prepare_summon",
+                        "entity.evoker.prepare_attack",
+                        "entity.zombie_villager.converted",
                 };
-        for (String[] s : powerSounds) {
-            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, sound, this, s[0], s[1]));
+        for (String s : powerSounds) {
+            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, this, sound, s));
         }
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Explosion Sounds"), null, -1));
-        String[][] explosionSounds = new String[][]{
-                        {"entity.tnt.primed", "TNT Ignite"},
-                        {"entity.generic.explode", "TNT Explode"},
-                        {"entity.lightning_bolt.thunder", "Thunder"},
-                        {"item.firecharge.use", "Fire Charge"},
-                        {"block.fire.extinguish", "Fire Extinguish"},
-                        {"entity.firework_rocket.blast", "Firework 1"},
-                        {"entity.firework_rocket.large_blast", "Firework 2"},
-                        {"entity.firework_rocket.twinkle", "Firework 3"},
+                localized("option", "sound.group.explosion"), null, -1));
+        String[] explosionSounds = new String[]{
+                        "entity.tnt.primed",
+                        "entity.generic.explode",
+                        "entity.lightning_bolt.thunder",
+                        "item.firecharge.use",
+                        "block.fire.extinguish",
+                        "entity.firework_rocket.blast",
+                        "entity.firework_rocket.large_blast",
+                        "entity.firework_rocket.twinkle",
                 };
-        for (String[] s : explosionSounds) {
-            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, sound, this, s[0], s[1]));
+        for (String s : explosionSounds) {
+            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, this, sound, s));
         }
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Illager Sounds"), null, -1));
-        String[][] villagerSounds = new String[][]{
-                        {"entity.villager.ambient", "Villager"},
-                        {"entity.villager.yes", "Villager Yes"},
-                        {"entity.villager.no", "Villager No"},
-                        {"entity.villager.trade", "Villager Trade"},
-                        {"entity.pillager.ambient", "Pillager"},
-                        {"entity.vindicator.ambient", "Vindicator"},
-                        {"entity.evoker.ambient", "Evoker"},
+                localized("option", "sound.group.illager"), null, -1));
+        String[] villagerSounds = new String[]{
+                        "entity.villager.ambient",
+                        "entity.villager.yes",
+                        "entity.villager.no",
+                        "entity.villager.trade",
+                        "entity.pillager.ambient",
+                        "entity.vindicator.ambient",
+                        "entity.evoker.ambient",
 
                 };
-        for (String[] s : villagerSounds) {
-            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, sound, this, s[0], s[1]));
+        for (String s : villagerSounds) {
+            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, this, sound, s));
         }
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Misc Sounds"), null, -1));
-        String[][] miscSounds = new String[][]{
-                        {"entity.arrow.hit_player", "Arrow Hit"},
-                        {"block.bell.use", "Bell"},
-                        {"block.amethyst_block.hit", "Amethyst 1"},
-                        {"block.amethyst_cluster.place", "Amethyst 2"},
-                        {"entity.allay.item_thrown", "Allay Throw"},
-                        {"entity.iron_golem.repair", "Iron Repair"},
-                        {"block.anvil.land", "Anvil Land"},
-                        {"item.shield.block", "Shield Block"},
-                        {"item.shield.break", "Shield Break"},
-                        {"entity.player.death", "Player Death"},
-                        {"entity.goat.screaming.prepare_ram", "Screaming Goat"},
-                        {"ui.button.click", "UI Button Click"},
+                localized("option", "sound.group.misc"), null, -1));
+        String[] miscSounds = new String[]{
+                        "entity.arrow.hit_player",
+                        "block.bell.use",
+                        "block.amethyst_block.hit",
+                        "block.amethyst_cluster.place",
+                        "entity.allay.item_thrown",
+                        "entity.iron_golem.repair",
+                        "block.anvil.land",
+                        "item.shield.block",
+                        "item.shield.break",
+                        "entity.player.death",
+                        "entity.goat.screaming.prepare_ram",
+                        "ui.button.click",
                 };
-        for (String[] s : miscSounds) {
-            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, sound, this, s[0], s[1]));
+        for (String s : miscSounds) {
+            addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, this, sound, s));
         }
     }
 
     @Override
-    public SoundOptionsList resize(int width, int height, int y,
-                                   int itemHeight, double scrollAmount) {
-        SoundOptionsList newListWidget = new SoundOptionsList(
-                minecraft, width, height, y, itemHeight,
-                entryRelX, entryWidth, entryHeight, scrollWidth, sound);
+    public SoundOptionsList reload(int width, int height, double scrollAmount) {
+        SoundOptionsList newListWidget = new SoundOptionsList(minecraft, width, height,
+                getY(), getRowWidth(), itemHeight, entryWidth, entryHeight, sound);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
@@ -179,27 +178,27 @@ public class SoundOptionsList extends OptionsList {
     private abstract static class Entry extends OptionsList.Entry {
 
         private static class SoundSourceEntry extends MainOptionsList.Entry {
-            SoundSourceEntry(int x, int width, int height) {
+            SoundSourceEntry(int x, int width, int height, SoundOptionsList listWidget) {
                 super();
-                int spacing = 5;
                 int volumeButtonWidth = 20;
-                int mainButtonWidth = width - volumeButtonWidth - spacing;
+                int mainButtonWidth = width - volumeButtonWidth - SPACING;
 
                 elements.add(CycleButton.<SoundSource>builder(source -> Component.translatable(
                                 "soundCategory." + source.getName()))
                         .withValues(SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
-                        .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
-                                "The sound category determines which of Minecraft's volume control " +
-                                        "sliders will affect the notification sound.")))
-                        .create(x, 0, mainButtonWidth, height, Component.literal("Sound Category"),
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.sound_source.tooltip")))
+                        .create(x, 0, mainButtonWidth, height,
+                                localized("option", "global.sound_source"),
                                 (button, status) -> Config.get().soundSource = status));
 
                 elements.add(Button.builder(
                                 Component.literal("\uD83D\uDD0A"),
                                 (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
-                                        Minecraft.getInstance().screen, Minecraft.getInstance().options)))
-                        .tooltip(Tooltip.create(Component.literal("Open Minecraft's volume settings")))
+                                        listWidget.screen, Minecraft.getInstance().options)))
+                        .tooltip(Tooltip.create(
+                                localized("option", "global.sound_source.minecraft_volume")))
                         .pos(x + width - volumeButtonWidth, 0)
                         .size(volumeButtonWidth, height)
                         .build());
@@ -214,14 +213,13 @@ public class SoundOptionsList extends OptionsList {
                 super();
                 this.sound = sound;
                 soundField = new EditBox(Minecraft.getInstance().font, x, 0, width, height,
-                        Component.literal("Notification Sound"));
+                        Component.empty());
                 soundField.setMaxLength(120);
                 soundField.setValue(sound.getId());
                 soundField.setResponder((soundId) -> {
                     if (sound.setId(soundId.strip())) {
                         soundField.setTextColor(16777215);
-                    }
-                    else {
+                    } else {
                         soundField.setTextColor(16711680);
                     }
                 });
@@ -234,10 +232,11 @@ public class SoundOptionsList extends OptionsList {
         }
 
         private static class SoundOption extends Entry {
-            SoundOption(int x, int width, int height, Sound sound, SoundOptionsList listWidget,
-                        String soundId, String soundName) {
+            SoundOption(int x, int width, int height, SoundOptionsList listWidget, Sound sound,
+                        String soundId) {
                 super();
-                elements.add(new SilentButton(x, 0, width, height, Component.literal(soundName),
+                elements.add(new SilentButton(x, 0, width, height,
+                        localized("option", "sound.id." + soundId),
                         (button) -> {
                             sound.setId(soundId);
                             listWidget.refreshSoundField();

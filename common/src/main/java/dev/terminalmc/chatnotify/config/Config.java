@@ -144,7 +144,7 @@ public class Config {
     }
 
     /**
-     * <p>Removes the notification at the specified index, if possible.</p>
+     * Removes the notification at the specified index, if possible.
      *
      * <p><b>Note:</b> Will fail without error if the specified index is 0.</p>
      * @param index the index of the notification.
@@ -160,64 +160,16 @@ public class Config {
     }
 
     /**
-     * <p>Swaps the notification at the specified index with the one at
-     * the specified index minus one, if possible.</p>
+     * Moves the {@link Notification} at the source index to the destination
+     * index.
      *
-     * <p><b>Note:</b> Will fail without error if the index is valid but
-     * swapping is not possible.</p>
-     * @param index the current index of the notification.
+     * <p><b>Note:</b> Will fail without error if either index is 0.</p>
+     * @param sourceIndex the index of the element to move.
+     * @param destIndex the desired final index of the element.
      */
-    public void increasePriority(int index) {
-        if (index > 1) {
-            Notification temp = notifications.get(index);
-            notifications.set(index, notifications.get(index - 1));
-            notifications.set(index - 1, temp);
-        }
-    }
-
-    /**
-     * <p>Moves the notification at the specified index to index 1, if possible,
-     * shuffling other notifications as required.</p>
-     *
-     * <p><b>Note:</b> Will fail without error if the index is valid but moving
-     * is not possible.</p>
-     * @param index the current index of the notification.
-     */
-    public void toMaxPriority(int index) {
-        if (index > 1) {
-            notifications.add(1, notifications.get(index));
-            notifications.remove(index + 1);
-        }
-    }
-
-    /**
-     * <p>Swaps the notification at the specified index with the one at
-     * the specified index plus one, if possible.</p>
-     *
-     * <p><b>Note:</b> Will fail without error if the index is valid but
-     * swapping is not possible.</p>
-     * @param index the current index of the notification.
-     */
-    public void decreasePriority(int index) {
-        if (index < notifications.size() - 1) {
-            Notification temp = notifications.get(index);
-            notifications.set(index, notifications.get(index + 1));
-            notifications.set(index + 1, temp);
-        }
-    }
-
-    /**
-     * <p>Moves the notification at the specified index to the highest index, if
-     * possible, shuffling other notifications as required.</p>
-     *
-     * <p><b>Note:</b> Will fail without error if the index is valid but moving
-     * is not possible.</p>
-     * @param index the current index of the notification.
-     */
-    public void toMinPriority(int index) {
-        if (index < notifications.size() - 1) {
-            notifications.add(notifications.get(index));
-            notifications.remove(index);
+    public void changeNotifPriority(int sourceIndex, int destIndex) {
+        if (sourceIndex > 0 && destIndex > 0 && sourceIndex != destIndex) {
+            notifications.add(destIndex, notifications.remove(sourceIndex));
         }
     }
 
@@ -333,7 +285,6 @@ public class Config {
 
     public static class Deserializer implements JsonDeserializer<Config> {
         @Override
-        @SuppressWarnings("unchecked")
         public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();

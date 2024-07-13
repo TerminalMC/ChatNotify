@@ -9,15 +9,14 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.TriState;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
+import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -31,29 +30,25 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * Contains global configuration options.
  */
 public class GlobalOptionsList extends OptionsList {
-    public GlobalOptionsList(Minecraft mc, int width, int height, int y,
-                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                             int scrollWidth) {
-        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+    public GlobalOptionsList(Minecraft mc, int width, int height, int y, int rowWidth,
+                             int itemHeight, int entryWidth, int entryHeight) {
+        super(mc, width, height, y, rowWidth, itemHeight, entryWidth, entryHeight);
 
         addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.SelfCheckAndRegexEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
-        addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Message Modifier Prefixes \u2139"),
-                Tooltip.create(Component.literal("A message prefix is a character or " +
-                        "sequence of characters that you type before a message to modify it. " +
-                        "For example, '!' or '/shout' may be used on some servers to communicate " +
-                        "in global chat. This may be useful for preventing spurious notifications.")), -1));
+                localized("option", "global.prefixes", "\u2139"),
+                Tooltip.create(localized("option", "global.prefixes.tooltip")), -1));
 
         int max = Config.get().prefixes.size();
         for (int i = 0; i < max; i++) {
             addEntry(new Entry.PrefixFieldEntry(entryX, entryWidth, entryHeight, this, i));
         }
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().prefixes.add("");
@@ -62,28 +57,17 @@ public class GlobalOptionsList extends OptionsList {
     }
 
     @Override
-    public GlobalOptionsList resize(int width, int height, int y,
-                                    int itemHeight, double scrollAmount) {
-        GlobalOptionsList newListWidget = new GlobalOptionsList(
-                minecraft, width, height, y, itemHeight,
-                entryRelX, entryWidth, entryHeight, scrollWidth);
+    public GlobalOptionsList reload(int width, int height, double scrollAmount) {
+        GlobalOptionsList newListWidget = new GlobalOptionsList(minecraft, width, height, 
+                getY(), getRowWidth(), itemHeight, entryWidth, entryHeight);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
 
-    private void openColorConfig() {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                localized("screen", "color"),
-                new ColorOptionsList(minecraft, screen.width, screen.height, getY(),
-                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
-                        () -> Config.get().defaultColor, (color) -> Config.get().defaultColor = color)));
-    }
-
     private void openSoundConfig() {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                localized("screen", "sound"),
-                new SoundOptionsList(minecraft, screen.width, screen.height, getY(),
-                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth, Config.get().defaultSound)));
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
+                new SoundOptionsList(minecraft, width, height, getY(),
+                        getRowWidth(), itemHeight, entryWidth, entryHeight, Config.get().defaultSound)));
     }
 
     private abstract static class Entry extends OptionsList.Entry {
@@ -91,41 +75,35 @@ public class GlobalOptionsList extends OptionsList {
         private static class MixinAndKeyDebugEntry extends MainOptionsList.Entry {
             MixinAndKeyDebugEntry(int x, int width, int height) {
                 super();
+                int buttonWidth = (width - SPACING) / 2;
 
-                int spacing = 4;
-                int buttonWidth = (width - spacing) / 2;
-
-                elements.add(CycleButton.<TriState.State>builder(
-                        (val) -> switch(val) {
-                            case ON -> Component.translatable("options.on").withStyle(ChatFormatting.GREEN);
-                            case OFF -> Component.translatable("options.off").withStyle(ChatFormatting.RED);
-                            case DISABLED -> Component.literal("Auto ").append(ChatNotify.hasChatHistoryMod
-                                            ? Component.translatable("options.on").withStyle(ChatFormatting.GREEN)
-                                            : Component.translatable("options.off").withStyle(ChatFormatting.RED));
-                        })
+                elements.add(CycleButton.<TriState.State>builder((status) -> switch(status) {
+                    case ON -> CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN);
+                    case OFF -> CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED);
+                    case DISABLED -> localized("option", "global.mixin.auto").append(" ")
+                            .append(ChatNotify.hasChatHistoryMod
+                                    ? CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN)
+                                    : CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED));
+                })
                         .withValues(TriState.State.values())
                         .withInitialValue(Config.get().mixinEarly.state)
-                        .withTooltip((status) -> Tooltip.create(Component.literal(
-                                "If ChatNotify is not detecting incoming messages, try changing this.\n\n" +
-                                        "Note: Auto mode defaults to OFF but will switch ON if a chat history " +
-                                        "mod is detected, e.g. ChatPatches")))
-                        .create(x, 0, buttonWidth, height, Component.literal("Early Mixin"),
+                        .withTooltip((status) -> Tooltip.create(localized("option", "global.mixin.tooltip")))
+                        .create(x, 0, buttonWidth, height, localized("option", "global.mixin"),
                                 (button, status) -> Config.get().mixinEarly.state = status));
 
-                elements.add(CycleButton.<TriState.State>builder(
-                                (val) -> switch(val) {
-                                    case ON -> Component.literal("Key").withStyle(ChatFormatting.GREEN);
-                                    case OFF -> Component.literal("Raw").withStyle(ChatFormatting.GREEN);
-                                    case DISABLED -> Component.literal("OFF").withStyle(ChatFormatting.RED);
-                                })
+                elements.add(CycleButton.<TriState.State>builder((status) -> switch(status) {
+                    case ON -> localized("option", "global.debug.key").withStyle(ChatFormatting.GREEN);
+                    case OFF -> localized("option", "global.debug.raw").withStyle(ChatFormatting.GREEN);
+                    case DISABLED -> localized("option", "global.debug.off").withStyle(ChatFormatting.RED);
+                })
                         .withValues(TriState.State.values())
                         .withInitialValue(Config.get().debugShowKey.state)
-                        .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
-                            case ON -> "Click on a chat message to copy the translation key.\nDisable if not in use";
-                            case OFF -> "Click on a chat message to copy the raw string.\nDisable if not in use";
-                            case DISABLED -> "Disabled";
-                        })))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height, Component.literal("Debug"),
+                        .withTooltip((status) -> Tooltip.create(switch(status) {
+                            case ON -> localized("option", "global.debug.key.tooltip");
+                            case OFF -> localized("option", "global.debug.raw.tooltip");
+                            case DISABLED -> localized("option", "global.debug.off.tooltip");
+                        }))
+                        .create(x + width - buttonWidth, 0, buttonWidth, height, localized("option", "global.debug"),
                                 (button, status) -> Config.get().debugShowKey.state = status));
             }
         }
@@ -133,29 +111,25 @@ public class GlobalOptionsList extends OptionsList {
         private static class SelfCheckAndRegexEntry extends MainOptionsList.Entry {
             SelfCheckAndRegexEntry(int x, int width, int height) {
                 super();
-
-                int spacing = 4;
-                int buttonWidth = (width - spacing) / 2;
+                int buttonWidth = (width - SPACING) / 2;
 
                 elements.add(CycleButton.booleanBuilder(
-                                Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
+                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(Config.get().checkOwnMessages)
-                        .withTooltip((status) -> Tooltip.create(Component.literal(
-                                "If ON, messages that you send will trigger notifications." +
-                                        "\n\nNote: ChatNotify will only detect a message as being sent " +
-                                        "by you if it matches a trigger of the first notification.")))
-                        .create(x, 0, buttonWidth, height, Component.literal("Self Notify"),
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.self_notify.tooltip")))
+                        .create(x, 0, buttonWidth, height, localized("option", "global.self_notify"),
                                 (button, status) -> Config.get().checkOwnMessages = status));
 
                 elements.add(CycleButton.booleanBuilder(
-                                Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
+                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(Config.get().allowRegex)
-                        .withTooltip((status) -> Tooltip.create(Component.literal(
-                                "If ON, you can set any trigger to be interpreted " +
-                                        "as regex by using the [.*] button next to the trigger.")))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height, Component.literal("Allow Regex"),
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.regex.tooltip")))
+                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                localized("option", "global.regex"),
                                 (button, status) -> Config.get().allowRegex = status));
             }
         }
@@ -163,51 +137,55 @@ public class GlobalOptionsList extends OptionsList {
         private static class DefaultColorEntry extends MainOptionsList.Entry {
             DefaultColorEntry(int x, int width, int height, GlobalOptionsList listWidget) {
                 super();
+                Font font = Minecraft.getInstance().font;
+                int colorFieldWidth = font.width("#FFAAFF+++");
+                int mainButtonWidth = width - colorFieldWidth - SPACING;
 
-                Font activeFont = Minecraft.getInstance().font;
-                int spacing = 5;
-                int reloadButtonWidth = 20;
-                int colorFieldWidth = activeFont.width("#FFAAFF+++");
-                int mainButtonWidth = width - reloadButtonWidth - colorFieldWidth - spacing;
-
-                String mainButtonMessage = "Default Color";
-                Button mainButton = Button.builder(Component.literal(mainButtonMessage)
+                Button mainButton = Button.builder(localized("option", "global.default_color")
                                         .setStyle(Style.EMPTY.withColor(Config.get().defaultColor)),
-                                (button) -> listWidget.openColorConfig())
+                        (button) -> {
+                            int cpHeight = 80;
+                            int cpWidth = Math.max(cpHeight, width);
+                            listWidget.screen.setOverlayWidget(new HsvColorPicker(
+                                    x, listWidget.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
+                                    Component.empty(), () -> Config.get().defaultColor,
+                                    (val) -> Config.get().defaultColor = val,
+                                    (widget) -> {
+                                        listWidget.screen.removeOverlayWidget();
+                                        listWidget.reload();
+                                    }));
+                        })
                         .pos(x, 0)
                         .size(mainButtonWidth, height)
                         .build();
                 elements.add(mainButton);
 
-                EditBox colorField = new EditBox(activeFont, x + mainButtonWidth + spacing, 0,
-                        colorFieldWidth, height, Component.literal("Hex Color"));
+                EditBox colorField = new EditBox(font, x + mainButtonWidth + SPACING, 0,
+                        colorFieldWidth, height, Component.empty());
                 colorField.setMaxLength(7);
-                colorField.setResponder(strColor -> {
-                    TextColor color = ColorUtil.parseColor(strColor);
-                    if (color != null) {
-                        Config.get().defaultColor = color.getValue();
+                colorField.setResponder((val) -> {
+                    TextColor textColor = ColorUtil.parseColor(val);
+                    if (textColor != null) {
+                        int color = textColor.getValue();
+                        Config.get().defaultColor = color;
                         // Update color of main button
-                        mainButton.setMessage(Component.literal(mainButtonMessage)
-                                .setStyle(Style.EMPTY.withColor(color)));
+                        mainButton.setMessage(localized("option", "global.default_color")
+                                .setStyle(Style.EMPTY.withColor(textColor)));
+                        colorField.setTextColor(color);
+                    } else {
+                        colorField.setTextColor(16711680);
                     }
                 });
                 colorField.setValue(TextColor.fromRgb(Config.get().defaultColor).formatValue());
                 elements.add(colorField);
-
-                elements.add(Button.builder(Component.literal("\ud83d\uddd8"),
-                                (button) -> listWidget.reload())
-                        .tooltip(Tooltip.create(Component.literal("Check Value")))
-                        .pos(x + mainButtonWidth + spacing + colorFieldWidth, 0)
-                        .size(reloadButtonWidth, height)
-                        .build());
             }
         }
 
         private static class DefaultSoundEntry extends MainOptionsList.Entry {
             DefaultSoundEntry(int x, int width, int height, GlobalOptionsList listWidget) {
                 super();
-                elements.add(Button.builder(
-                        Component.literal("Default Sound: " + Config.get().defaultSound.getId()),
+                elements.add(Button.builder(localized("option", "global.default_sound",
+                                        Config.get().defaultSound.getId()),
                                 (button) -> listWidget.openSoundConfig())
                         .pos(x, 0)
                         .size(width, height)
@@ -216,26 +194,25 @@ public class GlobalOptionsList extends OptionsList {
         }
 
         private static class SoundSourceEntry extends MainOptionsList.Entry {
-            SoundSourceEntry(int x, int width, int height) {
+            SoundSourceEntry(int x, int width, int height, GlobalOptionsList listWidget) {
                 super();
-                int spacing = 5;
-                int volumeButtonWidth = 20;
-                int mainButtonWidth = width - volumeButtonWidth - spacing;
+                int volumeButtonWidth = height;
+                int mainButtonWidth = width - volumeButtonWidth - SPACING;
 
                 elements.add(CycleButton.<SoundSource>builder(source -> Component.translatable(
-                                "soundCategory." + source.getName()))
+                        "soundCategory." + source.getName()))
                         .withValues(SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
-                        .withTooltip((status) -> Tooltip.create(Component.literal(
-                                "The sound category determines which of Minecraft's volume control " +
-                                        "sliders will affect the notification sound.")))
-                        .create(x, 0, mainButtonWidth, height, Component.literal("Sound Category"),
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.sound_source.tooltip")))
+                        .create(x, 0, mainButtonWidth, height, localized("option", "global.sound_source"),
                                 (button, status) -> Config.get().soundSource = status));
 
                 elements.add(Button.builder(Component.literal("\uD83D\uDD0A"),
                                 (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
-                                        Minecraft.getInstance().screen, Minecraft.getInstance().options)))
-                        .tooltip(Tooltip.create(Component.literal("Open Minecraft's volume settings")))
+                                        listWidget.screen, Minecraft.getInstance().options)))
+                        .tooltip(Tooltip.create(
+                                localized("option", "global.sound_source.minecraft_volume")))
                         .pos(x + width - volumeButtonWidth, 0)
                         .size(volumeButtonWidth, height)
                         .build());
@@ -245,26 +222,23 @@ public class GlobalOptionsList extends OptionsList {
         private static class PrefixFieldEntry extends Entry {
             PrefixFieldEntry(int x, int width, int height, GlobalOptionsList listWidget, int index) {
                 super();
+                int removeButtonWidth = Math.max(16, height);
 
-                int spacing = 5;
-                int removeButtonWidth = 24;
-
-                EditBox prefixField = new EditBox(
-                        Minecraft.getInstance().font, x, 0, width, height,
-                        Component.literal("Message Prefix"));
-                prefixField.setMaxLength(20);
+                EditBox prefixField = new EditBox(Minecraft.getInstance().font, x, 0,
+                        width, height, Component.empty());
+                prefixField.setMaxLength(30);
                 prefixField.setValue(Config.get().prefixes.get(index));
-                prefixField.setResponder(
-                        (prefix) -> Config.get().prefixes.set(
-                                index, prefix.strip().toLowerCase(Locale.ROOT)));
+                prefixField.setResponder((prefix) -> Config.get().prefixes.set(
+                        index, prefix.strip().toLowerCase(Locale.ROOT)));
                 elements.add(prefixField);
 
-                elements.add(Button.builder(Component.literal("\u274C"),
+                elements.add(Button.builder(Component.literal("\u274C")
+                                        .withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     Config.get().prefixes.remove(index);
                                     listWidget.reload();
                                 })
-                        .pos(x + width + spacing, 0)
+                        .pos(x + width + SPACING, 0)
                         .size(removeButtonWidth, height)
                         .build());
             }

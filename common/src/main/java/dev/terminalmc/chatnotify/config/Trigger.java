@@ -12,10 +12,11 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 
 public class Trigger {
-    public final int version = 1;
+    public final int version = 2;
 
     public boolean enabled;
     public String string;
+    public @Nullable String styleString;
     public boolean isKey;
     public boolean isRegex;
 
@@ -25,6 +26,7 @@ public class Trigger {
     public Trigger() {
         this.enabled = true;
         this.string = "";
+        this.styleString = null;
         this.isKey = false;
         this.isRegex = false;
     }
@@ -35,6 +37,7 @@ public class Trigger {
     public Trigger(String string) {
         this.enabled = true;
         this.string = string;
+        this.styleString = null;
         this.isKey = false;
         this.isRegex = false;
     }
@@ -42,9 +45,10 @@ public class Trigger {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Trigger(boolean enabled, String string, boolean isKey, boolean isRegex) {
+    Trigger(boolean enabled, String string, @Nullable String styleString, boolean isKey, boolean isRegex) {
         this.enabled = enabled;
         this.string = string;
+        this.styleString = styleString;
         this.isKey = isKey;
         this.isRegex = isRegex;
     }
@@ -58,10 +62,12 @@ public class Trigger {
             try {
                 boolean enabled = obj.get("enabled").getAsBoolean();
                 String string = obj.get("string").getAsString();
+                String styleString = obj.has("styleString")
+                        ? obj.get("styleString").getAsString() : null;
                 boolean isKey = obj.get("isKey").getAsBoolean();
                 boolean isRegex = obj.get("isRegex").getAsBoolean();
 
-                return new Trigger(enabled, string, isKey, isRegex);
+                return new Trigger(enabled, string, styleString, isKey, isRegex);
             }
             catch (Exception e) {
                 ChatNotify.LOG.warn("Unable to deserialize Trigger", e);

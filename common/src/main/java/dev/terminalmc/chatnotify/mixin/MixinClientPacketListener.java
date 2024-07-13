@@ -56,7 +56,7 @@ import java.util.Locale;
  * (if any) is cut from the message.
  */
 
-@Mixin(value = ClientPacketListener.class, priority = 800)
+@Mixin(value = ClientPacketListener.class, priority = 792)
 public class MixinClientPacketListener {
 
     // Username-update mixins

@@ -5,10 +5,17 @@
 
 package dev.terminalmc.chatnotify.gui.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionsList;
+import dev.terminalmc.chatnotify.mixin.accessor.ScreenAccessor;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.CommonComponents;
@@ -16,17 +23,25 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * An OptionsScreen contains one tightly-coupled {@link OptionsList},
- * which is used to display all option controls required for the screen.
+ * An OptionsScreen contains one tightly-coupled {@link OptionsList}, which is
+ * used to display all option control widgets.
  */
 public class OptionsScreen extends OptionsSubScreen {
+    public static final int ROW_WIDTH = Window.BASE_WIDTH;
+    public static final int TOP_MARGIN = 32;
+    public static final int BOTTOM_MARGIN = 32;
+    public static final int LIST_ENTRY_SPACE = 25;
+    public static final int LIST_ENTRY_WIDTH = Math.max(240, Window.BASE_WIDTH - 80);
+    public static final int LIST_ENTRY_HEIGHT = 20;
 
     protected OptionsList listWidget;
+    private AbstractWidget overlayWidget = null;
 
-    public final int listTop = 32;
-    public final int bottomMargin = 32;
-    public final int listItemHeight = 25;
-
+    /**
+     * The {@link OptionsList} passed here is not required to have the correct
+     * dimensions (width and height), as it will be automatically reloaded (and
+     * resized) prior to being displayed.
+     */
     public OptionsScreen(Screen lastScreen, Component title, OptionsList listWidget) {
         super(lastScreen, Minecraft.getInstance().options, title);
         this.listWidget = listWidget;
@@ -34,12 +49,22 @@ public class OptionsScreen extends OptionsSubScreen {
 
     @Override
     protected void init() {
-        reloadListWidget();
+        reload();
     }
 
     @Override
     protected void addOptions() {
-        // TODO
+        // Not currently used
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == InputConstants.KEY_ESCAPE && overlayWidget != null) {
+            removeOverlayWidget();
+            return true;
+        } else {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
     }
 
     @Override
@@ -51,33 +76,71 @@ public class OptionsScreen extends OptionsSubScreen {
 
     @Override
     public void onClose() {
-        listWidget.onClose();
-        if (super.lastScreen instanceof OptionsScreen screen) {
-            screen.reloadListWidget(width, height);
+        if (lastScreen instanceof OptionsScreen screen) {
+            // Resize the parent screen's OptionsList
+            screen.reload(width, height);
         }
+        listWidget.onClose();
         super.onClose();
     }
 
     @Override
-    public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        context.drawCenteredString(font, title, width / 2, 5, 0xffffff);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.render(graphics, mouseX, mouseY, delta);
     }
 
-    public void reloadListWidget() {
-        reloadListWidget(width, height);
+    public void reload() {
+        reload(width, height);
     }
 
-    private void reloadListWidget(int width, int height) {
+    private void reload(int width, int height) {
         clearWidgets();
-        listWidget = listWidget.resize(width, height - listTop - bottomMargin,
-                listTop, listItemHeight, listWidget.getScrollAmount());
-        listWidget.setScreen(this);
+        listWidget = listWidget.reload(this, width, height - TOP_MARGIN - BOTTOM_MARGIN,
+                listWidget.getScrollAmount());
         addRenderableWidget(listWidget);
-        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,
-                        (button) -> onClose())
-                .pos(width / 2 - 120, height - 27)
-                .size(240, 20)
+
+        // Title text
+        Font font = Minecraft.getInstance().font;
+        addRenderableWidget(new StringWidget(width / 2 - (font.width(title) / 2),
+                Math.max(0, TOP_MARGIN / 2 - font.lineHeight / 2),
+                font.width(title), font.lineHeight, title, font).alignLeft());
+
+        // Done button
+        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
+                .pos(width / 2 - LIST_ENTRY_WIDTH / 2, Math.min(height - LIST_ENTRY_HEIGHT,
+                        height - BOTTOM_MARGIN / 2 - LIST_ENTRY_HEIGHT / 2))
+                .size(LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT)
                 .build());
+
+        if (overlayWidget != null) {
+            overlayWidget.setX(width / 2 - overlayWidget.getWidth() / 2);
+            overlayWidget.setY(height / 2 - overlayWidget.getHeight() / 2);
+            setOverlayWidget(overlayWidget);
+        }
+    }
+
+    public void setOverlayWidget(AbstractWidget widget) {
+        removeOverlayWidget();
+        overlayWidget = widget;
+        setChildrenVisible(false);
+        ((ScreenAccessor)this).getChildren().addFirst(widget);
+        ((ScreenAccessor)this).getNarratables().addFirst(widget);
+        ((ScreenAccessor)this).getRenderables().addLast(widget);
+    }
+
+    public void removeOverlayWidget() {
+        if (overlayWidget != null) {
+            removeWidget(overlayWidget);
+            overlayWidget = null;
+            setChildrenVisible(true);
+        }
+    }
+
+    private void setChildrenVisible(boolean visible) {
+        for (GuiEventListener listener : children()) {
+            if (listener instanceof AbstractWidget widget) {
+                widget.visible = visible;
+            }
+        }
     }
 }

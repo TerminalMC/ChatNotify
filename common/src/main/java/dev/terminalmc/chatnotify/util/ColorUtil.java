@@ -29,14 +29,14 @@ public class ColorUtil {
 
     /**
      * Converts a hex color string into a {@link TextColor}.
-     * <p>Note: requires a full-length hex code with leading # (7 chars total).
-     * @param strColor the color string.
+     * @param str a full-length RGB hex string with leading #
+     *                 (7 chars total).
      * @return the resulting {@link TextColor} if the string is a valid color,
      * {@code null} otherwise.
      */
-    public static TextColor parseColor(String strColor) {
-        if (strColor.startsWith("#") && strColor.length() == 7) {
-            Optional<TextColor> result = TextColor.parseColor(strColor).result();
+    public static TextColor parseColor(String str) {
+        if (str.startsWith("#") && str.length() == 7) {
+            Optional<TextColor> result = TextColor.parseColor(str).result();
             if (result.isPresent()) return result.get();
         }
         return null;

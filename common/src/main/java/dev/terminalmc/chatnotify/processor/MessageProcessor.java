@@ -16,6 +16,7 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static dev.terminalmc.chatnotify.ChatNotify.recentMessages;
+import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /*
  * Message processing algorithm, starting at processMessage.
@@ -82,7 +84,7 @@ public class MessageProcessor {
                 // Check for a username trigger in the part before the match
                 String prefix = msgStr.substring(0, lastMatchIdx);
                 for (Trigger trigger : Config.get().getUserNotif().triggers) {
-                    Matcher matcher = strSearch(prefix, trigger.string);
+                    Matcher matcher = triggerSearch(prefix, trigger.string);
                     if (matcher.find()) { // Second condition satisfied
                         recentMessages.remove(i);
                         // Modify the message string
@@ -134,7 +136,7 @@ public class MessageProcessor {
                             hit = matcher != null && matcher.find();
                         }
                         else {
-                            hit = strSearch(checkedMsgStr, trigger.string).find();
+                            hit = triggerSearch(checkedMsgStr, trigger.string).find();
                         }
                         if (hit) {
                             boolean exclHit = false;
@@ -147,7 +149,7 @@ public class MessageProcessor {
                                     exclHit = exclMatcher != null && exclMatcher.find();
                                 }
                                 else {
-                                    exclHit = strSearch(checkedMsgStr, exclTrigger.string).find();
+                                    exclHit = triggerSearch(checkedMsgStr, exclTrigger.string).find();
                                 }
                                 if (exclHit) break;
                             }
@@ -155,9 +157,22 @@ public class MessageProcessor {
                             if (!exclHit) {
                                 playSound(notif);
                                 sendResponses(notif, matcher);
-                                return (trigger.isKey || (allowRegex && trigger.isRegex)) ?
-                                        simpleRestyle(msg, notif.textStyle) :
-                                        complexRestyle(msg, trigger.string, notif.textStyle);
+                                String cleanMsgStr = StringUtil.stripColor(msgStr);
+                                if (trigger.isKey || (allowRegex && trigger.isRegex)) {
+                                    if (trigger.styleString != null && styleSearch(cleanMsgStr, trigger.styleString).find()) {
+                                        return complexRestyle(msg, trigger.styleString, notif.textStyle);
+                                    } else {
+                                        return simpleRestyle(msg, notif.textStyle);
+                                    }
+                                } else {
+                                    if (trigger.styleString != null && styleSearch(cleanMsgStr, trigger.styleString).find()) {
+                                        return complexRestyle(msg, trigger.styleString, notif.textStyle);
+                                    } else if (styleSearch(cleanMsgStr, trigger.string).find()) {
+                                        return complexRestyle(msg, trigger.string, notif.textStyle);
+                                    } else {
+                                        return simpleRestyle(msg, notif.textStyle);
+                                    }
+                                }
                             }
                         }
                     }
@@ -191,7 +206,7 @@ public class MessageProcessor {
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.
      */
-    private static Matcher strSearch(String msgStr, String str) {
+    private static Matcher triggerSearch(String msgStr, String str) {
         /*
         U flag for full unicode comparison, performance using randomly-generated
         100-character msgStr and 10-character str is approx 1.18 microseconds
@@ -200,6 +215,10 @@ public class MessageProcessor {
         return Pattern.compile(
                 "(?iU)(?<!\\w)((\\W?|(§[a-z0-9])+)" + Pattern.quote(str) + "\\W?)(?!\\w)")
                 .matcher(msgStr);
+    }
+
+    private static Matcher styleSearch(String msgStr, String str) {
+        return Pattern.compile("(?iU)" + Pattern.quote(str)).matcher(msgStr);
     }
 
     /**
@@ -340,7 +359,7 @@ public class MessageProcessor {
         if (!(msg.getContents() instanceof PlainTextContents contents)) return msg;
 
         String msgStr = contents.text();
-        Matcher matcher = strSearch(msgStr, trigger);
+        Matcher matcher = styleSearch(msgStr, trigger);
         if (matcher.find()) {
             // Trigger found, restyle
             List<Component> siblings = msg.getSiblings();
@@ -456,7 +475,7 @@ public class MessageProcessor {
      *
      * <p>This method scans the specified string to determine the start
      * of the actual match, defined as being the first character after the
-     * last format code.
+     * last format code.<p>
      * @param str the string with possible format codes.
      * @param maxStart the maximum possible value of the match start.
      * @return the index of the first character after the last format code.
@@ -498,15 +517,14 @@ public class MessageProcessor {
         if (msg.getContents() instanceof TranslatableContents tc) {
             newStyle = Style.EMPTY
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            Component.literal("Key: " + tc.getKey())
-                                    .append(Component.literal("\n[Click to Copy]")
+                            localized("chat", "message.translation_key.value", tc.getKey())
+                                    .append("\n").append(localized("common", "click_copy")
                                             .withStyle(ChatFormatting.GOLD))))
                     .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
                             tc.getKey()));
-        }
-        else {
+        } else {
             newStyle = Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Component.literal("No Translation Key")
+                    localized("chat", "message.translation_key.missing")
                             .withStyle(ChatFormatting.GRAY)));
         }
         // Overwrite existing events
@@ -518,8 +536,7 @@ public class MessageProcessor {
         // Create new Hover and Click events
         newStyle = Style.EMPTY.
                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Component.literal("[Click to Copy Raw]")
-                                .withStyle(ChatFormatting.GOLD)))
+                        localized("common", "click_copy.raw").withStyle(ChatFormatting.GOLD)))
                 .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
                         msg.toString()));
 
@@ -528,8 +545,23 @@ public class MessageProcessor {
     }
 
     public static MutableComponent overwriteStyle(Style style, MutableComponent msg) {
-        msg.setStyle(style.applyTo(msg.getStyle()));
-        msg.getSiblings().replaceAll((sibling) -> overwriteStyle(style, sibling.copy()));
+        if (msg.getContents() instanceof TranslatableContents tc) {
+            Object[] args = tc.getArgs();
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] instanceof Component c) {
+                    args[i] = overwriteStyle(style, c.copy());
+                }
+//                else if (args[i] instanceof String s) {
+//                    args[i] = Component.literal(s).setStyle(style);
+//                }
+                msg = MutableComponent.create(
+                        new TranslatableContents(tc.getKey(), tc.getFallback(), args))
+                        .setStyle(style.applyTo(msg.getStyle()));
+            }
+        } else {
+            msg.setStyle(style.applyTo(msg.getStyle()));
+            msg.getSiblings().replaceAll((sibling) -> overwriteStyle(style, sibling.copy()));
+        }
         return msg;
     }
 }

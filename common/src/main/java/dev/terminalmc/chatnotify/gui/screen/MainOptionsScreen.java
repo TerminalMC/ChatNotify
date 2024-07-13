@@ -13,15 +13,14 @@ import dev.terminalmc.chatnotify.gui.widget.list.MainOptionsList;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /**
- * <b>Note:</b> If creating a ChatNotify config screen (e.g. for ModMenu
- * integration), instantiate this class, not {@code OptionsScreen}.
+ * The root {@link OptionsScreen}, containing a {@link MainOptionsList}.
  */
-public class GlobalOptionsScreen extends OptionsScreen {
-
-    public GlobalOptionsScreen(Screen lastScreen) {
-        super(lastScreen, localized("screen", "default"),
-                new MainOptionsList(Minecraft.getInstance(), 0, 0, 0,
-                        0, -120, 240, 20, 320));
+public class MainOptionsScreen extends OptionsScreen {
+    public MainOptionsScreen(Screen lastScreen) {
+        super(lastScreen, localized("option", "main"),
+                new MainOptionsList(Minecraft.getInstance(), 0, 0, OptionsScreen.TOP_MARGIN,
+                        OptionsScreen.ROW_WIDTH, OptionsScreen.LIST_ENTRY_SPACE,
+                        OptionsScreen.LIST_ENTRY_WIDTH, OptionsScreen.LIST_ENTRY_HEIGHT));
     }
 
     @Override

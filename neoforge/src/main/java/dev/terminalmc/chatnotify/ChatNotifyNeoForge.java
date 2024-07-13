@@ -5,7 +5,7 @@
 
 package dev.terminalmc.chatnotify;
 
-import dev.terminalmc.chatnotify.gui.screen.GlobalOptionsScreen;
+import dev.terminalmc.chatnotify.gui.screen.MainOptionsScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 public class ChatNotifyNeoForge {
     public ChatNotifyNeoForge() {
         ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
-                () -> (minecraft, parent) -> new GlobalOptionsScreen(parent));
+                () -> (minecraft, parent) -> new MainOptionsScreen(parent));
 
 //        boolean hasChatHistoryMod = ModList.get().isLoaded("");
         ChatNotify.init(false);

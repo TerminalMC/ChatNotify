@@ -111,6 +111,40 @@ public class Notification {
         }
     }
 
+    /**
+     * Moves the {@link Trigger} at the source index to the destination index.
+     * @param sourceIndex the index of the element to move.
+     * @param destIndex the desired final index of the element.
+     */
+    public void moveTrigger(int sourceIndex, int destIndex) {
+        if (sourceIndex != destIndex) {
+            triggers.add(destIndex, triggers.remove(sourceIndex));
+        }
+    }
+
+    /**
+     * Moves the exclusion {@link Trigger} at the source index to the
+     * destination index.
+     * @param sourceIndex the index of the element to move.
+     * @param destIndex the desired final index of the element.
+     */
+    public void moveExclusionTrigger(int sourceIndex, int destIndex) {
+        if (sourceIndex != destIndex) {
+            exclusionTriggers.add(destIndex, exclusionTriggers.remove(sourceIndex));
+        }
+    }
+
+    /**
+     * Moves the {@link ResponseMessage} at the source index to the destination
+     * index.
+     * @param sourceIndex the index of the element to move.
+     * @param destIndex the desired final index of the element.
+     */
+    public void moveResponseMessage(int sourceIndex, int destIndex) {
+        if (sourceIndex != destIndex) {
+            responseMessages.add(destIndex, responseMessages.remove(sourceIndex));
+        }
+    }
 
     // Validation and cleanup
 
@@ -160,7 +194,6 @@ public class Notification {
 
     public static class Deserializer implements JsonDeserializer<Notification> {
         @Override
-        @SuppressWarnings("unchecked")
         public @Nullable Notification deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();

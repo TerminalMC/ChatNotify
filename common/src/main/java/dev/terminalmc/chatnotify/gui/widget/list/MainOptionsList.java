@@ -5,6 +5,7 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Trigger;
@@ -12,43 +13,44 @@ import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.StringDecomposer;
+import net.minecraft.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /**
  * Contains a button linking to global options, and a dynamic list of buttons
- * linking to different {@link Notification}s.
+ * linked to {@link Notification} instances.
  */
 public class MainOptionsList extends OptionsList {
+    private int dragSourceSlot = -1;
 
-    public MainOptionsList(Minecraft mc, int width, int height, int y,
-                           int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                           int scrollWidth) {
-        super(mc, width, height, y, itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth);
+    public MainOptionsList(Minecraft mc, int width, int height, int y, int rowWidth,
+                           int itemHeight, int entryWidth, int entryHeight) {
+        super(mc, width, height, y, rowWidth, itemHeight, entryWidth, entryHeight);
 
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
-                Component.literal("Global Options"), null, -1, (button -> openGlobalConfig())));
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+                localized("option", "main.global"), null, -1, (button -> openGlobalConfig())));
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Notifications \u2139"),
-                Tooltip.create(Component.literal("Incoming messages will activate the first " +
-                        "enabled notification that has a matching trigger.")), -1));
+                localized("option", "main.notifs", "\u2139"),
+                Tooltip.create(localized("option", "main.notifs.tooltip")), -1));
 
         List<Notification> notifs = Config.get().getNotifs();
         for (int i = 0; i < notifs.size(); i++) {
             addEntry(new Entry.NotifConfigEntry(entryX, entryWidth, entryHeight, this, notifs, i));
         }
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().addNotif();
@@ -57,155 +59,200 @@ public class MainOptionsList extends OptionsList {
     }
 
     @Override
-    public MainOptionsList resize(int width, int height, int y, int itemHeight, double scrollAmount) {
-        MainOptionsList newListWidget = new MainOptionsList(minecraft, width, height, y, itemHeight,
-                entryRelX, entryWidth, entryHeight, scrollWidth);
+    public MainOptionsList reload(int width, int height, double scrollAmount) {
+        MainOptionsList newListWidget = new MainOptionsList(minecraft, width, height,
+                getY(), rowWidth, itemHeight, entryWidth, entryHeight);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
 
     private void openGlobalConfig() {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                localized("screen", "global"),
-                new GlobalOptionsList(minecraft, screen.width, screen.height, getY(),
-                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth)));
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "global"),
+                new GlobalOptionsList(minecraft, width, height, getY(), getRowWidth(),
+                        itemHeight, entryWidth, entryHeight)));
     }
 
     private void openNotificationConfig(int index) {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                localized("screen", "notif"),
-                new NotifOptionsList(minecraft, screen.width, screen.height, getY(),
-                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth,
-                        Config.get().getNotifs().get(index), index == 0)));
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "notif"),
+                new NotifOptionsList(minecraft, width, height, getY(), getRowWidth(),
+                        itemHeight, entryWidth, entryHeight, Config.get().getNotifs().get(index),
+                        index == 0)));
+    }
+
+    // Notification button dragging
+
+    @Override
+    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.renderWidget(graphics, mouseX, mouseY, delta);
+        if (dragSourceSlot != -1) {
+            super.renderItem(graphics, mouseX, mouseY, delta, dragSourceSlot,
+                    mouseX, mouseY, entryWidth, entryHeight);
+        }
+    }
+
+    @Override
+    public boolean mouseReleased(double x, double y, int button) {
+        if (dragSourceSlot != -1 && button == InputConstants.MOUSE_BUTTON_LEFT) {
+            dropDragged(x, y);
+            return true;
+        }
+        return super.mouseReleased(x, y, button);
+    }
+
+    /**
+     * A dragged entry, when dropped, will be placed below the hovered entry.
+     * Therefore, the move operation will only be executed if the hovered entry
+     * is below the dragged entry, or more than one slot above.
+     */
+    private void dropDragged(double mouseX, double mouseY) {
+        OptionsList.Entry hoveredEntry = getEntryAtPosition(mouseX, mouseY);
+        // Check whether the drop location is valid
+        if (hoveredEntry instanceof Entry.NotifConfigEntry) {
+            int hoveredSlot = children().indexOf(hoveredEntry);
+            // Check whether the move operation would actually change anything
+            if (hoveredSlot > dragSourceSlot || hoveredSlot < dragSourceSlot - 1) {
+                // Account for the list not starting at slot 0
+                int offset = notifListOffset();
+                int sourceIndex = dragSourceSlot - offset;
+                int destIndex = hoveredSlot - offset;
+                // I can't really explain why
+                if (sourceIndex > destIndex) destIndex += 1;
+                // Move
+                Config.get().changeNotifPriority(sourceIndex, destIndex);
+                reload();
+            }
+        }
+        this.dragSourceSlot = -1;
+    }
+
+    /**
+     * @return The index of the first {@link Entry.NotifConfigEntry} in the
+     * {@link OptionsList}.
+     */
+    private int notifListOffset() {
+        int i = 0;
+        for (OptionsList.Entry entry : children()) {
+            if (entry instanceof Entry.NotifConfigEntry) return i;
+            i++;
+        }
+        throw new IllegalStateException("Notification list not found");
     }
 
     public static class Entry extends OptionsList.Entry {
 
         private static class NotifConfigEntry extends Entry {
-            private final int mainButtonWidth;
-
             NotifConfigEntry(int x, int width, int height, MainOptionsList listWidget,
                              List<Notification> notifs, int index) {
                 super();
-
-                int spacing = 5;
-                int statusButtonWidth = 25;
-                mainButtonWidth = width - statusButtonWidth - spacing;
-                int moveButtonWidth = 12;
-                int removeButtonWidth = 24;
+                int statusButtonWidth = Math.max(24, height);
+                int sideButtonWidth = Math.max(16, height);
+                int mainButtonWidth = width - statusButtonWidth - SPACING;
                 Notification notif = notifs.get(index);
 
-                elements.add(Button.builder(getMessage(notif, index == 0),
+                // Main button
+                elements.add(Button.builder(createLabel(notif, mainButtonWidth - 10),
                                 (button) -> listWidget.openNotificationConfig(index))
                         .pos(x, 0)
                         .size(mainButtonWidth, height)
                         .build());
 
+                // On/off button
                 elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
+                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
                         .withInitialValue(notif.isEnabled())
-                        .create(x + mainButtonWidth + spacing, 0, statusButtonWidth, height,
-                                Component.empty(),
-                                (button, status) -> notif.setEnabled(status)));
+                        .create(x + mainButtonWidth + SPACING, 0, statusButtonWidth, height,
+                                Component.empty(), (button, status) -> notif.setEnabled(status)));
 
                 if (index > 0) {
-                    Button upButton = Button.builder(Component.literal("\u2191"),
+                    // Drag reorder button
+                    elements.add(Button.builder(Component.literal("\u2191\u2193"),
                                     (button) -> {
-                                        if (Screen.hasShiftDown()) {
-                                            Config.get().toMaxPriority(index);
-                                            listWidget.reload();
-                                        } else {
-                                            Config.get().increasePriority(index);
-                                            listWidget.reload();
-                                        }})
-                            .pos(x - 2 * moveButtonWidth - spacing, 0)
-                            .size(moveButtonWidth, height)
-                            .build();
-                    if (index == 1) upButton.active = false;
-                    elements.add(upButton);
-
-
-                    Button downButton = Button.builder(Component.literal("\u2193"),
-                                    (button) -> {
-                                        if (Screen.hasShiftDown()) {
-                                            Config.get().toMinPriority(index);
-                                            listWidget.reload();
-                                        } else {
-                                            Config.get().decreasePriority(index);
-                                            listWidget.reload();
-                                        }})
-                            .pos(x - moveButtonWidth - spacing, 0)
-                            .size(moveButtonWidth, height)
-                            .build();
-                    if (index == notifs.size() - 1) downButton.active = false;
-                    elements.add(downButton);
-
-                    elements.add(Button.builder(Component.literal("\u274C"),
+                                        this.setDragging(true);
+                                        listWidget.dragSourceSlot = listWidget.children().indexOf(this);
+                                    })
+                            .pos(x - sideButtonWidth - SPACING, 0)
+                            .size(sideButtonWidth, height)
+                            .build());
+                    // Delete button
+                    elements.add(Button.builder(Component.literal("\u274C")
+                                            .withStyle(ChatFormatting.RED),
                                     (button) -> {
                                         if (Config.get().removeNotif(index)) {
                                             listWidget.reload();
                                         }
                                     })
-                            .pos(x + width + spacing, 0)
-                            .size(removeButtonWidth, height)
+                            .pos(x + width + SPACING, 0)
+                            .size(sideButtonWidth, height)
                             .build());
                 }
             }
 
-            private MutableComponent getMessage(Notification notif, boolean isUser) {
-                MutableComponent message;
-                int maxWidth = (int)(mainButtonWidth * 0.8);
+            private MutableComponent createLabel(Notification notif, int maxWidth) {
+                MutableComponent label;
                 Font font = Minecraft.getInstance().font;
+                String separator = ", ";
+                String plusNumFormat = " [+%d]";
+                Pattern plusNumPattern = Pattern.compile(" \\[\\+\\d+]");
 
                 if (notif.triggers.isEmpty() || notif.triggers.getFirst().string.isBlank()) {
-                    message = Component.literal("> Click to Configure <");
+                    label = Component.literal("> ").append(
+                            localized("option", "main.notifs.configure")
+                                    .withStyle(ChatFormatting.YELLOW)).append(" <");
                 }
                 else {
-                    List<String> messageList = new ArrayList<>();
-                    StringBuilder messageBuilder = new StringBuilder();
+                    Set<String> usedStrings = new TreeSet<>();
+                    List<String> strList = new ArrayList<>();
+                    boolean first = true;
 
-                    for (int i = 0; i < notif.triggers.size(); i++) {
-                        Trigger trigger = notif.triggers.get(i);
-                        String triggerStr;
-                        if (trigger.isKey) {
-                            triggerStr = "[Key] " + (trigger.string.equals(".") ? "Any Message" : trigger.string);
+                    // Compile all trigger strings, ignoring duplicates
+                    for (Trigger trig : notif.triggers) {
+                        String str = StringUtil.stripColor(getString(trig));
+                        if (!usedStrings.contains(str)) {
+                            strList.add(first ? str : separator + str);
+                            usedStrings.add(str);
                         }
-                        else {
-                            triggerStr = trigger.string;
-                        }
-
-                        if (i == 0) {
-                            messageBuilder.append(triggerStr);
-                            messageList.add(triggerStr);
-                        }
-                        else if (font.width(messageBuilder.toString()) + font.width(triggerStr) <= maxWidth) {
-                            if (isUser) {
-                                // Ignore duplicate triggers
-                                triggerStr = StringDecomposer.getPlainText(Component.literal(triggerStr));
-                                if (!messageList.contains(triggerStr)) {
-                                    messageBuilder.append(", ");
-                                    messageBuilder.append(triggerStr);
-                                }
-                            }
-                            else {
-                                messageBuilder.append(", ");
-                                messageBuilder.append(triggerStr);
-                            }
-                        }
-                        else {
-                            messageBuilder.append(" [+");
-                            messageBuilder.append(notif.triggers.size() - i);
-                            messageBuilder.append("]");
-                            break;
-                        }
+                        first = false;
                     }
 
-                    message = Component.literal(messageBuilder.toString())
-                            .setStyle(notif.textStyle.getStyle());
+                    // Delete trigger strings until label is small enough
+                    // Not the most efficient approach, but simple is nice
+                    while(font.width(compileLabel(strList)) > maxWidth) {
+                        if (strList.size() == 1 || (strList.size() == 2
+                                && plusNumPattern.matcher(strList.getLast()).matches())) {
+                            break;
+                        }
+                        if (plusNumPattern.matcher(strList.removeLast()).matches()) {
+                            strList.removeLast();
+                        }
+                        strList.add(String.format(plusNumFormat, usedStrings.size() - strList.size()));
+                    }
+
+                    label = Component.literal(compileLabel(strList));
+                    if (notif.textStyle.isEnabled()) {
+                        label.withColor(notif.textStyle.color);
+                    }
                 }
-                return message;
+                return label;
+            }
+
+            private String getString(Trigger trigger) {
+                if (trigger.isKey) {
+                    return "[Key] " + (trigger.string.equals(".")
+                            ? localized("option", "trigger.key..").toString()
+                            : trigger.string);
+                } else {
+                    return trigger.string;
+                }
+            }
+
+            private String compileLabel(List<String> list) {
+                StringBuilder builder = new StringBuilder();
+                for (String s : list) {
+                    builder.append(s);
+                }
+                return builder.toString();
             }
         }
     }

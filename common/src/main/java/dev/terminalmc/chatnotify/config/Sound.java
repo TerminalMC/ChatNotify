@@ -86,6 +86,8 @@ public class Sound {
         if (volume < 0 || volume > 1) throw new IllegalArgumentException(
                 "Value out of range. Expected 0-1, got " + volume);
         this.volume = volume;
+        if (volume == 0) this.enabled = false;
+        else if (!this.enabled) this.enabled = true;
     }
 
     public float getPitch() {
