@@ -23,8 +23,8 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * An OptionsScreen contains one tightly-coupled {@link OptionsList}, which is
- * used to display all option control widgets.
+ * Contains one tightly-coupled {@link OptionsList}, which is used to display
+ * all option control widgets.
  */
 public class OptionsScreen extends OptionsSubScreen {
     public static final int ROW_WIDTH = Window.BASE_WIDTH;

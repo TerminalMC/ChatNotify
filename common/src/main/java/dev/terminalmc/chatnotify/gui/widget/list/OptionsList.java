@@ -26,15 +26,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * An {@link OptionsList} is tightly coupled to a generic {@link OptionsScreen},
- * allowing many unique options screens to use a single screen implementation,
- * while displaying different options.
+ * Tightly coupled to a generic {@link OptionsScreen}, allowing many unique
+ * options screens to use a single screen implementation, while displaying
+ * different options.
  *
- * <p>An {@link OptionsList} has a list of {@link Entry} objects, which are
- * drawn onto the screen top-down in the order that they are stored, with each
- * entry being allocated a standard amount of space specified by
- * {@link OptionsList#itemHeight}. The actual height of list entries, specified
- * by {@link OptionsList#entryHeight}, can be less but should not be more.</p>
+ * <p>Contains list of {@link Entry} objects, which are drawn onto the screen
+ * top-down in the order that they are stored, with each entry being allocated
+ * a standard amount of space specified by {@link OptionsList#itemHeight}. The
+ * actual height of list entries, specified by {@link OptionsList#entryHeight},
+ * can be less but should not be more.</p>
  *
  * <p><b>Note:</b> If you want multiple widgets to appear side-by-side, you must
  * add them all to a single {@link Entry}'s list of widgets, which are all
@@ -86,7 +86,7 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
     public void onClose() {}
 
     /**
-     * Base implementation of options list widget entry, with common entries.
+     * Base implementation of {@link Entry}, with common entries.
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
         public static final int SPACING = 4;
