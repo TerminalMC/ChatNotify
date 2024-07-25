@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list;
+package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Config;
@@ -32,17 +32,17 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * Contains a button linking to global options, and a dynamic list of buttons
  * linked to {@link Notification} instances.
  */
-public class MainOptionsList extends OptionsList {
+public class MainOptionList extends OptionList {
     private int dragSourceSlot = -1;
 
-    public MainOptionsList(Minecraft mc, int width, int height, int y, int rowWidth,
-                           int itemHeight, int entryWidth, int entryHeight) {
-        super(mc, width, height, y, rowWidth, itemHeight, entryWidth, entryHeight);
+    public MainOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
+                          int entryWidth, int entryHeight) {
+        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
 
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "main.global"), null, -1, (button -> openGlobalConfig())));
 
-        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "main.notifs", "\u2139"),
                 Tooltip.create(localized("option", "main.notifs.tooltip")), -1));
 
@@ -50,33 +50,32 @@ public class MainOptionsList extends OptionsList {
         for (int i = 0; i < notifs.size(); i++) {
             addEntry(new Entry.NotifConfigEntry(entryX, entryWidth, entryHeight, this, notifs, i));
         }
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().addNotif();
-                    openNotificationConfig(Config.get().getNotifs().size()-1);
+                    openNotificationConfig(Config.get().getNotifs().size() - 1);
                 }));
     }
 
     @Override
-    public MainOptionsList reload(int width, int height, double scrollAmount) {
-        MainOptionsList newListWidget = new MainOptionsList(minecraft, width, height,
-                getY(), rowWidth, itemHeight, entryWidth, entryHeight);
-        newListWidget.setScrollAmount(scrollAmount);
-        return newListWidget;
+    public MainOptionList reload(int width, int height, double scrollAmount) {
+        MainOptionList newList = new MainOptionList(minecraft, width, height,
+                getY(), itemHeight, entryWidth, entryHeight);
+        newList.setScrollAmount(scrollAmount);
+        return newList;
     }
 
     private void openGlobalConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "global"),
-                new GlobalOptionsList(minecraft, width, height, getY(), getRowWidth(),
-                        itemHeight, entryWidth, entryHeight)));
+                new GlobalOptionList(minecraft, width, height, getY(), itemHeight,
+                        entryWidth, entryHeight)));
     }
 
     private void openNotificationConfig(int index) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "notif"),
-                new NotifOptionsList(minecraft, width, height, getY(), getRowWidth(),
-                        itemHeight, entryWidth, entryHeight, Config.get().getNotifs().get(index),
-                        index == 0)));
+                new NotifOptionList(minecraft, width, height, getY(), itemHeight,
+                        entryWidth, entryHeight, Config.get().getNotifs().get(index))));
     }
 
     // Notification button dragging
@@ -105,7 +104,7 @@ public class MainOptionsList extends OptionsList {
      * is below the dragged entry, or more than one slot above.
      */
     private void dropDragged(double mouseX, double mouseY) {
-        OptionsList.Entry hoveredEntry = getEntryAtPosition(mouseX, mouseY);
+        OptionList.Entry hoveredEntry = getEntryAtPosition(mouseX, mouseY);
         // Check whether the drop location is valid
         if (hoveredEntry instanceof Entry.NotifConfigEntry) {
             int hoveredSlot = children().indexOf(hoveredEntry);
@@ -127,31 +126,42 @@ public class MainOptionsList extends OptionsList {
 
     /**
      * @return The index of the first {@link Entry.NotifConfigEntry} in the
-     * {@link OptionsList}.
+     * {@link OptionList}.
      */
     private int notifListOffset() {
         int i = 0;
-        for (OptionsList.Entry entry : children()) {
+        for (OptionList.Entry entry : children()) {
             if (entry instanceof Entry.NotifConfigEntry) return i;
             i++;
         }
         throw new IllegalStateException("Notification list not found");
     }
 
-    public static class Entry extends OptionsList.Entry {
+    public static class Entry extends OptionList.Entry {
 
         private static class NotifConfigEntry extends Entry {
-            NotifConfigEntry(int x, int width, int height, MainOptionsList listWidget,
+            NotifConfigEntry(int x, int width, int height, MainOptionList list,
                              List<Notification> notifs, int index) {
                 super();
-                int statusButtonWidth = Math.max(24, height);
-                int sideButtonWidth = Math.max(16, height);
-                int mainButtonWidth = width - statusButtonWidth - SPACING;
                 Notification notif = notifs.get(index);
+                int statusButtonWidth = Math.max(24, height);
+                int mainButtonWidth = width - statusButtonWidth - SPACING;
+
+                if (index > 0) {
+                    // Drag reorder button
+                    elements.add(Button.builder(Component.literal("\u2191\u2193"),
+                                    (button) -> {
+                                        this.setDragging(true);
+                                        list.dragSourceSlot = list.children().indexOf(this);
+                                    })
+                            .pos(x - list.smallWidgetWidth - SPACING, 0)
+                            .size(list.smallWidgetWidth, height)
+                            .build());
+                }
 
                 // Main button
                 elements.add(Button.builder(createLabel(notif, mainButtonWidth - 10),
-                                (button) -> listWidget.openNotificationConfig(index))
+                                (button) -> list.openNotificationConfig(index))
                         .pos(x, 0)
                         .size(mainButtonWidth, height)
                         .build());
@@ -166,25 +176,16 @@ public class MainOptionsList extends OptionsList {
                                 Component.empty(), (button, status) -> notif.setEnabled(status)));
 
                 if (index > 0) {
-                    // Drag reorder button
-                    elements.add(Button.builder(Component.literal("\u2191\u2193"),
-                                    (button) -> {
-                                        this.setDragging(true);
-                                        listWidget.dragSourceSlot = listWidget.children().indexOf(this);
-                                    })
-                            .pos(x - sideButtonWidth - SPACING, 0)
-                            .size(sideButtonWidth, height)
-                            .build());
                     // Delete button
                     elements.add(Button.builder(Component.literal("\u274C")
                                             .withStyle(ChatFormatting.RED),
                                     (button) -> {
                                         if (Config.get().removeNotif(index)) {
-                                            listWidget.reload();
+                                            list.reload();
                                         }
                                     })
                             .pos(x + width + SPACING, 0)
-                            .size(sideButtonWidth, height)
+                            .size(list.smallWidgetWidth, height)
                             .build());
                 }
             }
@@ -197,9 +198,9 @@ public class MainOptionsList extends OptionsList {
                 Pattern plusNumPattern = Pattern.compile(" \\[\\+\\d+]");
 
                 if (notif.triggers.isEmpty() || notif.triggers.getFirst().string.isBlank()) {
-                    label = Component.literal("> ").append(
+                    label = Component.literal("> ").withStyle(ChatFormatting.YELLOW).append(
                             localized("option", "main.notifs.configure")
-                                    .withStyle(ChatFormatting.YELLOW)).append(" <");
+                                    .withStyle(ChatFormatting.WHITE)).append(" <");
                 }
                 else {
                     Set<String> usedStrings = new TreeSet<>();
@@ -239,9 +240,9 @@ public class MainOptionsList extends OptionsList {
 
             private String getString(Trigger trigger) {
                 if (trigger.isKey) {
-                    return "[Key] " + (trigger.string.equals(".")
-                            ? localized("option", "trigger.key..").toString()
-                            : trigger.string);
+                    return localized("option", "notif.label.key", (trigger.string.equals(".")
+                            ? localized("option", "notif.trigger.key.any")
+                            : trigger.string)).getString();
                 } else {
                     return trigger.string;
                 }

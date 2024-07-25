@@ -4,14 +4,13 @@ import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import dev.terminalmc.chatnotify.util.ColorUtil;
+import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -27,12 +26,16 @@ import java.util.function.Supplier;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
-public class HsvColorPicker extends AbstractWidget {
+public class HsvColorPicker extends OverlayWidget {
     public static final int GUI_SHADOW_ALPHA = 160;
     public static final int GUI_LIGHT = 160;
     public static final int GUI_DARK = 44;
+
     public static final int MIN_WIDTH = 100;
     public static final int MIN_HEIGHT = 80;
+    public static final int MAX_WIDTH = 400;
+    public static final int MAX_HEIGHT = 300;
+
     public static final int BORDER = 2;
     public static final int OUTLINE = 1;
     public static final int CURSOR = 1;
@@ -42,7 +45,6 @@ public class HsvColorPicker extends AbstractWidget {
 
     private final Supplier<Integer> source;
     private final Consumer<Integer> dest;
-    private final Consumer<HsvColorPicker> close;
 
     private boolean hasClickedOnH = false;
     private boolean hasClickedOnSv = false;
@@ -79,7 +81,7 @@ public class HsvColorPicker extends AbstractWidget {
 
     private int cFieldTextWidth;
 
-    private EditBox hexField;
+    private TextField hexField;
     private Button cancelButton;
     private Button confirmButton;
 
@@ -90,11 +92,10 @@ public class HsvColorPicker extends AbstractWidget {
 
     public HsvColorPicker(int x, int y, int width, int height, Component msg,
                           Supplier<Integer> source, Consumer<Integer> dest,
-                          Consumer<HsvColorPicker> close) {
-        super(x, y, checkWidth(width), checkHeight(height), msg);
+                          Consumer<OverlayWidget> close) {
+        super(x, y, width, height, msg, close);
         this.source = source;
         this.dest = dest;
-        this.close = close;
         this.updateColorFromSource();
         this.init();
     }
@@ -103,7 +104,7 @@ public class HsvColorPicker extends AbstractWidget {
      * Builds or rebuilds the widget based on its positional and dimensional
      * fields.
      */
-    private void init() {
+    protected void init() {
         // Fixed values
         int textFieldHeight = 20;
         int minColorBoxWidth = 12;
@@ -132,8 +133,9 @@ public class HsvColorPicker extends AbstractWidget {
         int hexFieldY = BORDER;
         int hexFieldWidth = interiorWidth - hsvPickerBoxWidth;
 
-        hexField = new EditBox(font, getX() + hexFieldX, getY() + hexFieldY,
-                hexFieldWidth, hexFieldHeight, Component.empty());
+        hexField = new TextField(getX() + hexFieldX, getY() + hexFieldY,
+                hexFieldWidth, hexFieldHeight);
+        hexField.hexColorValidator();
         hexField.setMaxLength(7);
         hexField.setResponder(this::updateColorFromHexField);
         hexField.setValue(TextColor.fromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2])).formatValue());
@@ -144,7 +146,7 @@ public class HsvColorPicker extends AbstractWidget {
         int cancelButtonX = BORDER + hsvPickerBoxWidth;
         int cancelButtonY = BORDER + interiorHeight - buttonHeight;
 
-        cancelButton = Button.builder(CommonComponents.GUI_CANCEL, (button) -> close.accept(this))
+        cancelButton = Button.builder(CommonComponents.GUI_CANCEL, (button) -> onClose())
                 .pos(getX() + cancelButtonX, getY() + cancelButtonY)
                 .size(cancelButtonWidth, buttonHeight)
                 .build();
@@ -155,7 +157,7 @@ public class HsvColorPicker extends AbstractWidget {
 
         confirmButton = Button.builder(CommonComponents.GUI_OK, (button) -> {
                     dest.accept(Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]));
-                    close.accept(this);
+                    onClose();
                 })
                 .pos(getX() + confirmButtonX, getY() + confirmButtonY)
                 .size(confirmButtonWidth, buttonHeight)
@@ -181,6 +183,30 @@ public class HsvColorPicker extends AbstractWidget {
         oldCFieldTextY = getY() + oldCFieldY + ((oldCFieldHeight - font.lineHeight) / 2);
     }
 
+    // Overlay stuff
+
+    @Override
+    public int getMinWidth() {
+        return MIN_WIDTH;
+    }
+
+    @Override
+    public int getMaxWidth() {
+        return MAX_WIDTH;
+    }
+
+    @Override
+    public int getMinHeight() {
+        return MIN_HEIGHT;
+    }
+
+    @Override
+    public int getMaxHeight() {
+        return MAX_HEIGHT;
+    }
+
+    // Regular widget stuff
+
     public void updateColorFromSource() {
         int color = source.get();
         Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
@@ -199,18 +225,17 @@ public class HsvColorPicker extends AbstractWidget {
     }
 
     private void updateColorFromHexField(String s) {
-        TextColor textColor = ColorUtil.parseColor(s);
+        TextColor textColor = MiscUtil.parseColor(s);
         if (textColor != null) {
             int color = textColor.getValue();
-            hexField.setTextColor(color);
             if (!updateFromCursor) {
                 Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
                         FastColor.ARGB32.blue(color), hsv);
                 updateHCursor();
                 updateSvCursor();
             }
-        } else {
-            hexField.setTextColor(16711680); // Error red
+            if (hsv[2] < 0.1) hexField.setTextColor(16777215); // Keep text visible
+            else hexField.setTextColor(color);
         }
     }
 
@@ -254,11 +279,6 @@ public class HsvColorPicker extends AbstractWidget {
         } else {
             return false;
         }
-    }
-
-    @Override
-    public boolean isMouseOver(double mouseX, double mouseY) {
-        return true;
     }
 
     @Override
@@ -308,7 +328,7 @@ public class HsvColorPicker extends AbstractWidget {
                 }
             }
         } else {
-            close.accept(this);
+            onClose();
         }
         return true;
     }
@@ -360,9 +380,9 @@ public class HsvColorPicker extends AbstractWidget {
                 newCFieldTextX, newCFieldTextY, 16777215);
         graphics.drawString(Minecraft.getInstance().font, oldColorLabel,
                 oldCFieldTextX, oldCFieldTextY, 16777215);
-        this.hexField.renderWidget(graphics, mouseX, mouseY, delta);
-        this.cancelButton.render(graphics, mouseX, mouseY, delta);
-        this.confirmButton.render(graphics, mouseX, mouseY, delta);
+        hexField.renderWidget(graphics, mouseX, mouseY, delta);
+        cancelButton.render(graphics, mouseX, mouseY, delta);
+        confirmButton.render(graphics, mouseX, mouseY, delta);
     }
 
     private void drawQuads(GuiGraphics graphics) {
@@ -543,82 +563,4 @@ public class HsvColorPicker extends AbstractWidget {
         RenderSystem.depthMask(true);
         RenderSystem.depthFunc(GlConst.GL_LEQUAL);
     }
-
-    @Override
-    public void setPosition(int x, int y) {
-        super.setPosition(x, y);
-        init();
-    }
-
-    public void setX(int x) {
-        super.setX(x);
-        init();
-    }
-
-    public void setY(int y) {
-        super.setY(y);
-        init();
-    }
-
-    /**
-     * @throws IllegalArgumentException if {@code width} or {@code height} is
-     * out of range.
-     * @see HsvColorPicker#checkWidth
-     * @see HsvColorPicker#checkHeight
-     */
-    @Override
-    public void setSize(int width, int height) {
-        checkWidth(width);
-        checkHeight(height);
-        setWidth(width);
-        setHeight(height);
-        init();
-    }
-
-    /**
-     * @throws IllegalArgumentException if {@code width} is out of range.
-     * @see HsvColorPicker#checkWidth
-     */
-    @Override
-    public void setWidth(int width) {
-        checkWidth(width);
-        super.setWidth(width);
-        init();
-    }
-
-    /**
-     * @throws IllegalArgumentException if {@code height} is out of range.
-     * @see HsvColorPicker#checkHeight
-     */
-    @Override
-    public void setHeight(int height) {
-        checkHeight(height);
-        super.setHeight(height);
-        init();
-    }
-
-    /**
-     * @return {@code width}, if it is valid.
-     * @throws IllegalArgumentException if {@code width} is less than
-     * {@link HsvColorPicker#MIN_WIDTH}
-     */
-    private static int checkWidth(int width) {
-        if (width < MIN_WIDTH) throw new IllegalArgumentException(
-                "Width cannot be less than " + MIN_WIDTH + ", got " + width);
-        return width;
-    }
-
-    /**
-     * @return {@code height}, if it is valid.
-     * @throws IllegalArgumentException if {@code height} is less than
-     * {@link HsvColorPicker#MIN_HEIGHT}
-     */
-    private static int checkHeight(int height) {
-        if (height < MIN_HEIGHT) throw new IllegalArgumentException(
-                "Height cannot be less than " + MIN_HEIGHT + ", got " + height);
-        return height;
-    }
-
-    @Override
-    protected void updateWidgetNarration(@NotNull NarrationElementOutput narration) {}
 }

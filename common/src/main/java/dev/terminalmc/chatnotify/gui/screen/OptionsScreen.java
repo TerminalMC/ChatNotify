@@ -7,7 +7,8 @@ package dev.terminalmc.chatnotify.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
-import dev.terminalmc.chatnotify.gui.widget.list.OptionsList;
+import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
+import dev.terminalmc.chatnotify.gui.widget.list.option.OptionList;
 import dev.terminalmc.chatnotify.mixin.accessor.ScreenAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -23,26 +24,27 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Contains one tightly-coupled {@link OptionsList}, which is used to display
+ * Contains one tightly-coupled {@link OptionList}, which is used to display
  * all option control widgets.
  */
 public class OptionsScreen extends OptionsSubScreen {
-    public static final int ROW_WIDTH = Window.BASE_WIDTH;
     public static final int TOP_MARGIN = 32;
     public static final int BOTTOM_MARGIN = 32;
     public static final int LIST_ENTRY_SPACE = 25;
-    public static final int LIST_ENTRY_WIDTH = Math.max(240, Window.BASE_WIDTH - 80);
     public static final int LIST_ENTRY_HEIGHT = 20;
+    public static final int BASE_ROW_WIDTH = Window.BASE_WIDTH;
+    public static final int LIST_ENTRY_SIDE_MARGIN = 24;
+    public static final int BASE_LIST_ENTRY_WIDTH = BASE_ROW_WIDTH - (LIST_ENTRY_SIDE_MARGIN * 2);
 
-    protected OptionsList listWidget;
-    private AbstractWidget overlayWidget = null;
+    protected OptionList listWidget;
+    private OverlayWidget overlayWidget = null;
 
     /**
-     * The {@link OptionsList} passed here is not required to have the correct
+     * The {@link OptionList} passed here is not required to have the correct
      * dimensions (width and height), as it will be automatically reloaded (and
      * resized) prior to being displayed.
      */
-    public OptionsScreen(Screen lastScreen, Component title, OptionsList listWidget) {
+    public OptionsScreen(Screen lastScreen, Component title, OptionList listWidget) {
         super(lastScreen, Minecraft.getInstance().options, title);
         this.listWidget = listWidget;
     }
@@ -55,16 +57,6 @@ public class OptionsScreen extends OptionsSubScreen {
     @Override
     protected void addOptions() {
         // Not currently used
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == InputConstants.KEY_ESCAPE && overlayWidget != null) {
-            removeOverlayWidget();
-            return true;
-        } else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
-        }
     }
 
     @Override
@@ -107,19 +99,25 @@ public class OptionsScreen extends OptionsSubScreen {
 
         // Done button
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
-                .pos(width / 2 - LIST_ENTRY_WIDTH / 2, Math.min(height - LIST_ENTRY_HEIGHT,
+                .pos(width / 2 - BASE_LIST_ENTRY_WIDTH / 2, Math.min(height - LIST_ENTRY_HEIGHT,
                         height - BOTTOM_MARGIN / 2 - LIST_ENTRY_HEIGHT / 2))
-                .size(LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT)
+                .size(BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT)
                 .build());
 
         if (overlayWidget != null) {
+            // Proportional resizing
+            overlayWidget.setWidth(overlayWidget.getNominalWidth(width));
+            overlayWidget.setHeight(overlayWidget.getNominalHeight(height));
+            // Recenter
             overlayWidget.setX(width / 2 - overlayWidget.getWidth() / 2);
             overlayWidget.setY(height / 2 - overlayWidget.getHeight() / 2);
             setOverlayWidget(overlayWidget);
         }
     }
 
-    public void setOverlayWidget(AbstractWidget widget) {
+    // Overlay widget handling
+
+    public void setOverlayWidget(OverlayWidget widget) {
         removeOverlayWidget();
         overlayWidget = widget;
         setChildrenVisible(false);
@@ -141,6 +139,31 @@ public class OptionsScreen extends OptionsSubScreen {
             if (listener instanceof AbstractWidget widget) {
                 widget.visible = visible;
             }
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (overlayWidget != null) {
+            if (keyCode == InputConstants.KEY_ESCAPE) {
+                overlayWidget.onClose();
+                removeOverlayWidget();
+            } else {
+                overlayWidget.keyPressed(keyCode, scanCode, modifiers);
+            }
+            return true;
+        } else {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        if (overlayWidget != null) {
+            overlayWidget.charTyped(chr, modifiers);
+            return true;
+        } else {
+            return super.charTyped(chr, modifiers);
         }
     }
 }

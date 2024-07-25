@@ -2,18 +2,18 @@ package dev.terminalmc.chatnotify.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.terminalmc.chatnotify.gui.widget.LenientEditBox;
+import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import net.minecraft.client.gui.components.EditBox;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * Allows {@link LenientEditBox} instances to accept the section sign character
+ * Allows {@link TextField} instances to accept the section sign character
  * (§, ASCII 167).
  *
  * <p>The main reason for this approach is to avoid having to fully
- * re-implement the {@link EditBox} methods in {@link LenientEditBox}.</p>
+ * re-implement the {@link EditBox} methods in {@link TextField}.</p>
  */
 @Mixin(EditBox.class)
 public class MixinEditBox {
@@ -25,7 +25,7 @@ public class MixinEditBox {
             )
     )
     private boolean allowSectionSign(char c, Operation<Boolean> original) {
-        if (((Object)this) instanceof LenientEditBox) {
+        if (((Object)this) instanceof TextField tf && tf.allowSectionSign) {
             return chatNotify$isAllowedChatCharacter(c);
         } else {
             return original.call(c);
@@ -40,7 +40,7 @@ public class MixinEditBox {
             )
     )
     private String allowSectionSign(String s, Operation<String> original) {
-        if (((Object)this) instanceof LenientEditBox) {
+        if (((Object)this) instanceof TextField tf && tf.allowSectionSign) {
             StringBuilder b = new StringBuilder();
             for (char c : s.toCharArray()) {
                 if (chatNotify$isAllowedChatCharacter(c)) {

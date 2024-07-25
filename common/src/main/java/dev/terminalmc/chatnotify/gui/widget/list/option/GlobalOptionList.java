@@ -3,25 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list;
+package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.TriState;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
-import dev.terminalmc.chatnotify.util.ColorUtil;
+import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.util.MiscUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.FastColor;
 
+import java.awt.*;
 import java.util.Locale;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
@@ -29,10 +32,10 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 /**
  * Contains global configuration options.
  */
-public class GlobalOptionsList extends OptionsList {
-    public GlobalOptionsList(Minecraft mc, int width, int height, int y, int rowWidth,
-                             int itemHeight, int entryWidth, int entryHeight) {
-        super(mc, width, height, y, rowWidth, itemHeight, entryWidth, entryHeight);
+public class GlobalOptionList extends OptionList {
+    public GlobalOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
+                            int entryWidth, int entryHeight) {
+        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
 
         addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.SelfCheckAndRegexEntry(entryX, entryWidth, entryHeight));
@@ -40,7 +43,7 @@ public class GlobalOptionsList extends OptionsList {
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
 
-        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "global.prefixes", "\u2139"),
                 Tooltip.create(localized("option", "global.prefixes.tooltip")), -1));
 
@@ -48,7 +51,7 @@ public class GlobalOptionsList extends OptionsList {
         for (int i = 0; i < max; i++) {
             addEntry(new Entry.PrefixFieldEntry(entryX, entryWidth, entryHeight, this, i));
         }
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().prefixes.add("");
@@ -57,22 +60,22 @@ public class GlobalOptionsList extends OptionsList {
     }
 
     @Override
-    public GlobalOptionsList reload(int width, int height, double scrollAmount) {
-        GlobalOptionsList newListWidget = new GlobalOptionsList(minecraft, width, height, 
-                getY(), getRowWidth(), itemHeight, entryWidth, entryHeight);
-        newListWidget.setScrollAmount(scrollAmount);
-        return newListWidget;
+    public GlobalOptionList reload(int width, int height, double scrollAmount) {
+        GlobalOptionList newList = new GlobalOptionList(minecraft, width, height,
+                getY(), itemHeight, entryWidth, entryHeight);
+        newList.setScrollAmount(scrollAmount);
+        return newList;
     }
 
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
-                new SoundOptionsList(minecraft, width, height, getY(),
-                        getRowWidth(), itemHeight, entryWidth, entryHeight, Config.get().defaultSound)));
+                new SoundOptionList(minecraft, width, height, getY(), itemHeight,
+                        entryWidth, entryHeight, Config.get().defaultSound)));
     }
 
-    private abstract static class Entry extends OptionsList.Entry {
+    private abstract static class Entry extends OptionList.Entry {
 
-        private static class MixinAndKeyDebugEntry extends MainOptionsList.Entry {
+        private static class MixinAndKeyDebugEntry extends MainOptionList.Entry {
             MixinAndKeyDebugEntry(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACING) / 2;
@@ -108,7 +111,7 @@ public class GlobalOptionsList extends OptionsList {
             }
         }
 
-        private static class SelfCheckAndRegexEntry extends MainOptionsList.Entry {
+        private static class SelfCheckAndRegexEntry extends MainOptionList.Entry {
             SelfCheckAndRegexEntry(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACING) / 2;
@@ -134,46 +137,47 @@ public class GlobalOptionsList extends OptionsList {
             }
         }
 
-        private static class DefaultColorEntry extends MainOptionsList.Entry {
-            DefaultColorEntry(int x, int width, int height, GlobalOptionsList listWidget) {
+        private static class DefaultColorEntry extends MainOptionList.Entry {
+            DefaultColorEntry(int x, int width, int height, GlobalOptionList list) {
                 super();
-                Font font = Minecraft.getInstance().font;
-                int colorFieldWidth = font.width("#FFAAFF+++");
-                int mainButtonWidth = width - colorFieldWidth - SPACING;
+                int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
 
                 Button mainButton = Button.builder(localized("option", "global.default_color")
                                         .setStyle(Style.EMPTY.withColor(Config.get().defaultColor)),
                         (button) -> {
-                            int cpHeight = 80;
-                            int cpWidth = Math.max(cpHeight, width);
-                            listWidget.screen.setOverlayWidget(new HsvColorPicker(
-                                    x, listWidget.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
+                            int cpHeight = Math.max(HsvColorPicker.MIN_HEIGHT, list.height / 2);
+                            int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
+                            list.screen.setOverlayWidget(new HsvColorPicker(
+                                    x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
                                     Component.empty(), () -> Config.get().defaultColor,
                                     (val) -> Config.get().defaultColor = val,
                                     (widget) -> {
-                                        listWidget.screen.removeOverlayWidget();
-                                        listWidget.reload();
+                                        list.screen.removeOverlayWidget();
+                                        list.reload();
                                     }));
                         })
                         .pos(x, 0)
-                        .size(mainButtonWidth, height)
+                        .size(width - colorFieldWidth - SPACING, height)
                         .build();
                 elements.add(mainButton);
 
-                EditBox colorField = new EditBox(font, x + mainButtonWidth + SPACING, 0,
-                        colorFieldWidth, height, Component.empty());
+                TextField colorField = new TextField(x + width - colorFieldWidth, 0,
+                        colorFieldWidth, height);
+                colorField.hexColorValidator();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
-                    TextColor textColor = ColorUtil.parseColor(val);
+                    TextColor textColor = MiscUtil.parseColor(val);
                     if (textColor != null) {
                         int color = textColor.getValue();
                         Config.get().defaultColor = color;
-                        // Update color of main button
+                        // Update color of main button and field
                         mainButton.setMessage(localized("option", "global.default_color")
                                 .setStyle(Style.EMPTY.withColor(textColor)));
-                        colorField.setTextColor(color);
-                    } else {
-                        colorField.setTextColor(16711680);
+                        float[] hsv = new float[3];
+                        Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
+                                FastColor.ARGB32.blue(color), hsv);
+                        if (hsv[2] < 0.1) colorField.setTextColor(16777215);
+                        else colorField.setTextColor(color);
                     }
                 });
                 colorField.setValue(TextColor.fromRgb(Config.get().defaultColor).formatValue());
@@ -181,23 +185,21 @@ public class GlobalOptionsList extends OptionsList {
             }
         }
 
-        private static class DefaultSoundEntry extends MainOptionsList.Entry {
-            DefaultSoundEntry(int x, int width, int height, GlobalOptionsList listWidget) {
+        private static class DefaultSoundEntry extends MainOptionList.Entry {
+            DefaultSoundEntry(int x, int width, int height, GlobalOptionList list) {
                 super();
                 elements.add(Button.builder(localized("option", "global.default_sound",
                                         Config.get().defaultSound.getId()),
-                                (button) -> listWidget.openSoundConfig())
+                                (button) -> list.openSoundConfig())
                         .pos(x, 0)
                         .size(width, height)
                         .build());
             }
         }
 
-        private static class SoundSourceEntry extends MainOptionsList.Entry {
-            SoundSourceEntry(int x, int width, int height, GlobalOptionsList listWidget) {
+        private static class SoundSourceEntry extends MainOptionList.Entry {
+            SoundSourceEntry(int x, int width, int height, GlobalOptionList list) {
                 super();
-                int volumeButtonWidth = height;
-                int mainButtonWidth = width - volumeButtonWidth - SPACING;
 
                 elements.add(CycleButton.<SoundSource>builder(source -> Component.translatable(
                         "soundCategory." + source.getName()))
@@ -205,41 +207,40 @@ public class GlobalOptionsList extends OptionsList {
                         .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "global.sound_source.tooltip")))
-                        .create(x, 0, mainButtonWidth, height, localized("option", "global.sound_source"),
+                        .create(x, 0, width - list.smallWidgetWidth - SPACING, height,
+                                localized("option", "global.sound_source"),
                                 (button, status) -> Config.get().soundSource = status));
 
                 elements.add(Button.builder(Component.literal("\uD83D\uDD0A"),
                                 (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
-                                        listWidget.screen, Minecraft.getInstance().options)))
+                                        list.screen, Minecraft.getInstance().options)))
                         .tooltip(Tooltip.create(
                                 localized("option", "global.sound_source.minecraft_volume")))
-                        .pos(x + width - volumeButtonWidth, 0)
-                        .size(volumeButtonWidth, height)
+                        .pos(x + width - list.smallWidgetWidth, 0)
+                        .size(list.smallWidgetWidth, height)
                         .build());
             }
         }
 
         private static class PrefixFieldEntry extends Entry {
-            PrefixFieldEntry(int x, int width, int height, GlobalOptionsList listWidget, int index) {
+            PrefixFieldEntry(int x, int width, int height, GlobalOptionList list, int index) {
                 super();
-                int removeButtonWidth = Math.max(16, height);
 
-                EditBox prefixField = new EditBox(Minecraft.getInstance().font, x, 0,
-                        width, height, Component.empty());
+                EditBox prefixField = new TextField(x, 0, width, height);
                 prefixField.setMaxLength(30);
-                prefixField.setValue(Config.get().prefixes.get(index));
                 prefixField.setResponder((prefix) -> Config.get().prefixes.set(
                         index, prefix.strip().toLowerCase(Locale.ROOT)));
+                prefixField.setValue(Config.get().prefixes.get(index));
                 elements.add(prefixField);
 
                 elements.add(Button.builder(Component.literal("\u274C")
                                         .withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     Config.get().prefixes.remove(index);
-                                    listWidget.reload();
+                                    list.reload();
                                 })
                         .pos(x + width + SPACING, 0)
-                        .size(removeButtonWidth, height)
+                        .size(list.smallWidgetWidth, height)
                         .build());
             }
         }

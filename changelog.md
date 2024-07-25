@@ -1,7 +1,5 @@
-- Add drag-and-drop functionality to lists
-- Add enhanced color selection widget
-- Switch to multi-line text fields for response messages
-- Add an optional 'style string' field to triggers, which can be used to fine-tune message re-styling
-- Make everything translatable
-- Improve debug behavior
-- Note: this is experimental, please report any issues you find
+- Add regex validator
+- Add sound validator
+- Add dropdown text field widget for sound and key selection
+- Allow dynamic expansion of text fields
+- Adjust various GUI elements

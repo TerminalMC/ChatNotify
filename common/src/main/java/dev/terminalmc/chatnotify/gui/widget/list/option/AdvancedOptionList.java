@@ -3,25 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list;
+package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.ResponseMessage;
 import dev.terminalmc.chatnotify.config.Trigger;
-import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
-import dev.terminalmc.chatnotify.gui.widget.LenientEditBox;
+import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
+import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
+import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.List;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -29,26 +30,26 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * Contains controls for advanced options of a {@link Notification}, including
  * exclusion triggers, response messages, and reset options.
  */
-public class AdvancedOptionsList extends OptionsList {
+public class AdvancedOptionList extends OptionList {
     private final Notification notif;
     private int dragSourceSlot = -1;
 
-    public AdvancedOptionsList(Minecraft mc, int width, int height, int y, int rowWidth,
-                               int itemHeight, int entryWidth, int entryHeight, Notification notif) {
-        super(mc, width, height, y, rowWidth, itemHeight, entryWidth, entryHeight);
+    public AdvancedOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
+                              int entryWidth, int entryHeight, Notification notif) {
+        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
         this.notif = notif;
 
-        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.exclusion", "\u2139"),
                 Tooltip.create(localized("option", "advanced.exclusion.tooltip")), -1));
         addEntry(new Entry.ExclusionToggleEntry(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.exclusionEnabled) {
             for (int i = 0; i < this.notif.exclusionTriggers.size(); i ++) {
-                addEntry(new Entry.ExclusionFieldEntry(entryX, entryWidth, entryHeight,
+                addEntry(new Entry.ExclusionFieldEntry(dynEntryX, dynEntryWidth, entryHeight,
                         this, notif, notif.exclusionTriggers.get(i), i));
             }
-            addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.exclusionTriggers.add(new Trigger());
@@ -56,23 +57,21 @@ public class AdvancedOptionsList extends OptionsList {
                     }));
         }
 
-        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.response", "\u2139"),
                 Tooltip.create(localized("option", "advanced.response.tooltip")
                         .append(localized("option", "advanced.response.tooltip.warning")
-                        .withStyle(ChatFormatting.RED))
-                        .append(Config.get().allowRegex
-                                ? localized("option", "advanced.response.tooltip.regex")
-                                : Component.empty())), -1));
+                        .withStyle(ChatFormatting.RED))), -1));
         addEntry(new Entry.ResponseToggleEntry(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.responseEnabled) {
             for (int i = 0; i < notif.responseMessages.size(); i ++) {
-                Entry e = new Entry.ResponseFieldEntry(entryX, entryWidth, entryHeight, this, notif, i);
+                Entry e = new Entry.ResponseFieldEntry(dynEntryX, dynEntryWidth, entryHeight, this,
+                        notif, notif.responseMessages.get(i), i);
                 addEntry(e);
                 addEntry(new SpaceEntry(e));
             }
-            addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+            addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.responseMessages.add(new ResponseMessage());
@@ -80,10 +79,10 @@ public class AdvancedOptionsList extends OptionsList {
                     }));
         }
 
-        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.broken"), null, -1));
 
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.level_1"),
                 Tooltip.create(localized("option", "advanced.reset.level_1.tooltip")),
                 -1,
@@ -92,7 +91,7 @@ public class AdvancedOptionsList extends OptionsList {
                     reload();
                 }));
 
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.level_2"),
                 Tooltip.create(localized("option", "advanced.reset.level_2.tooltip")),
                 -1,
@@ -109,7 +108,7 @@ public class AdvancedOptionsList extends OptionsList {
                         localized("option", "advanced.reset.level_2"),
                         localized("option", "advanced.reset.level_2.confirm")))));
 
-        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.level_3"),
                 Tooltip.create(localized("option", "advanced.reset.level_3.tooltip")),
                 -1,
@@ -128,18 +127,11 @@ public class AdvancedOptionsList extends OptionsList {
     }
 
     @Override
-    public AdvancedOptionsList reload(int width, int height, double scrollAmount) {
-        AdvancedOptionsList newListWidget = new AdvancedOptionsList(minecraft, width, height, 
-                getY(), getRowWidth(), itemHeight, entryWidth, entryHeight, notif);
-        newListWidget.setScrollAmount(scrollAmount);
-        return newListWidget;
-    }
-
-    private void openTriggerConfig(Trigger trigger) {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen,
-                localized("option", "trigger"),
-                new TriggerOptionsList(minecraft, width, height, getY(), getRowWidth(),
-                        itemHeight, entryWidth, entryHeight, trigger)));
+    public AdvancedOptionList reload(int width, int height, double scrollAmount) {
+        AdvancedOptionList newList = new AdvancedOptionList(minecraft, width, height,
+                getY(), itemHeight, entryWidth, entryHeight, notif);
+        newList.setScrollAmount(scrollAmount);
+        return newList;
     }
 
     // Field dragging
@@ -163,8 +155,8 @@ public class AdvancedOptionsList extends OptionsList {
     }
 
     private void dropDragged(double mouseX, double mouseY) {
-        OptionsList.Entry sourceEntry = children().get(dragSourceSlot);
-        OptionsList.Entry hoveredEntry = getEntryAtPosition(mouseX, mouseY);
+        OptionList.Entry sourceEntry = children().get(dragSourceSlot);
+        OptionList.Entry hoveredEntry = getEntryAtPosition(mouseX, mouseY);
         switch(children().get(dragSourceSlot)) {
             case Entry.ExclusionFieldEntry e -> dropDraggedExclusion(hoveredEntry);
             case Entry.ResponseFieldEntry e -> dropDraggedResponse(hoveredEntry);
@@ -173,7 +165,7 @@ public class AdvancedOptionsList extends OptionsList {
         this.dragSourceSlot = -1;
     }
 
-    private void dropDraggedExclusion(OptionsList.Entry hoveredEntry) {
+    private void dropDraggedExclusion(OptionList.Entry hoveredEntry) {
         int targetSlot = children().indexOf(hoveredEntry);
         int offset = exclusionListOffset();
         // Check whether the drop location is valid
@@ -193,7 +185,7 @@ public class AdvancedOptionsList extends OptionsList {
         }
     }
 
-    private void dropDraggedResponse(OptionsList.Entry hoveredEntry) {
+    private void dropDraggedResponse(OptionList.Entry hoveredEntry) {
         int hoveredSlot = children().indexOf(hoveredEntry);
         // Check whether the drop location is valid
         if (hoveredEntry instanceof Entry.ResponseFieldEntry || hoveredSlot == responseListOffset() - 1) {
@@ -218,11 +210,11 @@ public class AdvancedOptionsList extends OptionsList {
 
     /**
      * @return The index of the first {@link Entry.ExclusionFieldEntry} in the
-     * {@link OptionsList}.
+     * {@link OptionList}.
      */
     private int exclusionListOffset() {
         int i = 0;
-        for (OptionsList.Entry entry : children()) {
+        for (OptionList.Entry entry : children()) {
             if (entry instanceof Entry.ExclusionFieldEntry) return i;
             i++;
         }
@@ -231,11 +223,11 @@ public class AdvancedOptionsList extends OptionsList {
 
     /**
      * @return The index of the first {@link Entry.ResponseFieldEntry} in the
-     * {@link OptionsList}.
+     * {@link OptionList}.
      */
     private int responseListOffset() {
         int i = 0;
-        for (OptionsList.Entry entry : children()) {
+        for (OptionList.Entry entry : children()) {
             if (entry instanceof Entry.ResponseFieldEntry) return i;
             i++;
         }
@@ -244,23 +236,23 @@ public class AdvancedOptionsList extends OptionsList {
 
     /**
      * @return The number of non-{@link Entry.ResponseFieldEntry} entries in the
-     * {@link OptionsList} before (and including) the specified index.
+     * {@link OptionList} before (and including) the specified index.
      */
     private int responseOffset(int index) {
         int i = 0;
         int offset = 0;
-        for (OptionsList.Entry entry : children()) {
+        for (OptionList.Entry entry : children()) {
             if (!(entry instanceof Entry.ResponseFieldEntry)) offset++;
             if (i++ == index) return offset;
         }
         throw new IllegalStateException("Response index out of range");
     }
 
-    private abstract static class Entry extends OptionsList.Entry {
+    private abstract static class Entry extends OptionList.Entry {
 
         private static class ExclusionToggleEntry extends Entry {
             ExclusionToggleEntry(int x, int width, int height, Notification notif,
-                                 AdvancedOptionsList listWidget) {
+                                 AdvancedOptionList list) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
@@ -269,45 +261,63 @@ public class AdvancedOptionsList extends OptionsList {
                         .create(x, 0, width, height, localized("common", "status"),
                                 (button, status) -> {
                                     notif.exclusionEnabled = status;
-                                    listWidget.reload();
+                                    list.reload();
                                 }));
             }
         }
 
         private static class ExclusionFieldEntry extends Entry {
-            ExclusionFieldEntry(int x, int width, int height, AdvancedOptionsList listWidget,
+            ExclusionFieldEntry(int x, int width, int height, AdvancedOptionList list,
                                 Notification notif, Trigger trigger, int index) {
                 super();
-                boolean regex = Config.get().allowRegex;
                 int fieldSpacing = 1;
-                int smallButtonWidth = 16;
-                int sideButtonWidth = Math.max(16, height);
-                int regexButtonX = x;
-                int keyButtonX = x + (regex ? smallButtonWidth : 0);
-                int triggerFieldWidth = width - smallButtonWidth - fieldSpacing
-                        - (regex ? smallButtonWidth : 0);
-                int triggerFieldX = x + smallButtonWidth + fieldSpacing + (regex ? smallButtonWidth : 0);
+                int triggerFieldWidth = width - list.tinyWidgetWidth - fieldSpacing
+                        - (Config.get().allowRegex ? list.tinyWidgetWidth : 0);
+                TextField triggerField = trigger.isKey
+                        ? new FakeTextField(0, 0, triggerFieldWidth, height, () -> {
+                    int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
+                    int wWidth = Math.max(DropdownTextField.MIN_WIDTH, width);
+                    int wX = x + (width / 2) - (wWidth / 2);
+                    int wY = list.getY();
+                    list.screen.setOverlayWidget(new DropdownTextField(
+                            wX, wY, wWidth, wHeight, Component.empty(),
+                            () -> trigger.string, (str) -> trigger.string = str,
+                            (widget) -> {
+                                list.screen.removeOverlayWidget();
+                                list.reload();
+                            }, List.of(NotifOptionList.KEYS)));
+                })
+                        : new TextField(0, 0, triggerFieldWidth, height);
+                int movingX = x;
 
-                EditBox triggerField = new LenientEditBox(Minecraft.getInstance().font,
-                        triggerFieldX, 0, triggerFieldWidth, height, Component.empty());
-                triggerField.setMaxLength(240);
-                triggerField.setValue(trigger.string);
-                triggerField.setResponder((string) -> trigger.string = string.strip());
-                elements.add(triggerField);
+                // Drag reorder button
+                elements.add(Button.builder(Component.literal("\u2191\u2193"),
+                                (button) -> {
+                                    this.setDragging(true);
+                                    list.dragSourceSlot = list.children().indexOf(this);
+                                })
+                        .pos(x - list.smallWidgetWidth - SPACING, 0)
+                        .size(list.smallWidgetWidth, height)
+                        .build());
 
                 // Regex button
-                if (regex) {
+                if (Config.get().allowRegex) {
                     String icon = ".*";
                     CycleButton<Boolean> regexButton = CycleButton.booleanBuilder(
-                            Component.literal(icon).withStyle(ChatFormatting.GREEN),
+                                    Component.literal(icon).withStyle(ChatFormatting.GREEN),
                                     Component.literal(icon).withStyle(ChatFormatting.RED))
                             .displayOnlyValue()
                             .withInitialValue(trigger.isRegex)
                             .withTooltip((status) -> Tooltip.create(status
                                     ? localized("option", "notif.regex.enabled")
                                     : localized("option", "notif.regex.disabled")))
-                            .create(regexButtonX, 0, smallButtonWidth, height,
-                                    Component.empty(), (button, status) -> trigger.isRegex = status);
+                            .create(movingX, 0, list.tinyWidgetWidth, height,
+                                    Component.empty(), (button, status) -> {
+                                        trigger.isRegex = status;
+                                        if (status) triggerField.regexValidator();
+                                        else triggerField.defaultValidator();
+                                        triggerField.setValue(triggerField.getValue());
+                                    });
                     regexButton.setTooltipDelay(Duration.ofMillis(500));
                     if (trigger.isKey) {
                         regexButton.setMessage(Component.literal(icon).withStyle(ChatFormatting.GRAY));
@@ -316,6 +326,7 @@ public class AdvancedOptionsList extends OptionsList {
                         regexButton.active = false;
                     }
                     elements.add(regexButton);
+                    movingX += list.tinyWidgetWidth;
                 }
 
                 // Key button
@@ -325,45 +336,44 @@ public class AdvancedOptionsList extends OptionsList {
                         .withInitialValue(trigger.isKey)
                         .displayOnlyValue()
                         .withTooltip((status) -> Tooltip.create(status
-                                ? localized("option", "notif.key.enabled")
-                                : localized("option", "notif.key.disabled")))
-                        .create(keyButtonX, 0, smallButtonWidth, height, Component.empty(),
+                                ? localized("option", "notif.trigger.tooltip.key")
+                                : localized("option", "notif.trigger.tooltip.normal")))
+                        .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, status) -> {
-                                    if (Screen.hasShiftDown()) {
-                                        trigger.isKey = status;
-                                        listWidget.reload();
-                                    } else {
-                                        listWidget.openTriggerConfig(trigger);
-                                    }});
+                                    trigger.isKey = status;
+                                    list.reload();
+                                });
                 keyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(keyButton);
+                movingX += list.tinyWidgetWidth + fieldSpacing;
+
+                // Trigger field
+                triggerField.setPosition(movingX, 0);
+                if (trigger.isRegex) triggerField.regexValidator();
+                triggerField.setMaxLength(240);
+                triggerField.setResponder((string) -> trigger.string = string.strip());
+                triggerField.setValue(trigger.string);
+                triggerField.setTooltip(Tooltip.create(
+                        localized("option", "notif.trigger.field.tooltip")));
+                triggerField.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(triggerField);
 
                 // Delete button
                 elements.add(Button.builder(Component.literal("\u274C")
                                         .withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     notif.exclusionTriggers.remove(index);
-                                    listWidget.reload();
+                                    list.reload();
                                 })
                         .pos(x + width + SPACING, 0)
-                        .size(sideButtonWidth, height)
-                        .build());
-
-                // Drag reorder button
-                elements.add(Button.builder(Component.literal("\u2191\u2193"),
-                                (button) -> {
-                                    this.setDragging(true);
-                                    listWidget.dragSourceSlot = listWidget.children().indexOf(this);
-                                })
-                        .pos(x - sideButtonWidth - SPACING, 0)
-                        .size(sideButtonWidth, height)
+                        .size(list.smallWidgetWidth, height)
                         .build());
             }
         }
 
         private static class ResponseToggleEntry extends Entry {
             ResponseToggleEntry(int x, int width, int height, Notification notif,
-                                AdvancedOptionsList listWidget) {
+                                AdvancedOptionList listWidget) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
@@ -378,50 +388,29 @@ public class AdvancedOptionsList extends OptionsList {
         }
 
         private static class ResponseFieldEntry extends Entry {
-            ResponseFieldEntry(int x, int width, int height, AdvancedOptionsList listWidget,
-                               Notification notif, int index) {
+            ResponseFieldEntry(int x, int width, int height, AdvancedOptionList list,
+                               Notification notif, ResponseMessage response, int index) {
                 super();
-                boolean regex = Config.get().allowRegex;
                 int fieldSpacing = 1;
-                int smallButtonWidth = 16;
-                int sideButtonWidth = Math.max(16, height);
                 int timeFieldWidth = Minecraft.getInstance().font.width("00000");
                 int msgFieldWidth = width - timeFieldWidth - fieldSpacing
-                        - (regex ? smallButtonWidth + fieldSpacing : 0);
-                int msgFieldX = x + (regex ? smallButtonWidth + fieldSpacing : 0);
-                ResponseMessage response = notif.responseMessages.get(index);
+                        - (Config.get().allowRegex ? list.tinyWidgetWidth + fieldSpacing : 0);
+                MultiLineEditBox msgField = new MultiLineEditBox(Minecraft.getInstance().font,
+                        0, 0, msgFieldWidth, height * 2, Component.empty(), Component.empty());
+                int movingX = x;
 
-                // Response field
-                MultiLineEditBox messageField = new MultiLineEditBox(Minecraft.getInstance().font,
-                        msgFieldX, 0, msgFieldWidth, height * 2,
-                        Component.empty(), Component.empty());
-                messageField.setCharacterLimit(256);
-                messageField.setValue(response.string);
-                messageField.setValueListener((val) -> response.string = val.strip());
-                elements.add(messageField);
-
-                // Delay field
-                EditBox timeField = new EditBox(Minecraft.getInstance().font,
-                        x + width - timeFieldWidth, 0, timeFieldWidth, height, Component.empty());
-                timeField.setTooltip(Tooltip.create(
-                        localized("option", "advanced.response.time.tooltip")));
-                timeField.setTooltipDelay(Duration.ofMillis(500));
-                timeField.setMaxLength(5);
-                timeField.setValue(String.valueOf(response.delayTicks));
-                timeField.setResponder((val) -> {
-                    try {
-                        int delay = Integer.parseInt(val.strip());
-                        if (delay < 0) throw new NumberFormatException();
-                        response.delayTicks = delay;
-                        timeField.setTextColor(16777215);
-                    } catch (NumberFormatException ignored) {
-                        timeField.setTextColor(16711680);
-                    }
-                });
-                elements.add(timeField);
+                // Drag reorder button
+                elements.add(Button.builder(Component.literal("\u2191\u2193"),
+                                (button) -> {
+                                    this.setDragging(true);
+                                    list.dragSourceSlot = list.children().indexOf(this);
+                                })
+                        .pos(x - list.smallWidgetWidth - SPACING, 0)
+                        .size(list.smallWidgetWidth, height)
+                        .build());
 
                 // Regex button
-                if (regex) {
+                if (Config.get().allowRegex) {
                     String icon = ".*";
                     CycleButton<Boolean> regexButton = CycleButton.booleanBuilder(
                                     Component.literal(icon).withStyle(ChatFormatting.GREEN),
@@ -431,31 +420,40 @@ public class AdvancedOptionsList extends OptionsList {
                             .withTooltip((status) -> Tooltip.create(status
                                     ? localized("option", "advanced.response.regex.enabled")
                                     : localized("option", "advanced.response.regex.disabled")))
-                            .create(x, 0, smallButtonWidth, height,
+                            .create(x, 0, list.tinyWidgetWidth, height,
                                     Component.empty(), (button, status) -> response.regexGroups = status);
                     regexButton.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(regexButton);
+                    movingX += list.tinyWidgetWidth + fieldSpacing;
                 }
+
+                // Response field
+                msgField.setX(movingX);
+                msgField.setCharacterLimit(256);
+                msgField.setValue(response.string);
+                msgField.setValueListener((val) -> response.string = val.strip());
+                elements.add(msgField);
+
+                // Delay field
+                EditBox timeField = new EditBox(Minecraft.getInstance().font,
+                        x + width - timeFieldWidth, 0, timeFieldWidth, height, Component.empty());
+                timeField.setTooltip(Tooltip.create(
+                        localized("option", "advanced.response.time.tooltip")));
+                timeField.setTooltipDelay(Duration.ofMillis(500));
+                timeField.setMaxLength(5);
+                timeField.setValue(String.valueOf(response.delayTicks));
+                timeField.setResponder((str) -> response.delayTicks = Integer.parseInt(str.strip()));
+                elements.add(timeField);
 
                 // Delete button
                 elements.add(Button.builder(Component.literal("\u274C")
                                         .withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     notif.responseMessages.remove(index);
-                                    listWidget.reload();
+                                    list.reload();
                                 })
                         .pos(x + width + SPACING, 0)
-                        .size(sideButtonWidth, height)
-                        .build());
-
-                // Drag reorder button
-                elements.add(Button.builder(Component.literal("\u2191\u2193"),
-                                (button) -> {
-                                    this.setDragging(true);
-                                    listWidget.dragSourceSlot = listWidget.children().indexOf(this);
-                                })
-                        .pos(x - sideButtonWidth - SPACING, 0)
-                        .size(sideButtonWidth, height)
+                        .size(list.smallWidgetWidth, height)
                         .build());
             }
         }

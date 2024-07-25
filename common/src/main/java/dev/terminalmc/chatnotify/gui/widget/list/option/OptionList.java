@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list;
+package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
@@ -32,32 +32,42 @@ import java.util.function.Supplier;
  *
  * <p>Contains list of {@link Entry} objects, which are drawn onto the screen
  * top-down in the order that they are stored, with each entry being allocated
- * a standard amount of space specified by {@link OptionsList#itemHeight}. The
- * actual height of list entries, specified by {@link OptionsList#entryHeight},
+ * a standard amount of space specified by {@link OptionList#itemHeight}. The
+ * actual height of list entries, specified by {@link OptionList#entryHeight},
  * can be less but should not be more.</p>
  *
  * <p><b>Note:</b> If you want multiple widgets to appear side-by-side, you must
  * add them all to a single {@link Entry}'s list of widgets, which are all
  * rendered at the same list level.</p>
  */
-public abstract class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
+public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
+    public static final int ROW_WIDTH_MARGIN = 20;
+
     protected OptionsScreen screen;
 
     // Standard positional and dimensional values used by entries
     protected final int rowWidth;
     protected final int entryWidth;
+    protected final int dynEntryWidth;
     protected final int entryHeight;
-    protected final int entryRelX;
     protected final int entryX;
+    protected final int dynEntryX;
 
-    public OptionsList(Minecraft mc, int width, int height, int y, int rowWidth,
-                       int itemHeight, int entryWidth, int entryHeight) {
+    protected final int smallWidgetWidth;
+    protected final int tinyWidgetWidth;
+
+    public OptionList(Minecraft mc, int width, int height, int y, int itemHeight,
+                      int entryWidth, int entryHeight) {
         super(mc, width, height, y, itemHeight);
-        this.rowWidth = rowWidth;
         this.entryWidth = entryWidth;
+        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 5.0F * 3));
         this.entryHeight = entryHeight;
-        this.entryRelX = -entryWidth / 2;
-        this.entryX = width / 2 + entryRelX;
+        this.entryX = width / 2 - (entryWidth / 2);
+        this.dynEntryX = width / 2 - (dynEntryWidth / 2);
+        this.rowWidth = Math.max(entryWidth, dynEntryWidth)
+                + (OptionsScreen.LIST_ENTRY_SIDE_MARGIN * 2) + ROW_WIDTH_MARGIN;
+        this.smallWidgetWidth = Math.max(16, entryHeight);
+        this.tinyWidgetWidth = 16;
     }
 
     @Override
@@ -75,13 +85,13 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
         screen.reload();
     }
 
-    public OptionsList reload(OptionsScreen screen, int width, int height, double scrollAmount) {
-        OptionsList newList = reload(width, height, scrollAmount);
+    public OptionList reload(OptionsScreen screen, int width, int height, double scrollAmount) {
+        OptionList newList = reload(width, height, scrollAmount);
         newList.screen = screen;
         return newList;
     }
 
-    protected abstract OptionsList reload(int width, int height, double scrollAmount);
+    protected abstract OptionList reload(int width, int height, double scrollAmount);
 
     public void onClose() {}
 
@@ -108,12 +118,12 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
         }
 
         @Override
-        public void render(@NotNull GuiGraphics context, int index, int y, int x,
+        public void render(@NotNull GuiGraphics graphics, int index, int y, int x,
                            int entryWidth, int entryHeight, int mouseX, int mouseY,
                            boolean hovered, float delta) {
             elements.forEach((widget) -> {
                 widget.setY(y);
-                widget.render(context, mouseX, mouseY, delta);
+                widget.render(graphics, mouseX, mouseY, delta);
             });
         }
 
@@ -183,10 +193,10 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
 
     /**
      * The {@link AbstractSelectionList} class (second-degree superclass of
-     * {@link OptionsList}) is hard-coded to only support fixed spacing of
+     * {@link OptionList}) is hard-coded to only support fixed spacing of
      * entries. This is an invisible entry which defers all actions to the
      * given {@link Entry}, thereby allowing that entry to span multiple slots
-     * of the {@link OptionsList}.
+     * of the {@link OptionList}.
      */
     public static class SpaceEntry extends Entry {
         private final Entry entry;
