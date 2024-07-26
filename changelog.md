@@ -1,5 +1,1 @@
-- Add regex validator
-- Add sound validator
-- Add dropdown text field widget for sound and key selection
-- Allow dynamic expansion of text fields
-- Adjust various GUI elements
+- Add Russian translation (KiberAndy)
