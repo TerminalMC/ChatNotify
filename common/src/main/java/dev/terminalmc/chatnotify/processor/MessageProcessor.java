@@ -24,14 +24,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import static dev.terminalmc.chatnotify.ChatNotify.recentMessages;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
-/*
- * Message processing algorithm, starting at processMessage.
- */
 public class MessageProcessor {
 
     /**
@@ -46,16 +42,11 @@ public class MessageProcessor {
             case OFF -> msg = addRawInfo(msg);
         }
 
-        String msgStr = msg.getString();
-        if (msgStr.isBlank()) return msg; // Ignore blank messages
-        String checkedMsgStr = checkOwner(msgStr); // Null if ignoring message
+        String str = msg.getString();
+        if (str.isBlank()) return msg; // Ignore blank messages
+        String checkedStr = checkOwner(str); // Null if ignoring message
 
-        Component modifiedMsg = null;
-        if (checkedMsgStr != null) {
-            modifiedMsg = tryNotify(msg.copy(), msgStr, checkedMsgStr);
-        }
-
-        return (modifiedMsg == null ? msg : modifiedMsg);
+        return (checkedStr == null ? msg : tryNotify(msg.copy(), str, checkedStr));
     }
 
     /**
@@ -64,43 +55,38 @@ public class MessageProcessor {
      *
      * <p>The message is identified as sent by the user if it contains a stored
      * message (or command) sent by the user, and the part preceding the stored
-     * message contains a trigger of the username notification.
+     * message contains a trigger of the username notification.</p>
      *
      * <p>If the message is positively identified, it is set to {@code null} if
      * ChatNotify is configured to ignore such messages, else the part of the
      * prefix that matched a trigger is removed to prevent it being detected by
-     * trigger search.
-     * @param msgStr the message to check.
-     * @return the message, modified message, or {@code null} depending on the
+     * trigger search.</p>
+     * @param msg the message to check.
+     * @return the message, a modified copy, or {@code null} depending on the
      * result of the check.
      */
-    private static @Nullable String checkOwner(String msgStr) {
-        // Stored messages are always converted to lowercase, convert to match.
-        String msgStrLow = msgStr.toLowerCase(Locale.ROOT);
+    private static @Nullable String checkOwner(String msg) {
+        // Stored messages are always converted to lowercase, convert to match
+        String msgStrLow = msg.toLowerCase(Locale.ROOT);
         // Check for a matching stored message
         for (int i = 0; i < recentMessages.size(); i++) {
             int lastMatchIdx = msgStrLow.lastIndexOf(recentMessages.get(i).getSecond());
-            if (lastMatchIdx > 0) { // First condition satisfied
+            if (lastMatchIdx > 0) { // Matched against a stored message
                 // Check for a username trigger in the part before the match
-                String prefix = msgStr.substring(0, lastMatchIdx);
+                String prefix = msg.substring(0, lastMatchIdx);
                 for (Trigger trigger : Config.get().getUserNotif().triggers) {
-                    Matcher matcher = triggerSearch(prefix, trigger.string);
-                    if (matcher.find()) { // Second condition satisfied
+                    Matcher matcher = normalSearch(prefix, trigger.string);
+                    if (matcher.find()) { // Matched against a username trigger
                         recentMessages.remove(i);
-                        // Modify the message string
-                        if (Config.get().checkOwnMessages) {
-                            msgStr = msgStr.substring(0, matcher.start()) +
-                                    msgStr.substring(matcher.end());
-                        }
-                        else {
-                            msgStr = null;
-                        }
-                        return msgStr;
+                        return Config.get().checkOwnMessages
+                                ? msg.substring(0, matcher.start())
+                                        + msg.substring(matcher.end())
+                                : null;
                     }
                 }
             }
         }
-        return msgStr;
+        return msg;
     }
 
     /**
@@ -108,78 +94,80 @@ public class MessageProcessor {
      * trigger matches the message.
      *
      * <p>When a trigger matches, checks the exclusion triggers of the
-     * notification to determine whether to activate the notification.
+     * notification to determine whether to activate the notification.</p>
      *
      * <p>If the notification should be activated, completes the relevant
-     * notification actions.
+     * notification actions.</p>
      *
      * <p><b>Note:</b> For performance and simplicity reasons, this method only
-     * allows one notification to be triggered by a given message.
+     * allows one notification to be triggered by a given message.</p>
      * @param msg the original message.
-     * @param msgStr the original message string.
-     * @param checkedMsgStr the owner-checked message string.
-     * @return a re-styled copy of the message, or null if no trigger matched.
+     * @param str the original message string.
+     * @param checkedStr the owner-checked message string.
+     * @return a re-styled copy of the message, or the original message if
+     * restyling was not possible.
      */
-    private static Component tryNotify(Component msg, String msgStr, String checkedMsgStr) {
+    private static Component tryNotify(Component msg, String str, String checkedStr) {
         boolean allowRegex = Config.get().allowRegex;
         for (Notification notif : Config.get().getNotifs()) {
-            if (notif.isEnabled() && !notif.editing) {
-                for (Trigger trigger : notif.triggers) {
-                    if (!trigger.string.isBlank()) { // Guard
-                        boolean hit;
-                        Matcher matcher = null;
-                        if (trigger.isKey) {
-                            hit = keySearch(msg, trigger.string);
-                        }
-                        else if (allowRegex && trigger.isRegex) {
-                            matcher = regexSearch(msgStr, trigger.string);
-                            hit = matcher != null && matcher.find();
-                        }
-                        else {
-                            hit = triggerSearch(checkedMsgStr, trigger.string).find();
-                        }
-                        if (hit) {
-                            boolean exclHit = false;
-                            for (Trigger exclTrigger : notif.exclusionTriggers) {
-                                if (exclTrigger.isKey) {
-                                    exclHit = keySearch(msg, exclTrigger.string);
-                                }
-                                else if (allowRegex && exclTrigger.isRegex) {
-                                    Matcher exclMatcher = regexSearch(msgStr, exclTrigger.string);
-                                    exclHit = exclMatcher != null && exclMatcher.find();
-                                }
-                                else {
-                                    exclHit = triggerSearch(checkedMsgStr, exclTrigger.string).find();
-                                }
-                                if (exclHit) break;
-                            }
+            if (!notif.isEnabled() || notif.editing) continue;
+            for (Trigger trig : notif.triggers) {
+                if (trig.string.isBlank()) continue;
 
-                            if (!exclHit) {
-                                playSound(notif);
-                                sendResponses(notif, matcher);
-                                String cleanMsgStr = StringUtil.stripColor(msgStr);
-                                if (trigger.isKey || (allowRegex && trigger.isRegex)) {
-                                    if (trigger.styleString != null && styleSearch(cleanMsgStr, trigger.styleString).find()) {
-                                        return complexRestyle(msg, trigger.styleString, notif.textStyle);
-                                    } else {
-                                        return simpleRestyle(msg, notif.textStyle);
-                                    }
-                                } else {
-                                    if (trigger.styleString != null && styleSearch(cleanMsgStr, trigger.styleString).find()) {
-                                        return complexRestyle(msg, trigger.styleString, notif.textStyle);
-                                    } else if (styleSearch(cleanMsgStr, trigger.string).find()) {
-                                        return complexRestyle(msg, trigger.string, notif.textStyle);
-                                    } else {
-                                        return simpleRestyle(msg, notif.textStyle);
-                                    }
-                                }
-                            }
+                // Trigger search
+                boolean hit = false;
+                Matcher matcher = null;
+                if (trig.isKey) {
+                    hit = keySearch(msg, trig.string);
+                } else if (allowRegex && trig.isRegex) {
+                    if (trig.pattern != null) {
+                        matcher = trig.pattern.matcher(str);
+                        hit = matcher.find();
+                    }
+                } else {
+                    hit = normalSearch(checkedStr, trig.string).find();
+                }
+                if (!hit) continue;
+
+                // Exclusion search
+                boolean exHit = false;
+                for (Trigger exTrig : notif.exclusionTriggers) {
+                    // Search exclusions
+                    if (exTrig.isKey) {
+                        exHit = keySearch(msg, exTrig.string);
+                    } else if (allowRegex && exTrig.isRegex) {
+                        if (exTrig.pattern != null) {
+                            exHit = exTrig.pattern.matcher(str).find();
                         }
+                    } else {
+                        exHit = normalSearch(checkedStr, exTrig.string).find();
+                    }
+                    if (exHit) break;
+                }
+                if (exHit) continue;
+
+                // Notify
+                playSound(notif);
+                sendResponses(notif, matcher);
+                String cleanStr = StringUtil.stripColor(str);
+                if (trig.isKey || (allowRegex && trig.isRegex)) {
+                    if (trig.styleString != null && styleSearch(cleanStr, trig.styleString).find()) {
+                        return complexRestyle(msg, trig.styleString, notif.textStyle);
+                    } else {
+                        return simpleRestyle(msg, notif.textStyle);
+                    }
+                } else {
+                    if (trig.styleString != null && styleSearch(cleanStr, trig.styleString).find()) {
+                        return complexRestyle(msg, trig.styleString, notif.textStyle);
+                    } else if (styleSearch(cleanStr, trig.string).find()) {
+                        return complexRestyle(msg, trig.string, notif.textStyle);
+                    } else {
+                        return simpleRestyle(msg, notif.textStyle);
                     }
                 }
             }
         }
-        return null;
+        return msg;
     }
 
     /**
@@ -189,51 +177,39 @@ public class MessageProcessor {
      * otherwise.
      */
     private static boolean keySearch(Component msg, String key) {
-        boolean hit = false;
         if (key.equals(".")) {
-            hit = true;
+            return true;
+        } else if (msg.getContents() instanceof TranslatableContents tc) {
+            return tc.getKey().contains(key);
         }
-        else if (msg.getContents() instanceof TranslatableContents tc) {
-            if (tc.getKey().contains(key)) {
-                hit = true;
-            }
-        }
-        return hit;
+        return false;
     }
 
     /**
-     * @param msgStr the message to search.
+     * Performs a slightly 'fuzzy' search for the string within the message.
+     * @param msg the message to search.
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.
      */
-    private static Matcher triggerSearch(String msgStr, String str) {
+    private static Matcher normalSearch(String msg, String str) {
         /*
         U flag for full unicode comparison, performance using randomly-generated
-        100-character msgStr and 10-character str is approx 1.18 microseconds
+        100-character msg and 10-character str is approx 1.18 microseconds
         per check without flag, 1.31 microseconds with.
          */
         return Pattern.compile(
                 "(?iU)(?<!\\w)((\\W?|(§[a-z0-9])+)" + Pattern.quote(str) + "\\W?)(?!\\w)")
-                .matcher(msgStr);
-    }
-
-    private static Matcher styleSearch(String msgStr, String str) {
-        return Pattern.compile("(?iU)" + Pattern.quote(str)).matcher(msgStr);
+                .matcher(msg);
     }
 
     /**
-     * @param msgStr the message to search.
-     * @param patternStr the pattern string to search for.
-     * @return  the {@link Matcher} for the search, if the pattern string was
-     * compilable, {@code null} otherwise.
+     * Performs a case-insensitive search for the string within the message.
+     * @param msg the message to search.
+     * @param str the string to search for.
+     * @return the {@link Matcher} for the search.
      */
-    private static @Nullable Matcher regexSearch(String msgStr, String patternStr) {
-        try {
-            return Pattern.compile(patternStr).matcher(msgStr);
-        } catch (PatternSyntaxException e) {
-            ChatNotify.LOG.warn("ChatNotify: Error processing regex: " + e);
-        }
-        return null;
+    private static Matcher styleSearch(String msg, String str) {
+        return Pattern.compile("(?iU)" + Pattern.quote(str)).matcher(msg);
     }
 
     /**
@@ -242,13 +218,12 @@ public class MessageProcessor {
      * @param notif the Notification.
      */
     private static void playSound(Notification notif) {
-        if (notif.sound.isEnabled()) {
-            Minecraft.getInstance().getSoundManager().play(
-                    new SimpleSoundInstance(
-                            notif.sound.getResourceLocation(), Config.get().soundSource,
-                            notif.sound.getVolume(), notif.sound.getPitch(),
-                            SoundInstance.createUnseededRandom(), false, 0,
-                            SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+        if (notif.sound.isEnabled() && notif.sound.getVolume() > 0) {
+            Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(
+                    notif.sound.getResourceLocation(), Config.get().soundSource,
+                    notif.sound.getVolume(), notif.sound.getPitch(),
+                    SoundInstance.createUnseededRandom(), false, 0,
+                    SoundInstance.Attenuation.NONE, 0, 0, 0, true));
         }
     }
 
@@ -260,9 +235,9 @@ public class MessageProcessor {
     private static void sendResponses(Notification notif, @Nullable Matcher matcher) {
         if (notif.responseEnabled) {
             boolean allowRegex = Config.get().allowRegex;
-            Minecraft minecraft = Minecraft.getInstance();
-            Screen oldScreen = minecraft.screen;
-            minecraft.setScreen(new ChatScreen(""));
+            Minecraft mc = Minecraft.getInstance();
+            Screen oldScreen = mc.screen;
+            mc.setScreen(new ChatScreen(""));
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
                 if (matcher != null && allowRegex && msg.regexGroups) {
@@ -274,15 +249,15 @@ public class MessageProcessor {
                 msg.countdown = msg.delayTicks;
                 ChatNotify.responseMessages.add(msg);
             }
-            minecraft.setScreen(oldScreen);
+            mc.setScreen(oldScreen);
         }
     }
 
     /**
      * Destructively fills the style of the message with the specified
-     * TextStyle.
+     * {@link TextStyle}.
      * @param msg the message to restyle.
-     * @param style the TextStyle to apply.
+     * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
     private static Component simpleRestyle(Component msg, TextStyle style) {
@@ -293,44 +268,44 @@ public class MessageProcessor {
     }
 
     /**
-     * Uses a recursive break-down algorithm to apply the specified TextStyle to
-     * only the part of the message that matches the trigger.
+     * Uses a recursive break-down algorithm to apply the specified
+     * {@link TextStyle} to only the part of the message that matches the
+     * trigger.
      * @param msg the message to restyle.
-     * @param trigger the string to restyle within the message.
-     * @param style the TextStyle to apply.
+     * @param str the string to restyle within the message.
+     * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
-    private static Component complexRestyle(Component msg, String trigger, TextStyle style) {
+    private static Component complexRestyle(Component msg, String str, TextStyle style) {
         if (style.isEnabled()) {
-            msg = restyleComponent(msg.copy(), trigger, style);
+            msg = restyleComponent(msg.copy(), str, style);
         }
         return msg;
     }
 
     /**
-     * Recursively deconstructs the message to find the trigger and apply the
+     * Recursively deconstructs the message to find the string and apply the
      * specified style to it.
      * @param msg the message to restyle.
-     * @param trigger the string to restyle within the message.
-     * @param style the TextStyle to apply.
+     * @param str the string to restyle within the message.
+     * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
-    private static MutableComponent restyleComponent(MutableComponent msg, String trigger,
-                                                     TextStyle style) {
-
+    private static MutableComponent restyleComponent(
+            MutableComponent msg, String str, TextStyle style) {
         if (msg.getContents() instanceof PlainTextContents) {
             // PlainTextContents is typically the lowest level
-            msg = restyleContents(msg, trigger, style);
+            msg = restyleContents(msg, str, style);
         }
         else if (msg.getContents() instanceof TranslatableContents contents) {
             // Recurse for all args
             Object[] args = contents.getArgs();
             for (int i = 0; i < contents.getArgs().length; i++) {
                 if (args[i] instanceof Component argComponent) {
-                    args[i] = restyleComponent(argComponent.copy(), trigger, style);
+                    args[i] = restyleComponent(argComponent.copy(), str, style);
                 }
                 else if (args[i] instanceof String argString) {
-                    args[i] = restyleComponent(Component.literal(argString), trigger, style);
+                    args[i] = restyleComponent(Component.literal(argString), str, style);
                 }
             }
             // Reconstruct
@@ -340,7 +315,7 @@ public class MessageProcessor {
         }
         else {
             // Recurse for all siblings
-            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
+            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), str, style));
         }
         return msg;
     }
@@ -348,18 +323,18 @@ public class MessageProcessor {
     /**
      * If the message contents is {@link PlainTextContents}, deconstructs,
      * restyles and reconstructs the message with the objective of applying
-     * the specified style only to occurrences of the trigger.
+     * the specified style only to occurrences of the string.
      * @param msg the message to restyle.
-     * @param trigger the string to restyle within the message.
-     * @param style the TextStyle to apply.
+     * @param str the string to restyle within the message.
+     * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
-    private static MutableComponent restyleContents(MutableComponent msg, String trigger,
+    private static MutableComponent restyleContents(MutableComponent msg, String str,
                                                     TextStyle style) {
         if (!(msg.getContents() instanceof PlainTextContents contents)) return msg;
 
         String msgStr = contents.text();
-        Matcher matcher = styleSearch(msgStr, trigger);
+        Matcher matcher = styleSearch(msgStr, str);
         if (matcher.find()) {
             // Trigger found, restyle
             List<Component> siblings = msg.getSiblings();
@@ -372,11 +347,11 @@ public class MessageProcessor {
 
                 // Some magic to deal with format codes
                 if (msgStr.contains("§")) {
-                    String activeCodes = activeFormatCodes(msgStr.substring(0, end-trigger.length()));
+                    String activeCodes = activeFormatCodes(msgStr.substring(0, end-str.length()));
 
                     String msgTriggerFull = msgStr.substring(start,end);
                     int realStart = startIgnoreCodes(msgTriggerFull,
-                            msgTriggerFull.length() - trigger.length());
+                            msgTriggerFull.length() - str.length());
 
                     String msgStart = msgStr.substring(0, start);
                     String msgTrigger = msgTriggerFull.substring(realStart);
@@ -423,12 +398,12 @@ public class MessageProcessor {
                 siblings.addFirst(MutableComponent.create(msg.getContents()));
                 replacement.siblings.addAll(siblings);
 
-                msg = restyleComponent(replacement, trigger, style);
+                msg = restyleComponent(replacement, str, style);
             }
         }
         else {
             // Trigger not found, try siblings
-            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), trigger, style));
+            msg.getSiblings().replaceAll(text -> restyleComponent(text.copy(), str, style));
         }
         return msg;
     }
@@ -436,21 +411,20 @@ public class MessageProcessor {
     /**
      * Scans the specified string and identifies any format codes that are
      * active at the end.
-     * @param msgStr the string to scan.
+     * @param str the string to scan.
      * @return the active format codes as a string.
      */
-    private static String activeFormatCodes(String msgStr) {
+    private static String activeFormatCodes(String str) {
         List<ChatFormatting> activeCodes = new ArrayList<>();
-        for (int i = 0; i < msgStr.length(); i++) {
-            char c = msgStr.charAt(i);
+        for (int i = 0; i < str.length() - 1; i++) {
+            char c = str.charAt(i);
             if ((int)c == 167) {
-                char d = msgStr.charAt(i+1);
+                char d = str.charAt(i+1);
                 ChatFormatting format = ChatFormatting.getByCode(d);
                 if (format != null) {
                     if (format == ChatFormatting.RESET) {
                         activeCodes.clear();
-                    }
-                    else {
+                    } else {
                         if (format.isColor()) {
                             activeCodes.removeIf(ChatFormatting::isColor);
                         }
@@ -459,7 +433,6 @@ public class MessageProcessor {
                 }
             }
         }
-
         StringBuilder builder = new StringBuilder();
         for (ChatFormatting cf : activeCodes) {
             builder.append('\u00a7');
@@ -469,9 +442,9 @@ public class MessageProcessor {
     }
 
     /**
-     * Workaround method; if a string passed to strSearch() contains format
-     * codes immediately preceding a match, the range returned will include the
-     * format codes.
+     * Workaround method; if a string passed to
+     * {@link MessageProcessor#normalSearch} contains format codes immediately
+     * preceding a match, the range returned will include the format codes.
      *
      * <p>This method scans the specified string to determine the start
      * of the actual match, defined as being the first character after the
@@ -493,11 +466,11 @@ public class MessageProcessor {
     }
 
     /**
-     * For each enabled field of the specified TextStyle, overrides the
-     * corresponding Style field.
-     * @param style the Style to apply to.
-     * @param textStyle the TextStyle to apply.
-     * @return the Style, with the TextStyle applied.
+     * For each enabled field of the specified {@link TextStyle}, overrides the
+     * corresponding {@link Style} field.
+     * @param style the {@link Style} to apply to.
+     * @param textStyle the {@link TextStyle} to apply.
+     * @return the {@link Style}, with the {@link TextStyle} applied.
      */
     private static Style applyStyle(Style style, TextStyle textStyle) {
         if (textStyle.bold.isEnabled()) style = style.withBold(textStyle.bold.isOn());

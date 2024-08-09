@@ -7,7 +7,9 @@ package dev.terminalmc.chatnotify;
 
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.ResponseMessage;
+import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.util.ModLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -39,7 +41,15 @@ public class ChatNotify {
     }
 
     public static void onConfigSaved(Config config) {
-        // Cache update method
+        if (!config.allowRegex) return;
+        for (Notification notif : config.getNotifs()) {
+            for (Trigger trig : notif.triggers) {
+                if (trig.isRegex) trig.tryCompilePattern();
+            }
+            for (Trigger trig : notif.exclusionTriggers) {
+                if (trig.isRegex) trig.tryCompilePattern();
+            }
+        }
     }
 
     public static void onEndTick(Minecraft mc) {

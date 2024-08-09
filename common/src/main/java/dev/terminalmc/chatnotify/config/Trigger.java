@@ -7,15 +7,20 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class Trigger {
     public final int version = 2;
 
     public boolean enabled;
-    public String string;
+
+    public @NotNull String string;
+    public transient @Nullable Pattern pattern;
     public @Nullable String styleString;
     public boolean isKey;
     public boolean isRegex;
@@ -34,7 +39,7 @@ public class Trigger {
     /**
      * Creates a default instance with the specified value.
      */
-    public Trigger(String string) {
+    public Trigger(@NotNull String string) {
         this.enabled = true;
         this.string = string;
         this.styleString = null;
@@ -45,12 +50,21 @@ public class Trigger {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Trigger(boolean enabled, String string, @Nullable String styleString, boolean isKey, boolean isRegex) {
+    Trigger(boolean enabled, @NotNull String string, @Nullable String styleString, boolean isKey, boolean isRegex) {
         this.enabled = enabled;
         this.string = string;
         this.styleString = styleString;
         this.isKey = isKey;
         this.isRegex = isRegex;
+    }
+
+    public void tryCompilePattern() {
+        try {
+            pattern = Pattern.compile(string);
+        } catch (PatternSyntaxException e) {
+            ChatNotify.LOG.warn("ChatNotify: Error processing regex: " + e);
+            pattern = null;
+        }
     }
 
     public static class Deserializer implements JsonDeserializer<Trigger> {

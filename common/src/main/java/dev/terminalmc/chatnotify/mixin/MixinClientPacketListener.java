@@ -126,7 +126,8 @@ public class MixinClientPacketListener {
                 break;
             }
         }
-        ChatNotify.recentMessages.add(Pair.of(time + 5000000000L, plainMsg.isEmpty() ? message : plainMsg));
+        ChatNotify.recentMessages.add(Pair.of(
+                time + 5000000000L, plainMsg.isEmpty() ? message : plainMsg));
     }
 
     @Unique
