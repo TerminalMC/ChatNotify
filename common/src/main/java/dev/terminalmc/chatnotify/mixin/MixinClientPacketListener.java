@@ -66,6 +66,7 @@ public class MixinClientPacketListener {
      */
     @Inject(method = "handleLogin", at = @At("TAIL"))
     public void getProfileName(ClientboundLoginPacket packet, CallbackInfo ci) {
+        if (Minecraft.getInstance().player == null) return;
         String name = Minecraft.getInstance().player.getName().getString();
         Config.get().setProfileName(name);
         Config.get().setDisplayName(name);
@@ -84,8 +85,9 @@ public class MixinClientPacketListener {
     private void getDisplayName(ClientboundPlayerInfoUpdatePacket.Action action,
                                 ClientboundPlayerInfoUpdatePacket.Entry entry,
                                 PlayerInfo playerInfo, CallbackInfo ci) {
-        if (action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME) &&
-                playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())) {
+        if (action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)
+                && Minecraft.getInstance().player != null // Workaround
+                && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())) {
             if (entry.displayName() != null) Config.get().setDisplayName(entry.displayName().getString());
         }
     }

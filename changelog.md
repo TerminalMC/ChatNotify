@@ -1,1 +1,2 @@
+- Fix a network crash caused by unexpected packet sequence
 - Add Russian translation (KiberAndy)
