@@ -195,7 +195,7 @@ public class SoundOptionList extends OptionList {
                 soundField = new FakeTextField(x, 0, width, height,
                         () -> {
                             int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, width);
+                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
                             int wX = x + (width / 2) - (wWidth / 2);
                             int wY = list.getY();
                             list.screen.setOverlayWidget(new DropdownTextField(
