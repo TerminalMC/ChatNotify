@@ -275,19 +275,19 @@ public class AdvancedOptionList extends OptionList {
                         - (Config.get().allowRegex ? list.tinyWidgetWidth : 0);
                 TextField triggerField = trigger.isKey
                         ? new FakeTextField(0, 0, triggerFieldWidth, height, () -> {
-                    int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                    int wWidth = Math.max(DropdownTextField.MIN_WIDTH, width);
-                    int wX = x + (width / 2) - (wWidth / 2);
-                    int wY = list.getY();
-                    list.screen.setOverlayWidget(new DropdownTextField(
-                            wX, wY, wWidth, wHeight, Component.empty(),
-                            () -> trigger.string, (str) -> trigger.string = str,
-                            (widget) -> {
-                                list.screen.removeOverlayWidget();
-                                list.reload();
-                            }, List.of(NotifOptionList.KEYS)));
-                })
-                        : new TextField(0, 0, triggerFieldWidth, height);
+                            int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
+                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, width);
+                            int wX = x + (width / 2) - (wWidth / 2);
+                            int wY = list.getY();
+                            list.screen.setOverlayWidget(new DropdownTextField(
+                                    wX, wY, wWidth, wHeight, Component.empty(),
+                                    () -> trigger.string, (str) -> trigger.string = str,
+                                    (widget) -> {
+                                        list.screen.removeOverlayWidget();
+                                        list.reload();
+                                    }, List.of(NotifOptionList.KEYS)));
+                        })
+                        : new TextField(0, 0, triggerFieldWidth, height, true);
                 int movingX = x;
 
                 // Drag reorder button
@@ -435,14 +435,15 @@ public class AdvancedOptionList extends OptionList {
                 elements.add(msgField);
 
                 // Delay field
-                EditBox timeField = new EditBox(Minecraft.getInstance().font,
-                        x + width - timeFieldWidth, 0, timeFieldWidth, height, Component.empty());
+                TextField timeField = new TextField(
+                        x + width - timeFieldWidth, 0, timeFieldWidth, height);
+                timeField.posIntValidator();
                 timeField.setTooltip(Tooltip.create(
                         localized("option", "advanced.response.time.tooltip")));
                 timeField.setTooltipDelay(Duration.ofMillis(500));
                 timeField.setMaxLength(5);
-                timeField.setValue(String.valueOf(response.delayTicks));
                 timeField.setResponder((str) -> response.delayTicks = Integer.parseInt(str.strip()));
+                timeField.setValue(String.valueOf(response.delayTicks));
                 elements.add(timeField);
 
                 // Delete button

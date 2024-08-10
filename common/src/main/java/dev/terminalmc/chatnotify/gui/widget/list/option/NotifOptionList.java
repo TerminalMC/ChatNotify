@@ -277,7 +277,7 @@ public class NotifOptionList extends OptionList {
                                         list.reload();
                                     }, List.of(KEYS)));
                         })
-                        : new TextField(0, 0, triggerFieldWidth, height);
+                        : new TextField(0, 0, triggerFieldWidth, height, true);
                 int movingX = x;
 
                 // Drag reorder button

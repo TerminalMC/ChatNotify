@@ -35,6 +35,11 @@ public class TextField extends EditBox {
                 false, (str) -> Optional.empty());
     }
 
+    public TextField(int x, int y, int width, int height, boolean allowSectionSign) {
+        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
+                allowSectionSign, (str) -> Optional.empty());
+    }
+
     public TextField(Font font, int x, int y, int width, int height, Component msg,
                      boolean allowSectionSign, Function<String, Optional<Component>> validator) {
         super(font, x, y, width, height, msg);
