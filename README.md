@@ -27,7 +27,7 @@ Set up audio and visual notifications for chat messages.
 
 ### Dependencies
 
-Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/) (required), [ModMenu](https://modrinth.com/mod/mOgUt4GM/) (optional for configuration)
+Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/), [ModMenu](https://modrinth.com/mod/mOgUt4GM/)
 
 NeoForge: None
 
