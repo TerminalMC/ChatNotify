@@ -1,1 +1,2 @@
 - Add Simplified Chinese translation (Andypsl8)
+- Fix trigger reordering on username notification screen

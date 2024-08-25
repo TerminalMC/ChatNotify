@@ -225,14 +225,16 @@ public class NotifOptionList extends OptionList {
     }
 
     /**
-     * @return The number of non-{@link Entry.TriggerFieldEntry} entries in the
+     * @return The number of non-{@link Entry.TriggerFieldEntry} or
+     * {@link Entry.TriggerDisplayFieldEntry} entries in the
      * {@link OptionList} before (and including) the specified index.
      */
     private int triggerOffset(int index) {
         int i = 0;
         int offset = 0;
         for (OptionList.Entry entry : children()) {
-            if (!(entry instanceof Entry.TriggerFieldEntry)) offset++;
+            if (!(entry instanceof Entry.TriggerFieldEntry
+                    || entry instanceof Entry.TriggerDisplayFieldEntry)) offset++;
             if (i++ == index) return offset;
         }
         throw new IllegalStateException("Trigger index out of range");
