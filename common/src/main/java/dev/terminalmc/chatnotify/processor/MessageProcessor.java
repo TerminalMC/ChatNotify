@@ -108,7 +108,6 @@ public class MessageProcessor {
      * restyling was not possible.
      */
     private static Component tryNotify(Component msg, String str, String checkedStr) {
-        boolean allowRegex = Config.get().allowRegex;
         for (Notification notif : Config.get().getNotifs()) {
             if (!notif.isEnabled() || notif.editing) continue;
             for (Trigger trig : notif.triggers) {
@@ -117,15 +116,15 @@ public class MessageProcessor {
                 // Trigger search
                 boolean hit = false;
                 Matcher matcher = null;
-                if (trig.isKey) {
-                    hit = keySearch(msg, trig.string);
-                } else if (allowRegex && trig.isRegex) {
-                    if (trig.pattern != null) {
-                        matcher = trig.pattern.matcher(str);
-                        hit = matcher.find();
+                switch(trig.type) {
+                    case NORMAL -> hit = normalSearch(checkedStr, trig.string).find();
+                    case REGEX -> {
+                        if (trig.pattern != null) {
+                            matcher = trig.pattern.matcher(str);
+                            hit = matcher.find();
+                        }
                     }
-                } else {
-                    hit = normalSearch(checkedStr, trig.string).find();
+                    case KEY -> hit = keySearch(msg, trig.string);
                 }
                 if (!hit) continue;
 
@@ -133,14 +132,15 @@ public class MessageProcessor {
                 boolean exHit = false;
                 for (Trigger exTrig : notif.exclusionTriggers) {
                     // Search exclusions
-                    if (exTrig.isKey) {
-                        exHit = keySearch(msg, exTrig.string);
-                    } else if (allowRegex && exTrig.isRegex) {
-                        if (exTrig.pattern != null) {
-                            exHit = exTrig.pattern.matcher(str).find();
+                    switch(exTrig.type) {
+                        case NORMAL -> exHit = normalSearch(checkedStr, exTrig.string).find();
+                        case REGEX -> {
+                            if (exTrig.pattern != null) {
+                                matcher = exTrig.pattern.matcher(str);
+                                exHit = matcher.find();
+                            }
                         }
-                    } else {
-                        exHit = normalSearch(checkedStr, exTrig.string).find();
+                        case KEY -> exHit = keySearch(msg, exTrig.string);
                     }
                     if (exHit) break;
                 }
@@ -150,7 +150,7 @@ public class MessageProcessor {
                 playSound(notif);
                 sendResponses(notif, matcher);
                 String cleanStr = StringUtil.stripColor(str);
-                if (trig.isKey || (allowRegex && trig.isRegex)) {
+                if (trig.type != Trigger.Type.NORMAL) {
                     if (trig.styleString != null && styleSearch(cleanStr, trig.styleString).find()) {
                         return complexRestyle(msg, trig.styleString, notif.textStyle);
                     } else {
@@ -234,13 +234,12 @@ public class MessageProcessor {
      */
     private static void sendResponses(Notification notif, @Nullable Matcher matcher) {
         if (notif.responseEnabled) {
-            boolean allowRegex = Config.get().allowRegex;
             Minecraft mc = Minecraft.getInstance();
             Screen oldScreen = mc.screen;
             mc.setScreen(new ChatScreen(""));
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
-                if (matcher != null && allowRegex && msg.regexGroups) {
+                if (matcher != null && msg.regexGroups) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {
                         msg.sendingString = msg.sendingString.replace("(" + i + ")", matcher.group(i));

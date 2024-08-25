@@ -114,7 +114,6 @@ public class GlobalOptionList extends OptionList {
         private static class SelfCheckAndRegexEntry extends MainOptionList.Entry {
             SelfCheckAndRegexEntry(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
 
                 elements.add(CycleButton.booleanBuilder(
                         CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
@@ -122,18 +121,8 @@ public class GlobalOptionList extends OptionList {
                         .withInitialValue(Config.get().checkOwnMessages)
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "global.self_notify.tooltip")))
-                        .create(x, 0, buttonWidth, height, localized("option", "global.self_notify"),
+                        .create(x, 0, width, height, localized("option", "global.self_notify"),
                                 (button, status) -> Config.get().checkOwnMessages = status));
-
-                elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .withInitialValue(Config.get().allowRegex)
-                        .withTooltip((status) -> Tooltip.create(
-                                localized("option", "global.regex.tooltip")))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                localized("option", "global.regex"),
-                                (button, status) -> Config.get().allowRegex = status));
             }
         }
 

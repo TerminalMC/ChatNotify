@@ -41,13 +41,12 @@ public class ChatNotify {
     }
 
     public static void onConfigSaved(Config config) {
-        if (!config.allowRegex) return;
         for (Notification notif : config.getNotifs()) {
             for (Trigger trig : notif.triggers) {
-                if (trig.isRegex) trig.tryCompilePattern();
+                if (trig.type == Trigger.Type.REGEX) trig.tryCompilePattern();
             }
             for (Trigger trig : notif.exclusionTriggers) {
-                if (trig.isRegex) trig.tryCompilePattern();
+                if (trig.type == Trigger.Type.REGEX) trig.tryCompilePattern();
             }
         }
     }

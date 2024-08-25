@@ -10,20 +10,32 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class Trigger {
-    public final int version = 2;
+    public final int version = 3;
+
+    public enum Type {
+        NORMAL,
+        REGEX,
+        KEY,
+    }
+
+    public static String iconOf(Type t) {
+        return switch(t) {
+            case NORMAL -> "~";
+            case REGEX -> ".*";
+            case KEY -> "\uD83D\uDD11";
+        };
+    }
 
     public boolean enabled;
 
     public @NotNull String string;
     public transient @Nullable Pattern pattern;
     public @Nullable String styleString;
-    public boolean isKey;
-    public boolean isRegex;
+    public Type type;
 
     /**
      * Creates a default instance.
@@ -32,8 +44,7 @@ public class Trigger {
         this.enabled = true;
         this.string = "";
         this.styleString = null;
-        this.isKey = false;
-        this.isRegex = false;
+        this.type = Type.NORMAL;
     }
 
     /**
@@ -43,19 +54,17 @@ public class Trigger {
         this.enabled = true;
         this.string = string;
         this.styleString = null;
-        this.isKey = false;
-        this.isRegex = false;
+        this.type = Type.NORMAL;
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Trigger(boolean enabled, @NotNull String string, @Nullable String styleString, boolean isKey, boolean isRegex) {
+    Trigger(boolean enabled, @NotNull String string, @Nullable String styleString, Type type) {
         this.enabled = enabled;
         this.string = string;
         this.styleString = styleString;
-        this.isKey = isKey;
-        this.isRegex = isRegex;
+        this.type = type;
     }
 
     public void tryCompilePattern() {
@@ -69,19 +78,28 @@ public class Trigger {
 
     public static class Deserializer implements JsonDeserializer<Trigger> {
         @Override
-        public @Nullable Trigger deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
-                throws JsonParseException {
+        public @Nullable Trigger deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
+                                             JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
 
             try {
+                int version = obj.get("version").getAsInt();
+
                 boolean enabled = obj.get("enabled").getAsBoolean();
                 String string = obj.get("string").getAsString();
                 String styleString = obj.has("styleString")
                         ? obj.get("styleString").getAsString() : null;
-                boolean isKey = obj.get("isKey").getAsBoolean();
-                boolean isRegex = obj.get("isRegex").getAsBoolean();
 
-                return new Trigger(enabled, string, styleString, isKey, isRegex);
+                Type type;
+                if (version < 3) {
+                    boolean isKey = obj.get("isKey").getAsBoolean();
+                    boolean isRegex = obj.get("isRegex").getAsBoolean();
+                    type = isKey ? Type.KEY : (isRegex ? Type.REGEX : Type.NORMAL);
+                } else {
+                    type = Type.valueOf(obj.get("type").getAsString());
+                }
+
+                return new Trigger(enabled, string, styleString, type);
             }
             catch (Exception e) {
                 ChatNotify.LOG.warn("Unable to deserialize Trigger", e);

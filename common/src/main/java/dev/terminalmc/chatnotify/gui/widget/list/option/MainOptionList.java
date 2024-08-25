@@ -239,7 +239,7 @@ public class MainOptionList extends OptionList {
             }
 
             private String getString(Trigger trigger) {
-                if (trigger.isKey) {
+                if (trigger.type == Trigger.Type.KEY) {
                     return localized("option", "notif.label.key", (trigger.string.equals(".")
                             ? localized("option", "notif.trigger.key.any")
                             : trigger.string)).getString();

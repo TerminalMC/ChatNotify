@@ -77,7 +77,7 @@
   "option.chatnotify.notif.trigger.profile_name.tooltip": "設定檔名稱\n（自動更新）",
   "option.chatnotify.notif.trigger.tooltip.key": "翻譯鍵觸發條件\n\n如果訊息可翻譯且翻譯鍵包含觸發條件，則此類型的觸發條件將會啟動通知。\n\n使用全域選項「除錯：鍵」來檢視新聊天訊息的鍵。",
   "option.chatnotify.notif.trigger.tooltip.normal": "一般觸發條件\n\n如果訊息本身包含觸發條件（而不是作為單字的一部分），則此類型的觸發條件將會啟動通知。\n\n（不區分大小寫，允許使用包括標點符號在內的符號）。",
-  "option.chatnotify.notif.trigger.tooltip.normal.regex": "一般 Regex 觸發條件\n\n如果訊息與 Regex 模式相符，則此類型的觸發條件將會啟動通知。",
+  "option.chatnotify.notif.trigger.tooltip.regex": "Regex 觸發條件\n\n如果訊息與 Regex 模式相符，則此類型的觸發條件將會啟動通知。",
   "option.chatnotify.notif.triggers": "通知觸發條件 %s",
   "option.chatnotify.notif.triggers.tooltip": "如果在聊天訊息中偵測到觸發條件，則會啟動通知。\n注意：一般觸發條件不區分大小寫。",
   "option.chatnotify.posint.error": "需要正整數",

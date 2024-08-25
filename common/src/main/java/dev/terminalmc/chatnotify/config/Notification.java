@@ -165,7 +165,7 @@ public class Notification {
     public void purgeTriggers() {
         triggers.removeIf(trigger -> trigger.string.isBlank());
         for (Trigger t : triggers) {
-            if (t.isKey) t.string = t.string.toLowerCase(Locale.ROOT);
+            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
         }
     }
 
@@ -177,7 +177,7 @@ public class Notification {
         exclusionTriggers.removeIf(trigger -> trigger.string.isBlank());
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
         for (Trigger t : exclusionTriggers) {
-            if (t.isKey) t.string = t.string.toLowerCase(Locale.ROOT);
+            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
         }
     }
 

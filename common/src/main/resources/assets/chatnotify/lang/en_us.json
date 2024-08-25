@@ -77,7 +77,7 @@
   "option.chatnotify.notif.trigger.profile_name.tooltip": "Profile name\n(updated automatically)",
   "option.chatnotify.notif.trigger.tooltip.key": "Translation Key Trigger\n\nThis type of trigger will activate the notification if the message is translatable and the translation key contains the trigger.\n\nUse the global option 'Debug: Key' to view the keys of new chat messages.",
   "option.chatnotify.notif.trigger.tooltip.normal": "Normal Trigger\n\nThis type of trigger will activate the notification if the message contains the trigger by itself (not as part of a word).\n\n(Not case-sensitive, allows for symbols including punctuation).",
-  "option.chatnotify.notif.trigger.tooltip.normal.regex": "Normal Regex Trigger\n\nThis type of trigger will activate the notification if the message matches the regex pattern.",
+  "option.chatnotify.notif.trigger.tooltip.regex": "Regex Trigger\n\nThis type of trigger will activate the notification if the message matches the regex pattern.",
   "option.chatnotify.notif.triggers": "Notification Triggers %s",
   "option.chatnotify.notif.triggers.tooltip": "If a trigger is detected in a chat message, the notification will be activated.\nNote: Normal triggers are NOT case-sensitive.",
   "option.chatnotify.posint.error": "Positive integer required",

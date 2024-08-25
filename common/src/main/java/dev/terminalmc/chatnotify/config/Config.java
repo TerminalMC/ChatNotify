@@ -43,7 +43,7 @@ import java.util.*;
  * </p>
  */
 public class Config {
-    public final int version = 2;
+    public final int version = 3;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     public static final Gson GSON = new GsonBuilder()
@@ -73,7 +73,6 @@ public class Config {
     public TriState debugShowKey;
     public boolean checkOwnMessages;
     public SoundSource soundSource;
-    public boolean allowRegex;
     public int defaultColor;
     public Sound defaultSound;
     public final List<String> prefixes;
@@ -88,7 +87,6 @@ public class Config {
         this.debugShowKey = new TriState();
         this.checkOwnMessages = true;
         this.soundSource = DEFAULT_SOUND_SOURCE;
-        this.allowRegex = false;
         this.defaultColor = DEFAULT_COLOR;
         this.defaultSound = DEFAULT_SOUND;
         this.prefixes = new ArrayList<>(DEFAULT_PREFIXES);
@@ -100,13 +98,12 @@ public class Config {
      * Not validated, only for use by self-validating deserializer.
      */
     Config(TriState mixinEarly, TriState debugShowKey, boolean checkOwnMessages,
-           SoundSource soundSource, boolean allowRegex, int defaultColor, Sound defaultSound,
+           SoundSource soundSource, int defaultColor, Sound defaultSound,
            List<String> prefixes, List<Notification> notifications) {
         this.mixinEarly = mixinEarly;
         this.debugShowKey = debugShowKey;
         this.checkOwnMessages = checkOwnMessages;
         this.soundSource = soundSource;
-        this.allowRegex = allowRegex;
         this.defaultColor = defaultColor;
         this.defaultSound = defaultSound;
         this.prefixes = prefixes;
@@ -298,7 +295,6 @@ public class Config {
                     : ctx.deserialize(obj.get("debugShowKey"), TriState.class);
             boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
             SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());
-            boolean allowRegex = obj.get("allowRegex").getAsBoolean();
             int defaultColor = obj.get("defaultColor").getAsInt();
             Sound defaultSound = ctx.deserialize(obj.get("defaultSound"), Sound.class);
             List<String> prefixes = new ArrayList<>();
@@ -324,7 +320,7 @@ public class Config {
             }
 
             return new Config(mixinEarly, debugShowKey, checkOwnMessages, soundSource,
-                    allowRegex, defaultColor, defaultSound, prefixes, notifications);
+                    defaultColor, defaultSound, prefixes, notifications);
         }
     }
 }

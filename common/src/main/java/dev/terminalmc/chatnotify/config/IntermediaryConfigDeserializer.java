@@ -28,7 +28,6 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
         TriState debugShowKey = new TriState(obj.get("debugShowKey").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
         boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
         SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());
-        boolean allowRegex = false;
         int defaultColor = Config.DEFAULT_COLOR;
         Sound defaultSound = Config.DEFAULT_SOUND;
         List<String> prefixes = new ArrayList<>(
@@ -38,8 +37,6 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
 
         for (JsonElement je : obj.get("notifications").getAsJsonArray()) {
             JsonObject notifObj = je.getAsJsonObject();
-
-            allowRegex = allowRegex || notifObj.get("allowRegex").getAsBoolean();
 
             boolean enabled = notifObj.get("enabled").getAsBoolean();
             boolean exclusionEnabled = notifObj.get("exclusionEnabled").getAsBoolean();
@@ -71,6 +68,6 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
         }
 
         return new Config(mixinEarly, debugShowKey, checkOwnMessages, soundSource,
-                allowRegex, defaultColor, defaultSound, prefixes, notifications);
+                defaultColor, defaultSound, prefixes, notifications);
     }
 }

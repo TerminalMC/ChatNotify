@@ -29,7 +29,6 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
         SoundSource soundSource = obj.has("notifSoundSource") ?
                 SoundSource.valueOf(obj.get("notifSoundSource").getAsString()) :
                 Config.DEFAULT_SOUND_SOURCE;
-        boolean allowRegex = false;
         int defaultColor = Config.DEFAULT_COLOR;
         Sound defaultSound = Config.DEFAULT_SOUND;
         List<String> messagePrefixes = new ArrayList<>(
@@ -41,7 +40,6 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
             JsonObject notifObj = je.getAsJsonObject();
 
             boolean regexEnabled = notifObj.get("regexEnabled").getAsBoolean();
-            allowRegex = allowRegex || regexEnabled;
 
             // Legacy-only data
 
@@ -126,11 +124,13 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
                     formatControls.get(4) ? new TriState(TriState.State.ON) : new TriState(TriState.State.DISABLED));
 
             for (String triggerStr : triggerStrings) {
-                triggers.add(new Trigger(true, triggerStr, null, triggerIsKey, regexEnabled));
+                triggers.add(new Trigger(true, triggerStr, null,
+                        triggerIsKey ? Trigger.Type.KEY : (regexEnabled ? Trigger.Type.REGEX : Trigger.Type.NORMAL)));
             }
 
             for (String exclTriggerStr : exclusionTriggerStrings) {
-                exclusionTriggers.add(new Trigger(true, exclTriggerStr, null, triggerIsKey, regexEnabled));
+                exclusionTriggers.add(new Trigger(true, exclTriggerStr, null,
+                        triggerIsKey ? Trigger.Type.KEY : (regexEnabled ? Trigger.Type.REGEX : Trigger.Type.NORMAL)));
             }
 
             for (JsonElement je2 : notifObj.get("responseMessages").getAsJsonArray()) {
@@ -150,6 +150,6 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
         }
 
         return new Config(mixinEarly, debugShowKey, checkOwnMessages, soundSource,
-                allowRegex, defaultColor, defaultSound, messagePrefixes, notifications);
+                defaultColor, defaultSound, messagePrefixes, notifications);
     }
 }

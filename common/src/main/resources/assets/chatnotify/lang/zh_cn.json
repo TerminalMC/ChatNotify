@@ -77,7 +77,7 @@
   "option.chatnotify.notif.trigger.profile_name.tooltip": "配置文件名称\n（自动更新）",
   "option.chatnotify.notif.trigger.tooltip.key": "翻译键触发器\n\n如果消息可翻译且翻译键包含触发器，则此类触发器将激活通知。\n\n使用全局选项“调试：键”来查看新聊天消息的键。",
   "option.chatnotify.notif.trigger.tooltip.normal": "普通触发器\n\n如果消息本身包含触发器（不是单词的一部分），则此类触发器将激活通知。\n\n（不区分大小写，允许使用包括标点符号在内的符号）。",
-  "option.chatnotify.notif.trigger.tooltip.normal.regex": "普通正则表达式触发器\n\n如果消息与正则表达式模式匹配，则此类触发器将激活通知。",
+  "option.chatnotify.notif.trigger.tooltip.regex": "正则表达式触发器\n\n如果消息与正则表达式模式匹配，则此类触发器将激活通知。",
   "option.chatnotify.notif.triggers": "通知触发器%s",
   "option.chatnotify.notif.triggers.tooltip": "如果在聊天消息中检测到触发器，则会激活通知。\n请注意：正常触发器不区分大小写。",
   "option.chatnotify.posint.error": "必须为正整数",

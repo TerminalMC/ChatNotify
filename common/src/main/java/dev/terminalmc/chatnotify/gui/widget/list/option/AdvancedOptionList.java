@@ -271,9 +271,8 @@ public class AdvancedOptionList extends OptionList {
                                 Notification notif, Trigger trigger, int index) {
                 super();
                 int fieldSpacing = 1;
-                int triggerFieldWidth = width - list.tinyWidgetWidth - fieldSpacing
-                        - (Config.get().allowRegex ? list.tinyWidgetWidth : 0);
-                TextField triggerField = trigger.isKey
+                int triggerFieldWidth = width - list.tinyWidgetWidth - fieldSpacing;
+                TextField triggerField = trigger.type == Trigger.Type.KEY
                         ? new FakeTextField(0, 0, triggerFieldWidth, height, () -> {
                             int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                             int wWidth = Math.max(DropdownTextField.MIN_WIDTH, width);
@@ -300,56 +299,29 @@ public class AdvancedOptionList extends OptionList {
                         .size(list.smallWidgetWidth, height)
                         .build());
 
-                // Regex button
-                if (Config.get().allowRegex) {
-                    String icon = ".*";
-                    CycleButton<Boolean> regexButton = CycleButton.booleanBuilder(
-                                    Component.literal(icon).withStyle(ChatFormatting.GREEN),
-                                    Component.literal(icon).withStyle(ChatFormatting.RED))
-                            .displayOnlyValue()
-                            .withInitialValue(trigger.isRegex)
-                            .withTooltip((status) -> Tooltip.create(status
-                                    ? localized("option", "notif.regex.enabled")
-                                    : localized("option", "notif.regex.disabled")))
-                            .create(movingX, 0, list.tinyWidgetWidth, height,
-                                    Component.empty(), (button, status) -> {
-                                        trigger.isRegex = status;
-                                        if (status) triggerField.regexValidator();
-                                        else triggerField.defaultValidator();
-                                        triggerField.setValue(triggerField.getValue());
-                                    });
-                    regexButton.setTooltipDelay(Duration.ofMillis(500));
-                    if (trigger.isKey) {
-                        regexButton.setMessage(Component.literal(icon).withStyle(ChatFormatting.GRAY));
-                        regexButton.setTooltip(Tooltip.create(
-                                localized("option", "notif.regex.disabled.key")));
-                        regexButton.active = false;
-                    }
-                    elements.add(regexButton);
-                    movingX += list.tinyWidgetWidth;
-                }
-
-                // Key button
-                CycleButton<Boolean> keyButton = CycleButton.booleanBuilder(
-                                Component.literal("\uD83D\uDD11").withStyle(ChatFormatting.GREEN),
-                                Component.literal("\uD83D\uDD11").withStyle(ChatFormatting.RED))
-                        .withInitialValue(trigger.isKey)
+                // Type button
+                CycleButton<Trigger.Type> typeButton = CycleButton.<Trigger.Type>builder(
+                                (type) -> Component.literal(Trigger.iconOf(type)))
+                        .withValues(Trigger.Type.values())
                         .displayOnlyValue()
-                        .withTooltip((status) -> Tooltip.create(status
-                                ? localized("option", "notif.trigger.tooltip.key")
-                                : localized("option", "notif.trigger.tooltip.normal")))
+                        .withInitialValue(trigger.type)
+                        .withTooltip((type) -> Tooltip.create(switch(type) {
+                            case NORMAL -> localized("option", "notif.trigger.tooltip.normal");
+                            case REGEX -> localized("option", "notif.trigger.tooltip.regex");
+                            case KEY -> localized("option", "notif.trigger.tooltip.key");
+                        }))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
-                                (button, status) -> {
-                                    trigger.isKey = status;
+                                (button, type) -> {
+                                    trigger.type = type;
                                     list.reload();
                                 });
-                keyButton.setTooltipDelay(Duration.ofMillis(500));
-                elements.add(keyButton);
+                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(typeButton);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
 
                 // Trigger field
                 triggerField.setPosition(movingX, 0);
-                if (trigger.isRegex) triggerField.regexValidator();
+                if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((string) -> trigger.string = string.strip());
                 triggerField.setValue(trigger.string);
@@ -393,8 +365,7 @@ public class AdvancedOptionList extends OptionList {
                 super();
                 int fieldSpacing = 1;
                 int timeFieldWidth = Minecraft.getInstance().font.width("00000");
-                int msgFieldWidth = width - timeFieldWidth - fieldSpacing
-                        - (Config.get().allowRegex ? list.tinyWidgetWidth + fieldSpacing : 0);
+                int msgFieldWidth = width - timeFieldWidth - fieldSpacing;
                 MultiLineEditBox msgField = new MultiLineEditBox(Minecraft.getInstance().font,
                         0, 0, msgFieldWidth, height * 2, Component.empty(), Component.empty());
                 int movingX = x;
@@ -410,22 +381,20 @@ public class AdvancedOptionList extends OptionList {
                         .build());
 
                 // Regex button
-                if (Config.get().allowRegex) {
-                    String icon = ".*";
-                    CycleButton<Boolean> regexButton = CycleButton.booleanBuilder(
-                                    Component.literal(icon).withStyle(ChatFormatting.GREEN),
-                                    Component.literal(icon).withStyle(ChatFormatting.RED))
-                            .displayOnlyValue()
-                            .withInitialValue(response.regexGroups)
-                            .withTooltip((status) -> Tooltip.create(status
-                                    ? localized("option", "advanced.response.regex.enabled")
-                                    : localized("option", "advanced.response.regex.disabled")))
-                            .create(x, 0, list.tinyWidgetWidth, height,
-                                    Component.empty(), (button, status) -> response.regexGroups = status);
-                    regexButton.setTooltipDelay(Duration.ofMillis(500));
-                    elements.add(regexButton);
-                    movingX += list.tinyWidgetWidth + fieldSpacing;
-                }
+                String icon = ".*";
+                CycleButton<Boolean> regexButton = CycleButton.booleanBuilder(
+                                Component.literal(icon).withStyle(ChatFormatting.GREEN),
+                                Component.literal(icon).withStyle(ChatFormatting.RED))
+                        .displayOnlyValue()
+                        .withInitialValue(response.regexGroups)
+                        .withTooltip((status) -> Tooltip.create(status
+                                ? localized("option", "advanced.response.regex.enabled")
+                                : localized("option", "advanced.response.regex.disabled")))
+                        .create(x, 0, list.tinyWidgetWidth, height,
+                                Component.empty(), (button, status) -> response.regexGroups = status);
+                regexButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(regexButton);
+                movingX += list.tinyWidgetWidth + fieldSpacing;
 
                 // Response field
                 msgField.setX(movingX);
