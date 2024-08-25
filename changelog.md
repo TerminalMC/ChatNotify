@@ -1,4 +1,1 @@
-- Fix a network crash caused by unexpected packet sequence
-- Add Russian translation (KiberAndy)
-- Add Traditional Chinese translation (yichifauzi)
-- GUI fixes
+- Add Simplified Chinese translation (Andypsl8)
