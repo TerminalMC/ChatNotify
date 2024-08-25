@@ -18,6 +18,18 @@ Set up audio and visual notifications for chat messages.
 
 </center></div>
 
+### Features
+
+- Extensive customizability and control.
+- Access to the full range of Minecraft sound effects, plus resourcepack sounds, with adjustable volume and pitch.
+- Custom color picker widget for easy selection of any RGB color.
+- Support for three trigger types:
+  - `Normal`: uses a 'fuzzy' matching pattern to detect words or phrases.
+  - `Key`: matches vanilla message types such as whispers and advancements.
+  - `Regex`: pure regex pattern matching for ultimate control.
+- Exclusion triggers for fine-tuning activation.
+- Automatic response messages with optional delay.
+
 <table style="width:100%;">
   <tr>
     <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/showcase/chat_01.png" style="width:100%;"></td>
@@ -30,6 +42,10 @@ Set up audio and visual notifications for chat messages.
 Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/), [ModMenu](https://modrinth.com/mod/mOgUt4GM/)
 
 NeoForge: None
+
+### Compatibility
+
+If you encounter issues, please report on Discord or GitHub.
 
 ### License
 
