@@ -365,7 +365,7 @@ public class AdvancedOptionList extends OptionList {
                 super();
                 int fieldSpacing = 1;
                 int timeFieldWidth = Minecraft.getInstance().font.width("00000");
-                int msgFieldWidth = width - timeFieldWidth - fieldSpacing;
+                int msgFieldWidth = width - timeFieldWidth - list.tinyWidgetWidth - fieldSpacing * 2;
                 MultiLineEditBox msgField = new MultiLineEditBox(Minecraft.getInstance().font,
                         0, 0, msgFieldWidth, height * 2, Component.empty(), Component.empty());
                 int movingX = x;
