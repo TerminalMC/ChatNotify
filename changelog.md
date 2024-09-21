@@ -1,1 +1,2 @@
 - Minor GUI fixes
+- Add optional title text display when notifications activate

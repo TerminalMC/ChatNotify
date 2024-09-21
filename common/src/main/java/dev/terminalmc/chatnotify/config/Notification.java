@@ -18,7 +18,7 @@ import java.util.Locale;
  * Consists of activation criteria and audio/visual notification parameters.
  */
 public class Notification {
-    public final int version = 1;
+    public final int version = 2;
 
     // Flags the notification as being actively edited.
     public transient boolean editing = false;
@@ -29,6 +29,7 @@ public class Notification {
     public boolean responseEnabled;
     public final Sound sound;
     public final TextStyle textStyle;
+    public final TitleText titleText;
     public final List<Trigger> triggers;
     public final List<Trigger> exclusionTriggers;
     public final List<ResponseMessage> responseMessages;
@@ -42,6 +43,7 @@ public class Notification {
         this.responseEnabled = false;
         this.sound = new Sound();
         this.textStyle = new TextStyle();
+        this.titleText = new TitleText();
         this.triggers = new ArrayList<>();
         this.exclusionTriggers = new ArrayList<>();
         this.responseMessages = new ArrayList<>();
@@ -51,13 +53,14 @@ public class Notification {
      * Not validated, only for use by self-validating deserializer.
      */
     Notification(boolean enabled, boolean exclusionEnabled, boolean responseEnabled,
-                 Sound sound, TextStyle textStyle, List<Trigger> triggers,
+                 Sound sound, TextStyle textStyle, TitleText titleText, List<Trigger> triggers,
                  List<Trigger> exclusionTriggers, List<ResponseMessage> responseMessages) {
         this.enabled = enabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
         this.sound = sound;
         this.textStyle = textStyle;
+        this.titleText = titleText;
         this.triggers = triggers;
         this.exclusionTriggers = exclusionTriggers;
         this.responseMessages = responseMessages;
@@ -69,7 +72,7 @@ public class Notification {
      */
     public static Notification createUser() {
         return new Notification(true, false, false,
-                new Sound(), new TextStyle(), new ArrayList<>(List.of(
+                new Sound(), new TextStyle(), new TitleText(), new ArrayList<>(List.of(
                         new Trigger("Profile name"), new Trigger("Display name"))),
                 new ArrayList<>(), new ArrayList<>());
     }
@@ -79,7 +82,7 @@ public class Notification {
      */
     public static Notification createBlank(Sound sound, TextStyle textStyle) {
         return new Notification(true, false, false,
-                sound, textStyle, new ArrayList<>(List.of(new Trigger(""))),
+                sound, textStyle, new TitleText(), new ArrayList<>(List.of(new Trigger(""))),
                 new ArrayList<>(), new ArrayList<>());
     }
 
@@ -200,11 +203,16 @@ public class Notification {
             JsonObject obj = json.getAsJsonObject();
 
             try {
+                int version = obj.get("version").getAsInt();
+
                 boolean enabled = obj.get("enabled").getAsBoolean();
                 boolean exclusionEnabled = obj.get("exclusionEnabled").getAsBoolean();
                 boolean responseEnabled = obj.get("responseEnabled").getAsBoolean();
                 Sound sound = ctx.deserialize(obj.get("sound"), Sound.class);
                 TextStyle textStyle = ctx.deserialize(obj.get("textStyle"), TextStyle.class);
+                TitleText titleText = version >= 2
+                        ? ctx.deserialize(obj.get("titleText"), TitleText.class)
+                        : new TitleText();
                 List<Trigger> triggers = new ArrayList<>();
                 for (JsonElement je : obj.getAsJsonArray("triggers")) {
                     Trigger t = ctx.deserialize(je, Trigger.class);
@@ -226,7 +234,7 @@ public class Notification {
                 if (textStyle == null) throw new JsonParseException("Notification #1");
 
                 return new Notification(enabled, exclusionEnabled, responseEnabled, sound,
-                        textStyle, triggers, exclusionTriggers, responseMessages);
+                        textStyle, titleText, triggers, exclusionTriggers, responseMessages);
             }
             catch (Exception e) {
                 ChatNotify.LOG.warn("Unable to deserialize Notification", e);

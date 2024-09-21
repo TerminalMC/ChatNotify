@@ -21,16 +21,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FastColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -120,9 +120,18 @@ public class NotifOptionList extends OptionList {
                 localized("option", "notif.controls"), null, -1));
 
         addEntry(new Entry.SoundConfigEntry(entryX, entryWidth, entryHeight, notif, this));
-        addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, this,
+                () -> notif.textStyle.color, (val) -> notif.textStyle.color = val,
+                () -> notif.textStyle.doColor, (val) -> notif.textStyle.doColor = val,
+                localized("option", "notif.color")));
         addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, true));
         addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, false));
+        addEntry(new Entry.TitleConfigEntry(entryX, entryWidth, entryHeight, notif, this));
+        if (notif.titleText.enabled) {
+            addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, this,
+                    () -> notif.titleText.color, (val) -> notif.titleText.color = val,
+                    localized("option", "notif.title.color")));
+        }
 
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "notif.advanced"),
@@ -421,66 +430,6 @@ public class NotifOptionList extends OptionList {
             }
         }
 
-        private static class ColorConfigEntry extends Entry {
-            ColorConfigEntry(int x, int width, int height, Notification notif, NotifOptionList list) {
-                super();
-                int statusButtonWidth = Math.max(24, height);
-                int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
-                int mainButtonWidth = width - colorFieldWidth - statusButtonWidth - SPACING * 2;
-
-                // Color GUI button
-                Button mainButton = Button.builder(localized("option", "notif.color")
-                                        .setStyle(Style.EMPTY.withColor(notif.textStyle.getTextColor())),
-                                (button) -> {
-                                    int cpHeight = HsvColorPicker.MIN_HEIGHT;
-                                    int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
-                                    list.screen.setOverlayWidget(new HsvColorPicker(
-                                            x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
-                                            Component.empty(), () -> notif.textStyle.color,
-                                            (val) -> notif.textStyle.color = val,
-                                            (widget) -> {
-                                                list.screen.removeOverlayWidget();
-                                                list.reload();
-                                            }));
-                                })
-                        .pos(x, 0)
-                        .size(mainButtonWidth, height)
-                        .build();
-                elements.add(mainButton);
-
-                // Hex code field
-                TextField colorField = new TextField(x + mainButtonWidth + SPACING, 0,
-                        colorFieldWidth, height);
-                colorField.hexColorValidator();
-                colorField.setMaxLength(7);
-                colorField.setResponder((val) -> {
-                    TextColor textColor = MiscUtil.parseColor(val);
-                    if (textColor != null) {
-                        int color = textColor.getValue();
-                        notif.textStyle.color = color;
-                        // Update color of main button and field
-                        mainButton.setMessage(mainButton.getMessage().copy().withColor(color));
-                        float[] hsv = new float[3];
-                        Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
-                                FastColor.ARGB32.blue(color), hsv);
-                        if (hsv[2] < 0.1) colorField.setTextColor(16777215);
-                        else colorField.setTextColor(color);
-                    }
-                });
-                colorField.setValue(notif.textStyle.getTextColor().formatValue());
-                elements.add(colorField);
-
-                // Status button
-                elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .displayOnlyValue()
-                        .withInitialValue(notif.textStyle.doColor)
-                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
-                                Component.empty(), (button, status) -> notif.textStyle.doColor = status));
-            }
-        }
-
         private static class FormatConfigEntry extends Entry {
             private FormatConfigEntry(int x, int width, int height, Notification notif, boolean first) {
                 super();
@@ -566,6 +515,113 @@ public class NotifOptionList extends OptionList {
                 if (state.equals(TriState.State.DISABLED)) return
                         Tooltip.create(localized("option", "notif.format.tooltip"));
                 return null;
+            }
+        }
+
+        private static class TitleConfigEntry extends Entry {
+            TitleConfigEntry(int x, int width, int height, Notification notif, NotifOptionList list) {
+                super();
+                int statusButtonWidth = Math.max(24, height);
+                int fieldWidth = width - statusButtonWidth - SPACING;
+
+                // Title text field
+                TextField titleField = new TextField(x, 0, fieldWidth, height);
+                titleField.setMaxLength(256);
+                titleField.setResponder((val) -> notif.titleText.text = val);
+                titleField.setValue(notif.titleText.text);
+                titleField.setTooltip(Tooltip.create(
+                        localized("option", "notif.title.text.tooltip")));
+                titleField.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(titleField);
+
+                // Status button
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .displayOnlyValue()
+                        .withInitialValue(notif.titleText.enabled)
+                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
+                                Component.empty(), (button, status) -> {
+                                    notif.titleText.enabled = status;
+                                    list.reload();
+                                }));
+            }
+        }
+
+        private static class ColorConfigEntry extends Entry {
+            ColorConfigEntry(int x, int width, int height, NotifOptionList list,
+                             Supplier<Integer> supplier, Consumer<Integer> consumer,
+                             MutableComponent text) {
+                this(x, width, height, list, supplier, consumer, () -> false, (val) -> {}, text, false);
+            }
+
+            ColorConfigEntry(int x, int width, int height, NotifOptionList list,
+                             Supplier<Integer> supplier, Consumer<Integer> consumer,
+                             Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
+                             MutableComponent text) {
+                this(x, width, height, list, supplier, consumer, statusSupplier, statusConsumer, text, true);
+            }
+
+            ColorConfigEntry(int x, int width, int height, NotifOptionList list,
+                             Supplier<Integer> supplier, Consumer<Integer> consumer,
+                             Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
+                             MutableComponent text, boolean showStatusButton) {
+                super();
+                int statusButtonWidth = Math.max(24, height);
+                int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
+                int mainButtonWidth = width - colorFieldWidth - SPACING;
+                if (showStatusButton) mainButtonWidth -= (statusButtonWidth + SPACING);
+
+                // Color GUI button
+                Button mainButton = Button.builder(text.withColor(supplier.get()),
+                                (button) -> {
+                                    int cpHeight = HsvColorPicker.MIN_HEIGHT;
+                                    int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
+                                    list.screen.setOverlayWidget(new HsvColorPicker(
+                                            x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
+                                            Component.empty(), supplier, consumer,
+                                            (widget) -> {
+                                                list.screen.removeOverlayWidget();
+                                                list.reload();
+                                            }));
+                                })
+                        .pos(x, 0)
+                        .size(mainButtonWidth, height)
+                        .build();
+                elements.add(mainButton);
+
+                // Hex code field
+                TextField colorField = new TextField(x + mainButtonWidth + SPACING, 0,
+                        colorFieldWidth, height);
+                colorField.hexColorValidator();
+                colorField.setMaxLength(7);
+                colorField.setResponder((val) -> {
+                    TextColor textColor = MiscUtil.parseColor(val);
+                    if (textColor != null) {
+                        int color = textColor.getValue();
+                        consumer.accept(color);
+                        // Update color of main button and field
+                        mainButton.setMessage(mainButton.getMessage().copy().withColor(color));
+                        float[] hsv = new float[3];
+                        Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
+                                FastColor.ARGB32.blue(color), hsv);
+                        if (hsv[2] < 0.1) colorField.setTextColor(16777215);
+                        else colorField.setTextColor(color);
+                    }
+                });
+                colorField.setValue(TextColor.fromRgb(supplier.get()).formatValue());
+                elements.add(colorField);
+
+                if (showStatusButton) {
+                    // Status button
+                    elements.add(CycleButton.booleanBuilder(
+                                    CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                    CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                            .displayOnlyValue()
+                            .withInitialValue(statusSupplier.get())
+                            .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
+                                    Component.empty(), (button, status) -> statusConsumer.accept(status)));
+                }
             }
         }
     }

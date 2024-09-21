@@ -138,7 +138,7 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
             }
 
             notifications.add(new Notification(enabled, exclusionEnabled, responseEnabled,
-                    sound, textStyle, triggers, exclusionTriggers, responseMessages));
+                    sound, textStyle, new TitleText(), triggers, exclusionTriggers, responseMessages));
         }
 
         // Ensure username Notification is valid

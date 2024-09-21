@@ -38,7 +38,7 @@ public class TextStyle {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Creates a default instance with specified color.
      */
     TextStyle(int color) {
         this.doColor = true;
@@ -50,6 +50,9 @@ public class TextStyle {
         this.obfuscated = new TriState();
     }
 
+    /**
+     * Not validated, only for use by self-validating deserializer.
+     */
     public TextStyle(boolean doColor, int color, TriState bold, TriState italic,
                      TriState underlined, TriState strikethrough, TriState obfuscated) {
         this.doColor = doColor;

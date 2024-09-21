@@ -71,6 +71,8 @@
   "option.chatnotify.notif.style_string.add.tooltip": "Add style target string",
   "option.chatnotify.notif.style_string.field.tooltip": "Style string",
   "option.chatnotify.notif.style_string.tooltip": "Normally ChatNotify will attempt to restyle the part of the message that matches the trigger, unless the trigger is a key or a regex pattern.\nSetting a style target string allows you to specify exactly what you want to restyle.",
+  "option.chatnotify.notif.title.color": "Title Text Color",
+  "option.chatnotify.notif.title.text.tooltip": "Title Text\n\nDisplayed center-screen when the notification is activated.",
   "option.chatnotify.notif.trigger.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.field.tooltip": "Trigger",
   "option.chatnotify.notif.trigger.key.any": "Any Message",

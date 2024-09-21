@@ -148,7 +148,9 @@ public class MessageProcessor {
 
                 // Notify
                 playSound(notif);
+                showTitle(notif);
                 sendResponses(notif, matcher);
+
                 String cleanStr = StringUtil.stripColor(str);
                 if (trig.type != Trigger.Type.NORMAL) {
                     if (trig.styleString != null && styleSearch(cleanStr, trig.styleString).find()) {
@@ -224,6 +226,18 @@ public class MessageProcessor {
                     notif.sound.getVolume(), notif.sound.getPitch(),
                     SoundInstance.createUnseededRandom(), false, 0,
                     SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+        }
+    }
+
+    /**
+     * Displays the title text for the notification, if enabled.
+     * @param notif the Notification.
+     */
+    private static void showTitle(Notification notif) {
+        if (notif.titleText.isEnabled()) {
+            MutableComponent text = Component.literal(notif.titleText.text);
+            Minecraft.getInstance().gui.setTitle(
+                    Component.literal(notif.titleText.text).withColor(notif.titleText.color));
         }
     }
 

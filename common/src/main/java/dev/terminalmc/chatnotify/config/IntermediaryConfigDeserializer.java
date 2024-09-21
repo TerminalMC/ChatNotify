@@ -56,7 +56,7 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
                     .asList().stream().map(je2 -> new ResponseMessage(true, je2.getAsString(), false, 0)).toList());
 
             notifications.add(new Notification(enabled, exclusionEnabled, responseEnabled,
-                    sound, textStyle, triggers, exclusionTriggers, responseMessages));
+                    sound, textStyle, new TitleText(), triggers, exclusionTriggers, responseMessages));
         }
 
         // Validate username notification
