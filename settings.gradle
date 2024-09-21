@@ -34,7 +34,7 @@ plugins {
 }
 
 // This should match the folder name of the project, else IDEA may complain (https://youtrack.jetbrains.com/issue/IDEA-317606)
-rootProject.name = "Framework"
+rootProject.name = "ChatNotify"
 include("common")
 include("fabric")
 include("neoforge")
