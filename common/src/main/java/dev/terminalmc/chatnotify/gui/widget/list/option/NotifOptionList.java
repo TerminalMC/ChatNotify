@@ -525,7 +525,7 @@ public class NotifOptionList extends OptionList {
                 int fieldWidth = width - statusButtonWidth - SPACING;
 
                 // Title text field
-                TextField titleField = new TextField(x, 0, fieldWidth, height);
+                TextField titleField = new TextField(x, 0, fieldWidth, height, true);
                 titleField.setMaxLength(256);
                 titleField.setResponder((val) -> notif.titleText.text = val);
                 titleField.setValue(notif.titleText.text);
