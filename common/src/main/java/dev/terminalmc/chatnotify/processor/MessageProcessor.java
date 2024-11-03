@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.processor;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.*;
+import dev.terminalmc.chatnotify.mixin.accessor.MutableComponentAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -406,7 +407,7 @@ public class MessageProcessor {
                 }
                 else {
                     MutableComponent newMessage = MutableComponent.create(PlainTextContents.EMPTY);
-                    newMessage.siblings.addAll(siblings);
+                    ((MutableComponentAccessor)newMessage).getSiblings().addAll(siblings);
                     msg = newMessage;
                 }
             }
@@ -419,7 +420,7 @@ public class MessageProcessor {
                 replacement.setStyle(msg.getStyle());
 
                 siblings.addFirst(MutableComponent.create(msg.getContents()));
-                replacement.siblings.addAll(siblings);
+                ((MutableComponentAccessor)replacement).getSiblings().addAll(siblings);
 
                 msg = restyleComponent(replacement, str, style);
             }

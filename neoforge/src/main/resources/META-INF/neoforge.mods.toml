@@ -39,3 +39,6 @@ issueTrackerURL="${issues_url}" #optional:none
   modId="neoforge"
   versionRange="${neoforge_versions}"
   side="CLIENT"
+
+# https://docs.neoforged.net/docs/gettingstarted/modfiles/#modstoml
+# https://docs.neoforged.net/docs/misc/updatechecker

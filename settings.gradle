@@ -25,10 +25,10 @@ pluginManagement {
         }
         exclusiveContent {
             forRepositories(
-                    maven {
-                        name = "NeoForge"
-                        url = "https://maven.neoforged.net/releases"
-                    }
+                maven {
+                    name = "NeoForge"
+                    url = "https://maven.neoforged.net/releases"
+                }
             )
             filter { includeGroupAndSubgroups("net.neoforged.licenser") }
         }

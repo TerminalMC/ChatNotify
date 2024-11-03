@@ -1,6 +1,5 @@
-accessWidener v1 named
+accessWidener v2 named
+# https://fabricmc.net/wiki/tutorial:accesswideners
 accessible class net/minecraft/client/OptionInstance$SliderableValueSet
 accessible class net/minecraft/client/OptionInstance$ValueSet
-accessible field net/minecraft/network/chat/MutableComponent siblings Ljava/util/List;
-accessible method net/minecraft/network/chat/Style create (Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;)Lnet/minecraft/network/chat/Style;
 accessible method net/minecraft/network/chat/TextColor formatValue ()Ljava/lang/String;
