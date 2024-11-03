@@ -1,6 +1,17 @@
 /*
- * Copyright 2023, 2024 NotRyken
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2024 TerminalMC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package dev.terminalmc.chatnotify.config;
@@ -35,22 +46,8 @@ public class Notification {
     public final List<ResponseMessage> responseMessages;
 
     /**
-     * Initializes default configuration with all lists empty.
-     */
-    public Notification() {
-        this.enabled = true;
-        this.exclusionEnabled = false;
-        this.responseEnabled = false;
-        this.sound = new Sound();
-        this.textStyle = new TextStyle();
-        this.titleText = new TitleText();
-        this.triggers = new ArrayList<>();
-        this.exclusionTriggers = new ArrayList<>();
-        this.responseMessages = new ArrayList<>();
-    }
-
-    /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated, only for use by self-validating deserializer and hardcoded
+     * default creation.
      */
     Notification(boolean enabled, boolean exclusionEnabled, boolean responseEnabled,
                  Sound sound, TextStyle textStyle, TitleText titleText, List<Trigger> triggers,
