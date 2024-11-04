@@ -31,8 +31,8 @@ Set up audio and visual notifications for chat messages.
 
 <table style="width:100%;">
   <tr>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/showcase/chat_01.png" style="width:100%;"></td>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/showcase/config_01.png" style="width:100%;"></td>
+    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_01.png" style="width:100%;"></td>
+    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/config_01.png" style="width:100%;"></td>
   </tr>
 </table>
 

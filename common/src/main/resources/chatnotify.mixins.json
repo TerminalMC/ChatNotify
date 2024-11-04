@@ -5,15 +5,15 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
-    "accessor.MutableComponentAccessor",
-    "accessor.ScreenAccessor"
   ],
   "client": [
     "MixinChatComponent",
     "MixinChatListener",
     "MixinClientPacketListener",
     "MixinEditBox",
-    "MixinOptionInstance"
+    "MixinOptionInstance",
+    "accessor.MutableComponentAccessor",
+    "accessor.ScreenAccessor"
   ],
   "server": [
   ],
