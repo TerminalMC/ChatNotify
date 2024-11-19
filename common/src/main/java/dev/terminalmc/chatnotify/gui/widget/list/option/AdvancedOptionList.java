@@ -29,6 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +50,16 @@ public class AdvancedOptionList extends OptionList {
                               int entryWidth, int entryHeight, Notification notif) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
         this.notif = notif;
+
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                localized("option", "advanced.title", "\u2139"),
+                Tooltip.create(localized("option", "advanced.title.tooltip")), -1));
+        addEntry(new Entry.TitleConfigEntry(entryX, entryWidth, entryHeight, notif, this));
+        if (notif.titleText.enabled) {
+            addEntry(new NotifOptionList.Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, this,
+                    () -> notif.titleText.color, (val) -> notif.titleText.color = val,
+                    localized("option", "advanced.title.color")));
+        }
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.exclusion", "\u2139"),
@@ -260,6 +271,33 @@ public class AdvancedOptionList extends OptionList {
     }
 
     private abstract static class Entry extends OptionList.Entry {
+
+        private static class TitleConfigEntry extends Entry {
+            TitleConfigEntry(int x, int width, int height, Notification notif, AdvancedOptionList list) {
+                super();
+                int statusButtonWidth = Math.max(24, height);
+                int fieldWidth = width - statusButtonWidth - SPACING;
+
+                // Title text field
+                TextField titleField = new TextField(x, 0, fieldWidth, height, true);
+                titleField.setMaxLength(256);
+                titleField.setResponder((val) -> notif.titleText.text = val);
+                titleField.setValue(notif.titleText.text);
+                elements.add(titleField);
+
+                // Status button
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .displayOnlyValue()
+                        .withInitialValue(notif.titleText.enabled)
+                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
+                                Component.empty(), (button, status) -> {
+                                    notif.titleText.enabled = status;
+                                    list.reload();
+                                }));
+            }
+        }
 
         private static class ExclusionToggleEntry extends Entry {
             ExclusionToggleEntry(int x, int width, int height, Notification notif,

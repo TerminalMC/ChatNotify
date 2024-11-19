@@ -137,12 +137,6 @@ public class NotifOptionList extends OptionList {
                 localized("option", "notif.color")));
         addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, true));
         addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, false));
-        addEntry(new Entry.TitleConfigEntry(entryX, entryWidth, entryHeight, notif, this));
-        if (notif.titleText.enabled) {
-            addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, this,
-                    () -> notif.titleText.color, (val) -> notif.titleText.color = val,
-                    localized("option", "notif.title.color")));
-        }
 
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "notif.advanced"),
@@ -260,7 +254,7 @@ public class NotifOptionList extends OptionList {
         throw new IllegalStateException("Trigger index out of range");
     }
 
-    private abstract static class Entry extends OptionList.Entry {
+    abstract static class Entry extends OptionList.Entry {
 
         private static class TriggerDisplayFieldEntry extends Entry {
             TriggerDisplayFieldEntry(int x, int width, int height, String value, boolean first) {
@@ -529,51 +523,21 @@ public class NotifOptionList extends OptionList {
             }
         }
 
-        private static class TitleConfigEntry extends Entry {
-            TitleConfigEntry(int x, int width, int height, Notification notif, NotifOptionList list) {
-                super();
-                int statusButtonWidth = Math.max(24, height);
-                int fieldWidth = width - statusButtonWidth - SPACING;
-
-                // Title text field
-                TextField titleField = new TextField(x, 0, fieldWidth, height, true);
-                titleField.setMaxLength(256);
-                titleField.setResponder((val) -> notif.titleText.text = val);
-                titleField.setValue(notif.titleText.text);
-                titleField.setTooltip(Tooltip.create(
-                        localized("option", "notif.title.text.tooltip")));
-                titleField.setTooltipDelay(Duration.ofMillis(500));
-                elements.add(titleField);
-
-                // Status button
-                elements.add(CycleButton.booleanBuilder(
-                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .displayOnlyValue()
-                        .withInitialValue(notif.titleText.enabled)
-                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
-                                Component.empty(), (button, status) -> {
-                                    notif.titleText.enabled = status;
-                                    list.reload();
-                                }));
-            }
-        }
-
-        private static class ColorConfigEntry extends Entry {
-            ColorConfigEntry(int x, int width, int height, NotifOptionList list,
+        static class ColorConfigEntry extends Entry {
+            ColorConfigEntry(int x, int width, int height, OptionList list,
                              Supplier<Integer> supplier, Consumer<Integer> consumer,
                              MutableComponent text) {
                 this(x, width, height, list, supplier, consumer, () -> false, (val) -> {}, text, false);
             }
 
-            ColorConfigEntry(int x, int width, int height, NotifOptionList list,
+            ColorConfigEntry(int x, int width, int height, OptionList list,
                              Supplier<Integer> supplier, Consumer<Integer> consumer,
                              Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
                              MutableComponent text) {
                 this(x, width, height, list, supplier, consumer, statusSupplier, statusConsumer, text, true);
             }
 
-            ColorConfigEntry(int x, int width, int height, NotifOptionList list,
+            ColorConfigEntry(int x, int width, int height, OptionList list,
                              Supplier<Integer> supplier, Consumer<Integer> consumer,
                              Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
                              MutableComponent text, boolean showStatusButton) {
