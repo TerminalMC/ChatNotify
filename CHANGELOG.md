@@ -2,4 +2,4 @@
 
 ## 2.2.0
 
-- Something
+- Fixed style target string field overlapping delete button

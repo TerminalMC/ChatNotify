@@ -380,7 +380,7 @@ public class NotifOptionList extends OptionList {
                                   Trigger trigger) {
                 super();
                 int fieldSpacing = 1;
-                int stringFieldWidth = width - (list.tinyWidgetWidth * 2) - (fieldSpacing * 2);
+                int stringFieldWidth = width - (list.tinyWidgetWidth * 3) - (fieldSpacing * 2);
                 int movingX = x + list.tinyWidgetWidth;
 
                 // Info icon
