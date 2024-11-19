@@ -148,7 +148,7 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
                 responseMessages.add(new ResponseMessage(true, je2.getAsString(), false, 0));
             }
 
-            notifications.add(new Notification(enabled, exclusionEnabled, responseEnabled,
+            notifications.add(new Notification(enabled, exclusionEnabled, responseEnabled, false,
                     sound, textStyle, new TitleText(), triggers, exclusionTriggers, responseMessages));
         }
 

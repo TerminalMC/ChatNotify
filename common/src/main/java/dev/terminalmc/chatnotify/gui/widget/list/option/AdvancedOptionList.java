@@ -52,6 +52,10 @@ public class AdvancedOptionList extends OptionList {
         this.notif = notif;
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                localized("option", "advanced.controls"), null, -1));
+        addEntry(new Entry.ControlsEntry(entryX, entryWidth, entryHeight, notif));
+
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.title", "\u2139"),
                 Tooltip.create(localized("option", "advanced.title.tooltip")), -1));
         addEntry(new Entry.TitleConfigEntry(entryX, entryWidth, entryHeight, notif, this));
@@ -271,6 +275,21 @@ public class AdvancedOptionList extends OptionList {
     }
 
     private abstract static class Entry extends OptionList.Entry {
+
+        private static class ControlsEntry extends MainOptionList.Entry {
+            ControlsEntry(int x, int width, int height, Notification notif) {
+                super();
+
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(notif.blockMessage)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "advanced.block.tooltip")))
+                        .create(x, 0, width, height, localized("option", "advanced.block"),
+                                (button, status) -> notif.blockMessage = status));
+            }
+        }
 
         private static class TitleConfigEntry extends Entry {
             TitleConfigEntry(int x, int width, int height, Notification notif, AdvancedOptionList list) {

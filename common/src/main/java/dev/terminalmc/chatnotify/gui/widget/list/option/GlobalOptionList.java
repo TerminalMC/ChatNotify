@@ -49,7 +49,7 @@ public class GlobalOptionList extends OptionList {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
 
         addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.SelfCheckAndRegexEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SelfCheckEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
@@ -122,8 +122,8 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
-        private static class SelfCheckAndRegexEntry extends MainOptionList.Entry {
-            SelfCheckAndRegexEntry(int x, int width, int height) {
+        private static class SelfCheckEntry extends MainOptionList.Entry {
+            SelfCheckEntry(int x, int width, int height) {
                 super();
 
                 elements.add(CycleButton.booleanBuilder(

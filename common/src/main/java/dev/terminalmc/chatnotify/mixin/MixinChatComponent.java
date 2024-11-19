@@ -16,17 +16,19 @@
 
 package dev.terminalmc.chatnotify.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.processor.MessageProcessor;
+import dev.terminalmc.chatnotify.util.MessageProcessor;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.Unique;
 
 /**
  * Minecraft handles different message packet types in different ways. The
@@ -53,12 +55,15 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(value = ChatComponent.class, priority = 792)
 public class MixinChatComponent {
 
-    @ModifyVariable(
-            method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V",
-            at = @At("HEAD"),
-            argsOnly = true
-    )
-    private Component replaceMessage(Component message) {
+    @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V")
+    private void replaceMessage(Component message, MessageSignature headerSignature, 
+                                GuiMessageTag tag, Operation<Void> original) {
+        message = chatNotify$replaceMessage(message);
+        if (message != null) original.call(message, headerSignature, tag);
+    }
+
+    @Unique
+    private static @Nullable Component chatNotify$replaceMessage(Component message) {
         if (ChatNotify.mixinEarly()) {
             return message;
         } else {

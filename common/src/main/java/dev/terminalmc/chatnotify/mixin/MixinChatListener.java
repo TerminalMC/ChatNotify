@@ -16,14 +16,20 @@
 
 package dev.terminalmc.chatnotify.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.mojang.authlib.GameProfile;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.processor.MessageProcessor;
+import dev.terminalmc.chatnotify.util.MessageProcessor;
 import net.minecraft.client.multiplayer.chat.ChatListener;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+
+import java.time.Instant;
 
 /**
  * Refer to {@link MixinChatComponent} for an overview of Minecraft's message
@@ -32,37 +38,34 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(value = ChatListener.class, priority = 792)
 public class MixinChatListener {
 
-    @ModifyVariable(
-            method = "handleDisguisedChatMessage",
-            at = @At("HEAD"),
-            argsOnly = true
-    )
-    private Component replaceDisguisedChatMessage(Component message) {
-        return chatNotify$replaceMessage(message);
+    @WrapMethod(method = "handleDisguisedChatMessage")
+    private void wrapHandleDisguisedChatMessage(Component message, ChatType.Bound boundChatType, 
+                                                Operation<Void> original) {
+        message = chatNotify$replaceMessage(message);
+        if (message != null) original.call(message, boundChatType);
     }
 
-    @ModifyVariable(
-            method = "handleSystemMessage",
-            at = @At("HEAD"),
-            argsOnly = true
-    )
-    private Component replaceSystemMessage(Component message) {
-        return chatNotify$replaceMessage(message);
+    @WrapMethod(method = "handleSystemMessage")
+    private void wrapHandleSystemMessage(Component message, boolean isOverlay, 
+                                         Operation<Void> original) {
+        message = chatNotify$replaceMessage(message);
+        if (message != null) original.call(message, isOverlay);
     }
 
     // Unable to use handlePlayerChatMessage as that takes a PlayerChatMessage.
-    @ModifyVariable(
-            method = "showMessageToPlayer",
-            at = @At("HEAD"),
-            argsOnly = true
-    )
-    private Component replaceMessageToPlayer(Component message) {
-        return chatNotify$replaceMessage(message);
+    @WrapMethod(method = "showMessageToPlayer")
+    private boolean wrapShowMessageToPlayer(ChatType.Bound boundChatType, 
+                                            PlayerChatMessage chatMessage, Component message, 
+                                            GameProfile gameProfile, boolean onlyShowSecureChat, 
+                                            Instant timestamp, Operation<Boolean> original) {
+        message = chatNotify$replaceMessage(message);
+        if (message != null) return original.call(boundChatType, chatMessage, message, gameProfile, 
+                onlyShowSecureChat, timestamp);
+        return false;
     }
 
-
     @Unique
-    private static Component chatNotify$replaceMessage(Component message) {
+    private static @Nullable Component chatNotify$replaceMessage(Component message) {
         if (ChatNotify.mixinEarly()) {
             return MessageProcessor.processMessage(message);
         } else {

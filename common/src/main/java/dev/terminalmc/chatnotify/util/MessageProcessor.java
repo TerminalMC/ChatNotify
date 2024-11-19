@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.processor;
+package dev.terminalmc.chatnotify.util;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.*;
@@ -48,7 +48,7 @@ public class MessageProcessor {
      * @return A modified copy of the message, or the original if no modifying
      * was required.
      */
-    public static Component processMessage(Component msg) {
+    public static @Nullable Component processMessage(Component msg) {
         switch(Config.get().debugShowKey.state) {
             case ON -> msg = addKeyInfo(msg);
             case OFF -> msg = addRawInfo(msg);
@@ -157,8 +157,15 @@ public class MessageProcessor {
                     if (exHit) break;
                 }
                 if (exHit) continue;
-
-                // Notify
+                
+                // Activate notification
+                
+                if (notif.blockMessage) {
+                    ChatNotify.LOG.info("Blocked message '{}' due to trigger '{}'", 
+                            msg.getString(), trig.string);
+                    return null;
+                }
+                
                 playSound(notif);
                 showTitle(notif);
                 sendResponses(notif, matcher);
