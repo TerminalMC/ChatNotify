@@ -76,6 +76,8 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     protected void init() {
+        Minecraft mc = Minecraft.getInstance();
+        
         int x = getX();
         int y = getY();
 
@@ -84,8 +86,11 @@ public class DropdownTextField extends OverlayWidget {
         int buttonWidth = widgetHeight;
         int textFieldWidth = width - (2 * widgetHeight);
 
-        cancelButton = Button.builder(Component.literal("\u274C").withStyle(ChatFormatting.RED),
-                        (button) -> onClose())
+        cancelButton = Button.builder(Component.literal("\u274C").withStyle(ChatFormatting.RED), 
+                (button) -> {
+                    onClose();
+                    playDownSound(mc.getSoundManager());
+                })
                 .pos(x + width - (buttonWidth * 2), y)
                 .size(buttonWidth, widgetHeight)
                 .build();
@@ -93,6 +98,7 @@ public class DropdownTextField extends OverlayWidget {
                 (button) -> {
                     dest.accept(textField.getValue());
                     onClose();
+                    playDownSound(mc.getSoundManager());
                 })
                 .pos(x + width - buttonWidth, y)
                 .size(buttonWidth, widgetHeight)
@@ -100,8 +106,7 @@ public class DropdownTextField extends OverlayWidget {
         textField = new TextField(x, y, textFieldWidth, widgetHeight);
         dropdown = new ExpandingList(x, y + widgetHeight + verticalSpace,
                 width, height - widgetHeight - verticalSpace,
-                Minecraft.getInstance().font.lineHeight,
-                Minecraft.getInstance().font.lineHeight, 2);
+                mc.font.lineHeight, mc.font.lineHeight, 2);
 
         textField.setMaxLength(240);
         textField.setResponder(this::valueResponder);

@@ -121,6 +121,8 @@ public class HsvColorPicker extends OverlayWidget {
      * fields.
      */
     protected void init() {
+        Minecraft mc = Minecraft.getInstance();
+        
         // Fixed values
         int textFieldHeight = 20;
         int minColorBoxWidth = 12;
@@ -143,7 +145,7 @@ public class HsvColorPicker extends OverlayWidget {
         svFieldY = hFieldY;
 
         // Hex code text field
-        Font font = Minecraft.getInstance().font;
+        Font font = mc.font;
         int hexFieldHeight = textFieldHeight;
         int hexFieldX = BORDER + hsvPickerBoxWidth;
         int hexFieldY = BORDER;
@@ -162,7 +164,10 @@ public class HsvColorPicker extends OverlayWidget {
         int cancelButtonX = BORDER + hsvPickerBoxWidth;
         int cancelButtonY = BORDER + interiorHeight - buttonHeight;
 
-        cancelButton = Button.builder(CommonComponents.GUI_CANCEL, (button) -> onClose())
+        cancelButton = Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
+                    onClose();
+                    playDownSound(mc.getSoundManager());
+                })
                 .pos(getX() + cancelButtonX, getY() + cancelButtonY)
                 .size(cancelButtonWidth, buttonHeight)
                 .build();
@@ -174,6 +179,7 @@ public class HsvColorPicker extends OverlayWidget {
         confirmButton = Button.builder(CommonComponents.GUI_OK, (button) -> {
                     dest.accept(Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]));
                     onClose();
+                    playDownSound(mc.getSoundManager());
                 })
                 .pos(getX() + confirmButtonX, getY() + confirmButtonY)
                 .size(confirmButtonWidth, buttonHeight)
