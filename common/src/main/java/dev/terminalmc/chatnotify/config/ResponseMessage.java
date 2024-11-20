@@ -20,18 +20,28 @@ import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
-
 public class ResponseMessage {
-    public final int version = 1;
+    public final int version = 2;
+
+    public enum Type {
+        NORMAL("~"),
+        REGEX(".*"),
+        COMMANDKEYS("K");
+
+        public final String icon;
+
+        Type(String icon) {
+            this.icon = icon;
+        }
+    }
 
     public transient int countdown;
     public transient String sendingString;
 
     public boolean enabled;
     public String string;
-    public boolean regexGroups;
     public int delayTicks;
+    public Type type;
 
     /**
      * Creates a default instance.
@@ -39,36 +49,40 @@ public class ResponseMessage {
     public ResponseMessage() {
         enabled = true;
         string = "";
-        regexGroups = false;
+        type = Type.NORMAL;
         delayTicks = 0;
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    ResponseMessage(boolean enabled, String string, boolean regexGroups, int delayTicks) {
+    ResponseMessage(boolean enabled, String string, Type type, int delayTicks) {
         this.enabled = enabled;
         this.string = string;
-        this.regexGroups = regexGroups;
+        this.type = type;
         this.delayTicks = delayTicks;
     }
 
     public static class Deserializer implements JsonDeserializer<ResponseMessage> {
         @Override
-        public @Nullable ResponseMessage deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
-                throws JsonParseException {
+        public @Nullable ResponseMessage deserialize(JsonElement json, java.lang.reflect.Type typeOfT, 
+                                                     JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
 
             try {
+                int version = obj.get("version").getAsInt();
+                
                 boolean enabled = obj.get("enabled").getAsBoolean();
                 String string = obj.get("string").getAsString();
-                boolean regexGroups = obj.get("regexGroups").getAsBoolean();
                 int delayTicks = obj.get("delayTicks").getAsInt();
+                Type responseType = version >= 2 
+                        ? ctx.deserialize(obj.get("type"), Type.class) 
+                        : obj.get("regexGroups").getAsBoolean() ? Type.REGEX : Type.NORMAL;
 
                 // Validation
                 if (delayTicks < 0) throw new JsonParseException("ResponseMessage #1");
 
-                return new ResponseMessage(enabled, string, regexGroups, delayTicks);
+                return new ResponseMessage(enabled, string, responseType, delayTicks);
             }
             catch (Exception e) {
                 ChatNotify.LOG.warn("Unable to deserialize ResponseMessage", e);

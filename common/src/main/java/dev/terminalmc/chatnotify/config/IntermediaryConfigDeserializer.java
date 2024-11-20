@@ -64,7 +64,8 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
                             .filter(Objects::nonNull).toList());
             List<ResponseMessage> responseMessages = new ArrayList<>(
                     notifObj.getAsJsonArray("responseMessages")
-                    .asList().stream().map(je2 -> new ResponseMessage(true, je2.getAsString(), false, 0)).toList());
+                    .asList().stream().map(je2 -> new ResponseMessage(
+                            true, je2.getAsString(), ResponseMessage.Type.NORMAL, 0)).toList());
 
             notifications.add(new Notification(enabled, exclusionEnabled, responseEnabled, false,
                     sound, textStyle, new TitleText(), triggers, exclusionTriggers, responseMessages));

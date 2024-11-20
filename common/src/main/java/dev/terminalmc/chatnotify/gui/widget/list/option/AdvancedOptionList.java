@@ -24,6 +24,7 @@ import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -369,7 +371,7 @@ public class AdvancedOptionList extends OptionList {
 
                 // Type button
                 CycleButton<Trigger.Type> typeButton = CycleButton.<Trigger.Type>builder(
-                                (type) -> Component.literal(Trigger.iconOf(type)))
+                                (type) -> Component.literal(type.icon))
                         .withValues(Trigger.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
@@ -434,8 +436,6 @@ public class AdvancedOptionList extends OptionList {
                 int fieldSpacing = 1;
                 int timeFieldWidth = Minecraft.getInstance().font.width("00000");
                 int msgFieldWidth = width - timeFieldWidth - list.tinyWidgetWidth - fieldSpacing * 2;
-                MultiLineEditBox msgField = new MultiLineEditBox(Minecraft.getInstance().font,
-                        0, 0, msgFieldWidth, height * 2, Component.empty(), Component.empty());
                 int movingX = x;
 
                 // Drag reorder button
@@ -448,28 +448,89 @@ public class AdvancedOptionList extends OptionList {
                         .size(list.smallWidgetWidth, height)
                         .build());
 
-                // Regex button
-                String icon = ".*";
-                CycleButton<Boolean> regexButton = CycleButton.booleanBuilder(
-                                Component.literal(icon).withStyle(ChatFormatting.GREEN),
-                                Component.literal(icon).withStyle(ChatFormatting.RED))
+                // Type button
+                CycleButton<ResponseMessage.Type> typeButton = CycleButton.<ResponseMessage.Type>builder(
+                                (type) -> Component.literal(type.icon))
+                        .withValues(ResponseMessage.Type.values())
                         .displayOnlyValue()
-                        .withInitialValue(response.regexGroups)
-                        .withTooltip((status) -> Tooltip.create(status
-                                ? localized("option", "advanced.response.regex.enabled")
-                                : localized("option", "advanced.response.regex.disabled")))
-                        .create(x, 0, list.tinyWidgetWidth, height,
-                                Component.empty(), (button, status) -> response.regexGroups = status);
-                regexButton.setTooltipDelay(Duration.ofMillis(500));
-                elements.add(regexButton);
+                        .withInitialValue(response.type)
+                        .withTooltip((type) -> Tooltip.create(switch(type) {
+                            case NORMAL -> localized("option", "advanced.response.tooltip.normal");
+                            case REGEX -> localized("option", "advanced.response.tooltip.regex");
+                            case COMMANDKEYS -> localized("option", "advanced.response.tooltip.commandkeys");
+                        }))
+                        .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
+                                (button, type) -> {
+                                    response.type = type;
+                                    list.reload();
+                                });
+                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(typeButton);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
 
-                // Response field
-                msgField.setX(movingX);
-                msgField.setCharacterLimit(256);
-                msgField.setValue(response.string);
-                msgField.setValueListener((val) -> response.string = val.strip());
-                elements.add(msgField);
+                if (response.type.equals(ResponseMessage.Type.COMMANDKEYS)) {
+                    int keyFieldWidth = msgFieldWidth / 2;
+                    List<String> keys = KeyAccessor.getNameMap().keySet().stream().sorted().toList();
+                    FakeTextField keyField1 = new FakeTextField(movingX, 0, keyFieldWidth, height,
+                            () -> {
+                                int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
+                                int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
+                                int wX = x + (width / 2) - (wWidth / 2);
+                                int wY = list.getY();
+                                list.screen.setOverlayWidget(new DropdownTextField(
+                                        wX, wY, wWidth, wHeight, Component.empty(),
+                                        () -> response.string.matches(".+-.+") ? response.string.split("-")[0] : "", 
+                                        (val) -> response.string = val + "-" + (response.string.matches(".+-.+") ? response.string.split("-")[1] : "key.keyboard.unknown"),
+                                        (widget) -> {
+                                            list.screen.removeOverlayWidget();
+                                            list.reload();
+                                        }, keys));
+                            });
+                    keyField1.setTooltip(Tooltip.create(localized(
+                            "option", "advanced.response.tooltip.commandkeys.limit_key")));
+                    keyField1.setMaxLength(240);
+                    keyField1.setValidator((val) -> {
+                        if (keys.contains(val)) return Optional.empty();
+                        else return Optional.of(localized("option", "key.error")
+                                .withStyle(ChatFormatting.RED));
+                    });
+                    keyField1.setValue(response.string.matches(".+-.+") ? response.string.split("-")[0] : "");
+                    elements.add(keyField1);
+                    movingX += keyFieldWidth;
+                    FakeTextField keyField2 = new FakeTextField(movingX, 0, keyFieldWidth, height,
+                            () -> {
+                                int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
+                                int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
+                                int wX = x + (width / 2) - (wWidth / 2);
+                                int wY = list.getY();
+                                list.screen.setOverlayWidget(new DropdownTextField(
+                                        wX, wY, wWidth, wHeight, Component.empty(),
+                                        () -> response.string.matches(".+-.+") ? response.string.split("-")[1] : "",
+                                        (val) -> response.string = (response.string.matches(".+-.+") ? response.string.split("-")[0] + "-" + val : "key.keyboard.unknown"),
+                                        (widget) -> {
+                                            list.screen.removeOverlayWidget();
+                                            list.reload();
+                                        }, keys));
+                            });
+                    keyField2.setTooltip(Tooltip.create(localized(
+                            "option", "advanced.response.tooltip.commandkeys.key")));
+                    keyField2.setMaxLength(240);
+                    keyField2.setValidator((val) -> {
+                        if (keys.contains(val)) return Optional.empty();
+                        else return Optional.of(localized("option", "key.error")
+                                .withStyle(ChatFormatting.RED));
+                    });
+                    keyField2.setValue(response.string.matches(".+-.+") ? response.string.split("-")[1] : "");
+                    elements.add(keyField2);
+                } else {
+                    // Response field
+                    MultiLineEditBox msgField = new MultiLineEditBox(Minecraft.getInstance().font,
+                            movingX, 0, msgFieldWidth, height * 2, Component.empty(), Component.empty());
+                    msgField.setCharacterLimit(256);
+                    msgField.setValue(response.string);
+                    msgField.setValueListener((val) -> response.string = val.strip());
+                    elements.add(msgField);
+                }
 
                 // Delay field
                 TextField timeField = new TextField(

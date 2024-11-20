@@ -308,7 +308,7 @@ public class NotifOptionList extends OptionList {
 
                 // Type button
                 CycleButton<Trigger.Type> typeButton = CycleButton.<Trigger.Type>builder(
-                                (type) -> Component.literal(Trigger.iconOf(type)))
+                                (type) -> Component.literal(type.icon))
                         .withValues(Trigger.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)

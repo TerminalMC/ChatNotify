@@ -21,6 +21,7 @@ import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.ResponseMessage;
 import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.util.CommandKeysUtil;
 import dev.terminalmc.chatnotify.util.ModLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -71,7 +72,13 @@ public class ChatNotify {
         responseMessages.removeIf((resMsg) -> {
             if (--resMsg.countdown <= 0) {
                 if (resMsg.sendingString != null && !resMsg.sendingString.isBlank()) {
-                    sending.add(resMsg.sendingString);
+                    if (resMsg.type.equals(ResponseMessage.Type.COMMANDKEYS)) {
+                        try {
+                            CommandKeysUtil.send(resMsg.sendingString);
+                        } catch (NoClassDefFoundError | NoSuchMethodError ignored) {} 
+                    } else {
+                        sending.add(resMsg.sendingString);
+                    }
                 }
                 return true;
             }

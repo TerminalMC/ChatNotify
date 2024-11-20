@@ -28,21 +28,18 @@ public class Trigger {
     public final int version = 3;
 
     public enum Type {
-        NORMAL,
-        REGEX,
-        KEY,
-    }
-
-    public static String iconOf(Type t) {
-        return switch(t) {
-            case NORMAL -> "~";
-            case REGEX -> ".*";
-            case KEY -> "\uD83D\uDD11";
-        };
+        NORMAL("~"),
+        REGEX(".*"),
+        KEY("\uD83D\uDD11");
+        
+        public final String icon;
+        
+        Type(String icon) {
+            this.icon = icon;
+        }
     }
 
     public boolean enabled;
-
     public @NotNull String string;
     public transient @Nullable Pattern pattern;
     public @Nullable String styleString;

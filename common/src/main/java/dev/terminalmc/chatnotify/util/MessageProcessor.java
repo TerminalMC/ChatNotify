@@ -267,7 +267,7 @@ public class MessageProcessor {
             int totalDelay = 0;
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
-                if (matcher != null && msg.regexGroups) {
+                if (matcher != null && msg.type.equals(ResponseMessage.Type.REGEX)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {
                         msg.sendingString = msg.sendingString.replace("(" + i + ")", matcher.group(i));

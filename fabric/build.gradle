@@ -19,6 +19,9 @@ dependencies {
 
     // Modmenu
     modImplementation("maven.modrinth:mOgUt4GM:${modmenu_version}")
+    
+    // CommandKeys
+    modImplementation("maven.modrinth:65UyswbY:${commandkeys_version}")
 }
 
 loom {
