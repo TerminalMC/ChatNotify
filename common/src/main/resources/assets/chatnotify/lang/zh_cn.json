@@ -32,6 +32,8 @@
   "option.chatnotify.color.new": "新",
   "option.chatnotify.color.old": "旧",
   "option.chatnotify.global": "全局选项",
+  "option.chatnotify.global.compat_send": "Compat Send",
+  "option.chatnotify.global.compat_send.tooltip": "If ON, response messages will be sent via a Chat Screen. This may help with compatibility with other mods, but could cause other issues.",
   "option.chatnotify.global.debug": "调试",
   "option.chatnotify.global.debug.key": "键",
   "option.chatnotify.global.debug.key.tooltip": "单击聊天消息即可复制翻译键。\n如不使用，请禁用",

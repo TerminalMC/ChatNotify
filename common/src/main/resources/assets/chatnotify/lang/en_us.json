@@ -32,6 +32,8 @@
   "option.chatnotify.color.new": "New",
   "option.chatnotify.color.old": "Old",
   "option.chatnotify.global": "Global Options",
+  "option.chatnotify.global.compat_send": "Compat Send",
+  "option.chatnotify.global.compat_send.tooltip": "If ON, response messages will be sent via a Chat Screen. This may help with compatibility with other mods, but could cause other issues.",
   "option.chatnotify.global.debug": "Debug",
   "option.chatnotify.global.debug.key": "Key",
   "option.chatnotify.global.debug.key.tooltip": "Click on a chat message to copy the translation key.\nDisable if not in use",

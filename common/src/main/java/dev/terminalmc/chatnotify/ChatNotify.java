@@ -68,23 +68,44 @@ public class ChatNotify {
 
     private static void tickResponseMessages(Minecraft mc) {
         List<String> sending = new ArrayList<>();
-        for (ResponseMessage resMsg : responseMessages) {
-            resMsg.countdown--;
-            if (resMsg.countdown <= 0 && resMsg.sendingString != null) {
-                sending.add(resMsg.sendingString);
+        responseMessages.removeIf((resMsg) -> {
+            if (--resMsg.countdown <= 0) {
+                if (resMsg.sendingString != null && !resMsg.sendingString.isBlank()) {
+                    sending.add(resMsg.sendingString);
+                }
+                return true;
             }
-        }
-        responseMessages.removeIf((resMsg) -> resMsg.countdown <= 0);
-        if (mc.getConnection() != null && mc.getConnection().isAcceptingMessages()) {
-            if (!sending.isEmpty()) {
-                Screen oldScreen = mc.screen;
-                mc.setScreen(new ChatScreen(""));
-                for (String msg : sending) {
-                    if (mc.screen instanceof ChatScreen cs) {
+            return false;
+        });
+        if (
+                mc.player != null 
+                && mc.getConnection() != null 
+                && mc.getConnection().isAcceptingMessages()) 
+        {
+            if (sending.isEmpty()) return;
+            if (Config.get().compatSendMode) {
+                // Compat send mode for mods mixing into handleChatInput
+                Screen oldScreen = null;
+                if (!(mc.screen instanceof ChatScreen)) {
+                    oldScreen = mc.screen;
+                    mc.setScreen(new ChatScreen(""));
+                }
+                if (mc.screen instanceof ChatScreen cs) {
+                    for (String msg : sending) {
                         cs.handleChatInput(msg, false);
                     }
                 }
-                mc.setScreen(oldScreen);
+                if (oldScreen != null) mc.setScreen(oldScreen);
+            }
+            else {
+                // Normal mode
+                for (String msg : sending) {
+                    if (msg.startsWith("/")) {
+                        mc.player.connection.sendCommand(msg.substring(1));
+                    } else {
+                        mc.player.connection.sendChat(msg);
+                    }
+                }
             }
         }
         else {

@@ -49,7 +49,7 @@ public class GlobalOptionList extends OptionList {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
 
         addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.SelfCheckEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SelfCheckAndSendModeEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
@@ -101,14 +101,19 @@ public class GlobalOptionList extends OptionList {
                 })
                         .withValues(TriState.State.values())
                         .withInitialValue(Config.get().mixinEarly.state)
-                        .withTooltip((status) -> Tooltip.create(localized("option", "global.mixin.tooltip")))
-                        .create(x, 0, buttonWidth, height, localized("option", "global.mixin"),
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.mixin.tooltip")))
+                        .create(x, 0, buttonWidth, height, 
+                                localized("option", "global.mixin"),
                                 (button, status) -> Config.get().mixinEarly.state = status));
 
                 elements.add(CycleButton.<TriState.State>builder((status) -> switch(status) {
-                    case ON -> localized("option", "global.debug.key").withStyle(ChatFormatting.GREEN);
-                    case OFF -> localized("option", "global.debug.raw").withStyle(ChatFormatting.GREEN);
-                    case DISABLED -> localized("option", "global.debug.off").withStyle(ChatFormatting.RED);
+                    case ON -> localized("option", "global.debug.key")
+                            .withStyle(ChatFormatting.GREEN);
+                    case OFF -> localized("option", "global.debug.raw")
+                            .withStyle(ChatFormatting.GREEN);
+                    case DISABLED -> localized("option", "global.debug.off")
+                            .withStyle(ChatFormatting.RED);
                 })
                         .withValues(TriState.State.values())
                         .withInitialValue(Config.get().debugShowKey.state)
@@ -117,14 +122,16 @@ public class GlobalOptionList extends OptionList {
                             case OFF -> localized("option", "global.debug.raw.tooltip");
                             case DISABLED -> localized("option", "global.debug.off.tooltip");
                         }))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height, localized("option", "global.debug"),
+                        .create(x + width - buttonWidth, 0, buttonWidth, height, 
+                                localized("option", "global.debug"),
                                 (button, status) -> Config.get().debugShowKey.state = status));
             }
         }
 
-        private static class SelfCheckEntry extends MainOptionList.Entry {
-            SelfCheckEntry(int x, int width, int height) {
+        private static class SelfCheckAndSendModeEntry extends MainOptionList.Entry {
+            SelfCheckAndSendModeEntry(int x, int width, int height) {
                 super();
+                int buttonWidth = (width - SPACING) / 2;
 
                 elements.add(CycleButton.booleanBuilder(
                         CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
@@ -132,8 +139,19 @@ public class GlobalOptionList extends OptionList {
                         .withInitialValue(Config.get().checkOwnMessages)
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "global.self_notify.tooltip")))
-                        .create(x, 0, width, height, localized("option", "global.self_notify"),
+                        .create(x, 0, buttonWidth, height, 
+                                localized("option", "global.self_notify"),
                                 (button, status) -> Config.get().checkOwnMessages = status));
+
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(Config.get().compatSendMode)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.compat_send.tooltip")))
+                        .create(x + width - buttonWidth, 0, buttonWidth, height, 
+                                localized("option", "global.compat_send"),
+                                (button, status) -> Config.get().compatSendMode = status));
             }
         }
 

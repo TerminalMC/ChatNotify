@@ -21,8 +21,6 @@ import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.mixin.accessor.MutableComponentAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.*;
@@ -266,9 +264,6 @@ public class MessageProcessor {
      */
     private static void sendResponses(Notification notif, @Nullable Matcher matcher) {
         if (notif.responseEnabled) {
-            Minecraft mc = Minecraft.getInstance();
-            Screen oldScreen = mc.screen;
-            mc.setScreen(new ChatScreen(""));
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
                 if (matcher != null && msg.regexGroups) {
@@ -280,7 +275,6 @@ public class MessageProcessor {
                 msg.countdown = msg.delayTicks;
                 ChatNotify.responseMessages.add(msg);
             }
-            mc.setScreen(oldScreen);
         }
     }
 
