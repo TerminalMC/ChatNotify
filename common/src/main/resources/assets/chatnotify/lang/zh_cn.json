@@ -22,7 +22,7 @@
   "option.chatnotify.advanced.response": "响应消息%s",
   "option.chatnotify.advanced.response.regex.disabled": "正则表达式组已禁用",
   "option.chatnotify.advanced.response.regex.enabled": "正则表达式组已启用。\n在响应消息中使用(1)、(2)等从触发器访问正则表达式组。",
-  "option.chatnotify.advanced.response.time.tooltip": "发送前等待的时间（以刻为单位）",
+  "option.chatnotify.advanced.response.time.tooltip": "Time in ticks to wait (after the previous message, if any) before sending.",
   "option.chatnotify.advanced.response.tooltip": "当此通知激活时要发\u200B\u200B送的聊天消息或命令。",
   "option.chatnotify.advanced.response.tooltip.warning": "\n警告：可能会导致游戏崩溃，请谨慎使用。",
   "option.chatnotify.advanced.title": "Title Text %s",

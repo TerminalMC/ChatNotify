@@ -264,6 +264,7 @@ public class MessageProcessor {
      */
     private static void sendResponses(Notification notif, @Nullable Matcher matcher) {
         if (notif.responseEnabled) {
+            int totalDelay = 0;
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
                 if (matcher != null && msg.regexGroups) {
@@ -272,7 +273,8 @@ public class MessageProcessor {
                         msg.sendingString = msg.sendingString.replace("(" + i + ")", matcher.group(i));
                     }
                 }
-                msg.countdown = msg.delayTicks;
+                totalDelay += msg.delayTicks;
+                msg.countdown = totalDelay;
                 ChatNotify.responseMessages.add(msg);
             }
         }

@@ -22,7 +22,7 @@
   "option.chatnotify.advanced.response": "回應訊息 %s",
   "option.chatnotify.advanced.response.regex.disabled": "已停用 Regex 群組",
   "option.chatnotify.advanced.response.regex.enabled": "已啟用 Regex 群組。\n在回應訊息中使用 (1)、(2) 等來存取觸發條件中的 Regex 群組。",
-  "option.chatnotify.advanced.response.time.tooltip": "傳送前的等待時間（以刻為單位）",
+  "option.chatnotify.advanced.response.time.tooltip": "Time in ticks to wait (after the previous message, if any) before sending.",
   "option.chatnotify.advanced.response.tooltip": "當此通知啟動時要傳送的聊天訊息或指令。",
   "option.chatnotify.advanced.response.tooltip.warning": "\n警告：可能會導致遊戲崩潰，請謹慎使用。",
   "option.chatnotify.advanced.title": "Title Text %s",

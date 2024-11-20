@@ -22,7 +22,7 @@
   "option.chatnotify.advanced.response": "Ответные сообщения %s",
   "option.chatnotify.advanced.response.regex.disabled": "Группы Regex отключены",
   "option.chatnotify.advanced.response.regex.enabled": "Группы Regex включены. Используйте (1), (2) и т.д. в ответном сообщении для доступа к группам Regex из триггера.",
-  "option.chatnotify.advanced.response.time.tooltip": "Время ожидания в тиках перед отправкой (В 1 секунде 20 тиков)",
+  "option.chatnotify.advanced.response.time.tooltip": "Time in ticks to wait (after the previous message, if any) before sending.",
   "option.chatnotify.advanced.response.tooltip": "Сообщения чата или команды, которые будут отправлены при активации этого уведомления. ",
   "option.chatnotify.advanced.response.tooltip.warning": "Предупреждение: Игра может привести к сбою, используйте с осторожностью.",
   "option.chatnotify.advanced.title": "Title Text %s",

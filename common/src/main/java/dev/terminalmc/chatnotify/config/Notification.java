@@ -29,7 +29,7 @@ import java.util.Locale;
  * Consists of activation criteria and audio/visual notification parameters.
  */
 public class Notification {
-    public final int version = 3;
+    public final int version = 4;
 
     // Flags the notification as being actively edited.
     public transient boolean editing = false;
@@ -227,6 +227,13 @@ public class Notification {
                 for (JsonElement je : obj.getAsJsonArray("responseMessages")) {
                     ResponseMessage r = ctx.deserialize(je, ResponseMessage.class);
                     if (r != null) responseMessages.add(r);
+                }
+                if (version <= 3) {
+                    int totalDelay = 0;
+                    for (ResponseMessage resMsg : responseMessages) {
+                        resMsg.delayTicks -= totalDelay;
+                        totalDelay += resMsg.delayTicks;
+                    }
                 }
 
                 // Validation

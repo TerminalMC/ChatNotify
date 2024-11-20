@@ -6,3 +6,4 @@
 - Moved title text field to advanced options
 - Added advanced option to block messages via notification
 - Added option to change the way response messages are sent
+- Switched response message delays from individual to cumulative

@@ -22,7 +22,7 @@
   "option.chatnotify.advanced.response": "Response Messages %s",
   "option.chatnotify.advanced.response.regex.disabled": "Regex groups disabled",
   "option.chatnotify.advanced.response.regex.enabled": "Regex groups enabled.\nUse (1), (2) etc in the response message to access regex groups from the trigger.",
-  "option.chatnotify.advanced.response.time.tooltip": "Time in ticks to wait before sending",
+  "option.chatnotify.advanced.response.time.tooltip": "Time in ticks to wait (after the previous message, if any) before sending.",
   "option.chatnotify.advanced.response.tooltip": "Chat messages or commands to be sent when this notification is activated.",
   "option.chatnotify.advanced.response.tooltip.warning": "\nWarning: Can crash the game, use with caution.",
   "option.chatnotify.advanced.title": "Title Text %s",
