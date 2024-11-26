@@ -17,11 +17,11 @@
 package dev.terminalmc.chatnotify;
 
 import com.mojang.datafixers.util.Pair;
+import dev.terminalmc.chatnotify.compat.commandkeys.CommandKeysWrapper;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.ResponseMessage;
 import dev.terminalmc.chatnotify.config.Trigger;
-import dev.terminalmc.chatnotify.util.CommandKeysUtil;
 import dev.terminalmc.chatnotify.util.ModLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -73,9 +73,7 @@ public class ChatNotify {
             if (--resMsg.countdown <= 0) {
                 if (resMsg.sendingString != null && !resMsg.sendingString.isBlank()) {
                     if (resMsg.type.equals(ResponseMessage.Type.COMMANDKEYS)) {
-                        try {
-                            CommandKeysUtil.send(resMsg.sendingString);
-                        } catch (NoClassDefFoundError | NoSuchMethodError ignored) {} 
+                        CommandKeysWrapper.trySend(resMsg.sendingString);
                     } else {
                         sending.add(resMsg.sendingString);
                     }

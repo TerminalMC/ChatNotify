@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.util;
+package dev.terminalmc.chatnotify.compat.commandkeys;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 
-public class CommandKeysUtil {
-    public static void send(String str) {
+public class CommandKeys {
+    static void send(String str) {
         if (!str.matches(".+-.+")) return;
         String[] splitStr = str.split("-");
         String limitKeyStr = splitStr[0];
