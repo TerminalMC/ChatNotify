@@ -88,7 +88,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     }
 
     @Override
-    protected int getScrollbarPosition() {
+    protected int scrollBarX() {
         return width / 2 + rowWidth / 2;
     }
 

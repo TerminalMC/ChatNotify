@@ -99,7 +99,7 @@ public class OptionsScreen extends OptionsSubScreen {
     private void reload(int width, int height) {
         clearWidgets();
         listWidget = listWidget.reload(this, width, height - TOP_MARGIN - BOTTOM_MARGIN,
-                listWidget.getScrollAmount());
+                listWidget.scrollAmount());
         addRenderableWidget(listWidget);
 
         // Title text
