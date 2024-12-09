@@ -47,9 +47,10 @@ public class MessageProcessor {
      * was required.
      */
     public static @Nullable Component processMessage(Component msg) {
-        switch(Config.get().debugShowKey.state) {
-            case ON -> msg = addKeyInfo(msg);
-            case OFF -> msg = addRawInfo(msg);
+        switch(Config.get().debugMode) {
+            case KEY -> msg = addKeyInfo(msg);
+            case TEXT -> msg = addTextInfo(msg);
+            case RAW -> msg = addRawInfo(msg);
         }
 
         String str = msg.getString();
@@ -527,6 +528,19 @@ public class MessageProcessor {
                     localized("chat", "message.translation_key.missing")
                             .withStyle(ChatFormatting.GRAY)));
         }
+        // Overwrite existing events
+        return overwriteStyle(newStyle, msg.copy());
+    }
+
+    public static Component addTextInfo(Component msg) {
+        Style newStyle;
+        // Create new Hover and Click events
+        newStyle = Style.EMPTY.
+                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        localized("common", "click_copy.text").withStyle(ChatFormatting.GOLD)))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
+                        msg.getString()));
+
         // Overwrite existing events
         return overwriteStyle(newStyle, msg.copy());
     }

@@ -53,7 +53,7 @@ import java.util.*;
  * </p>
  */
 public class Config {
-    public final int version = 4;
+    public final int version = 5;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     private static final String BACKUP_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
@@ -82,7 +82,15 @@ public class Config {
     public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
 
     public TriState mixinEarly;
-    public TriState debugShowKey;
+    
+    public DebugMode debugMode;
+    public enum DebugMode {
+        OFF,
+        KEY,
+        TEXT,
+        RAW,
+    }
+    
     public boolean checkOwnMessages;
     public boolean compatSendMode;
     public SoundSource soundSource;
@@ -96,7 +104,7 @@ public class Config {
      * name.
      */
     public Config() {
-        this(new TriState(), new TriState(), true, false, 
+        this(new TriState(), DebugMode.OFF, true, false, 
                 DEFAULT_SOUND_SOURCE, DEFAULT_COLOR, DEFAULT_SOUND, 
                 new ArrayList<>(DEFAULT_PREFIXES), 
                 new ArrayList<>(List.of(Notification.createUser())));
@@ -105,12 +113,12 @@ public class Config {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Config(TriState mixinEarly, TriState debugShowKey, 
+    Config(TriState mixinEarly, DebugMode debugMode, 
            boolean checkOwnMessages, boolean compatSendMode,
            SoundSource soundSource, int defaultColor, Sound defaultSound,
            List<String> prefixes, List<Notification> notifications) {
         this.mixinEarly = mixinEarly;
-        this.debugShowKey = debugShowKey;
+        this.debugMode = debugMode;
         this.checkOwnMessages = checkOwnMessages;
         this.compatSendMode = compatSendMode;
         this.soundSource = soundSource;
@@ -318,9 +326,9 @@ public class Config {
             TriState mixinEarly = version == 1
                     ? new TriState(obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED)
                     : ctx.deserialize(obj.get("mixinEarly"), TriState.class);
-            TriState debugShowKey = version == 1
-                    ? new TriState(obj.get("debugShowKey").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED)
-                    : ctx.deserialize(obj.get("debugShowKey"), TriState.class);
+            DebugMode debugMode = version >= 5 
+                        ? DebugMode.valueOf(obj.get("debugMode").getAsString())
+                        : DebugMode.OFF;
             boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
             boolean compatSendMode = version >= 4 ? obj.get("compatSendMode").getAsBoolean() : false;
             SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());
@@ -338,8 +346,7 @@ public class Config {
 
             // Validation
             if (mixinEarly == null) throw new JsonParseException("Config #1");
-            if (debugShowKey == null) throw new JsonParseException("Config #2");
-            if (defaultColor < 0 || defaultColor > 16777215) throw new JsonParseException("Config #4");
+            if (defaultColor < 0 || defaultColor > 16777215) throw new JsonParseException("Config #2");
             if (defaultSound == null) throw new JsonParseException("Config #3");
 
             if (notifications.isEmpty()) {
@@ -348,7 +355,7 @@ public class Config {
                 notifications.set(0, Notification.createUser());
             }
 
-            return new Config(mixinEarly, debugShowKey, checkOwnMessages, compatSendMode, 
+            return new Config(mixinEarly, debugMode, checkOwnMessages, compatSendMode, 
                     soundSource, defaultColor, defaultSound, prefixes, notifications);
         }
     }

@@ -107,24 +107,27 @@ public class GlobalOptionList extends OptionList {
                                 localized("option", "global.mixin"),
                                 (button, status) -> Config.get().mixinEarly.state = status));
 
-                elements.add(CycleButton.<TriState.State>builder((status) -> switch(status) {
-                    case ON -> localized("option", "global.debug.key")
-                            .withStyle(ChatFormatting.GREEN);
-                    case OFF -> localized("option", "global.debug.raw")
-                            .withStyle(ChatFormatting.GREEN);
-                    case DISABLED -> localized("option", "global.debug.off")
+                elements.add(CycleButton.<Config.DebugMode>builder((status) -> switch(status) {
+                    case OFF -> localized("option", "global.debug.off")
                             .withStyle(ChatFormatting.RED);
+                    case KEY -> localized("option", "global.debug.key")
+                            .withStyle(ChatFormatting.GREEN);
+                    case TEXT -> localized("option", "global.debug.text")
+                            .withStyle(ChatFormatting.GREEN);
+                    case RAW -> localized("option", "global.debug.raw")
+                            .withStyle(ChatFormatting.GREEN);
                 })
-                        .withValues(TriState.State.values())
-                        .withInitialValue(Config.get().debugShowKey.state)
+                        .withValues(Config.DebugMode.values())
+                        .withInitialValue(Config.get().debugMode)
                         .withTooltip((status) -> Tooltip.create(switch(status) {
-                            case ON -> localized("option", "global.debug.key.tooltip");
-                            case OFF -> localized("option", "global.debug.raw.tooltip");
-                            case DISABLED -> localized("option", "global.debug.off.tooltip");
+                            case OFF -> localized("option", "global.debug.off.tooltip");
+                            case KEY -> localized("option", "global.debug.key.tooltip");
+                            case TEXT -> localized("option", "global.debug.text.tooltip");
+                            case RAW -> localized("option", "global.debug.raw.tooltip");
                         }))
                         .create(x + width - buttonWidth, 0, buttonWidth, height, 
                                 localized("option", "global.debug"),
-                                (button, status) -> Config.get().debugShowKey.state = status));
+                                (button, status) -> Config.get().debugMode = status));
             }
         }
 

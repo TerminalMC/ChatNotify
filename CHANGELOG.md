@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1
+
+- Added debug option to copy basic message text
+
 ## 2.2.0
 
 - Fixed style target string field overlapping delete button

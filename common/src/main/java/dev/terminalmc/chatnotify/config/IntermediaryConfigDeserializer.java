@@ -36,7 +36,6 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
         JsonObject obj = json.getAsJsonObject();
 
         TriState mixinEarly = new TriState(obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
-        TriState debugShowKey = new TriState(obj.get("debugShowKey").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED);
         boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
         SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());
         int defaultColor = Config.DEFAULT_COLOR;
@@ -79,7 +78,7 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
             notifications.set(0, Notification.createUser());
         }
 
-        return new Config(mixinEarly, debugShowKey, checkOwnMessages, false, soundSource,
-                defaultColor, defaultSound, prefixes, notifications);
+        return new Config(mixinEarly, Config.DebugMode.OFF, checkOwnMessages, false, 
+                soundSource, defaultColor, defaultSound, prefixes, notifications);
     }
 }
