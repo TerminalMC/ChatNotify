@@ -53,4 +53,3 @@ If you encounter issues, please report on Discord or GitHub.
 [![GitHub Issues](https://img.shields.io/github/issues/TerminalMC/ChatNotify?logo=github&label=GitHub%20Issues)](https://github.com/TerminalMC/ChatNotify/issues)
 
 [![License](https://img.shields.io/github/license/TerminalMC/ChatNotify?label=License&logo=github&logoColor=white)](https://github.com/TerminalMC/ChatNotify/blob/HEAD/LICENSE.txt)
-
