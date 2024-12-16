@@ -4,6 +4,7 @@
 
 - Added debug option to copy basic message text
 - Updated Russian translation (rfin0)
+- Fixed advanced settings reset
 
 ## 2.2.0
 

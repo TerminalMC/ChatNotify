@@ -151,13 +151,16 @@ public class Notification {
     // Validation and cleanup
 
     /**
-     * Disables regex, exclusion triggers and response messages and clears the
-     * lists of the latter two.
+     * Sets all advanced settings to their respective defaults.
      */
     public void resetAdvanced() {
+        blockMessage = false;
+        titleText.enabled = false;
+        titleText.color = 16777215;
+        titleText.text = "";
         exclusionEnabled = false;
-        responseEnabled = false;
         exclusionTriggers.clear();
+        responseEnabled = false;
         responseMessages.clear();
     }
 
