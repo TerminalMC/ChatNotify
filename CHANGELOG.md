@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.2
+
+- Updated Russian translation (rfin0)
+
 ## 2.2.1
 
 - Added debug option to copy basic message text
