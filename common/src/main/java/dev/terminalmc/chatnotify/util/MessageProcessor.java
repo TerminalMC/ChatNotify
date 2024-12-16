@@ -196,7 +196,7 @@ public class MessageProcessor {
      * @return {@code true} if the message matches the key, {@code false}
      * otherwise.
      */
-    private static boolean keySearch(Component msg, String key) {
+    public static boolean keySearch(Component msg, String key) {
         if (key.equals(".")) {
             return true;
         } else if (msg.getContents() instanceof TranslatableContents tc) {
@@ -211,7 +211,7 @@ public class MessageProcessor {
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.
      */
-    private static Matcher normalSearch(String msg, String str) {
+    public static Matcher normalSearch(String msg, String str) {
         /*
         U flag for full unicode comparison, performance using randomly-generated
         100-character msg and 10-character str is approx 1.18 microseconds
@@ -228,7 +228,7 @@ public class MessageProcessor {
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.
      */
-    private static Matcher styleSearch(String msg, String str) {
+    public static Matcher styleSearch(String msg, String str) {
         return Pattern.compile("(?iU)" + Pattern.quote(str)).matcher(msg);
     }
 
@@ -288,7 +288,7 @@ public class MessageProcessor {
      * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
-    private static Component simpleRestyle(Component msg, TextStyle style) {
+    public static Component simpleRestyle(Component msg, TextStyle style) {
         if (style.isEnabled()) {
             msg = msg.copy().setStyle(applyStyle(msg.getStyle(), style));
         }
@@ -304,7 +304,7 @@ public class MessageProcessor {
      * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
-    private static Component complexRestyle(Component msg, String str, TextStyle style) {
+    public static Component complexRestyle(Component msg, String str, TextStyle style) {
         if (style.isEnabled()) {
             msg = restyleComponent(msg.copy(), str, style);
         }

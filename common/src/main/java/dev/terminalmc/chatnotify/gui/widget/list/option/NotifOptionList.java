@@ -17,10 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.config.Notification;
-import dev.terminalmc.chatnotify.config.TriState;
-import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
@@ -158,6 +155,12 @@ public class NotifOptionList extends OptionList {
         notif.autoDisable();
     }
 
+    private void openTriggerConfig(Trigger trigger) {
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
+                new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
+                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", false)));
+    }
+
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
                 new SoundOptionList(minecraft, width, height, getY(), itemHeight,
@@ -277,7 +280,7 @@ public class NotifOptionList extends OptionList {
                               Notification notif, Trigger trigger, int index) {
                 super();
                 int fieldSpacing = 1;
-                int triggerFieldWidth = width - (list.tinyWidgetWidth * 2) - (fieldSpacing * 2);
+                int triggerFieldWidth = width - (list.tinyWidgetWidth * 3) - (fieldSpacing * 2);
                 TextField triggerField = trigger.type == Trigger.Type.KEY
                         ? new FakeTextField(0, 0, triggerFieldWidth, height, () -> {
                             int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
@@ -336,7 +339,19 @@ public class NotifOptionList extends OptionList {
                         localized("option", "notif.trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
-                movingX = x + width - list.tinyWidgetWidth;
+                movingX = x + width - list.tinyWidgetWidth * 2;
+                
+                // Recent message select button
+                Button selectButton = Button.builder(Component.literal("?"),
+                                (button) -> list.openTriggerConfig(trigger))
+                        .pos(movingX, 0)
+                        .size(list.tinyWidgetWidth, height)
+                        .build();
+                selectButton.setTooltip(Tooltip.create(
+                        localized("option", "notif.trigger.select.tooltip")));
+                selectButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(selectButton);
+                movingX += list.tinyWidgetWidth;
 
                 // Style string add button
                 Button styleButton = Button.builder(Component.literal("+"),

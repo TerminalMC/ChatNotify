@@ -1,10 +1,11 @@
 # Changelog
 
-## 2.2.1
+## 2.2.1-beta.1
 
 - Added debug option to copy basic message text
 - Updated Russian translation (rfin0)
 - Fixed advanced settings reset
+- Added enhanced trigger editor with affected messages preview
 
 ## 2.2.0
 

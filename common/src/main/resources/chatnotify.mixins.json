@@ -12,6 +12,7 @@
     "MixinClientPacketListener",
     "MixinEditBox",
     "MixinOptionInstance",
+    "accessor.ChatComponentAccessor",
     "accessor.KeyAccessor",
     "accessor.MutableComponentAccessor",
     "accessor.ScreenAccessor"
