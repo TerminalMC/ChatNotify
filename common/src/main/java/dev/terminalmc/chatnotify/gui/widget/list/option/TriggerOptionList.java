@@ -16,20 +16,27 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list.option;
 
+import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
-import dev.terminalmc.chatnotify.mixin.accessor.ChatComponentAccessor;
-import dev.terminalmc.chatnotify.util.MessageProcessor;
+import dev.terminalmc.chatnotify.util.FormatUtil;
+import dev.terminalmc.chatnotify.util.MessageUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.util.StringUtil;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -37,16 +44,18 @@ public class TriggerOptionList extends OptionList {
     private final Trigger trigger;
     private final TextStyle textStyle;
     private boolean filter;
-    final TextField textDisplayBox;
-    final TextField keyDisplayBox;
+    private boolean restyle;
+    final MultiLineEditBox textDisplayBox;
+    final EditBox keyDisplayBox;
     
     public TriggerOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
                              int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle, 
-                             String displayText, String displayKey, boolean filter) {
+                             String displayText, String displayKey, boolean filter, boolean restyle) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
         this.trigger = trigger;
         this.textStyle = textStyle;
         this.filter = filter;
+        this.restyle = restyle;
         
         addEntry(new Entry.TriggerFieldEntry(dynEntryX, dynEntryWidth, entryHeight, 
                 this, trigger));
@@ -55,140 +64,106 @@ public class TriggerOptionList extends OptionList {
                     this, trigger));
         }
 
-        textDisplayBox = new TextField(dynEntryX, 0, dynEntryWidth, entryHeight, true);
-        textDisplayBox.setMaxLength(256);
+        textDisplayBox = new MultiLineEditBox(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, 
+                localized("option", "notif.trigger.text.placeholder"), Component.empty());
         textDisplayBox.setValue(displayText);
-        keyDisplayBox = new TextField(dynEntryX, 0, dynEntryWidth, entryHeight, true);
-        textDisplayBox.setMaxLength(256);
+        keyDisplayBox = new EditBox(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, Component.empty());
+        keyDisplayBox.setMaxLength(256);
         keyDisplayBox.setValue(displayKey);
         
-        addEntry(new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight, textDisplayBox, 
-                localized("option", "notif.message.text")));
+        Entry e = new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight + itemHeight, 
+                textDisplayBox, localized("option", "notif.message.text"));
+        addEntry(e);
+        addEntry(new SpaceEntry(e));
         addEntry(new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight, keyDisplayBox, 
                 localized("option", "notif.message.key")));
-
-        addEntry(new OptionList.Entry.TextEntry(dynEntryX, dynEntryWidth, entryHeight,
-                localized("option", "notif.recent_messages"), null, -1));
         
-        addEntry(new OptionList.Entry.ActionButtonEntry(dynEntryX, dynEntryWidth, entryHeight, 
-                localized("option", "notif.filter", this.filter 
-                        ? CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN)
-                        : CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)), 
-                null, -1, (button) -> {
-                    this.filter = !this.filter;
-                    reload();
-                }));
+        addEntry(new Entry.FilterAndRestyleEntry(dynEntryX, dynEntryWidth, entryHeight, this));
         
         addChat();
     }
     
     private void addChat() {
         Minecraft mc = Minecraft.getInstance();
-        ((ChatComponentAccessor)mc.gui.getChat()).getAllMessages().stream()
-                .filter((msg) -> !filter || trigger.string.isBlank() || switch (trigger.type) {
-                    case NORMAL -> MessageProcessor.normalSearch(
-                            msg.content().getString(), trigger.string).find();
-                    case REGEX -> {
-                        if (trigger.pattern != null) {
-                            yield trigger.pattern.matcher(msg.content().getString()).find();
-                        }
+        List<MutableComponent> allChat = ChatNotify.unmodifiedChat.stream()
+                .map((msg) -> FormatUtil.convertCodes(msg.copy())).toList().reversed();
+        List<Component> filteredChat = new ArrayList<>();
+        for (Component msg : allChat) {
+            Matcher matcher = null;
+            boolean hit = switch(trigger.type) {
+                case NORMAL -> {
+                    matcher = MessageUtil.normalSearch(msg.getString(), trigger.string);
+                    yield matcher.find();
+                }
+                case REGEX -> {
+                    try {
+                        matcher = Pattern.compile(trigger.string).matcher(msg.getString());
+                        yield matcher.find();
+                    } catch (PatternSyntaxException ignored) {
                         yield false;
                     }
-                    case KEY -> MessageProcessor.keySearch(msg.content(), trigger.string);
-                })
-                .map((msg) -> {
-                    if (!filter || trigger.string.isBlank()) return msg.content();
-                    String cleanStr = StringUtil.stripColor(msg.content().getString());
-                    if (trigger.type != Trigger.Type.NORMAL) {
-                        if (trigger.styleString != null && !trigger.styleString.isBlank() 
-                                && MessageProcessor.styleSearch(
-                                cleanStr, trigger.styleString).find()) {
-                            return MessageProcessor.complexRestyle(
-                                    msg.content(), trigger.styleString, textStyle);
-                        } else {
-                            return MessageProcessor.simpleRestyle(msg.content(), textStyle);
-                        }
-                    } else {
-                        if (trigger.styleString != null && !trigger.styleString.isBlank() 
-                                && MessageProcessor.styleSearch(
-                                cleanStr, trigger.styleString).find()) {
-                            return MessageProcessor.complexRestyle(
-                                    msg.content(), trigger.styleString, textStyle);
-                        } else if (MessageProcessor.styleSearch(cleanStr, trigger.string).find()) {
-                            return MessageProcessor.complexRestyle(
-                                    msg.content(), trigger.string, textStyle);
-                        } else {
-                            return MessageProcessor.simpleRestyle(msg.content(), textStyle);
+                }
+                case KEY -> MessageUtil.keySearch(msg, trigger.string);
+            };
+            if (filter && !hit) continue;
+            else if (restyle && hit) {
+                // Restyle, using style string if possible
+                if (trigger.styleString != null) {
+                    Matcher m = MessageUtil.styleSearch(msg.getString(), trigger.styleString);
+                    if (m.find()) {
+                        msg = MessageUtil.restyleLeaves(msg, textStyle, m.start(), m.end());
+                    }
+                    if (Config.get().multiRestyle) {
+                        while (m.find()) {
+                            msg = MessageUtil.restyleLeaves(msg, textStyle, m.start(), m.end());
                         }
                     }
-                })
-                .forEach((msg) -> {
-                    Entry.MessageEntry entry = new Entry.MessageEntry(dynEntryX, dynEntryWidth,
-                            this, msg);
-                    addEntry(entry);
-                    int requiredHeight = 
-                            mc.font.wordWrapHeight(msg.getString(), dynEntryWidth) - itemHeight;
-                    while (requiredHeight > 0) {
-                        SpaceEntry spaceEntry = new SpaceEntry(entry);
-                        addEntry(spaceEntry);
-                        requiredHeight -= itemHeight;
+                } else {
+                    switch(trigger.type) {
+                        case NORMAL, REGEX -> {
+                            msg = MessageUtil.restyleLeaves(msg, textStyle, 
+                                    matcher.start(), matcher.end());
+                            if (Config.get().multiRestyle) {
+                                while (matcher.find()) {
+                                    msg = MessageUtil.restyleLeaves(msg, textStyle, 
+                                            matcher.start(), matcher.end());
+                                }
+                            }
+                        }
+                        case KEY -> MessageUtil.restyleRoot(msg, textStyle);
                     }
-                });
+                }
+            }
+            filteredChat.add(msg);
+        }
+        filteredChat.forEach((msg) -> {
+            Entry.MessageEntry entry = new Entry.MessageEntry(dynEntryX, dynEntryWidth,
+                    this, msg);
+            addEntry(entry);
+            int requiredHeight = 
+                    mc.font.wordWrapHeight(msg.getString(), dynEntryWidth) - itemHeight;
+            while (requiredHeight > 0) {
+                SpaceEntry spaceEntry = new SpaceEntry(entry);
+                addEntry(spaceEntry);
+                requiredHeight -= itemHeight;
+            }
+        });
+        if (!(children().getLast() instanceof Entry.MessageEntry)) {
+            addEntry(new OptionList.Entry.TextEntry(dynEntryX, dynEntryWidth, entryHeight,
+                    localized("option", "notif.recent_messages.none"), null, -1));
+        }
     }
 
     @Override
     protected OptionList reload(int width, int height, double scrollAmount) {
         TriggerOptionList newList = new TriggerOptionList(minecraft, width, height,
                 getY(), itemHeight, entryWidth, entryHeight, trigger, textStyle, 
-                textDisplayBox.getValue(), keyDisplayBox.getValue(), filter);
+                textDisplayBox.getValue(), keyDisplayBox.getValue(), filter, restyle);
         newList.setScrollAmount(scrollAmount);
         return newList;
     }
 
     abstract static class Entry extends OptionList.Entry {
-
-        private static class MessageFieldEntry extends Entry {
-            MessageFieldEntry(int x, int width, int height, TextField widget, Component label) {
-                super();
-                int labelWidth = 40;
-                int fieldWidth = width - labelWidth - SPACING;
-
-                Button labelButton = Button.builder(label, (button -> {}))
-                        .pos(x, 0)
-                        .size(labelWidth, height)
-                        .build();
-                labelButton.active = false;
-                elements.add(labelButton);
-                
-                widget.setWidth(fieldWidth);
-                widget.setX(x + width - fieldWidth);
-                elements.add(widget);
-            }
-        }
-        
-        private static class MessageEntry extends Entry {
-            private final TriggerOptionList list;
-            private final Component message;
-            
-            MessageEntry(int x, int width, TriggerOptionList list, Component message) {
-                super();
-                this.list = list;
-                this.message = message;
-                MultiLineTextWidget widget = new MultiLineTextWidget(x, 0, message, 
-                        Minecraft.getInstance().font);
-                widget.setMaxWidth(width);
-                elements.add(widget);
-            }
-            
-            @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                list.textDisplayBox.setValue(message.getString());
-                list.keyDisplayBox.setValue(message.getContents() instanceof TranslatableContents tc 
-                        ? tc.getKey() : "No translation key");
-                list.setScrollAmount(0);
-                return true;
-            }
-        }
 
         private static class TriggerFieldEntry extends Entry {
             TriggerFieldEntry(int x, int width, int height, TriggerOptionList list, 
@@ -196,7 +171,7 @@ public class TriggerOptionList extends OptionList {
                 super();
                 int fieldSpacing = 1;
                 int triggerFieldWidth = width - (list.tinyWidgetWidth * 2) - (fieldSpacing * 2);
-                TextField triggerField = new TextField(0, 0, triggerFieldWidth, height, true);
+                TextField triggerField = new TextField(0, 0, triggerFieldWidth, height);
                 int movingX = x;
 
                 // Type button
@@ -226,8 +201,9 @@ public class TriggerOptionList extends OptionList {
                 triggerField.setResponder((str) -> {
                     trigger.string = str.strip();
                     if (list.children().size() > 4) {
-                        list.children().removeIf((entry) ->
-                                entry instanceof MessageEntry || entry instanceof SpaceEntry);
+                        list.children().removeIf((entry) -> entry instanceof MessageEntry 
+                                || entry instanceof TextEntry 
+                                || (entry instanceof SpaceEntry && list.children().indexOf(entry) > 4));
                         list.addChat();
                     }
                 });
@@ -282,8 +258,9 @@ public class TriggerOptionList extends OptionList {
                 stringField.setValue(trigger.styleString);
                 stringField.setResponder((string) -> {
                     trigger.styleString = string.strip();
-                    list.children().removeIf((entry) ->
-                            entry instanceof MessageEntry || entry instanceof SpaceEntry);
+                    list.children().removeIf((entry) -> entry instanceof MessageEntry
+                            || entry instanceof TextEntry
+                            || (entry instanceof SpaceEntry && list.children().indexOf(entry) > 4));
                     list.addChat();
                 });
                 stringField.setTooltip(Tooltip.create(
@@ -301,6 +278,79 @@ public class TriggerOptionList extends OptionList {
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
                         .build());
+            }
+        }
+
+        private static class FilterAndRestyleEntry extends MainOptionList.Entry {
+            FilterAndRestyleEntry(int x, int width, int height, TriggerOptionList list) {
+                super();
+                int buttonWidth = (width - SPACING) / 2;
+
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(list.filter)
+                        .create(x, 0, buttonWidth, height,
+                                localized("option", "notif.trigger.filter"),
+                                (button, status) -> {
+                                    list.filter = status;
+                                    list.reload();
+                                }));
+
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(list.restyle)
+                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                localized("option", "notif.trigger.restyle"),
+                                (button, status) -> {
+                                    list.restyle = status;
+                                    list.reload();
+                                }));
+            }
+        }
+
+        private static class MessageFieldEntry extends Entry {
+            MessageFieldEntry(int x, int width, int height, AbstractWidget widget, Component label) {
+                super();
+                int labelWidth = 40;
+                int fieldWidth = width - labelWidth - SPACING;
+
+                Button labelButton = Button.builder(label, (button -> {}))
+                        .pos(x, 0)
+                        .size(labelWidth, height)
+                        .build();
+                labelButton.active = false;
+                elements.add(labelButton);
+
+                widget.setWidth(fieldWidth);
+                widget.setHeight(height);
+                widget.setX(x + width - fieldWidth);
+                elements.add(widget);
+            }
+        }
+
+        private static class MessageEntry extends Entry {
+            private final TriggerOptionList list;
+            private final Component message;
+
+            MessageEntry(int x, int width, TriggerOptionList list, Component message) {
+                super();
+                this.list = list;
+                this.message = message;
+                MultiLineTextWidget widget = new MultiLineTextWidget(x, 0, message,
+                        Minecraft.getInstance().font);
+                widget.setMaxWidth(width);
+                elements.add(widget);
+            }
+
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                list.textDisplayBox.setValue(message.getString());
+                list.keyDisplayBox.setValue(message.getContents() instanceof TranslatableContents tc
+                        ? tc.getKey() : "No translation key");
+                list.setScrollAmount(0);
+                return true;
             }
         }
     }

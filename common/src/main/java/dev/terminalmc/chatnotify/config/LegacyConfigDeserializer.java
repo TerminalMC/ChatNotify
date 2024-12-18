@@ -160,7 +160,7 @@ public class LegacyConfigDeserializer implements JsonDeserializer<Config> {
             notifications.set(0, Notification.createUser());
         }
 
-        return new Config(mixinEarly, Config.DebugMode.OFF, checkOwnMessages, false, 
-                soundSource, defaultColor, defaultSound, messagePrefixes, notifications);
+        return new Config(mixinEarly, Config.DebugMode.OFF, Config.MultiNotifMode.OFF, checkOwnMessages, 
+                false, false, soundSource, defaultColor, defaultSound, messagePrefixes, notifications);
     }
 }

@@ -20,7 +20,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.authlib.GameProfile;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.util.MessageProcessor;
+import dev.terminalmc.chatnotify.util.MessageUtil;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
@@ -67,7 +67,7 @@ public class MixinChatListener {
     @Unique
     private static @Nullable Component chatNotify$replaceMessage(Component message) {
         if (ChatNotify.mixinEarly()) {
-            return MessageProcessor.processMessage(message);
+            return MessageUtil.processMessage(message);
         } else {
             return message;
         }

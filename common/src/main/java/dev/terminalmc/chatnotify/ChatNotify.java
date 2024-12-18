@@ -29,8 +29,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ChatNotify {
     public static final String MOD_ID = "chatnotify";
@@ -44,6 +43,7 @@ public class ChatNotify {
 
     public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
     public static final List<ResponseMessage> responseMessages = new ArrayList<>();
+    public static final Queue<Component> unmodifiedChat = new LinkedList<>();
 
     public static boolean hasChatHistoryMod;
 

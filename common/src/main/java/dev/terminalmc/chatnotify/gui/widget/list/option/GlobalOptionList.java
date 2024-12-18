@@ -50,6 +50,7 @@ public class GlobalOptionList extends OptionList {
 
         addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.SelfCheckAndSendModeEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.MultiModeEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
@@ -110,20 +111,14 @@ public class GlobalOptionList extends OptionList {
                 elements.add(CycleButton.<Config.DebugMode>builder((status) -> switch(status) {
                     case OFF -> localized("option", "global.debug.off")
                             .withStyle(ChatFormatting.RED);
-                    case KEY -> localized("option", "global.debug.key")
-                            .withStyle(ChatFormatting.GREEN);
-                    case TEXT -> localized("option", "global.debug.text")
-                            .withStyle(ChatFormatting.GREEN);
-                    case RAW -> localized("option", "global.debug.raw")
+                    case ALL -> localized("option", "global.debug.all")
                             .withStyle(ChatFormatting.GREEN);
                 })
                         .withValues(Config.DebugMode.values())
                         .withInitialValue(Config.get().debugMode)
                         .withTooltip((status) -> Tooltip.create(switch(status) {
                             case OFF -> localized("option", "global.debug.off.tooltip");
-                            case KEY -> localized("option", "global.debug.key.tooltip");
-                            case TEXT -> localized("option", "global.debug.text.tooltip");
-                            case RAW -> localized("option", "global.debug.raw.tooltip");
+                            case ALL -> localized("option", "global.debug.all.tooltip");
                         }))
                         .create(x + width - buttonWidth, 0, buttonWidth, height, 
                                 localized("option", "global.debug"),
@@ -155,6 +150,42 @@ public class GlobalOptionList extends OptionList {
                         .create(x + width - buttonWidth, 0, buttonWidth, height, 
                                 localized("option", "global.compat_send"),
                                 (button, status) -> Config.get().compatSendMode = status));
+            }
+        }
+
+        private static class MultiModeEntry extends MainOptionList.Entry {
+            MultiModeEntry(int x, int width, int height) {
+                super();
+                int buttonWidth = (width - SPACING) / 2;
+
+                elements.add(CycleButton.<Config.MultiNotifMode>builder((status) -> switch(status) {
+                            case OFF -> localized("option", "global.multi_notif.off")
+                                    .withStyle(ChatFormatting.RED);
+                            case ONE -> localized("option", "global.multi_notif.one")
+                                    .withStyle(ChatFormatting.GREEN);
+                            case ALL -> localized("option", "global.multi_notif.all")
+                                    .withStyle(ChatFormatting.GREEN);
+                        })
+                        .withValues(Config.MultiNotifMode.values())
+                        .withInitialValue(Config.get().multiNotifMode)
+                        .withTooltip((status) -> Tooltip.create(switch(status) {
+                            case OFF -> localized("option", "global.multi_notif.off.tooltip");
+                            case ONE -> localized("option", "global.multi_notif.one.tooltip");
+                            case ALL -> localized("option", "global.multi_notif.all.tooltip");
+                        }))
+                        .create(x, 0, buttonWidth, height,
+                                localized("option", "global.multi_notif"),
+                                (button, status) -> Config.get().multiNotifMode = status));
+
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(Config.get().multiRestyle)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.multi_restyle.tooltip")))
+                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                localized("option", "global.multi_restyle"),
+                                (button, status) -> Config.get().multiRestyle = status));
             }
         }
 

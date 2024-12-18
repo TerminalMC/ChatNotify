@@ -1,11 +1,16 @@
 # Changelog
 
-## 2.2.1-beta.1
+## 2.3.0-beta.1
 
 - Added debug option to copy basic message text
 - Updated Russian translation (rfin0)
 - Fixed advanced settings reset
-- Added enhanced trigger editor with affected messages preview
+- Added enhanced trigger editor with chat message display
+- Fixed handling of format codes
+- Fixed handling of triggers spanning multiple message components
+- Replaced debug copy with debug logging
+- Added support for restyling multiple instances of style strings or triggers
+- Added support for activating multiple notifications on a single message
 
 ## 2.2.0
 

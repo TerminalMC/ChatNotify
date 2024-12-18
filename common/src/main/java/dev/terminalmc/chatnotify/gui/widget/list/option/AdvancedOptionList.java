@@ -300,7 +300,7 @@ public class AdvancedOptionList extends OptionList {
                 int fieldWidth = width - statusButtonWidth - SPACING;
 
                 // Title text field
-                TextField titleField = new TextField(x, 0, fieldWidth, height, true);
+                TextField titleField = new TextField(x, 0, fieldWidth, height);
                 titleField.setMaxLength(256);
                 titleField.setResponder((val) -> notif.titleText.text = val);
                 titleField.setValue(notif.titleText.text);
@@ -356,7 +356,7 @@ public class AdvancedOptionList extends OptionList {
                                         list.reload();
                                     }, List.of(NotifOptionList.KEYS)));
                         })
-                        : new TextField(0, 0, triggerFieldWidth, height, true);
+                        : new TextField(0, 0, triggerFieldWidth, height);
                 int movingX = x;
 
                 // Drag reorder button

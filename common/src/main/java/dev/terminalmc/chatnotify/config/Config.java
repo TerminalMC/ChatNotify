@@ -53,7 +53,7 @@ import java.util.*;
  * </p>
  */
 public class Config {
-    public final int version = 5;
+    public final int version = 6;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     private static final String BACKUP_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
@@ -79,20 +79,26 @@ public class Config {
     public static final int DEFAULT_COLOR = 16761856; // #FFC400
     public static final Sound DEFAULT_SOUND = new Sound();
     public static final SoundSource DEFAULT_SOUND_SOURCE = SoundSource.PLAYERS;
-    public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "!");
+    public static final List<String> DEFAULT_PREFIXES = List.of("/shout", "/me", "!");
 
     public TriState mixinEarly;
     
     public DebugMode debugMode;
     public enum DebugMode {
         OFF,
-        KEY,
-        TEXT,
-        RAW,
+        ALL,
+    }
+
+    public MultiNotifMode multiNotifMode;
+    public enum MultiNotifMode {
+        OFF,
+        ONE,
+        ALL,
     }
     
     public boolean checkOwnMessages;
     public boolean compatSendMode;
+    public boolean multiRestyle;
     public SoundSource soundSource;
     public int defaultColor;
     public Sound defaultSound;
@@ -104,7 +110,7 @@ public class Config {
      * name.
      */
     public Config() {
-        this(new TriState(), DebugMode.OFF, true, false, 
+        this(new TriState(), DebugMode.OFF, MultiNotifMode.OFF, true, false, false,
                 DEFAULT_SOUND_SOURCE, DEFAULT_COLOR, DEFAULT_SOUND, 
                 new ArrayList<>(DEFAULT_PREFIXES), 
                 new ArrayList<>(List.of(Notification.createUser())));
@@ -113,14 +119,16 @@ public class Config {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Config(TriState mixinEarly, DebugMode debugMode, 
-           boolean checkOwnMessages, boolean compatSendMode,
+    Config(TriState mixinEarly, DebugMode debugMode, MultiNotifMode multiNotifMode,
+           boolean checkOwnMessages, boolean compatSendMode, boolean multiRestyle,
            SoundSource soundSource, int defaultColor, Sound defaultSound,
            List<String> prefixes, List<Notification> notifications) {
         this.mixinEarly = mixinEarly;
         this.debugMode = debugMode;
+        this.multiNotifMode = multiNotifMode;
         this.checkOwnMessages = checkOwnMessages;
         this.compatSendMode = compatSendMode;
+        this.multiRestyle = multiRestyle;
         this.soundSource = soundSource;
         this.defaultColor = defaultColor;
         this.defaultSound = defaultSound;
@@ -327,10 +335,20 @@ public class Config {
                     ? new TriState(obj.get("mixinEarly").getAsBoolean() ? TriState.State.ON : TriState.State.DISABLED)
                     : ctx.deserialize(obj.get("mixinEarly"), TriState.class);
             DebugMode debugMode = version >= 5 
-                        ? DebugMode.valueOf(obj.get("debugMode").getAsString())
-                        : DebugMode.OFF;
+                    ? Arrays.stream(DebugMode.values()).map(Enum::name).toList()
+                        .contains(obj.get("debugMode").getAsString()) 
+                            ? DebugMode.valueOf(obj.get("debugMode").getAsString()) 
+                            : DebugMode.OFF
+                    : DebugMode.OFF;
+            MultiNotifMode multiNotifMode = version >= 6
+                    ? Arrays.stream(MultiNotifMode.values()).map(Enum::name).toList()
+                    .contains(obj.get("multiNotifMode").getAsString())
+                    ? MultiNotifMode.valueOf(obj.get("multiNotifMode").getAsString())
+                    : MultiNotifMode.OFF
+                    : MultiNotifMode.OFF;
             boolean checkOwnMessages = obj.get("checkOwnMessages").getAsBoolean();
             boolean compatSendMode = version >= 4 ? obj.get("compatSendMode").getAsBoolean() : false;
+            boolean multiRestyle = version >= 6 ? obj.get("multiRestyle").getAsBoolean() : false;
             SoundSource soundSource = SoundSource.valueOf(obj.get("soundSource").getAsString());
             int defaultColor = obj.get("defaultColor").getAsInt();
             Sound defaultSound = ctx.deserialize(obj.get("defaultSound"), Sound.class);
@@ -355,8 +373,8 @@ public class Config {
                 notifications.set(0, Notification.createUser());
             }
 
-            return new Config(mixinEarly, debugMode, checkOwnMessages, compatSendMode, 
-                    soundSource, defaultColor, defaultSound, prefixes, notifications);
+            return new Config(mixinEarly, debugMode, multiNotifMode, checkOwnMessages, compatSendMode, 
+                    multiRestyle, soundSource, defaultColor, defaultSound, prefixes, notifications);
         }
     }
 }

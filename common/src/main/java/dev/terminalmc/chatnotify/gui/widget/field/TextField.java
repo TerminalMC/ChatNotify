@@ -40,7 +40,6 @@ import java.util.regex.PatternSyntaxException;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class TextField extends EditBox {
-    public final boolean allowSectionSign;
     private Validator validator;
     public boolean lenient = false;
     private int defaultTextColor;
@@ -48,18 +47,12 @@ public class TextField extends EditBox {
 
     public TextField(int x, int y, int width, int height) {
         this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
-                false, (str) -> Optional.empty());
-    }
-
-    public TextField(int x, int y, int width, int height, boolean allowSectionSign) {
-        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
-                allowSectionSign, (str) -> Optional.empty());
+                (str) -> Optional.empty());
     }
 
     public TextField(Font font, int x, int y, int width, int height, Component msg,
-                     boolean allowSectionSign, Function<String, Optional<Component>> validator) {
+                     Function<String, Optional<Component>> validator) {
         super(font, x, y, width, height, msg);
-        this.allowSectionSign = allowSectionSign;
         this.validator = new Validator.Custom(validator);
         this.defaultTextColor = 14737632;
     }

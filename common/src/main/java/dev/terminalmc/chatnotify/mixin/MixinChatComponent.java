@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.util.MessageProcessor;
+import dev.terminalmc.chatnotify.util.MessageUtil;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -67,7 +67,7 @@ public class MixinChatComponent {
         if (ChatNotify.mixinEarly()) {
             return message;
         } else {
-            return MessageProcessor.processMessage(message);
+            return MessageUtil.processMessage(message);
         }
     }
 }

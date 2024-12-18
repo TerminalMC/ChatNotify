@@ -22,7 +22,6 @@ import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.Optional;
 
 public class TextStyle {
     public final int version = 1;
@@ -86,6 +85,21 @@ public class TextStyle {
                 underlined.isEnabled() ||
                 strikethrough.isEnabled() ||
                 obfuscated.isEnabled();
+    }
+    
+    public Style getStyle() {
+        return new Style(
+                doColor ? TextColor.fromRgb(color) : null, 
+                bold.isEnabled() ? bold.isOn() : null,
+                italic.isEnabled() ? italic.isOn() : null,
+                underlined.isEnabled() ? underlined.isOn() : null,
+                strikethrough.isEnabled() ? strikethrough.isOn() : null,
+                obfuscated.isEnabled() ? obfuscated.isOn() : null,
+                null, 
+                null, 
+                null, 
+                null
+        );
     }
 
     public static class Deserializer implements JsonDeserializer<TextStyle> {

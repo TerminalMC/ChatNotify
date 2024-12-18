@@ -78,7 +78,7 @@ public class IntermediaryConfigDeserializer implements JsonDeserializer<Config> 
             notifications.set(0, Notification.createUser());
         }
 
-        return new Config(mixinEarly, Config.DebugMode.OFF, checkOwnMessages, false, 
-                soundSource, defaultColor, defaultSound, prefixes, notifications);
+        return new Config(mixinEarly, Config.DebugMode.OFF, Config.MultiNotifMode.OFF, checkOwnMessages, 
+                false, false, soundSource, defaultColor, defaultSound, prefixes, notifications);
     }
 }

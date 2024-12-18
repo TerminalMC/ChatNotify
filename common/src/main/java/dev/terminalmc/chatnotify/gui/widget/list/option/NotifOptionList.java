@@ -158,7 +158,7 @@ public class NotifOptionList extends OptionList {
     private void openTriggerConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
                 new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
-                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", false)));
+                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", false, true)));
     }
 
     private void openSoundConfig() {
@@ -295,7 +295,7 @@ public class NotifOptionList extends OptionList {
                                         list.reload();
                                     }, List.of(KEYS)));
                         })
-                        : new TextField(0, 0, triggerFieldWidth, height, true);
+                        : new TextField(0, 0, triggerFieldWidth, height);
                 int movingX = x;
 
                 // Drag reorder button
@@ -341,16 +341,16 @@ public class NotifOptionList extends OptionList {
                 elements.add(triggerField);
                 movingX = x + width - list.tinyWidgetWidth * 2;
                 
-                // Recent message select button
-                Button selectButton = Button.builder(Component.literal("?"),
+                // Trigger editor button
+                Button editorButton = Button.builder(Component.literal("\u270e"),
                                 (button) -> list.openTriggerConfig(trigger))
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
                         .build();
-                selectButton.setTooltip(Tooltip.create(
-                        localized("option", "notif.trigger.select.tooltip")));
-                selectButton.setTooltipDelay(Duration.ofMillis(500));
-                elements.add(selectButton);
+                editorButton.setTooltip(Tooltip.create(
+                        localized("option", "notif.trigger_editor.tooltip")));
+                editorButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(editorButton);
                 movingX += list.tinyWidgetWidth;
 
                 // Style string add button
