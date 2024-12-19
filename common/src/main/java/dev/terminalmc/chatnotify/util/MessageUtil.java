@@ -200,27 +200,33 @@ public class MessageUtil {
                 }
 
                 // Restyle, using style string if possible
+                boolean restyled = false;
                 if (trig.styleString != null) {
                     Matcher m = styleSearch(cleanStr, trig.styleString);
                     if (m.find()) {
+                        restyled = true;
                         msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
-                    }
-                    if (Config.get().multiRestyle) {
-                        while (m.find()) {
-                            msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
-                        }
-                    }
-                }
-                switch(trig.type) {
-                    case NORMAL, REGEX -> {
-                        msg = restyleLeaves(msg, notif.textStyle, matcher.start(), matcher.end());
                         if (Config.get().multiRestyle) {
-                            while (matcher.find()) {
-                                msg = restyleLeaves(msg, notif.textStyle, matcher.start(), matcher.end());
+                            while (m.find()) {
+                                msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
                             }
                         }
                     }
-                    case KEY -> restyleRoot(msg, notif.textStyle);
+                }
+                if (!restyled) {
+                    switch(trig.type) {
+                        case NORMAL, REGEX -> {
+                            msg = restyleLeaves(msg, notif.textStyle, 
+                                    matcher.start(), matcher.end());
+                            if (Config.get().multiRestyle) {
+                                while (matcher.find()) {
+                                    msg = restyleLeaves(msg, notif.textStyle, 
+                                            matcher.start(), matcher.end());
+                                }
+                            }
+                        }
+                        case KEY -> restyleRoot(msg, notif.textStyle);
+                    }
                 }
                 if (!multiActivate) return msg;
             }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.2
+
+- Fixed style string restyle being overwritten
+
 ## 2.3.0-beta.1
 
 - Added debug option to copy basic message text
