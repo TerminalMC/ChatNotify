@@ -3,6 +3,7 @@
 ## 2.3.0-beta.2
 
 - Fixed style string restyle being overwritten
+- Added option to change style color from within trigger editor
 
 ## 2.3.0-beta.1
 

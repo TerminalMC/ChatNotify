@@ -20,6 +20,7 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.MessageUtil;
@@ -29,6 +30,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
 import java.time.Duration;
@@ -284,29 +286,50 @@ public class TriggerOptionList extends OptionList {
         private static class FilterAndRestyleEntry extends MainOptionList.Entry {
             FilterAndRestyleEntry(int x, int width, int height, TriggerOptionList list) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
+                int buttonWidth = (width - SPACING * 2) / 3;
+                int movingX = x;
 
                 elements.add(CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(list.filter)
-                        .create(x, 0, buttonWidth, height,
+                        .create(movingX, 0, buttonWidth, height,
                                 localized("option", "notif.trigger.filter"),
                                 (button, status) -> {
                                     list.filter = status;
                                     list.reload();
                                 }));
+                movingX += buttonWidth + SPACING;
 
                 elements.add(CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(list.restyle)
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                        .create(movingX, 0, buttonWidth, height,
                                 localized("option", "notif.trigger.restyle"),
                                 (button, status) -> {
                                     list.restyle = status;
                                     list.reload();
                                 }));
+                movingX = x + width - buttonWidth;
+                
+                elements.add(Button.builder(localized("option", "notif.color")
+                                        .setStyle(Style.EMPTY.withColor(list.textStyle.color)), 
+                                (button) -> {
+                                    int cpHeight = Math.max(HsvColorPicker.MIN_HEIGHT, list.height / 2);
+                                    int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
+                                    list.screen.setOverlayWidget(new HsvColorPicker(
+                                            x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
+                                            Component.empty(), () -> list.textStyle.color,
+                                            (val) -> list.textStyle.color = val,
+                                            (widget) -> {
+                                                list.screen.removeOverlayWidget();
+                                                list.reload();
+                                            }));
+                                })
+                        .pos(movingX, 0)
+                        .size(buttonWidth, height)
+                        .build());
             }
         }
 
