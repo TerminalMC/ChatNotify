@@ -21,7 +21,6 @@ import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
-import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.MiscUtil;
 import net.minecraft.ChatFormatting;
@@ -36,7 +35,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Duration;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -47,46 +45,6 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * to other screens.
  */
 public class NotifOptionList extends OptionList {
-    public static final String[] KEYS = {
-            ".",
-            "chat.type.",
-            "chat.type.admin",
-            "chat.type.advancement",
-            "chat.type.advancement.challenge",
-            "chat.type.advancement.goal",
-            "chat.type.advancement.task",
-            "chat.type.announcement",
-            "chat.type.emote",
-            "chat.type.team.sent",
-            "chat.type.team.text",
-            "chat.type.text",
-
-            "death.",
-
-            "multiplayer.player.joined",
-            "multiplayer.player.left",
-
-            "commands.",
-            "commands.message.display",
-            "commands.message.display.incoming",
-            "commands.message.display.outgoing",
-
-            "commands.ban.success",
-            "commands.pardon.success",
-            "commands.banip.success",
-            "commands.pardonip.success",
-            "commands.op.success",
-            "commands.deop.success",
-            "commands.whitelist.add.success",
-            "commands.whitelist.remove.success",
-
-            "commands.difficulty.success",
-            "commands.gamemode.success",
-            "commands.kick.success",
-            "commands.summon.success",
-            "commands.teleport.success",
-    };
-
     private final Notification notif;
     private int dragSourceSlot = -1;
     private boolean dragHasStyleField = false;
@@ -159,6 +117,12 @@ public class NotifOptionList extends OptionList {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
                 new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
                         entryWidth, entryHeight, trigger, notif.textStyle, "", "", false, true)));
+    }
+
+    private void openKeyConfig(Trigger trigger) {
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
+                new KeyOptionList(minecraft, width, height, getY(), itemHeight,
+                        entryWidth, entryHeight, trigger, notif.textStyle)));
     }
 
     private void openSoundConfig() {
@@ -282,19 +246,8 @@ public class NotifOptionList extends OptionList {
                 int fieldSpacing = 1;
                 int triggerFieldWidth = width - (list.tinyWidgetWidth * 3) - (fieldSpacing * 2);
                 TextField triggerField = trigger.type == Trigger.Type.KEY
-                        ? new FakeTextField(0, 0, triggerFieldWidth, height, () -> {
-                            int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, width);
-                            int wX = x + (width / 2) - (wWidth / 2);
-                            int wY = list.getY();
-                            list.screen.setOverlayWidget(new DropdownTextField(
-                                    wX, wY, wWidth, wHeight, Component.empty(),
-                                    () -> trigger.string, (str) -> trigger.string = str,
-                                    (widget) -> {
-                                        list.screen.removeOverlayWidget();
-                                        list.reload();
-                                    }, List.of(KEYS)));
-                        })
+                        ? new FakeTextField(0, 0, triggerFieldWidth, height, 
+                                () -> list.openKeyConfig(trigger))
                         : new TextField(0, 0, triggerFieldWidth, height);
                 int movingX = x;
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.4
+
+- Restored old key selection screen
+
 ## 2.3.0-beta.3
 
 - Fixed normal triggers restyling beyond the trigger string

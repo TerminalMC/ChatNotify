@@ -342,21 +342,7 @@ public class AdvancedOptionList extends OptionList {
                 super();
                 int fieldSpacing = 1;
                 int triggerFieldWidth = width - list.tinyWidgetWidth - fieldSpacing;
-                TextField triggerField = trigger.type == Trigger.Type.KEY
-                        ? new FakeTextField(0, 0, triggerFieldWidth, height, () -> {
-                            int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, width);
-                            int wX = x + (width / 2) - (wWidth / 2);
-                            int wY = list.getY();
-                            list.screen.setOverlayWidget(new DropdownTextField(
-                                    wX, wY, wWidth, wHeight, Component.empty(),
-                                    () -> trigger.string, (str) -> trigger.string = str,
-                                    (widget) -> {
-                                        list.screen.removeOverlayWidget();
-                                        list.reload();
-                                    }, List.of(NotifOptionList.KEYS)));
-                        })
-                        : new TextField(0, 0, triggerFieldWidth, height);
+                TextField triggerField = new TextField(0, 0, triggerFieldWidth, height);
                 int movingX = x;
 
                 // Drag reorder button
