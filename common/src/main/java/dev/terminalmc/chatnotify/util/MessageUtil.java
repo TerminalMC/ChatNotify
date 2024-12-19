@@ -215,17 +215,29 @@ public class MessageUtil {
                 }
                 if (!restyled) {
                     switch(trig.type) {
-                        case NORMAL, REGEX -> {
+                        case NORMAL -> {
+                            msg = restyleLeaves(msg, notif.textStyle, 
+                                    matcher.start() + matcher.group(1).length(),
+                                    matcher.end() - matcher.group(2).length());
+                            if (Config.get().multiRestyle) {
+                                while (matcher.find()) {
+                                    msg = restyleLeaves(msg, notif.textStyle,
+                                            matcher.start() + matcher.group(1).length(),
+                                            matcher.end() - matcher.group(2).length());
+                                }
+                            }
+                        }
+                        case REGEX -> {
                             msg = restyleLeaves(msg, notif.textStyle, 
                                     matcher.start(), matcher.end());
                             if (Config.get().multiRestyle) {
                                 while (matcher.find()) {
-                                    msg = restyleLeaves(msg, notif.textStyle, 
+                                    msg = restyleLeaves(msg, notif.textStyle,
                                             matcher.start(), matcher.end());
                                 }
                             }
                         }
-                        case KEY -> restyleRoot(msg, notif.textStyle);
+                        case KEY -> msg = restyleRoot(msg, notif.textStyle);
                     }
                 }
                 if (!multiActivate) return msg;
@@ -258,12 +270,12 @@ public class MessageUtil {
      */
     public static Matcher normalSearch(String msg, String str) {
         /*
-        U flag for full unicode comparison, performance using randomly-generated
+        U flag for full Unicode comparison, performance using randomly-generated
         100-character msg and 10-character str is approx 1.18 microseconds
         per check without flag, 1.31 microseconds with.
          */
         return Pattern.compile(
-                "(?iU)(?<!\\w)((\\W?|(§[a-z0-9])+)" + Pattern.quote(str) + "\\W?)(?!\\w)")
+                "(?iU)(?<!\\w)(\\W?)" + Pattern.quote(str) + "(\\W?)(?!\\w)")
                 .matcher(msg);
     }
 

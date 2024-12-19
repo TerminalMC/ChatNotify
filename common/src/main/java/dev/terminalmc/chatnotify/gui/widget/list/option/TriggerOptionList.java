@@ -122,17 +122,29 @@ public class TriggerOptionList extends OptionList {
                     }
                 } else {
                     switch(trigger.type) {
-                        case NORMAL, REGEX -> {
-                            msg = MessageUtil.restyleLeaves(msg, textStyle, 
+                        case NORMAL -> {
+                            msg = MessageUtil.restyleLeaves(msg, textStyle,
+                                    matcher.start() + matcher.group(1).length(),
+                                    matcher.end() - matcher.group(2).length());
+                            if (Config.get().multiRestyle) {
+                                while (matcher.find()) {
+                                    msg = MessageUtil.restyleLeaves(msg, textStyle,
+                                            matcher.start() + matcher.group(1).length(),
+                                            matcher.end() - matcher.group(2).length());
+                                }
+                            }
+                        }
+                        case REGEX -> {
+                            msg = MessageUtil.restyleLeaves(msg, textStyle,
                                     matcher.start(), matcher.end());
                             if (Config.get().multiRestyle) {
                                 while (matcher.find()) {
-                                    msg = MessageUtil.restyleLeaves(msg, textStyle, 
+                                    msg = MessageUtil.restyleLeaves(msg, textStyle,
                                             matcher.start(), matcher.end());
                                 }
                             }
                         }
-                        case KEY -> MessageUtil.restyleRoot(msg, textStyle);
+                        case KEY -> msg = MessageUtil.restyleRoot(msg, textStyle);
                     }
                 }
             }
