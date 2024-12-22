@@ -67,7 +67,8 @@ public class MixinChatComponent {
     private static @Nullable Component chatNotify$replaceMessage(Component message, GuiMessageTag tag) {
         if (switch (Config.get().detectionMode) {
             case HUD_KNOWN_TAGS_ONLY -> (
-                    tag.equals(GuiMessageTag.system())
+                    tag == null 
+                    || tag.equals(GuiMessageTag.system())
                     || tag.equals(GuiMessageTag.systemSinglePlayer())
                     || tag.equals(GuiMessageTag.chatNotSecure())
                     || tag.equals(GuiMessageTag.chatError())
