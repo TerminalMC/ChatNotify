@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 import static dev.terminalmc.chatnotify.ChatNotify.recentMessages;
 
 public class MessageUtil {
-    private static final String CODE_STRING = "c`h!a~t;n#o]t-i,f@y";
     private static boolean debug = false;
     
     /**
@@ -62,7 +61,11 @@ public class MessageUtil {
         
         // Check owner
         String cleanOwnedStr = checkOwner(cleanStr);
-        if (cleanOwnedStr == null) return msg; // From user and set to ignore
+        if (cleanOwnedStr == null) {
+            // Message was identified as being sent by the user and config
+            // is set to ignore such messages, so return the original
+            return msg;
+        }
         
         // Process notifications
         msg = tryNotify(msg.copy(), cleanStr, cleanOwnedStr);
@@ -142,13 +145,15 @@ public class MessageUtil {
         boolean soundPlayed = false;
         boolean multiActivate = !Config.get().multiNotifMode.equals(Config.MultiNotifMode.OFF);
         boolean multiSound = Config.get().multiNotifMode.equals(Config.MultiNotifMode.ALL);
+        
+        // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
             if (!notif.isEnabled() || notif.editing) continue;
             
             // Trigger search
             for (Trigger trig : notif.triggers) {
                 if (trig.string.isBlank()) continue;
-                Matcher matcher = null; // Used for capturing group responses
+                Matcher matcher = null;
                 boolean hit = switch(trig.type) {
                     case NORMAL -> {
                         if (normalSearch(cleanOwnedStr, trig.string).find()) {
@@ -192,55 +197,48 @@ public class MessageUtil {
                 showTitle(notif);
                 sendResponses(notif, trig.type == Trigger.Type.REGEX ? matcher : null);
                 
-                // Remove format codes before restyling
-                msg = FormatUtil.convertCodes(msg.copy());
-                if (debug) {
-                    ChatNotify.LOG.warn("Code-Converted Message");
-                    ChatNotify.LOG.warn(msg.toString());
-                }
+                try {
+                    // Convert message into a format suitable for recursive processing
+                    msg = FormatUtil.convertToStyledLiteral(msg.copy());
+                    if (debug) {
+                        ChatNotify.LOG.warn("Converted Message");
+                        ChatNotify.LOG.warn(msg.toString());
+                    }
 
-                // Restyle, using style string if possible
-                boolean restyled = false;
-                if (trig.styleString != null) {
-                    Matcher m = styleSearch(cleanStr, trig.styleString);
-                    if (m.find()) {
-                        restyled = true;
-                        msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
-                        if (Config.get().multiRestyle) {
-                            while (m.find()) {
+                    // Restyle, using style string if possible
+                    boolean restyled = false;
+                    if (trig.styleString != null) {
+                        Matcher m = styleSearch(cleanStr, trig.styleString);
+                        if (m.find()) {
+                            restyled = true;
+                            do {
                                 msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
-                            }
+                            } while (Config.get().multiRestyle && m.find());
                         }
                     }
-                }
-                if (!restyled) {
-                    switch(trig.type) {
-                        case NORMAL -> {
-                            msg = restyleLeaves(msg, notif.textStyle, 
-                                    matcher.start() + matcher.group(1).length(),
-                                    matcher.end() - matcher.group(2).length());
-                            if (Config.get().multiRestyle) {
-                                while (matcher.find()) {
+                    // If style string not usable, attempt to restyle trigger
+                    if (!restyled) {
+                        switch(trig.type) {
+                            case NORMAL -> {
+                                do {
                                     msg = restyleLeaves(msg, notif.textStyle,
                                             matcher.start() + matcher.group(1).length(),
                                             matcher.end() - matcher.group(2).length());
-                                }
+                                } while (Config.get().multiRestyle && matcher.find());
                             }
-                        }
-                        case REGEX -> {
-                            msg = restyleLeaves(msg, notif.textStyle, 
-                                    matcher.start(), matcher.end());
-                            if (Config.get().multiRestyle) {
-                                while (matcher.find()) {
+                            case REGEX -> {
+                                do {
                                     msg = restyleLeaves(msg, notif.textStyle,
                                             matcher.start(), matcher.end());
-                                }
+                                } while (Config.get().multiRestyle && matcher.find());
                             }
+                            case KEY -> msg = restyleRoot(msg, notif.textStyle);
                         }
-                        case KEY -> msg = restyleRoot(msg, notif.textStyle);
                     }
-                }
-                if (!multiActivate) return msg;
+                } catch (IllegalArgumentException ignored) {}
+                
+                if (multiActivate) break;
+                else return msg;
             }
         }
         return msg;
@@ -366,6 +364,11 @@ public class MessageUtil {
 
     /**
      * Recursive traversal restyling algorithm.
+     * 
+     * <p><b>Note:</b> Unable to process format codes or translatable 
+     * components, use {@link FormatUtil#convertToStyledLiteral} prior to 
+     * invoking this method.</p>
+     * 
      * @param msg the message to restyle.
      * @param style the style to apply.
      * @param start the root string index of the first character in the target substring.
@@ -376,10 +379,12 @@ public class MessageUtil {
     private static MutableComponent restyle(MutableComponent msg, TextStyle style, int start, int end, int index) {
         if (debug) ChatNotify.LOG.warn("restyle('{}', {}, {}, {})", 
                 msg.getString(), start, end, index);
-        // Detach siblings, to be re-attached at end
+        
+        // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(msg.getSiblings());
         msg.getSiblings().clear();
         
+        // Restyle contents
         if (msg.getContents() instanceof PlainTextContents contents) {
             if (debug) ChatNotify.LOG.warn("PlainTextContents");
             String str = contents.text();
@@ -404,66 +409,9 @@ public class MessageUtil {
             }
             index += str.length();
         }
-        else if (msg.getContents() instanceof TranslatableContents contents) {
-            if (debug) ChatNotify.LOG.warn("TranslatableContents");
-            String str = Component.translatable(contents.getKey(), contents.getArgs()).getString();
 
-            // Some messy heuristics to determine the offset of arguments in the
-            // translated string, required for correct traversal
-            
-            String[] array = new String[contents.getArgs().length];
-            Arrays.fill(array, CODE_STRING);
-            String baseStr = Component.translatable(contents.getKey(), (Object[])array).getString();
-            if (debug) ChatNotify.LOG.warn(baseStr);
-            
-            List<String> split = new ArrayList<>(List.of(baseStr.split(CODE_STRING)));
-            if (baseStr.startsWith(CODE_STRING)) split.addFirst("");
-            if (baseStr.endsWith(CODE_STRING)) split.addLast("");
-            
-            if (index + str.length() >= start && index < end) {
-                // Target string overlaps with current substring, so restyle args
-                Object[] args = contents.getArgs();
-                for (int i = 0; i < contents.getArgs().length; i++) {
-                    // Add offset
-                    index += split.get(i).length();
-                    
-                    if (args[i] instanceof Component argComponent) {
-                        // Recurse for component args
-                        String argString = argComponent.getString();
-                        if (index + argString.length() >= start && index < end) {
-                            args[i] = restyle(argComponent.copy(), style, start, end, index);
-                        }
-                        index += argString.length();
-                    }
-                    else if (args[i] instanceof String argString) {
-                        // Split string args into 3 components
-                        MutableComponent argComponent = Component.empty();
-
-                        int localStart = Math.max(0, start - index);
-                        int localEnd = Math.min(argString.length(), end - index);
-
-                        String part1 = argString.substring(0, localStart);
-                        if (!part1.isEmpty()) argComponent.append(part1);
-
-                        String part2 = argString.substring(localStart, localEnd);
-                        if (!part2.isEmpty()) argComponent.append(
-                                Component.literal(part2).withStyle(style.getStyle()));
-
-                        String part3 = argString.substring(localEnd);
-                        if (!part3.isEmpty()) argComponent.append(part3);
-                        
-                        args[i] = argComponent;
-                        index += argString.length();
-                    }
-                }
-                // Reconstruct
-                msg = MutableComponent.create(new TranslatableContents(contents.getKey(), 
-                                contents.getFallback(), args)).setStyle(msg.getStyle());
-            }
-            index += str.length();
-        }
-        // Recurse for original siblings
-        List<Component> siblings = new ArrayList<>();
+        // Recurse for original siblings and re-attach
+        List<Component> siblings = msg.getSiblings();
         for (Component sibling : oldSiblings) {
             String str = sibling.getString();
             if (index + str.length() >= start && index < end) {
@@ -473,8 +421,7 @@ public class MessageUtil {
             }
             index += str.length();
         }
-        // Re-attach siblings
-        msg.getSiblings().addAll(siblings);
+        
         return msg;
     }
 

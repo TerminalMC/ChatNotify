@@ -88,7 +88,7 @@ public class TriggerOptionList extends OptionList {
     private void addChat() {
         Minecraft mc = Minecraft.getInstance();
         List<MutableComponent> allChat = ChatNotify.unmodifiedChat.stream()
-                .map((msg) -> FormatUtil.convertCodes(msg.copy())).toList().reversed();
+                .map((msg) -> FormatUtil.convertToStyledLiteral(msg.copy())).toList().reversed();
         List<Component> filteredChat = new ArrayList<>();
         for (Component msg : allChat) {
             Matcher matcher = null;
@@ -112,37 +112,23 @@ public class TriggerOptionList extends OptionList {
                 // Restyle, using style string if possible
                 if (trigger.styleString != null) {
                     Matcher m = MessageUtil.styleSearch(msg.getString(), trigger.styleString);
-                    if (m.find()) {
+                    do {
                         msg = MessageUtil.restyleLeaves(msg, textStyle, m.start(), m.end());
-                    }
-                    if (Config.get().multiRestyle) {
-                        while (m.find()) {
-                            msg = MessageUtil.restyleLeaves(msg, textStyle, m.start(), m.end());
-                        }
-                    }
+                    } while (Config.get().multiRestyle && m.find());
                 } else {
                     switch(trigger.type) {
                         case NORMAL -> {
-                            msg = MessageUtil.restyleLeaves(msg, textStyle,
-                                    matcher.start() + matcher.group(1).length(),
-                                    matcher.end() - matcher.group(2).length());
-                            if (Config.get().multiRestyle) {
-                                while (matcher.find()) {
-                                    msg = MessageUtil.restyleLeaves(msg, textStyle,
-                                            matcher.start() + matcher.group(1).length(),
-                                            matcher.end() - matcher.group(2).length());
-                                }
-                            }
+                            do {
+                                msg = MessageUtil.restyleLeaves(msg, textStyle,
+                                        matcher.start() + matcher.group(1).length(),
+                                        matcher.end() - matcher.group(2).length());
+                            } while (Config.get().multiRestyle && matcher.find());
                         }
                         case REGEX -> {
-                            msg = MessageUtil.restyleLeaves(msg, textStyle,
-                                    matcher.start(), matcher.end());
-                            if (Config.get().multiRestyle) {
-                                while (matcher.find()) {
-                                    msg = MessageUtil.restyleLeaves(msg, textStyle,
-                                            matcher.start(), matcher.end());
-                                }
-                            }
+                            do {
+                                msg = MessageUtil.restyleLeaves(msg, textStyle,
+                                        matcher.start(), matcher.end());
+                            } while (Config.get().multiRestyle && matcher.find());
                         }
                         case KEY -> msg = MessageUtil.restyleRoot(msg, textStyle);
                     }

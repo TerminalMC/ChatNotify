@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.5
+
+- Fixed translatable message processing
+
 ## 2.3.0-beta.4
 
 - Restored old key selection screen

@@ -16,6 +16,7 @@
 
 package dev.terminalmc.chatnotify.util;
 
+import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -25,11 +26,14 @@ import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class FormatUtil {
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("\\u00A7.?");
+    private static final String ARGUMENT_STRING = "c`h!a~t;n#o]t-i,f@y";
     
     /**
      * {@link net.minecraft.util.StringUtil#stripColor} only strips valid 
@@ -39,48 +43,122 @@ public class FormatUtil {
     public static String stripCodes(String str) {
         return COLOR_CODE_PATTERN.matcher(str).replaceAll("");
     }
-    
-    public static MutableComponent convertCodes(MutableComponent text) {
-        if (!text.getString().contains("\u00A7")) return text;
-        
+
+    /**
+     * Recursively converts all format codes in the {@link MutableComponent} 
+     * to {@link Style}s.
+     * 
+     * <p><b>Note:</b> To ensure full conversion, all translatable contents
+     * are first converted to literal contents.</p>
+     */
+    public static MutableComponent convertToStyledLiteral(MutableComponent text) 
+            throws IllegalArgumentException {
+        // If contents are translatable, convert to literal
+        if (text.getContents() instanceof TranslatableContents) {
+            text = convertToLiteral(text);
+        }
+
         // Recurse for all siblings
-        List<Component> siblings = text.getSiblings();
-        siblings.replaceAll(sibling -> convertCodes(sibling.copy()));
+        text.getSiblings().replaceAll(sibling -> convertToStyledLiteral(sibling.copy()));
         
-        // Restyle contents
-        if (text.getContents() instanceof PlainTextContents ptc) {
-            // PlainTextContents is typically the lowest level
-            text = convertCodes(ptc.text(), text.getStyle());
-        }
-        else if (text.getContents() instanceof TranslatableContents contents) {
-            // Recurse for all args
-            Object[] args = contents.getArgs();
-            for (int i = 0; i < contents.getArgs().length; i++) {
-                if (args[i] instanceof Component argComponent) {
-                    args[i] = convertCodes(argComponent.copy());
-                }
-                else if (args[i] instanceof String argString) {
-                    args[i] = convertCodes(argString, text.getStyle());
-                }
-            }
-            // Reconstruct
-            text = MutableComponent.create(
-                    new TranslatableContents(contents.getKey(), contents.getFallback(), args))
-                            .setStyle(text.getStyle());
+        // Convert codes in contents
+        if (text.getContents() instanceof PlainTextContents) {
+            text = convertCodesToStyles(text);
         }
         
-        // Attach restyled siblings
-        text.getSiblings().addAll(siblings);
         return text;
     }
 
-    private static MutableComponent convertCodes(String str, Style style) {
-        if (!str.contains("\u00A7")) return Component.literal(str);
+    /**
+     * Converts the contents of the {@link MutableComponent} from 
+     * {@link TranslatableContents} to {@link PlainTextContents}.
+     * 
+     * <p><b>Note:</b> does not recurse, only affects root.</p>
+     */
+    private static MutableComponent convertToLiteral(MutableComponent text) 
+            throws IllegalArgumentException {
+        if (!(text.getContents() instanceof TranslatableContents contents)) return text;
         
-        MutableComponent text = Component.empty();
+        // Detach siblings
+        List<Component> oldSiblings = new ArrayList<>(text.getSiblings());
+        
+        // Create an array of arguments
+        String[] array = new String[contents.getArgs().length];
+        Arrays.fill(array, ARGUMENT_STRING);
+        
+        // Translate the contents using the new argument array
+        String translated = Component.translatable(contents.getKey(), (Object[])array).getString();
+
+        // Split on the known argument string to get the literal translation
+        List<String> translatedSplit = new ArrayList<>(List.of(translated.split(ARGUMENT_STRING)));
+        // Pad start and end
+        if (translated.startsWith(ARGUMENT_STRING)) translatedSplit.addFirst("");
+        if (translated.endsWith(ARGUMENT_STRING)) translatedSplit.addLast("");
+
+        if (translatedSplit.size() == 1) { // No args
+            // Create component from translated string
+            text = Component.literal(translatedSplit.getFirst()).withStyle(text.getStyle());
+        } else { // One or more args
+            // Create an empty component, and add each part of the translated
+            // string and each arg as siblings in sequence
+            text = Component.empty().withStyle(text.getStyle());
+            List<Component> siblings = text.getSiblings();
+            Object[] args = contents.getArgs();
+            
+            // Verify that split translated string and args match
+            if (args.length != translatedSplit.size() - 1) {
+                ChatNotify.LOG.error("Unable to process translatable with {} args and {} splits",
+                        args.length, translatedSplit.size());
+                ChatNotify.LOG.error("Text: {}", text.getString());
+                ChatNotify.LOG.error("Raw: {}", text.toString());
+                throw new IllegalArgumentException();
+            }
+            
+            for (int i = 0; i < contents.getArgs().length; i++) {
+                // Add translated substring
+                if (!translatedSplit.get(i).isEmpty()) {
+                    siblings.add(Component.literal(translatedSplit.get(i)));
+                }
+                // Add subsequent arg
+                if (args[i] instanceof Component argComponent) {
+                    siblings.add(argComponent);
+                } else {
+                    siblings.add(Component.literal(args[i].toString()));
+                }
+            }
+            // Add final translated substring
+            if (!translatedSplit.getLast().isEmpty()) {
+                siblings.add(Component.literal(translatedSplit.getLast()));
+            }
+        }
+        
+        // Re-attach siblings
+        text.getSiblings().addAll(oldSiblings);
+        
+        return text;
+    }
+
+    /**
+     * Converts any format codes in the literal contents of the 
+     * {@link MutableComponent} to {@link Style}s.
+     *
+     * <p><b>Note:</b> does not recurse, only affects root.</p>
+     */
+    private static MutableComponent convertCodesToStyles(MutableComponent text) {
+        if (!(text.getContents() instanceof PlainTextContents contents)) return text;
+        
+        // Check whether conversion is required
+        String str = contents.text();
+        if (!str.contains("\u00A7")) return text;
+        
+        // Detach siblings
+        List<Component> oldSiblings = new ArrayList<>(text.getSiblings());
+        
+        // Convert
+        text = Component.empty().withStyle(text.getStyle());
         StringBuilder sb = new StringBuilder();
         char[] chars = str.toCharArray();
-        FormatCodes codes = new FormatCodes(style);
+        FormatCodes codes = new FormatCodes();
         
         for (int i = 0; i < chars.length; i++) {
             if (chars[i] == '\u00A7') { // Section sign
@@ -110,6 +188,10 @@ public class FormatUtil {
         if (!sb.isEmpty()) {
             text.append(Component.literal(sb.toString()).withStyle(codes.createStyle()));
         }
+        
+        // Re-attach siblings
+        text.getSiblings().addAll(oldSiblings);
+        
         return text;
     }
     
@@ -120,11 +202,6 @@ public class FormatUtil {
         boolean underline = false;
         boolean strikethrough = false;
         boolean obfuscated = false;
-        private final Style baseStyle;
-        
-        FormatCodes(Style baseStyle) {
-            this.baseStyle = baseStyle;
-        }
         
         Style createStyle() {
             return new Style(
@@ -134,10 +211,10 @@ public class FormatUtil {
                     underline ? true : null,
                     strikethrough ? true : null,
                     obfuscated ? true : null,
-                    baseStyle.getClickEvent(),
-                    baseStyle.getHoverEvent(),
-                    baseStyle.getInsertion(), 
-                    baseStyle.getFont()
+                    null,
+                    null,
+                    null,
+                    null
             );
         }
         
