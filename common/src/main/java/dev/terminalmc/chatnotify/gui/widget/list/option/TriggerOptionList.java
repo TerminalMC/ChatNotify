@@ -16,6 +16,7 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list.option;
 
+import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.TextStyle;
@@ -27,7 +28,6 @@ import dev.terminalmc.chatnotify.util.MessageUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -88,10 +88,12 @@ public class TriggerOptionList extends OptionList {
     
     private void addChat() {
         Minecraft mc = Minecraft.getInstance();
-        List<MutableComponent> allChat = ChatNotify.unmodifiedChat.stream()
-                .map((msg) -> FormatUtil.convertToStyledLiteral(msg.copy())).toList().reversed();
-        List<Component> filteredChat = new ArrayList<>();
-        for (Component msg : allChat) {
+        List<Pair<Component, MutableComponent>> allChat = ChatNotify.unmodifiedChat.stream()
+                .map((msg) -> new Pair<>(msg, FormatUtil.convertToStyledLiteral(msg.copy())))
+                .toList().reversed();
+        List<Pair<Component, Component>> filteredChat = new ArrayList<>();
+        for (Pair<Component, MutableComponent> pair : allChat) {
+            Component msg = pair.getSecond();
             Matcher matcher = null;
             boolean hit = switch(trigger.type) {
                 case NORMAL -> {
@@ -138,14 +140,14 @@ public class TriggerOptionList extends OptionList {
                     }
                 }
             }
-            filteredChat.add(msg);
+            filteredChat.add(new Pair<>(pair.getFirst(), msg));
         }
-        filteredChat.forEach((msg) -> {
+        filteredChat.forEach((pair) -> {
             Entry.MessageEntry entry = new Entry.MessageEntry(dynEntryX, dynEntryWidth,
-                    this, msg);
+                    this, pair.getFirst(), pair.getSecond());
             addEntry(entry);
             int requiredHeight = 
-                    mc.font.wordWrapHeight(msg.getString(), dynEntryWidth) - itemHeight;
+                    mc.font.wordWrapHeight(pair.getFirst().getString(), dynEntryWidth) - itemHeight;
             while (requiredHeight > 0) {
                 SpaceEntry spaceEntry = new SpaceEntry(entry);
                 addEntry(spaceEntry);
@@ -354,13 +356,16 @@ public class TriggerOptionList extends OptionList {
 
         private static class MessageEntry extends Entry {
             private final TriggerOptionList list;
-            private final Component message;
+            private final Component msg;
+            private final Component restyledMsg;
 
-            MessageEntry(int x, int width, TriggerOptionList list, Component message) {
+            MessageEntry(int x, int width, TriggerOptionList list, 
+                         Component msg, Component restyledMsg) {
                 super();
                 this.list = list;
-                this.message = message;
-                MultiLineTextWidget widget = new MultiLineTextWidget(x, 0, message,
+                this.msg = msg;
+                this.restyledMsg = restyledMsg;
+                MultiLineTextWidget widget = new MultiLineTextWidget(x, 0, restyledMsg,
                         Minecraft.getInstance().font);
                 widget.setMaxWidth(width);
                 elements.add(widget);
@@ -368,8 +373,8 @@ public class TriggerOptionList extends OptionList {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                list.textDisplayBox.setValue(message.getString());
-                list.keyDisplayBox.setValue(message.getContents() instanceof TranslatableContents tc
+                list.textDisplayBox.setValue(msg.getString());
+                list.keyDisplayBox.setValue(msg.getContents() instanceof TranslatableContents tc
                         ? tc.getKey() : localized("option", "trigger.key.none").getString());
                 list.setScrollAmount(0);
                 return true;
