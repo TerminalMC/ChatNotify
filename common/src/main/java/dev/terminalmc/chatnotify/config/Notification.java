@@ -24,6 +24,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Consists of activation criteria and audio/visual notification parameters.
@@ -35,15 +38,34 @@ public class Notification {
     public transient boolean editing = false;
 
     // Options
+    private static final boolean enabledDefault = true;
     private boolean enabled;
+    
+    public static final boolean exclusionEnabledDefault = false;
     public boolean exclusionEnabled;
+    
+    public static final boolean responseEnabledDefault = false;
     public boolean responseEnabled;
+    
+    public static final boolean blockMessageDefault = false;
     public boolean blockMessage;
+    
+    public static final Supplier<Sound> soundDefault = Sound::new;
     public final Sound sound;
+    
+    public static final Supplier<TextStyle> textStyleDefault = TextStyle::new;
     public final TextStyle textStyle;
+    
+    public static final Supplier<TitleText> titleTextDefault = TitleText::new;
     public final TitleText titleText;
+    
+    public static final Supplier<List<Trigger>> triggersDefault = ArrayList::new;
     public final List<Trigger> triggers;
+
+    public static final Supplier<List<Trigger>> exclusionTriggersDefault = ArrayList::new;
     public final List<Trigger> exclusionTriggers;
+
+    public static final Supplier<List<ResponseMessage>> responseMessagesDefault = ArrayList::new;
     public final List<ResponseMessage> responseMessages;
 
     /**
@@ -203,53 +225,76 @@ public class Notification {
         public @Nullable Notification deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
+            int version = obj.get("version").getAsInt();
+            
+            String f = "enabled";
+            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : enabledDefault;
 
-            try {
-                int version = obj.get("version").getAsInt();
+            f = "exclusionEnabled";
+            boolean exclusionEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : exclusionEnabledDefault;
 
-                boolean enabled = obj.get("enabled").getAsBoolean();
-                boolean exclusionEnabled = obj.get("exclusionEnabled").getAsBoolean();
-                boolean responseEnabled = obj.get("responseEnabled").getAsBoolean();
-                boolean blockMessage = version >= 3 ? obj.get("blockMessage").getAsBoolean() : false;
-                Sound sound = ctx.deserialize(obj.get("sound"), Sound.class);
-                TextStyle textStyle = ctx.deserialize(obj.get("textStyle"), TextStyle.class);
-                TitleText titleText = version >= 2
-                        ? ctx.deserialize(obj.get("titleText"), TitleText.class)
-                        : new TitleText();
-                List<Trigger> triggers = new ArrayList<>();
-                for (JsonElement je : obj.getAsJsonArray("triggers")) {
-                    Trigger t = ctx.deserialize(je, Trigger.class);
-                    if (t != null) triggers.add(t);
-                }
-                List<Trigger> exclusionTriggers = new ArrayList<>();
-                for (JsonElement je : obj.getAsJsonArray("exclusionTriggers")) {
-                    Trigger t = ctx.deserialize(je, Trigger.class);
-                    if (t != null) exclusionTriggers.add(t);
-                }
-                List<ResponseMessage> responseMessages = new ArrayList<>();
-                for (JsonElement je : obj.getAsJsonArray("responseMessages")) {
-                    ResponseMessage r = ctx.deserialize(je, ResponseMessage.class);
-                    if (r != null) responseMessages.add(r);
-                }
-                if (version <= 3) {
-                    int totalDelay = 0;
-                    for (ResponseMessage resMsg : responseMessages) {
-                        resMsg.delayTicks -= totalDelay;
-                        totalDelay += resMsg.delayTicks;
-                    }
-                }
+            f = "responseEnabled";
+            boolean responseEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : responseEnabledDefault;
 
-                // Validation
-                if (sound == null) throw new JsonParseException("Notification #1");
-                if (textStyle == null) throw new JsonParseException("Notification #1");
+            f = "blockMessage";
+            boolean blockMessage = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : blockMessageDefault;
 
-                return new Notification(enabled, exclusionEnabled, responseEnabled, blockMessage,
-                        sound, textStyle, titleText, triggers, exclusionTriggers, responseMessages);
+            f = "sound";
+            Sound sound = obj.has(f) && obj.get(f).isJsonObject()
+                    ? ctx.deserialize(obj.get(f), Sound.class)
+                    : soundDefault.get();
+
+            f = "textStyle";
+            TextStyle textStyle = obj.has(f) && obj.get(f).isJsonObject()
+                    ? ctx.deserialize(obj.get(f), TextStyle.class)
+                    : textStyleDefault.get();
+
+            f = "titleText";
+            TitleText titleText = obj.has(f) && obj.get(f).isJsonObject()
+                    ? ctx.deserialize(obj.get(f), TitleText.class)
+                    : titleTextDefault.get();
+
+            f = "triggers";
+            List<Trigger> triggers = obj.has(f) && obj.get(f).isJsonArray()
+                    ? obj.getAsJsonArray(f).asList().stream()
+                        .filter(JsonElement::isJsonObject)
+                        .map((je) -> (Trigger)ctx.deserialize(je, Trigger.class)).toList()
+                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
+                    : triggersDefault.get();
+
+            f = "exclusionTriggers";
+            List<Trigger> exclusionTriggers = obj.has(f) && obj.get(f).isJsonArray()
+                    ? obj.getAsJsonArray(f).asList().stream()
+                        .filter(JsonElement::isJsonObject)
+                        .map((je) -> (Trigger)ctx.deserialize(je, Trigger.class)).toList()
+                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
+                    : exclusionTriggersDefault.get();
+
+            f = "responseMessages";
+            List<ResponseMessage> responseMessages = obj.has(f) && obj.get(f).isJsonArray()
+                    ? obj.getAsJsonArray(f).asList().stream()
+                        .filter(JsonElement::isJsonObject)
+                        .map((je) -> (ResponseMessage)ctx.deserialize(je, ResponseMessage.class)).toList()
+                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
+                    : responseMessagesDefault.get();
+            if (version <= 3) {
+                int totalDelay = 0;
+                for (ResponseMessage resMsg : responseMessages) {
+                    resMsg.delayTicks -= totalDelay;
+                    totalDelay += resMsg.delayTicks;
+                }
             }
-            catch (Exception e) {
-                ChatNotify.LOG.warn("Unable to deserialize Notification", e);
-                return null;
-            }
+
+            return new Notification(enabled, exclusionEnabled, responseEnabled, blockMessage,
+                    sound, textStyle, titleText, triggers, exclusionTriggers, responseMessages);
         }
     }
 }

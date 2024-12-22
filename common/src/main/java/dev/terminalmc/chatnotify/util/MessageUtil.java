@@ -143,8 +143,6 @@ public class MessageUtil {
                                                  String cleanOwnedStr) {
         boolean activated = false;
         boolean soundPlayed = false;
-        boolean multiActivate = !Config.get().multiNotifMode.equals(Config.MultiNotifMode.OFF);
-        boolean multiSound = Config.get().multiNotifMode.equals(Config.MultiNotifMode.ALL);
         
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
@@ -193,7 +191,9 @@ public class MessageUtil {
                 }
                 
                 activated = true;
-                if (!soundPlayed || multiSound) soundPlayed = playSound(notif);
+                if (!soundPlayed || Config.get().notifMode.equals(Config.NotifMode.MULTIPLE)) {
+                    soundPlayed = playSound(notif);
+                }
                 showTitle(notif);
                 sendResponses(notif, trig.type == Trigger.Type.REGEX ? matcher : null);
                 
@@ -213,7 +213,8 @@ public class MessageUtil {
                             restyled = true;
                             do {
                                 msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
-                            } while (Config.get().multiRestyle && m.find());
+                            } while (Config.get().restyleMode.equals(
+                                    Config.RestyleMode.ALL_INSTANCES) && m.find());
                         }
                     }
                     // If style string not usable, attempt to restyle trigger
@@ -224,22 +225,24 @@ public class MessageUtil {
                                     msg = restyleLeaves(msg, notif.textStyle,
                                             matcher.start() + matcher.group(1).length(),
                                             matcher.end() - matcher.group(2).length());
-                                } while (Config.get().multiRestyle && matcher.find());
+                                } while (Config.get().restyleMode.equals(
+                                        Config.RestyleMode.ALL_INSTANCES) && matcher.find());
                             }
                             case REGEX -> {
                                 do {
                                     msg = restyleLeaves(msg, notif.textStyle,
                                             matcher.start(), matcher.end());
-                                } while (Config.get().multiRestyle && matcher.find());
+                                } while (Config.get().restyleMode.equals(
+                                        Config.RestyleMode.ALL_INSTANCES) && matcher.find());
                             }
                             case KEY -> msg = restyleRoot(msg, notif.textStyle);
                         }
                     }
                 } catch (IllegalArgumentException ignored) {}
                 
-                if (multiActivate) break;
-                else return msg;
+                if (!Config.get().restyleMode.equals(Config.RestyleMode.ALL_TRIGGERS)) break;
             }
+            if (activated && Config.get().notifMode.equals(Config.NotifMode.SINGLE)) return msg;
         }
         return msg;
     }
@@ -433,11 +436,16 @@ public class MessageUtil {
      * @return the {@link Style}, with the {@link TextStyle} applied.
      */
     private static Style applyStyle(Style style, TextStyle textStyle) {
-        if (textStyle.bold.isEnabled()) style = style.withBold(textStyle.bold.isOn());
-        if (textStyle.italic.isEnabled()) style = style.withItalic(textStyle.italic.isOn());
-        if (textStyle.underlined.isEnabled()) style = style.withUnderlined(textStyle.underlined.isOn());
-        if (textStyle.strikethrough.isEnabled()) style = style.withStrikethrough(textStyle.strikethrough.isOn());
-        if (textStyle.obfuscated.isEnabled()) style = style.withObfuscated(textStyle.obfuscated.isOn());
+        if (!textStyle.bold.equals(TextStyle.FormatMode.DISABLED)) 
+            style = style.withBold(textStyle.bold.equals(TextStyle.FormatMode.ON));
+        if (!textStyle.italic.equals(TextStyle.FormatMode.DISABLED)) 
+            style = style.withItalic(textStyle.italic.equals(TextStyle.FormatMode.ON));
+        if (!textStyle.underlined.equals(TextStyle.FormatMode.DISABLED)) 
+            style = style.withUnderlined(textStyle.underlined.equals(TextStyle.FormatMode.ON));
+        if (!textStyle.strikethrough.equals(TextStyle.FormatMode.DISABLED)) 
+            style = style.withStrikethrough(textStyle.strikethrough.equals(TextStyle.FormatMode.ON));
+        if (!textStyle.obfuscated.equals(TextStyle.FormatMode.DISABLED)) 
+            style = style.withObfuscated(textStyle.obfuscated.equals(TextStyle.FormatMode.ON));
         if (textStyle.doColor) style = style.withColor(textStyle.getTextColor());
         return style;
     }

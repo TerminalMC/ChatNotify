@@ -22,49 +22,56 @@ import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 public class TextStyle {
-    public final int version = 1;
+    public final int version = 2;
 
+    public enum FormatMode {
+        DISABLED,
+        ON,
+        OFF,
+    }
+
+    public static final boolean doColorDefault = true;
     public boolean doColor;
+    
+    public static final int colorDefault = 0xffc400;
     public int color;
-    public TriState bold;
-    public TriState italic;
-    public TriState underlined;
-    public TriState strikethrough;
-    public TriState obfuscated;
+    
+    public FormatMode bold;
+    public FormatMode italic;
+    public FormatMode underlined;
+    public FormatMode strikethrough;
+    public FormatMode obfuscated;
 
     /**
      * Creates a default instance.
      */
     public TextStyle() {
-        this.doColor = true;
-        this.color = Config.DEFAULT_COLOR;
-        this.bold = new TriState();
-        this.italic = new TriState();
-        this.underlined = new TriState();
-        this.strikethrough = new TriState();
-        this.obfuscated = new TriState();
+        this(colorDefault);
     }
 
     /**
      * Creates a default instance with specified color.
      */
     TextStyle(int color) {
-        this.doColor = true;
-        this.color = color;
-        this.bold = new TriState();
-        this.italic = new TriState();
-        this.underlined = new TriState();
-        this.strikethrough = new TriState();
-        this.obfuscated = new TriState();
+        this(
+                doColorDefault,
+                color,
+                FormatMode.values()[0],
+                FormatMode.values()[0],
+                FormatMode.values()[0],
+                FormatMode.values()[0],
+                FormatMode.values()[0]
+        );
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    public TextStyle(boolean doColor, int color, TriState bold, TriState italic,
-                     TriState underlined, TriState strikethrough, TriState obfuscated) {
+    public TextStyle(boolean doColor, int color, FormatMode bold, FormatMode italic,
+                     FormatMode underlined, FormatMode strikethrough, FormatMode obfuscated) {
         this.doColor = doColor;
         this.color = color;
         this.bold = bold;
@@ -80,21 +87,21 @@ public class TextStyle {
 
     public boolean isEnabled() {
         return doColor ||
-                bold.isEnabled() ||
-                italic.isEnabled() ||
-                underlined.isEnabled() ||
-                strikethrough.isEnabled() ||
-                obfuscated.isEnabled();
+                bold != FormatMode.DISABLED ||
+                italic != FormatMode.DISABLED ||
+                underlined != FormatMode.DISABLED ||
+                strikethrough != FormatMode.DISABLED ||
+                obfuscated != FormatMode.DISABLED;
     }
     
     public Style getStyle() {
         return new Style(
                 doColor ? TextColor.fromRgb(color) : null, 
-                bold.isEnabled() ? bold.isOn() : null,
-                italic.isEnabled() ? italic.isOn() : null,
-                underlined.isEnabled() ? underlined.isOn() : null,
-                strikethrough.isEnabled() ? strikethrough.isOn() : null,
-                obfuscated.isEnabled() ? obfuscated.isOn() : null,
+                bold != FormatMode.DISABLED ? bold == FormatMode.ON : null,
+                italic != FormatMode.DISABLED ? italic == FormatMode.ON : null,
+                underlined != FormatMode.DISABLED ? underlined == FormatMode.ON : null,
+                strikethrough != FormatMode.DISABLED ? strikethrough == FormatMode.ON : null,
+                obfuscated != FormatMode.DISABLED ? obfuscated == FormatMode.ON : null,
                 null, 
                 null, 
                 null, 
@@ -102,28 +109,60 @@ public class TextStyle {
         );
     }
 
+   
     public static class Deserializer implements JsonDeserializer<TextStyle> {
         @Override
         public @Nullable TextStyle deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
+            int version = obj.get("version").getAsInt();
 
-            boolean doColor = obj.get("doColor").getAsBoolean();
-            int color = obj.get("color").getAsInt();
-            TriState bold = ctx.deserialize(obj.get("bold"), TriState.class);
-            TriState italic = ctx.deserialize(obj.get("italic"), TriState.class);
-            TriState underlined = ctx.deserialize(obj.get("underlined"), TriState.class);
-            TriState strikethrough = ctx.deserialize(obj.get("strikethrough"), TriState.class);
-            TriState obfuscated = ctx.deserialize(obj.get("obfuscated"), TriState.class);
+            String f = "doColor";
+            boolean doColor = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : doColorDefault;
 
-            // Validation
-            if (color < 0 || color > 16777215) throw new JsonParseException("TextStyle #1");
-            if (bold == null) throw new JsonParseException("TextStyle #2");
-            if (italic == null) throw new JsonParseException("TextStyle #3");
-            if (underlined == null) throw new JsonParseException("TextStyle #4");
-            if (strikethrough == null) throw new JsonParseException("TextStyle #5");
-            if (obfuscated == null) throw new JsonParseException("TextStyle #6");
+            f = "color";
+            int color = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
+                    ? obj.get(f).getAsNumber().intValue()
+                    : colorDefault;
+            if (color < 0 || color > 16777215) color = colorDefault;
 
+            f = "bold";
+            FormatMode bold = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                        ? FormatMode.valueOf(obj.get(f).getAsString())
+                        : FormatMode.values()[0]
+                    : FormatMode.values()[0];
+
+            f = "italic";
+            FormatMode italic = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                        ? FormatMode.valueOf(obj.get(f).getAsString())
+                        : FormatMode.values()[0]
+                    : FormatMode.values()[0];
+
+            f = "underlined";
+            FormatMode underlined = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                        ? FormatMode.valueOf(obj.get(f).getAsString())
+                        : FormatMode.values()[0]
+                    : FormatMode.values()[0];
+
+            f = "strikethrough";
+            FormatMode strikethrough = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                        ? FormatMode.valueOf(obj.get(f).getAsString())
+                        : FormatMode.values()[0]
+                    : FormatMode.values()[0];
+
+            f = "obfuscated";
+            FormatMode obfuscated = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                        ? FormatMode.valueOf(obj.get(f).getAsString())
+                        : FormatMode.values()[0]
+                    : FormatMode.values()[0];
+            
             return new TextStyle(doColor, color, bold, italic, underlined, strikethrough, obfuscated);
         }
     }

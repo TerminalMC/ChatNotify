@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.util;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -87,6 +88,7 @@ public class FormatUtil {
         Arrays.fill(array, ARGUMENT_STRING);
         
         // Translate the contents using the new argument array
+        // TODO I18n.get() ?
         String translated = Component.translatable(contents.getKey(), (Object[])array).getString();
 
         // Split on the known argument string to get the literal translation

@@ -56,8 +56,8 @@ public class HsvColorPicker extends OverlayWidget {
     public static final int OUTLINE = 1;
     public static final int CURSOR = 1;
 
-    private final String newColorLabel = " " + localized("option", "color.new").getString() + " ";
-    private final String oldColorLabel = " " + localized("option", "color.old").getString() + " ";
+    private final String newColorLabel = " " + localized("option", "picker.color.new").getString() + " ";
+    private final String oldColorLabel = " " + localized("option", "picker.color.old").getString() + " ";
 
     private final Supplier<Integer> source;
     private final Consumer<Integer> dest;

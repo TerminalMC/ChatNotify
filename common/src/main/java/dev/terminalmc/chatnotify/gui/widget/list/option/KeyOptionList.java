@@ -148,7 +148,7 @@ public class KeyOptionList extends OptionList {
         private static class KeyOption extends Entry {
             KeyOption(int x, int width, int height, KeyOptionList list, Trigger trigger, String key) {
                 super();
-                elements.add(Button.builder(localized("option", "key." + key), 
+                elements.add(Button.builder(localized("option", "key.id." + key), 
                         (button) -> {
                             trigger.string = key;
                             list.setScrollAmount(0);

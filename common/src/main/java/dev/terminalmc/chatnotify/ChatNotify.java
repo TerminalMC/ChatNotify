@@ -88,27 +88,28 @@ public class ChatNotify {
                 && mc.getConnection().isAcceptingMessages()) 
         {
             if (sending.isEmpty()) return;
-            if (Config.get().compatSendMode) {
-                // Compat send mode for mods mixing into handleChatInput
-                Screen oldScreen = null;
-                if (!(mc.screen instanceof ChatScreen)) {
-                    oldScreen = mc.screen;
-                    mc.setScreen(new ChatScreen(""));
-                }
-                if (mc.screen instanceof ChatScreen cs) {
-                    for (String msg : sending) {
-                        cs.handleChatInput(msg, false);
+            switch (Config.get().sendMode) {
+                case PACKET -> {
+                    // Compat mode for mods mixing into handleChatInput
+                    Screen oldScreen = null;
+                    if (!(mc.screen instanceof ChatScreen)) {
+                        oldScreen = mc.screen;
+                        mc.setScreen(new ChatScreen(""));
                     }
+                    if (mc.screen instanceof ChatScreen cs) {
+                        for (String msg : sending) {
+                            cs.handleChatInput(msg, false);
+                        }
+                    }
+                    if (oldScreen != null) mc.setScreen(oldScreen);
                 }
-                if (oldScreen != null) mc.setScreen(oldScreen);
-            }
-            else {
-                // Normal mode
-                for (String msg : sending) {
-                    if (msg.startsWith("/")) {
-                        mc.player.connection.sendCommand(msg.substring(1));
-                    } else {
-                        mc.player.connection.sendChat(msg);
+                case SCREEN -> {
+                    for (String msg : sending) {
+                        if (msg.startsWith("/")) {
+                            mc.player.connection.sendCommand(msg.substring(1));
+                        } else {
+                            mc.player.connection.sendChat(msg);
+                        }
                     }
                 }
             }
@@ -116,13 +117,5 @@ public class ChatNotify {
         else {
             responseMessages.clear();
         }
-    }
-
-    public static boolean mixinEarly() {
-        return switch(Config.get().mixinEarly.state) {
-            case ON -> true;
-            case OFF -> false;
-            case DISABLED -> hasChatHistoryMod;
-        };
     }
 }

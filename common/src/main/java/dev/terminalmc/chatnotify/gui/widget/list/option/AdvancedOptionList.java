@@ -328,7 +328,7 @@ public class AdvancedOptionList extends OptionList {
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
                                 Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.exclusionEnabled)
-                        .create(x, 0, width, height, localized("common", "status"),
+                        .create(x, 0, width, height, localized("option", "advanced.status"),
                                 (button, status) -> {
                                     notif.exclusionEnabled = status;
                                     list.reload();
@@ -361,11 +361,8 @@ public class AdvancedOptionList extends OptionList {
                         .withValues(Trigger.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
-                        .withTooltip((type) -> Tooltip.create(switch(type) {
-                            case NORMAL -> localized("option", "notif.trigger.tooltip.normal");
-                            case REGEX -> localized("option", "notif.trigger.tooltip.regex");
-                            case KEY -> localized("option", "notif.trigger.tooltip.key");
-                        }))
+                        .withTooltip((type) -> Tooltip.create(
+                                localized("option", "notif.trigger.type." + type.name() + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     trigger.type = type;
@@ -407,7 +404,7 @@ public class AdvancedOptionList extends OptionList {
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
                                 Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.responseEnabled)
-                        .create(x, 0, width, height, localized("common", "status"),
+                        .create(x, 0, width, height, localized("option", "advanced.status"),
                                 (button, status) -> {
                                     notif.responseEnabled = status;
                                     listWidget.reload();
@@ -440,11 +437,8 @@ public class AdvancedOptionList extends OptionList {
                         .withValues(ResponseMessage.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(response.type)
-                        .withTooltip((type) -> Tooltip.create(switch(type) {
-                            case NORMAL -> localized("option", "advanced.response.tooltip.normal");
-                            case REGEX -> localized("option", "advanced.response.tooltip.regex");
-                            case COMMANDKEYS -> localized("option", "advanced.response.tooltip.commandkeys");
-                        }))
+                        .withTooltip((type) -> Tooltip.create(
+                                localized("option", "advanced.response." + type.name() + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     response.type = type;
@@ -477,7 +471,7 @@ public class AdvancedOptionList extends OptionList {
                     keyField1.setMaxLength(240);
                     keyField1.setValidator((val) -> {
                         if (keys.contains(val)) return Optional.empty();
-                        else return Optional.of(localized("option", "key.error")
+                        else return Optional.of(localized("option", "advanced.key.error")
                                 .withStyle(ChatFormatting.RED));
                     });
                     keyField1.setValue(response.string.matches(".+-.+") ? response.string.split("-")[0] : "");

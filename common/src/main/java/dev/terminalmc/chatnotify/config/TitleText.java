@@ -25,8 +25,13 @@ import java.lang.reflect.Type;
 public class TitleText {
     public final int version = 1;
 
+    public static final boolean enabledDefault = true;
     public boolean enabled;
+    
+    public static final int colorDefault = 0xffffff;
     public int color;
+    
+    public static final @NotNull String textDefault = "";
     public @NotNull String text;
 
     /**
@@ -50,19 +55,29 @@ public class TitleText {
     public boolean isEnabled() {
         return enabled && !text.isBlank();
     }
-
+    
     public static class Deserializer implements JsonDeserializer<TitleText> {
         @Override
         public @Nullable TitleText deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
+            int version = obj.get("version").getAsInt();
 
-            boolean enabled = obj.get("enabled").getAsBoolean();
-            int color = obj.get("color").getAsInt();
-            String text = obj.get("text").getAsString();
+            String f = "enabled";
+            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : enabledDefault;
 
-            // Validation
-            if (color < 0 || color > 16777215) throw new JsonParseException("TitleText #1");
+            f = "color";
+            int color = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
+                    ? obj.get(f).getAsNumber().intValue()
+                    : colorDefault;
+            if (color < 0 || color > 16777215) color = colorDefault;
+
+            f = "text";
+            String text = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? obj.get(f).getAsString()
+                    : textDefault;
 
             return new TitleText(enabled, color, text);
         }

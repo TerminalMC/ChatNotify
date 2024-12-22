@@ -163,7 +163,7 @@ public class TextField extends EditBox {
                 if (MiscUtil.parseColor(str) != null) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("option", "color.error"));
+                    return Optional.of(localized("option", "field.color.error"));
                 }
             }
         }
@@ -177,7 +177,7 @@ public class TextField extends EditBox {
                 if (sounds.contains(str) || (!str.contains(":") && sounds.contains(("minecraft:" + str)))) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("option", "sound.error"));
+                    return Optional.of(localized("option", "field.sound.error"));
                 }
             }
         }
@@ -189,7 +189,7 @@ public class TextField extends EditBox {
                     if (Integer.parseInt(str) < 0) throw new NumberFormatException();
                     return Optional.empty();
                 } catch (NumberFormatException ignored) {
-                    return Optional.of(localized("option", "posint.error"));
+                    return Optional.of(localized("option", "field.posint.error"));
                 }
             }
         }

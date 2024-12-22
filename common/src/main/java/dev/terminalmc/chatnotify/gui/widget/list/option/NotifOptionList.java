@@ -230,8 +230,8 @@ public class NotifOptionList extends OptionList {
                 TextField displayField = new TextField(x, 0, width, height);
                 displayField.setValue(value);
                 displayField.setTooltip(Tooltip.create(first
-                        ? localized("option", "notif.trigger.profile_name.tooltip")
-                        : localized("option", "notif.trigger.display_name.tooltip")));
+                        ? localized("option", "notif.trigger.special.profile_name.tooltip")
+                        : localized("option", "notif.trigger.special.display_name.tooltip")));
                 displayField.setTooltipDelay(Duration.ofMillis(500));
                 displayField.setEditable(false);
                 displayField.active = false;
@@ -268,11 +268,8 @@ public class NotifOptionList extends OptionList {
                         .withValues(Trigger.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
-                        .withTooltip((type) -> Tooltip.create(switch(type) {
-                            case NORMAL -> localized("option", "notif.trigger.tooltip.normal");
-                            case REGEX -> localized("option", "notif.trigger.tooltip.regex");
-                            case KEY -> localized("option", "notif.trigger.tooltip.key");
-                        }))
+                        .withTooltip((type) -> Tooltip.create(
+                                localized("option", "notif.trigger.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     trigger.type = type;
@@ -414,36 +411,39 @@ public class NotifOptionList extends OptionList {
             private void createFirst(int x, int width, int height, Notification notif) {
                 int buttonWidth = (width - SPACING * 2) / 3;
 
-                CycleButton<TriState.State> boldButton = CycleButton.<TriState.State>builder(
-                        (state) -> getMessage(state, ChatFormatting.BOLD))
-                        .withValues(TriState.State.values())
-                        .withInitialValue(notif.textStyle.bold.getState())
-                        .withTooltip(this::getTooltip)
-                        .create(x, 0, buttonWidth, height,
-                                localized("option", "notif.format.bold"),
-                                (button, state) -> notif.textStyle.bold.state = state);
+                CycleButton<TextStyle.FormatMode> boldButton = 
+                        CycleButton.<TextStyle.FormatMode>builder(
+                                (state) -> getMessage(state, ChatFormatting.BOLD))
+                                .withValues(TextStyle.FormatMode.values())
+                                .withInitialValue(notif.textStyle.bold)
+                                .withTooltip(this::getTooltip)
+                                .create(x, 0, buttonWidth, height, 
+                                        localized("option", "notif.format.bold"), 
+                                        (button, state) -> notif.textStyle.bold = state);
                 boldButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(boldButton);
 
-                CycleButton<TriState.State> italicButton = CycleButton.<TriState.State>builder(
-                        (state) -> getMessage(state, ChatFormatting.ITALIC))
-                        .withValues(TriState.State.values())
-                        .withInitialValue(notif.textStyle.italic.getState())
-                        .withTooltip(this::getTooltip)
-                        .create(x + width / 2 - buttonWidth / 2, 0, buttonWidth, height,
-                                localized("option", "notif.format.italic"),
-                                (button, state) -> notif.textStyle.italic.state = state);
+                CycleButton<TextStyle.FormatMode> italicButton = 
+                        CycleButton.<TextStyle.FormatMode>builder(
+                                (state) -> getMessage(state, ChatFormatting.ITALIC))
+                                .withValues(TextStyle.FormatMode.values())
+                                .withInitialValue(notif.textStyle.italic)
+                                .withTooltip(this::getTooltip)
+                                .create(x + width / 2 - buttonWidth / 2, 0, buttonWidth, height,
+                                        localized("option", "notif.format.italic"),
+                                        (button, state) -> notif.textStyle.italic = state);
                 italicButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(italicButton);
 
-                CycleButton<TriState.State> underlineButton = CycleButton.<TriState.State>builder(
-                        (state) -> getMessage(state, ChatFormatting.UNDERLINE))
-                        .withValues(TriState.State.values())
-                        .withInitialValue(notif.textStyle.underlined.getState())
-                        .withTooltip(this::getTooltip)
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                localized("option", "notif.format.underline"),
-                                (button, state) -> notif.textStyle.underlined.state = state);
+                CycleButton<TextStyle.FormatMode> underlineButton = 
+                        CycleButton.<TextStyle.FormatMode>builder(
+                                (state) -> getMessage(state, ChatFormatting.UNDERLINE))
+                                .withValues(TextStyle.FormatMode.values())
+                                .withInitialValue(notif.textStyle.underlined)
+                                .withTooltip(this::getTooltip)
+                                .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                        localized("option", "notif.format.underline"),
+                                        (button, state) -> notif.textStyle.underlined = state);
                 underlineButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(underlineButton);
             }
@@ -452,31 +452,33 @@ public class NotifOptionList extends OptionList {
             private void createSecond(int x, int width, int height, Notification notif) {
                 int buttonWidth = (width - SPACING) / 2;
 
-                CycleButton<TriState.State> strikethroughButton = CycleButton.<TriState.State>builder(
-                        (state) -> getMessage(state, ChatFormatting.STRIKETHROUGH))
-                        .withValues(TriState.State.values())
-                        .withInitialValue(notif.textStyle.strikethrough.getState())
-                        .withTooltip(this::getTooltip)
-                        .create(x, 0, buttonWidth, height,
-                                localized("option", "notif.format.strikethrough"),
-                                (button, state) -> notif.textStyle.strikethrough.state = state);
+                CycleButton<TextStyle.FormatMode> strikethroughButton = 
+                        CycleButton.<TextStyle.FormatMode>builder(
+                                (state) -> getMessage(state, ChatFormatting.STRIKETHROUGH))
+                                .withValues(TextStyle.FormatMode.values())
+                                .withInitialValue(notif.textStyle.strikethrough)
+                                .withTooltip(this::getTooltip)
+                                .create(x, 0, buttonWidth, height,
+                                        localized("option", "notif.format.strikethrough"),
+                                        (button, state) -> notif.textStyle.strikethrough = state);
                 strikethroughButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(strikethroughButton);
 
-                CycleButton<TriState.State> obfuscateButton = CycleButton.<TriState.State>builder(
-                        (state) -> getMessage(state, ChatFormatting.OBFUSCATED))
-                        .withValues(TriState.State.values())
-                        .withInitialValue(notif.textStyle.obfuscated.getState())
-                        .withTooltip(this::getTooltip)
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                localized("option", "notif.format.obfuscate"),
-                                (button, state) -> notif.textStyle.obfuscated.state = state);
+                CycleButton<TextStyle.FormatMode> obfuscateButton = 
+                        CycleButton.<TextStyle.FormatMode>builder(
+                                (state) -> getMessage(state, ChatFormatting.OBFUSCATED))
+                                .withValues(TextStyle.FormatMode.values())
+                                .withInitialValue(notif.textStyle.obfuscated)
+                                .withTooltip(this::getTooltip)
+                                .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                        localized("option", "notif.format.obfuscate"),
+                                        (button, state) -> notif.textStyle.obfuscated = state);
                 obfuscateButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(obfuscateButton);
             }
 
-            private Component getMessage(TriState.State state, ChatFormatting format) {
-                return switch(state) {
+            private Component getMessage(TextStyle.FormatMode mode, ChatFormatting format) {
+                return switch(mode) {
                     case ON -> CommonComponents.OPTION_ON.copy().withStyle(format)
                             .withStyle(ChatFormatting.GREEN);
                     case OFF -> CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED);
@@ -484,10 +486,10 @@ public class NotifOptionList extends OptionList {
                 };
             }
 
-            private Tooltip getTooltip(TriState.State state) {
-                if (state.equals(TriState.State.DISABLED)) return
-                        Tooltip.create(localized("option", "notif.format.tooltip"));
-                return null;
+            private Tooltip getTooltip(TextStyle.FormatMode mode) {
+                return mode.equals(TextStyle.FormatMode.DISABLED)
+                        ? Tooltip.create(localized("option", "notif.format.tooltip"))
+                        : null;
             }
         }
 

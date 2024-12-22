@@ -17,8 +17,9 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
-import dev.terminalmc.chatnotify.ChatNotify;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
 
 public class ResponseMessage {
     public final int version = 2;
@@ -37,20 +38,28 @@ public class ResponseMessage {
 
     public transient int countdown;
     public transient String sendingString;
+    
+    // Options
 
+    public static final boolean enabledDefault = true;
     public boolean enabled;
+    
+    public static final String stringDefault = "";
     public String string;
+    
+    public static final int delayTicksDefault = 0;
     public int delayTicks;
+    
     public Type type;
 
     /**
      * Creates a default instance.
      */
     public ResponseMessage() {
-        enabled = true;
-        string = "";
-        type = Type.NORMAL;
-        delayTicks = 0;
+        enabled = enabledDefault;
+        string = stringDefault;
+        delayTicks = delayTicksDefault;
+        type = Type.values()[0];
     }
 
     /**
@@ -62,32 +71,45 @@ public class ResponseMessage {
         this.type = type;
         this.delayTicks = delayTicks;
     }
-
+    
     public static class Deserializer implements JsonDeserializer<ResponseMessage> {
         @Override
         public @Nullable ResponseMessage deserialize(JsonElement json, java.lang.reflect.Type typeOfT, 
                                                      JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
+            int version = obj.get("version").getAsInt();
 
-            try {
-                int version = obj.get("version").getAsInt();
-                
-                boolean enabled = obj.get("enabled").getAsBoolean();
-                String string = obj.get("string").getAsString();
-                int delayTicks = obj.get("delayTicks").getAsInt();
-                Type responseType = version >= 2 
-                        ? ctx.deserialize(obj.get("type"), Type.class) 
-                        : obj.get("regexGroups").getAsBoolean() ? Type.REGEX : Type.NORMAL;
+            String f = "enabled";
+            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : enabledDefault;
 
-                // Validation
-                if (delayTicks < 0) throw new JsonParseException("ResponseMessage #1");
+            f = "string";
+            String string = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? obj.get(f).getAsString()
+                    : stringDefault;
 
-                return new ResponseMessage(enabled, string, responseType, delayTicks);
+            f = "delayTicks";
+            int delayTicks = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
+                    ? obj.get(f).getAsNumber().intValue()
+                    : delayTicksDefault;
+            if (delayTicks < 0) delayTicks = delayTicksDefault;
+
+            f = "type";
+            Type type = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(Type.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                        ? Type.valueOf(obj.get(f).getAsString())
+                        : Type.values()[0]
+                    : Type.values()[0];
+            if (version < 2) { // 2024-11-24
+                f = "regexGroups";
+                boolean regexGroups = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                        ? obj.get(f).getAsBoolean()
+                        : false;
+                type = regexGroups ? Type.REGEX : Type.NORMAL;
             }
-            catch (Exception e) {
-                ChatNotify.LOG.warn("Unable to deserialize ResponseMessage", e);
-                return null;
-            }
+
+            return new ResponseMessage(enabled, string, type, delayTicks);
         }
     }
 }

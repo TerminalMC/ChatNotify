@@ -18,7 +18,7 @@ package dev.terminalmc.chatnotify.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.util.MessageUtil;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 /**
  * Minecraft handles different message packet types in different ways. The
- * mc1.20.1 call stacks look something like this:
+ * mc1.20.1 call stacks look roughly like this:
  *
  * <p>{@link ClientPacketListener#handleDisguisedChat}
  * <p>-> {@link ChatListener#handleDisguisedChatMessage}
@@ -50,7 +50,8 @@ import org.spongepowered.asm.mixin.Unique;
  * <p>-> {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
  *
  * <p>{@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
- * logs the message and adds it to the message queues.
+ * logs the message and adds it to the message queues, and is the earliest 
+ * merge point.
  */
 @Mixin(value = ChatComponent.class, priority = 792)
 public class MixinChatComponent {
@@ -58,16 +59,25 @@ public class MixinChatComponent {
     @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V")
     private void replaceMessage(Component message, MessageSignature headerSignature, 
                                 GuiMessageTag tag, Operation<Void> original) {
-        message = chatNotify$replaceMessage(message);
+        message = chatNotify$replaceMessage(message, tag);
         if (message != null) original.call(message, headerSignature, tag);
     }
 
     @Unique
-    private static @Nullable Component chatNotify$replaceMessage(Component message) {
-        if (ChatNotify.mixinEarly()) {
-            return message;
-        } else {
+    private static @Nullable Component chatNotify$replaceMessage(Component message, GuiMessageTag tag) {
+        if (switch (Config.get().detectionMode) {
+            case HUD_KNOWN_TAGS_ONLY -> (
+                    tag.equals(GuiMessageTag.system())
+                    || tag.equals(GuiMessageTag.systemSinglePlayer())
+                    || tag.equals(GuiMessageTag.chatNotSecure())
+                    || tag.equals(GuiMessageTag.chatError())
+            );
+            case HUD_ALL -> true;
+            case PACKET -> false;
+        }) {
             return MessageUtil.processMessage(message);
+        } else {
+            return message;
         }
     }
 }

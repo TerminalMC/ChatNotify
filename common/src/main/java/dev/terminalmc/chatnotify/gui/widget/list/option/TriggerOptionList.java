@@ -27,6 +27,7 @@ import dev.terminalmc.chatnotify.util.MessageUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -67,18 +68,18 @@ public class TriggerOptionList extends OptionList {
         }
 
         textDisplayBox = new MultiLineEditBox(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, 
-                localized("option", "notif.trigger.text.placeholder"), Component.empty());
+                localized("option", "trigger.text.placeholder"), Component.empty());
         textDisplayBox.setValue(displayText);
         keyDisplayBox = new EditBox(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, Component.empty());
         keyDisplayBox.setMaxLength(256);
         keyDisplayBox.setValue(displayKey);
         
         Entry e = new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight + itemHeight, 
-                textDisplayBox, localized("option", "notif.message.text"));
+                textDisplayBox, localized("option", "trigger.message.text"));
         addEntry(e);
         addEntry(new SpaceEntry(e));
         addEntry(new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight, keyDisplayBox, 
-                localized("option", "notif.message.key")));
+                localized("option", "trigger.message.key")));
         
         addEntry(new Entry.FilterAndRestyleEntry(dynEntryX, dynEntryWidth, entryHeight, this));
         
@@ -114,7 +115,8 @@ public class TriggerOptionList extends OptionList {
                     Matcher m = MessageUtil.styleSearch(msg.getString(), trigger.styleString);
                     do {
                         msg = MessageUtil.restyleLeaves(msg, textStyle, m.start(), m.end());
-                    } while (Config.get().multiRestyle && m.find());
+                    } while (Config.get().restyleMode.equals(
+                            Config.RestyleMode.ALL_INSTANCES) && m.find());
                 } else {
                     switch(trigger.type) {
                         case NORMAL -> {
@@ -122,13 +124,15 @@ public class TriggerOptionList extends OptionList {
                                 msg = MessageUtil.restyleLeaves(msg, textStyle,
                                         matcher.start() + matcher.group(1).length(),
                                         matcher.end() - matcher.group(2).length());
-                            } while (Config.get().multiRestyle && matcher.find());
+                            } while (Config.get().restyleMode.equals(
+                                    Config.RestyleMode.ALL_INSTANCES) && matcher.find());
                         }
                         case REGEX -> {
                             do {
                                 msg = MessageUtil.restyleLeaves(msg, textStyle,
                                         matcher.start(), matcher.end());
-                            } while (Config.get().multiRestyle && matcher.find());
+                            } while (Config.get().restyleMode.equals(
+                                    Config.RestyleMode.ALL_INSTANCES) && matcher.find());
                         }
                         case KEY -> msg = MessageUtil.restyleRoot(msg, textStyle);
                     }
@@ -150,7 +154,7 @@ public class TriggerOptionList extends OptionList {
         });
         if (!(children().getLast() instanceof Entry.MessageEntry)) {
             addEntry(new OptionList.Entry.TextEntry(dynEntryX, dynEntryWidth, entryHeight,
-                    localized("option", "notif.recent_messages.none"), null, -1));
+                    localized("option", "trigger.recent_messages.none"), null, -1));
         }
     }
 
@@ -180,11 +184,8 @@ public class TriggerOptionList extends OptionList {
                         .withValues(Trigger.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
-                        .withTooltip((type) -> Tooltip.create(switch(type) {
-                            case NORMAL -> localized("option", "notif.trigger.tooltip.normal");
-                            case REGEX -> localized("option", "notif.trigger.tooltip.regex");
-                            case KEY -> localized("option", "notif.trigger.tooltip.key");
-                        }))
+                        .withTooltip((type) -> Tooltip.create(
+                                localized("option", "notif.trigger.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     trigger.type = type;
@@ -292,7 +293,7 @@ public class TriggerOptionList extends OptionList {
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(list.filter)
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "notif.trigger.filter"),
+                                localized("option", "trigger.filter"),
                                 (button, status) -> {
                                     list.filter = status;
                                     list.reload();
@@ -304,7 +305,7 @@ public class TriggerOptionList extends OptionList {
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(list.restyle)
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "notif.trigger.restyle"),
+                                localized("option", "trigger.restyle"),
                                 (button, status) -> {
                                     list.restyle = status;
                                     list.reload();
@@ -369,7 +370,7 @@ public class TriggerOptionList extends OptionList {
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 list.textDisplayBox.setValue(message.getString());
                 list.keyDisplayBox.setValue(message.getContents() instanceof TranslatableContents tc
-                        ? tc.getKey() : "No translation key");
+                        ? tc.getKey() : localized("option", "trigger.key.none").getString());
                 list.setScrollAmount(0);
                 return true;
             }
