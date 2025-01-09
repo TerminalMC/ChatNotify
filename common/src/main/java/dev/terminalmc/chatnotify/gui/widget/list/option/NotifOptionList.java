@@ -186,8 +186,9 @@ public class NotifOptionList extends OptionList {
             // I can't really explain why
             if (sourceIndex > destIndex) destIndex += 1;
             // Move
-            notif.moveTrigger(sourceIndex, destIndex);
-            reload();
+            if (notif.moveTrigger(sourceIndex, destIndex)) {
+                reload();
+            }
         }
         this.dragSourceSlot = -1;
     }

@@ -25,14 +25,23 @@ import java.lang.reflect.Type;
 public class TitleText {
     public final int version = 1;
 
-    public static final boolean enabledDefault = true;
+    /**
+     * Whether this instance is eligible for use.
+     */
     public boolean enabled;
-    
-    public static final int colorDefault = 0xffffff;
+    public static final boolean enabledDefault = true;
+
+    /**
+     * The text color, from {@link 0x000000} to {@link 0xffffff} inclusive.
+     */
     public int color;
-    
-    public static final @NotNull String textDefault = "";
+    public static final int colorDefault = 0xffffff;
+
+    /**
+     * The string to display.
+     */
     public @NotNull String text;
+    public static final @NotNull String textDefault = "";
 
     /**
      * Creates a default instance.
@@ -44,17 +53,27 @@ public class TitleText {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated.
      */
-    TitleText(boolean enabled, int color, @NotNull String text) {
+    TitleText(
+            boolean enabled,
+            int color,
+            @NotNull String text
+    ) {
         this.enabled = enabled;
         this.color = color;
         this.text = text;
     }
 
-    public boolean isEnabled() {
+    /**
+     * @return {@code true} if this instance is enabled and has text to display,
+     * {@code false} otherwise.
+     */
+    public boolean canDisplay() {
         return enabled && !text.isBlank();
     }
+
+    // Deserialization
     
     public static class Deserializer implements JsonDeserializer<TitleText> {
         @Override

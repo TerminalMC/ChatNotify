@@ -28,56 +28,84 @@ import java.util.regex.PatternSyntaxException;
 public class Trigger {
     public final int version = 3;
 
+    /**
+     * Not currently used.
+     */
+    public boolean enabled;
+    public static final boolean enabledDefault = true;
+
+    /**
+     * The trigger string.
+     */
+    public @NotNull String string;
+    public static final @NotNull String stringDefault = "";
+
+    /**
+     * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
+     * {@code null} if the string could not be compiled.
+     */
+    public transient @Nullable Pattern pattern;
+
+    /**
+     * The message substring string to attempt to restyle when this trigger 
+     * matches a message.
+     */
+    public @Nullable String styleString;
+    public static final @Nullable String styleStringDefault = null;
+
+    /**
+     * Controls how {@link Trigger#string} is compared to messages.
+     */
+    public Type type;
     public enum Type {
+        /**
+         * Normal 'fuzzy' matching.
+         */
         NORMAL("~"),
+        /**
+         * Compile the trigger string as a regex pattern for matching.
+         */
         REGEX(".*"),
+        /**
+         * Compare the trigger string against the message translation key.
+         */
         KEY("\uD83D\uDD11");
-        
+
         public final String icon;
-        
+
         Type(String icon) {
             this.icon = icon;
         }
     }
-    
-    // Options
-
-    public static final boolean enabledDefault = true;
-    public boolean enabled;
-    
-    public static final @NotNull String stringDefault = "";
-    public @NotNull String string;
-    public transient @Nullable Pattern pattern;
-    
-    public static final @Nullable String styleStringDefault = null;
-    public @Nullable String styleString;
-    
-    public Type type;
 
     /**
      * Creates a default instance.
      */
     public Trigger() {
-        this.enabled = enabledDefault;
-        this.string = stringDefault;
-        this.styleString = styleStringDefault;
-        this.type = Type.values()[0];
+        this(stringDefault);
     }
 
     /**
      * Creates a default instance with the specified value.
      */
     public Trigger(@NotNull String string) {
-        this.enabled = true;
-        this.string = string;
-        this.styleString = null;
-        this.type = Type.NORMAL;
+        this(
+                enabledDefault,
+                string,
+                styleStringDefault,
+                Type.values()[0]
+        );
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated.
      */
-    Trigger(boolean enabled, @NotNull String string, @Nullable String styleString, Type type) {
+    Trigger(
+            boolean enabled,
+            @NotNull String string,
+            @Nullable String styleString,
+            Type type
+    ) {
         this.enabled = enabled;
         this.string = string;
         this.styleString = styleString;
@@ -92,6 +120,8 @@ public class Trigger {
             pattern = null;
         }
     }
+
+    // Deserialization
     
     public static class Deserializer implements JsonDeserializer<Trigger> {
         @Override

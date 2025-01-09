@@ -146,7 +146,7 @@ public class MessageUtil {
         
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
-            if (!notif.isEnabled() || notif.editing) continue;
+            if (!notif.isEnabled()) continue;
             
             // Trigger search
             for (Trigger trig : notif.triggers) {
@@ -312,7 +312,7 @@ public class MessageUtil {
      * @param notif the Notification.
      */
     private static void showTitle(Notification notif) {
-        if (notif.titleText.isEnabled()) {
+        if (notif.titleText.canDisplay()) {
             Minecraft.getInstance().gui.setTitle(
                     Component.literal(notif.titleText.text).withColor(notif.titleText.color));
         }

@@ -31,8 +31,7 @@ public class ChatNotifyNeoForge {
     public ChatNotifyNeoForge() {
         ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
                 () -> (minecraft, parent) -> new MainOptionsScreen(parent));
-
-//        boolean hasChatHistoryMod = ModList.get().isLoaded("");
+        
         ChatNotify.init(false);
     }
 

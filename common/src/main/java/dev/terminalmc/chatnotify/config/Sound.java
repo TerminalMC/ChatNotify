@@ -18,25 +18,36 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
 public class Sound {
     public final int version = 1;
-    
-    // Options
 
-    private static final boolean enabledDefault = true;
+    /**
+     * Whether this instance is eligible for activation.
+     */
     private boolean enabled;
-    
-    private static final String idDefault = "block.note_block.bell";
+    private static final boolean enabledDefault = true;
+
+    /**
+     * The string from which to get the sound {@link ResourceLocation}.
+     */
     private String id;
-    
-    private static final float volumeDefault = 1.0F;
+    private static final String idDefault = "block.note_block.bell";
+
+    /**
+     * The sound volume, from {@code 0} to {@code 1} inclusive.
+     */
     private float volume;
-    
-    private static final float pitchDefault = 1.0F;
+    private static final float volumeDefault = 1.0F;
+
+    /**
+     * The sound pitch, from {@code 0.5} to {@code 2} inclusive.
+     */
     private float pitch;
+    private static final float pitchDefault = 1.0F;
 
     /**
      * Creates a default instance.
@@ -49,9 +60,14 @@ public class Sound {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated.
      */
-    Sound(boolean enabled, String id, float volume, float pitch) {
+    Sound(
+            boolean enabled,
+            String id,
+            float volume,
+            float pitch
+    ) {
         if (!validId(id)) throw new IllegalArgumentException("Specified id is not a valid sound.");
         this.enabled = enabled;
         this.id = id;
@@ -59,6 +75,9 @@ public class Sound {
         setPitch(pitch);
     }
 
+    /**
+     * Copy constructor.
+     */
     public Sound(Sound pSound) {
         this.enabled = pSound.enabled;
         this.id = pSound.id;
@@ -66,21 +85,41 @@ public class Sound {
         this.pitch = pSound.pitch;
     }
 
+    /**
+     * @return {@code true} if this instance is eligible for activation, 
+     * {@code false} otherwise.
+     */
     public boolean isEnabled() {
         return enabled;
     }
 
+    /**
+     * Enables or disables this instance.
+     *
+     * <p>{@link Sound#volume} is 0 and {@code enabled} is true, sets 
+     * {@link Sound#volume} to 1.</p>
+     */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         if (enabled && volume == 0) {
-            volume = 1f;
+            volume = 1.0F;
         }
     }
 
+    /**
+     * @return the sound {@link ResourceLocation} string.
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Sets the sound {@link ResourceLocation} string to the specified value
+     * if it represents a valid {@link ResourceLocation}.
+     * @param id the {@link ResourceLocation} string.
+     * @return {@code true} if {@code id} represents a valid 
+     * {@link ResourceLocation}, {@code false} otherwise.
+     */
     public boolean setId(String id) {
         if (validId(id)) {
             this.id = id;
@@ -89,18 +128,32 @@ public class Sound {
         return false;
     }
 
-    public static boolean validId(String id) {
-        return ResourceLocation.tryParse(id) != null;
-    }
-
-    public ResourceLocation getResourceLocation() {
+    /**
+     * @return the sound {@link ResourceLocation}.
+     */
+    public @Nullable ResourceLocation getResourceLocation() {
         return ResourceLocation.tryParse(id);
     }
 
+    /**
+     * @return the sound volume, from {@code 0} to {@code 1} inclusive.
+     */
     public float getVolume() {
         return volume;
     }
 
+    /**
+     * Sets the sound volume.
+     * 
+     * <p>If {@code volume} is {@code 0}, sets {@link Sound#enabled} to 
+     * {@code false}.</p>
+     * 
+     * <p>If {@code volume} is not {@code 0} and {@link Sound#enabled} is 
+     * {@code false}, sets {@link Sound#enabled} to {@code true}.</p>
+     *
+     * @throws IllegalArgumentException if {@code volume} is less than {@code 0}
+     * or greater than {@code 1}.
+     */
     public void setVolume(float volume) {
         if (volume < 0 || volume > 1) throw new IllegalArgumentException(
                 "Value out of range. Expected 0-1, got " + volume);
@@ -109,15 +162,35 @@ public class Sound {
         else if (!this.enabled) this.enabled = true;
     }
 
+    /**
+     * @return the sound pitch, from {@code 0.5} to {@code 2} inclusive.
+     */
     public float getPitch() {
         return pitch;
     }
 
+    /**
+     * Sets the sound pitch.
+     * @throws IllegalArgumentException if {@code pitch} is less than 
+     * {@code 0.5} or greater than {@code 2}.
+     */
     public void setPitch(float pitch) {
         if (pitch < 0.5 || pitch > 2) throw new IllegalArgumentException(
                 "Value out of range. Expected 0.5-2, got " + pitch);
         this.pitch = pitch;
     }
+    
+    // Validation
+
+    /**
+     * @return {@code true} if {@code id} represents a valid
+     * {@link ResourceLocation}, {@code false} otherwise.
+     */
+    public static boolean validId(String id) {
+        return ResourceLocation.tryParse(id) != null;
+    }
+
+    // Deserialization
     
     public static class Deserializer implements JsonDeserializer<Sound> {
         @Override

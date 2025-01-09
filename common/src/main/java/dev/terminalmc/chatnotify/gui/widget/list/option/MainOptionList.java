@@ -128,8 +128,9 @@ public class MainOptionList extends OptionList {
                 // I can't really explain why
                 if (sourceIndex > destIndex) destIndex += 1;
                 // Move
-                Config.get().changeNotifPriority(sourceIndex, destIndex);
-                reload();
+                if (Config.get().changeNotifPriority(sourceIndex, destIndex)) {
+                    reload();
+                }
             }
         }
         this.dragSourceSlot = -1;

@@ -19,6 +19,10 @@ package dev.terminalmc.chatnotify.compat.commandkeys;
 public class CommandKeysWrapper {
     private static boolean hasFailed = false;
 
+    /**
+     * Wraps {@link CommandKeys#send} to catch errors caused by the CommandKeys
+     * mod not being available.
+     */
     public static void trySend(String str) {
         if (hasFailed) return;
         try {

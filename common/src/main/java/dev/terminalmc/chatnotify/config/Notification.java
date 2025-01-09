@@ -17,7 +17,6 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
-import dev.terminalmc.chatnotify.ChatNotify;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -28,53 +27,93 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/**
- * Consists of activation criteria and audio/visual notification parameters.
- */
 public class Notification {
     public final int version = 4;
 
-    // Flags the notification as being actively edited.
+    /**
+     * Indicates that this instance is being edited, and should not be activated
+     * irrespective of {@link Notification#enabled}
+     */
     public transient boolean editing = false;
 
     // Options
-    private static final boolean enabledDefault = true;
-    private boolean enabled;
-    
-    public static final boolean exclusionEnabledDefault = false;
-    public boolean exclusionEnabled;
-    
-    public static final boolean responseEnabledDefault = false;
-    public boolean responseEnabled;
-    
-    public static final boolean blockMessageDefault = false;
-    public boolean blockMessage;
-    
-    public static final Supplier<Sound> soundDefault = Sound::new;
-    public final Sound sound;
-    
-    public static final Supplier<TextStyle> textStyleDefault = TextStyle::new;
-    public final TextStyle textStyle;
-    
-    public static final Supplier<TitleText> titleTextDefault = TitleText::new;
-    public final TitleText titleText;
-    
-    public static final Supplier<List<Trigger>> triggersDefault = ArrayList::new;
-    public final List<Trigger> triggers;
-
-    public static final Supplier<List<Trigger>> exclusionTriggersDefault = ArrayList::new;
-    public final List<Trigger> exclusionTriggers;
-
-    public static final Supplier<List<ResponseMessage>> responseMessagesDefault = ArrayList::new;
-    public final List<ResponseMessage> responseMessages;
 
     /**
-     * Not validated, only for use by self-validating deserializer and hardcoded
-     * default creation.
+     * Whether this instance is eligible for activation.
      */
-    Notification(boolean enabled, boolean exclusionEnabled, boolean responseEnabled, boolean blockMessage,
-                 Sound sound, TextStyle textStyle, TitleText titleText, List<Trigger> triggers,
-                 List<Trigger> exclusionTriggers, List<ResponseMessage> responseMessages) {
+    private boolean enabled;
+    private static final boolean enabledDefault = true;
+
+    /**
+     * Whether this instance allows use of exclusion triggers.
+     */
+    public boolean exclusionEnabled;
+    public static final boolean exclusionEnabledDefault = false;
+
+    /**
+     * Whether this instance allows use of response messages.
+     */
+    public boolean responseEnabled;
+    public static final boolean responseEnabledDefault = false;
+
+    /**
+     * Whether messages activating this instance should be blocked from chat.
+     */
+    public boolean blockMessage;
+    public static final boolean blockMessageDefault = false;
+
+    /**
+     * The {@link Sound} to play on activation.
+     */
+    public final Sound sound;
+    public static final Supplier<Sound> soundDefault = Sound::new;
+
+    /**
+     * The {@link TextStyle} to use for restyling messages on activation.
+     */
+    public final TextStyle textStyle;
+    public static final Supplier<TextStyle> textStyleDefault = TextStyle::new;
+
+    /**
+     * The {@link TitleText} to show on activation.
+     */
+    public TitleText titleText;
+    public static final Supplier<TitleText> titleTextDefault = TitleText::new;
+
+    /**
+     * The list of {@link Trigger}s which can activate this instance.
+     */
+    public final List<Trigger> triggers;
+    public static final Supplier<List<Trigger>> triggersDefault = ArrayList::new;
+
+    /**
+     * The list of {@link Trigger}s which can cancel activation of this 
+     * instance.
+     */
+    public final List<Trigger> exclusionTriggers;
+    public static final Supplier<List<Trigger>> exclusionTriggersDefault = ArrayList::new;
+
+    /**
+     * The list of {@link ResponseMessage}s to be sent on activation.
+     */
+    public final List<ResponseMessage> responseMessages;
+    public static final Supplier<List<ResponseMessage>> responseMessagesDefault = ArrayList::new;
+
+    /**
+     * Not validated.
+     */
+    Notification(
+            boolean enabled,
+            boolean exclusionEnabled,
+            boolean responseEnabled,
+            boolean blockMessage,
+            Sound sound,
+            TextStyle textStyle,
+            TitleText titleText,
+            List<Trigger> triggers,
+            List<Trigger> exclusionTriggers,
+            List<ResponseMessage> responseMessages
+    ) {
         this.enabled = enabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
@@ -88,35 +127,64 @@ public class Notification {
     }
 
     /**
-     * Creates a notification for the user's name, with two default placeholder
-     * triggers.
+     * Creates a new {@link Notification} for the user's name, with two default 
+     * placeholder {@link Trigger}s.
      */
-    public static Notification createUser() {
-        return new Notification(true, false, false, false,
-                new Sound(), new TextStyle(), new TitleText(), new ArrayList<>(List.of(
-                        new Trigger("Profile name"), new Trigger("Display name"))),
-                new ArrayList<>(), new ArrayList<>());
+    static Notification createUser() {
+        return new Notification(
+                enabledDefault,
+                exclusionEnabledDefault,
+                responseEnabledDefault,
+                blockMessageDefault,
+                soundDefault.get(),
+                textStyleDefault.get(),
+                titleTextDefault.get(),
+                new ArrayList<>(List.of(
+                        new Trigger("Profile name"),
+                        new Trigger("Display name")
+                )),
+                new ArrayList<>(),
+                new ArrayList<>()
+        );
     }
 
     /**
-     * Creates a blank notification with one blank placeholder trigger.
+     * Creates a new generic {@link Notification}, with a single blank 
+     * {@link Trigger}.
      */
-    public static Notification createBlank(Sound sound, TextStyle textStyle) {
-        return new Notification(true, false, false, false,
-                sound, textStyle, new TitleText(), new ArrayList<>(List.of(new Trigger(""))),
-                new ArrayList<>(), new ArrayList<>());
+    static Notification createBlank(Sound sound, TextStyle textStyle) {
+        return new Notification(
+                true,
+                false,
+                false,
+                false,
+                sound,
+                textStyle,
+                new TitleText(),
+                new ArrayList<>(List.of(
+                        new Trigger("")
+                )),
+                new ArrayList<>(),
+                new ArrayList<>()
+        );
     }
 
+    // Notifications can be enabled and disabled manually, but for user
+    // convenience we also perform some actions automatically.
 
-    // Automatically turn certain controls on and off for user convenience
-
+    /**
+     * @return {@code true} if this instance is eligible for activation, 
+     * {@code false} otherwise.
+     */
     public boolean isEnabled() {
-        return this.enabled;
+        return enabled && !editing;
     }
 
     /**
-     * If all notification options are disabled and {@code enabled} is true,
-     * enables notification sound and text color.
+     * Enables or disables this instance.
+     * 
+     * <p>If sound and text style are disabled and {@code enabled} is true, 
+     * enables sound and text style.</p>
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -127,93 +195,97 @@ public class Notification {
     }
 
     /**
-     * Disables this notification if sound and text restyling are both disabled.
+     * Disables this instance if sound and text style are both disabled.
      */
     public void autoDisable() {
         if (!sound.isEnabled() && !textStyle.isEnabled()) {
             enabled = false;
         }
     }
+    
+    // List reordering
 
     /**
-     * Moves the {@link Trigger} at the source index to the destination index.
+     * Moves the {@link Trigger} at the source index to the destination index 
+     * in the list.
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
+     * @return {@code true} if the list was modified, {@code false} otherwise.
      */
-    public void moveTrigger(int sourceIndex, int destIndex) {
+    public boolean moveTrigger(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
             triggers.add(destIndex, triggers.remove(sourceIndex));
+            return true;
         }
+        return false;
     }
 
     /**
      * Moves the exclusion {@link Trigger} at the source index to the
-     * destination index.
+     * destination index in the list.
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
+     * @return {@code true} if the list was modified, {@code false} otherwise.
      */
-    public void moveExclusionTrigger(int sourceIndex, int destIndex) {
+    public boolean moveExclusionTrigger(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
             exclusionTriggers.add(destIndex, exclusionTriggers.remove(sourceIndex));
+            return true;
         }
+        return false;
     }
 
     /**
      * Moves the {@link ResponseMessage} at the source index to the destination
-     * index.
+     * index in the list.
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
+     * @return {@code true} if the list was modified, {@code false} otherwise.
      */
-    public void moveResponseMessage(int sourceIndex, int destIndex) {
+    public boolean moveResponseMessage(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
             responseMessages.add(destIndex, responseMessages.remove(sourceIndex));
+            return true;
         }
+        return false;
     }
-
-    // Validation and cleanup
-
+    
+    // Reset
+    
     /**
      * Sets all advanced settings to their respective defaults.
      */
     public void resetAdvanced() {
-        blockMessage = false;
-        titleText.enabled = false;
-        titleText.color = 16777215;
-        titleText.text = "";
-        exclusionEnabled = false;
+        blockMessage = blockMessageDefault;
+        titleText = titleTextDefault.get();
+        exclusionEnabled = exclusionEnabledDefault;
         exclusionTriggers.clear();
-        responseEnabled = false;
+        responseEnabled = responseEnabledDefault;
         responseMessages.clear();
     }
 
-    /**
-     * Removes all blank triggers, and converts all key triggers to lowercase.
-     */
-    public void purgeTriggers() {
+    // Cleanup and validation
+
+    public void cleanup() {
+        autoDisable();
+
+        // Remove all blank triggers, and convert all key triggers to lowercase.
         triggers.removeIf(trigger -> trigger.string.isBlank());
         for (Trigger t : triggers) {
             if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
             if (t.styleString != null && t.styleString.isBlank()) t.styleString = null;
         }
-    }
 
-    /**
-     * Removes all blank exclusion triggers, converts all key triggers to
-     * lowercase, and disables exclusion if there are none remaining.
-     */
-    public void purgeExclusionTriggers() {
+        // Remove all blank exclusion triggers, convert all key triggers to
+        // lowercase, and disable exclusion if there are none remaining.
         exclusionTriggers.removeIf(trigger -> trigger.string.isBlank());
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
         for (Trigger t : exclusionTriggers) {
             if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
         }
-    }
 
-    /**
-     * Removes all blank response messages, and disables response if there are
-     * none remaining.
-     */
-    public void purgeResponseMessages() {
+        // Remove all blank response messages, and disable response if there are
+        // none remaining.
         responseMessages.removeIf(responseMessage -> responseMessage.string.isBlank());
         if (responseMessages.isEmpty()) responseEnabled = false;
     }

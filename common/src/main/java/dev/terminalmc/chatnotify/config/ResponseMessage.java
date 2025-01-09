@@ -24,9 +24,45 @@ import java.util.Arrays;
 public class ResponseMessage {
     public final int version = 2;
 
+    public transient int countdown;
+    public transient String sendingString;
+    
+    // Options
+
+    /**
+     * Not currently used.
+     */
+    public boolean enabled;
+    public static final boolean enabledDefault = true;
+
+    /**
+     * The string to process when activated.
+     */
+    public String string;
+    public static final String stringDefault = "";
+
+    /**
+     * The time in ticks to wait before activating.
+     */
+    public int delayTicks;
+    public static final int delayTicksDefault = 0;
+
+    /**
+     * Controls how {@link ResponseMessage#string} is processed.
+     */
+    public Type type;
     public enum Type {
+        /**
+         * No additional processing.
+         */
         NORMAL("~"),
+        /**
+         * Replace regex group indicators with groups from the trigger.
+         */
         REGEX(".*"),
+        /**
+         * Convert into a pair of keys for use by the CommandKeys mod.
+         */
         COMMANDKEYS("K");
 
         public final String icon;
@@ -35,22 +71,6 @@ public class ResponseMessage {
             this.icon = icon;
         }
     }
-
-    public transient int countdown;
-    public transient String sendingString;
-    
-    // Options
-
-    public static final boolean enabledDefault = true;
-    public boolean enabled;
-    
-    public static final String stringDefault = "";
-    public String string;
-    
-    public static final int delayTicksDefault = 0;
-    public int delayTicks;
-    
-    public Type type;
 
     /**
      * Creates a default instance.
@@ -63,14 +83,21 @@ public class ResponseMessage {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated.
      */
-    ResponseMessage(boolean enabled, String string, Type type, int delayTicks) {
+    ResponseMessage(
+            boolean enabled,
+            String string,
+            Type type,
+            int delayTicks
+    ) {
         this.enabled = enabled;
         this.string = string;
         this.type = type;
         this.delayTicks = delayTicks;
     }
+
+    // Deserialization
     
     public static class Deserializer implements JsonDeserializer<ResponseMessage> {
         @Override

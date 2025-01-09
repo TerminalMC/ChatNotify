@@ -21,6 +21,10 @@ import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 
 public class CommandKeys {
+    /**
+     * Parses the specified string into two {@link InputConstants.Key} 
+     * instances, and passes them to CommandKeys' keypress handler.
+     */
     static void send(String str) {
         if (!str.matches(".+-.+")) return;
         String[] splitStr = str.split("-");

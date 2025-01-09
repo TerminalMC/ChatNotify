@@ -207,8 +207,9 @@ public class AdvancedOptionList extends OptionList {
                 // I can't really explain why
                 if (sourceIndex > destIndex) destIndex += 1;
                 // Move
-                notif.moveExclusionTrigger(sourceIndex, destIndex);
-                reload();
+                if (notif.moveExclusionTrigger(sourceIndex, destIndex)) {
+                    reload();
+                }
             }
         }
     }
@@ -231,8 +232,9 @@ public class AdvancedOptionList extends OptionList {
             // I can't really explain why
             if (sourceIndex > destIndex) destIndex += 1;
             // Move
-            notif.moveResponseMessage(sourceIndex, destIndex);
-            reload();
+            if (notif.moveResponseMessage(sourceIndex, destIndex)) {
+                reload();
+            }
         }
     }
 

@@ -27,23 +27,31 @@ import java.util.Arrays;
 public class TextStyle {
     public final int version = 2;
 
-    public enum FormatMode {
-        DISABLED,
-        ON,
-        OFF,
-    }
-
-    public static final boolean doColorDefault = true;
+    /**
+     * Whether color should be used when applying style.
+     */
     public boolean doColor;
-    
-    public static final int colorDefault = 0xffc400;
+    public static final boolean doColorDefault = true;
+
+    /**
+     * The text color, from {@link 0x000000} to {@link 0xffffff} inclusive.
+     */
     public int color;
+    public static final int colorDefault = 0xffc400;
+    
+    // Format controls
     
     public FormatMode bold;
     public FormatMode italic;
     public FormatMode underlined;
     public FormatMode strikethrough;
     public FormatMode obfuscated;
+
+    public enum FormatMode {
+        DISABLED,
+        ON,
+        OFF,
+    }
 
     /**
      * Creates a default instance.
@@ -68,10 +76,17 @@ public class TextStyle {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated.
      */
-    public TextStyle(boolean doColor, int color, FormatMode bold, FormatMode italic,
-                     FormatMode underlined, FormatMode strikethrough, FormatMode obfuscated) {
+    public TextStyle(
+            boolean doColor,
+            int color,
+            FormatMode bold,
+            FormatMode italic,
+            FormatMode underlined,
+            FormatMode strikethrough,
+            FormatMode obfuscated
+    ) {
         this.doColor = doColor;
         this.color = color;
         this.bold = bold;
@@ -109,6 +124,7 @@ public class TextStyle {
         );
     }
 
+    // Deserialization
    
     public static class Deserializer implements JsonDeserializer<TextStyle> {
         @Override

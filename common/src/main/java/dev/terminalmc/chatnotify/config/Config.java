@@ -33,15 +33,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * <p>ChatNotify configuration options class with default values and validation.
+ * Root configuration options class.
+ *
+ * <p><b>Note:</b> The list of {@link Notification} instances is required to 
+ * maintain an instance at index 0 for the user's name. This instance is handled
+ * differently in several ways, but is kept in the list for iteration purposes.
  * </p>
- *
- * <p><b>Note:</b> The list of notifications is required to maintain a
- * notification at index 0 for the user's name. This notification is handled
- * differently in several ways.</p>
- *
- * <p>Every configuration class has a final int field "version" which can be
- * used by the class deserializer to determine how to interpret the json.</p>
+ * 
+ * <p>The {@code version} field of a config class must be incremented whenever 
+ * the json structure of the class is changed, to facilitate correct 
+ * deserialization.</p>
+ * 
+ * <p><b>Note:</b> For enum controls, the default value is the first value of
+ * the enum.</p>
  */
 public class Config {
     public final int version = 7;
@@ -61,62 +65,98 @@ public class Config {
 
     // Options
 
+    /**
+     * Controls how messages are intercepted.
+     */
     public DetectionMode detectionMode;
     public enum DetectionMode {
         HUD_KNOWN_TAGS_ONLY,
         HUD_ALL,
         PACKET,
     }
-    
+
+    /**
+     * Controls debug logging.
+     */
     public DebugMode debugMode;
     public enum DebugMode {
         OFF,
         ALL,
     }
 
+    /**
+     * Controls how {@link Notification}s are activated.
+     */
     public NotifMode notifMode;
     public enum NotifMode {
         SINGLE,
         MULTIPLE_SINGLE_SOUND,
         MULTIPLE,
     }
-    
+
+    /**
+     * Controls message restyling.
+     */
     public RestyleMode restyleMode;
     public enum RestyleMode {
         SINGLE,
         ALL_INSTANCES,
         ALL_TRIGGERS,
     }
-    
+
+    /**
+     * Controls how {@link ResponseMessage}s are sent.
+     */
     public SendMode sendMode;
     public enum SendMode {
         PACKET,
         SCREEN,
     }
 
-    public static final boolean checkOwnMessagesDefault = true;
+    /**
+     * Whether messages identified as sent by the user should be able to 
+     * activate {@link Notification}s.
+     */
     public boolean checkOwnMessages;
-
-    public static final SoundSource soundSourceDefault = SoundSource.PLAYERS;
-    public SoundSource soundSource;
-    
-    public static final int defaultColorDefault = 0xffc400;
-    public int defaultColor;
-    
-    public static final Supplier<Sound> defaultSoundDefault = Sound::new;
-    public Sound defaultSound;
-
-    public static final Supplier<List<String>> prefixesDefault = 
-            () -> new ArrayList<>(List.of("/shout", "/me", "!"));
-    public final List<String> prefixes;
-    
-    private static final Supplier<List<Notification>> notificationsDefault = 
-            () -> new ArrayList<>(List.of(Notification.createUser()));
-    private final List<Notification> notifications;
+    public static final boolean checkOwnMessagesDefault = true;
 
     /**
-     * Initializes default configuration with one notification for the user's
-     * name.
+     * The sound source (and thus, volume control category) of 
+     * {@link Notification} sounds.
+     */
+    public SoundSource soundSource;
+    public static final SoundSource soundSourceDefault = SoundSource.PLAYERS;
+
+    /**
+     * The default restyle text color for new {@link Notification} instances.
+     */
+    public int defaultColor;
+    public static final int defaultColorDefault = 0xffc400;
+
+    /**
+     * The default restyle text color for new {@link Notification} instances.
+     */
+    public Sound defaultSound;
+    public static final Supplier<Sound> defaultSoundDefault = Sound::new;
+
+    /**
+     * The list of prefix strings to be checked when evaluating whether a 
+     * message was sent by the user.
+     */
+    public final List<String> prefixes;
+    public static final Supplier<List<String>> prefixesDefault = 
+            () -> new ArrayList<>(List.of("/shout", "/me", "!"));
+
+    /**
+     * The list of all {@link Notification} instances, guaranteed to contain
+     * at least one instance.
+     */
+    private final List<Notification> notifications;
+    private static final Supplier<List<Notification>> notificationsDefault = 
+            () -> new ArrayList<>(List.of(Notification.createUser()));
+
+    /**
+     * Initializes default configuration.
      */
     public Config() {
         this(
@@ -135,13 +175,21 @@ public class Config {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer and hardcoded
-     * default creation.
+     * Not validated.
      */
-    Config(DetectionMode detectionMode, DebugMode debugMode, NotifMode notifMode, 
-           RestyleMode restyleMode, SendMode sendMode, boolean checkOwnMessages, 
-           SoundSource soundSource, int defaultColor, Sound defaultSound,
-           List<String> prefixes, List<Notification> notifications) {
+    Config(
+            DetectionMode detectionMode, 
+            DebugMode debugMode, 
+            NotifMode notifMode, 
+            RestyleMode restyleMode, 
+            SendMode sendMode, 
+            boolean checkOwnMessages, 
+            SoundSource soundSource, 
+            int defaultColor, 
+            Sound defaultSound, 
+            List<String> prefixes, 
+            List<Notification> notifications
+    ) {
         this.detectionMode = detectionMode;
         this.debugMode = debugMode;
         this.notifMode = notifMode;
@@ -158,11 +206,12 @@ public class Config {
     // Username
 
     public Notification getUserNotif() {
+        validateUserNotif();
         return notifications.getFirst();
     }
 
     public void setProfileName(String name) {
-       getUserNotif().triggers.getFirst().string = name;
+        getUserNotif().triggers.getFirst().string = name;
     }
 
     public void setDisplayName(String name) {
@@ -172,26 +221,28 @@ public class Config {
     // Notifications
 
     /**
-     * @return an unmodifiable view of the notification list.
+     * @return an unmodifiable view of the {@link Notification} list.
      */
     public List<Notification> getNotifs() {
         return Collections.unmodifiableList(notifications);
     }
 
     /**
-     * Adds a new notification with default values.
+     * Adds a new {@link Notification} with default or blank values.
      */
     public void addNotif() {
-        notifications.add(Notification.createBlank(new Sound(defaultSound), new TextStyle(defaultColor)));
+        notifications.add(Notification.createBlank(
+                new Sound(defaultSound), new TextStyle(defaultColor)
+        ));
     }
 
     /**
-     * Removes the notification at the specified index, if possible.
+     * Removes the {@link Notification} at the specified index in the list, if 
+     * possible.
      *
      * <p><b>Note:</b> Will fail without error if the specified index is 0.</p>
      * @param index the index of the notification.
-     * @return {@code true} if a notification was removed, {@code false}
-     * otherwise.
+     * @return {@code true} if the list was modified, {@code false} otherwise.
      */
     public boolean removeNotif(int index) {
         if (index != 0) {
@@ -202,48 +253,20 @@ public class Config {
     }
 
     /**
-     * Moves the {@link Notification} at the source index to the destination
-     * index.
+     * Removes the {@link Notification} at the source index to the destination 
+     * index in the list, if possible, 
      *
      * <p><b>Note:</b> Will fail without error if either index is 0.</p>
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
+     * @return {@code true} if the list was modified, {@code false} otherwise.
      */
-    public void changeNotifPriority(int sourceIndex, int destIndex) {
+    public boolean changeNotifPriority(int sourceIndex, int destIndex) {
         if (sourceIndex > 0 && destIndex > 0 && sourceIndex != destIndex) {
             notifications.add(destIndex, notifications.remove(sourceIndex));
+            return true;
         }
-    }
-
-    public void cleanup() {
-        // Remove blank prefixes and sort by decreasing length
-        prefixes.removeIf(String::isBlank);
-        prefixes.sort(Comparator.comparingInt(String::length).reversed());
-
-        Notification notif;
-        Iterator<Notification> iterNotifs = notifications.iterator();
-
-        // Username notification (cannot be removed)
-        notif = iterNotifs.next();
-        notif.purgeTriggers();
-        notif.purgeExclusionTriggers();
-        notif.purgeResponseMessages();
-        notif.autoDisable();
-
-        // All other notifications
-        while (iterNotifs.hasNext()) {
-            notif = iterNotifs.next();
-            notif.purgeTriggers();
-            notif.purgeExclusionTriggers();
-            notif.purgeResponseMessages();
-
-            if (notif.triggers.isEmpty() && notif.exclusionTriggers.isEmpty()
-                    && notif.responseMessages.isEmpty()) {
-                iterNotifs.remove();
-            } else {
-                notif.autoDisable();
-            }
-        }
+        return false;
     }
 
     // Instance management
@@ -327,6 +350,46 @@ public class Config {
             ChatNotify.onConfigSaved(instance);
         } catch (IOException e) {
             ChatNotify.LOG.error("Unable to save config", e);
+        }
+    }
+    
+    // Cleanup and validation
+
+    /**
+     * Cleanup and validation method to be called after config editing and 
+     * before saving.
+     */
+    public void cleanup() {
+        // Remove blank prefixes and sort by decreasing length
+        prefixes.removeIf(String::isBlank);
+        prefixes.sort(Comparator.comparingInt(String::length).reversed());
+        
+        // Validate username notification
+        validateUserNotif();
+
+        // Cleanup notifications and remove any blanks except first
+        notifications.removeIf((n) -> {
+            n.cleanup();
+            return (
+                    n != notifications.getFirst()
+                    && n.triggers.isEmpty()
+                    && n.exclusionTriggers.isEmpty()
+                    && n.responseMessages.isEmpty()
+            );
+        });
+    }
+
+    /**
+     * Validates the existence of a {@link Notification} at index 0 for the
+     * user's name.
+     */
+    private void validateUserNotif() {
+        if (notifications.isEmpty()) {
+            ChatNotify.LOG.error("Username notification does not exist! Creating...");
+            notifications.add(Notification.createUser());
+        } else if (notifications.getFirst().triggers.size() < 2) {
+            ChatNotify.LOG.error("Username notification missing triggers! Recreating...");
+            notifications.add(Notification.createUser());
         }
     }
 
