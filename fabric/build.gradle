@@ -16,12 +16,12 @@ dependencies {
 
     // JiJ MixinExtras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")))
-
-    // Modmenu
-    modImplementation("maven.modrinth:mOgUt4GM:${modmenu_version}")
     
     // CommandKeys
     modImplementation("maven.modrinth:65UyswbY:${commandkeys_version}")
+
+    // ModMenu
+    modImplementation("maven.modrinth:mOgUt4GM:${modmenu_version}")
 }
 
 loom {
