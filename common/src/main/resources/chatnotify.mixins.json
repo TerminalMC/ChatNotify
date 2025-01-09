@@ -12,7 +12,6 @@
     "MixinClientPacketListener",
     "MixinOptionInstance",
     "accessor.KeyAccessor",
-    "accessor.MutableComponentAccessor",
     "accessor.ScreenAccessor"
   ],
   "server": [

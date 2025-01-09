@@ -107,8 +107,6 @@ public abstract class OverlayWidget extends AbstractWidget {
      */
     @Override
     public void setSize(int width, int height) {
-        checkWidth(width);
-        checkHeight(height);
         setWidth(width);
         setHeight(height);
         init();
@@ -120,8 +118,7 @@ public abstract class OverlayWidget extends AbstractWidget {
      */
     @Override
     public void setWidth(int width) {
-        checkWidth(width);
-        super.setWidth(width);
+        super.setWidth(checkWidth(width));
         init();
     }
 
@@ -131,8 +128,7 @@ public abstract class OverlayWidget extends AbstractWidget {
      */
     @Override
     public void setHeight(int height) {
-        checkHeight(height);
-        super.setHeight(height);
+        super.setHeight(checkHeight(height));
         init();
     }
 

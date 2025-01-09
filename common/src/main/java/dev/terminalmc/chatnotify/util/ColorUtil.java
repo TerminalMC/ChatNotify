@@ -20,11 +20,7 @@ import net.minecraft.network.chat.TextColor;
 
 import java.util.Optional;
 
-/**
- * It's okay to dislike the idea of a miscellaneous utilities class, but for the
- * moment you'll have to deal with it.
- */
-public class MiscUtil {
+public class ColorUtil {
     /**
      * Converts a hex color string into a {@link TextColor}.
      * @param str a full-length RGB hex string with leading #

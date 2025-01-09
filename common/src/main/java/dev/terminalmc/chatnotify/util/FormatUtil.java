@@ -18,7 +18,6 @@ package dev.terminalmc.chatnotify.util;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;

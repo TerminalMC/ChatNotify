@@ -32,7 +32,7 @@ public class ChatNotifyNeoForge {
         ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
                 () -> (minecraft, parent) -> new MainOptionsScreen(parent));
         
-        ChatNotify.init(false);
+        ChatNotify.init();
     }
 
     @EventBusSubscriber(modid = ChatNotify.MOD_ID, value = Dist.CLIENT)

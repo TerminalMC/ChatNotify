@@ -41,18 +41,28 @@ public class ChatNotify {
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
 
+    /**
+     * Stores messages recently sent by the client, for comparison with incoming 
+     * messages to determine sender identity.
+     */
     public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
+
+    /**
+     * Stores activated (but not sent) response messages.
+     */
     public static final List<ResponseMessage> responseMessages = new ArrayList<>();
+
+    /**
+     * Stores an unmodified copy of recent incoming chat messages.
+     */
     public static final Queue<Component> unmodifiedChat = new LinkedList<>();
 
-    public static boolean hasChatHistoryMod;
-
-    public static void init(boolean hasChatHistoryMod) {
+    public static void init() {
         Config.getAndSave();
-        ChatNotify.hasChatHistoryMod = hasChatHistoryMod;
     }
 
     public static void onConfigSaved(Config config) {
+        // Compile regex triggers
         for (Notification notif : config.getNotifs()) {
             for (Trigger trig : notif.triggers) {
                 if (trig.type == Trigger.Type.REGEX) trig.tryCompilePattern();
@@ -68,6 +78,11 @@ public class ChatNotify {
     }
 
     private static void tickResponseMessages(Minecraft mc) {
+        if (mc.getConnection() == null || !mc.getConnection().isAcceptingMessages()) {
+            responseMessages.clear();
+            return;
+        }
+        
         List<String> sending = new ArrayList<>();
         responseMessages.removeIf((resMsg) -> {
             if (--resMsg.countdown <= 0) {
@@ -82,40 +97,35 @@ public class ChatNotify {
             }
             return false;
         });
-        if (
-                mc.player != null 
-                && mc.getConnection() != null 
-                && mc.getConnection().isAcceptingMessages()) 
-        {
-            if (sending.isEmpty()) return;
-            switch (Config.get().sendMode) {
-                case PACKET -> {
-                    // Compat mode for mods mixing into handleChatInput
-                    Screen oldScreen = null;
-                    if (!(mc.screen instanceof ChatScreen)) {
-                        oldScreen = mc.screen;
-                        mc.setScreen(new ChatScreen(""));
-                    }
-                    if (mc.screen instanceof ChatScreen cs) {
-                        for (String msg : sending) {
-                            cs.handleChatInput(msg, false);
-                        }
-                    }
-                    if (oldScreen != null) mc.setScreen(oldScreen);
+        sendMessages(sending);
+    }
+    
+    private static void sendMessages(List<String> messages) {
+        Minecraft mc = Minecraft.getInstance();
+        switch (Config.get().sendMode) {
+            case SCREEN -> {
+                // Compat mode for mods mixing into handleChatInput
+                Screen oldScreen = null;
+                if (!(mc.screen instanceof ChatScreen)) {
+                    oldScreen = mc.screen;
+                    mc.setScreen(new ChatScreen(""));
                 }
-                case SCREEN -> {
-                    for (String msg : sending) {
-                        if (msg.startsWith("/")) {
-                            mc.player.connection.sendCommand(msg.substring(1));
-                        } else {
-                            mc.player.connection.sendChat(msg);
-                        }
+                if (mc.screen instanceof ChatScreen cs) {
+                    for (String msg : messages) {
+                        cs.handleChatInput(msg, false);
+                    }
+                }
+                if (oldScreen != null) mc.setScreen(oldScreen);
+            }
+            case PACKET -> {
+                for (String msg : messages) {
+                    if (msg.startsWith("/")) {
+                        mc.getConnection().sendCommand(msg.substring(1));
+                    } else {
+                        mc.getConnection().sendChat(msg);
                     }
                 }
             }
-        }
-        else {
-            responseMessages.clear();
         }
     }
 }

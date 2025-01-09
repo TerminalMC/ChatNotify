@@ -16,7 +16,7 @@
 
 package dev.terminalmc.chatnotify.gui.widget.field;
 
-import dev.terminalmc.chatnotify.util.MiscUtil;
+import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -160,7 +160,7 @@ public class TextField extends EditBox {
         class HexColor implements Validator {
             @Override
             public Optional<Component> validate(String str) {
-                if (MiscUtil.parseColor(str) != null) {
+                if (ColorUtil.parseColor(str) != null) {
                     return Optional.empty();
                 } else {
                     return Optional.of(localized("option", "field.color.error"));

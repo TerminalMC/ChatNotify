@@ -24,7 +24,6 @@ public class ChatNotifyFabric implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(ChatNotify::onEndTick);
-        boolean hasChatHistoryMod = FabricLoader.getInstance().isModLoaded("chatpatches");
-        ChatNotify.init(hasChatHistoryMod);
+        ChatNotify.init();
     }
 }

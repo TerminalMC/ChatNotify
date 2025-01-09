@@ -21,7 +21,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
-import dev.terminalmc.chatnotify.util.MiscUtil;
+import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -247,7 +247,7 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     private void updateColorFromHexField(String s) {
-        TextColor textColor = MiscUtil.parseColor(s);
+        TextColor textColor = ColorUtil.parseColor(s);
         if (textColor != null) {
             int color = textColor.getValue();
             if (!updateFromCursor) {

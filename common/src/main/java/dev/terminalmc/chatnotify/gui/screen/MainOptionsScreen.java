@@ -29,9 +29,15 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 public class MainOptionsScreen extends OptionsScreen {
     public MainOptionsScreen(Screen lastScreen) {
         super(lastScreen, localized("option", "main"),
-                new MainOptionList(Minecraft.getInstance(), 0, 0, OptionsScreen.TOP_MARGIN,
-                        OptionsScreen.LIST_ENTRY_SPACE, OptionsScreen.BASE_LIST_ENTRY_WIDTH,
-                        OptionsScreen.LIST_ENTRY_HEIGHT));
+                new MainOptionList(
+                        Minecraft.getInstance(), 
+                        0, 
+                        0, 
+                        OptionsScreen.TOP_MARGIN,
+                        OptionsScreen.LIST_ENTRY_SPACE, 
+                        OptionsScreen.BASE_LIST_ENTRY_WIDTH,
+                        OptionsScreen.LIST_ENTRY_HEIGHT
+                ));
     }
 
     @Override

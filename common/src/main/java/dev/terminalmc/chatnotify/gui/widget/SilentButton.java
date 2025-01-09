@@ -21,6 +21,9 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A {@link Button} that does not play a sound when pressed.
+ */
 public class SilentButton extends Button {
     public SilentButton(int x, int y, int width, int height, Component msg, OnPress onPress) {
         super(x, y, width, height, msg, onPress, DEFAULT_NARRATION);

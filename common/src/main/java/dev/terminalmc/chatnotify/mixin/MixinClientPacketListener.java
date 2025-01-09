@@ -69,9 +69,6 @@ import java.util.Locale;
 
 @Mixin(value = ClientPacketListener.class, priority = 792)
 public class MixinClientPacketListener {
-
-    // Username-update mixins
-
     /**
      * Update profileName.
      */
@@ -96,14 +93,17 @@ public class MixinClientPacketListener {
     private void getDisplayName(ClientboundPlayerInfoUpdatePacket.Action action,
                                 ClientboundPlayerInfoUpdatePacket.Entry entry,
                                 PlayerInfo playerInfo, CallbackInfo ci) {
-        if (action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)
-                && Minecraft.getInstance().player != null // Workaround
-                && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())) {
-            if (entry.displayName() != null) Config.get().setDisplayName(entry.displayName().getString());
+        if (Minecraft.getInstance().player == null) return;
+        if (
+                action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME) 
+                && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())
+                && entry.displayName() != null
+        ) {
+            Config.get().setDisplayName(entry.displayName().getString());
         }
     }
 
-    // Chat message and command storage mixins
+    // Outgoing chat message and command storage
 
     @Inject(method = "sendChat", at = @At("HEAD"))
     public void getMessage(String message, CallbackInfo ci) {
@@ -119,8 +119,6 @@ public class MixinClientPacketListener {
     public void getUnsignedCommand(String command, CallbackInfoReturnable<Boolean> cir) {
         chatNotify$storeCommand(command);
     }
-
-    // Storage methods
 
     @Unique
     private void chatNotify$storeMessage(String message) {

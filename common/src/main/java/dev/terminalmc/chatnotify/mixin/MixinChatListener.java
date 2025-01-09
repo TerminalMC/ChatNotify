@@ -52,7 +52,7 @@ public class MixinChatListener {
         if (message != null) original.call(message, isOverlay);
     }
 
-    // Unable to use handlePlayerChatMessage as that takes a PlayerChatMessage.
+    // Unable to use handlePlayerChatMessage as that takes a PlayerChatMessage
     @WrapMethod(method = "showMessageToPlayer")
     private boolean wrapShowMessageToPlayer(ChatType.Bound boundChatType, 
                                             PlayerChatMessage chatMessage, Component message, 

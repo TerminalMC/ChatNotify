@@ -37,6 +37,10 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Contains one tightly-coupled {@link OptionList}, which is used to display
  * all option control widgets.
+ * 
+ * <p>Supports displaying a single {@link OverlayWidget}, which requires hiding
+ * all other widgets to avoid rendering and click conflicts but is still simpler
+ * than screen switching.</p>
  */
 public class OptionsScreen extends OptionsSubScreen {
     public static final int TOP_MARGIN = 32;
@@ -80,7 +84,7 @@ public class OptionsScreen extends OptionsSubScreen {
     @Override
     public void onClose() {
         if (lastScreen instanceof OptionsScreen screen) {
-            // Resize the parent screen's OptionsList
+            // Resize the parent screen's OptionList
             screen.reload(width, height);
         }
         listWidget.onClose();
@@ -92,6 +96,10 @@ public class OptionsScreen extends OptionsSubScreen {
         super.render(graphics, mouseX, mouseY, delta);
     }
 
+    /**
+     * Clears all widgets, reloads the {@link OptionList}, recreates all fixed
+     * widgets, and resizes the overlay widget (if any).
+     */
     public void reload() {
         reload(width, height);
     }
@@ -127,7 +135,7 @@ public class OptionsScreen extends OptionsSubScreen {
     }
 
     // Overlay widget handling
-
+    
     public void setOverlayWidget(OverlayWidget widget) {
         removeOverlayWidget();
         overlayWidget = widget;

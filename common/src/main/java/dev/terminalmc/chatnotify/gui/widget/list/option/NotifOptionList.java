@@ -22,7 +22,7 @@ import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
-import dev.terminalmc.chatnotify.util.MiscUtil;
+import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -542,7 +542,7 @@ public class NotifOptionList extends OptionList {
                 colorField.hexColorValidator();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
-                    TextColor textColor = MiscUtil.parseColor(val);
+                    TextColor textColor = ColorUtil.parseColor(val);
                     if (textColor != null) {
                         int color = textColor.getValue();
                         consumer.accept(color);
