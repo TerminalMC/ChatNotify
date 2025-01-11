@@ -3,6 +3,8 @@
 ## 2.3.0-beta.6
 
 - Improved format util error logging
+- Fixed response message sending via chat screen
+- Fixed inversion of response message modes
 
 ## 2.3.0-beta.5
 

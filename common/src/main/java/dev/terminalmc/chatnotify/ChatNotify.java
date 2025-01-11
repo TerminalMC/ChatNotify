@@ -97,17 +97,18 @@ public class ChatNotify {
             }
             return false;
         });
+        
         sendMessages(sending);
     }
     
     private static void sendMessages(List<String> messages) {
+        if (messages.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
         switch (Config.get().sendMode) {
             case SCREEN -> {
                 // Compat mode for mods mixing into handleChatInput
-                Screen oldScreen = null;
+                Screen oldScreen = mc.screen;
                 if (!(mc.screen instanceof ChatScreen)) {
-                    oldScreen = mc.screen;
                     mc.setScreen(new ChatScreen(""));
                 }
                 if (mc.screen instanceof ChatScreen cs) {
@@ -115,7 +116,7 @@ public class ChatNotify {
                         cs.handleChatInput(msg, false);
                     }
                 }
-                if (oldScreen != null) mc.setScreen(oldScreen);
+                mc.screen = oldScreen;
             }
             case PACKET -> {
                 for (String msg : messages) {
