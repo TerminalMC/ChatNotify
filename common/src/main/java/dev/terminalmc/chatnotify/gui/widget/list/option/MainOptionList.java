@@ -183,9 +183,9 @@ public class MainOptionList extends OptionList {
                         CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
-                        .withInitialValue(notif.isEnabled())
+                        .withInitialValue(notif.enabled)
                         .create(x + mainButtonWidth + SPACING, 0, statusButtonWidth, height,
-                                Component.empty(), (button, status) -> notif.setEnabled(status)));
+                                Component.empty(), (button, status) -> notif.enabled = status));
 
                 if (index > 0) {
                     // Delete button

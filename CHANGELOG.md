@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.7
+
+- Fixed notification status display
+
 ## 2.3.0-beta.6
 
 - Improved format util error logging

@@ -146,7 +146,7 @@ public class MessageUtil {
         
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
-            if (!notif.isEnabled()) continue;
+            if (!notif.canActivate()) continue;
             
             // Trigger search
             for (Trigger trig : notif.triggers) {

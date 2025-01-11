@@ -41,8 +41,8 @@ public class Notification {
     /**
      * Whether this instance is eligible for activation.
      */
-    private boolean enabled;
-    private static final boolean enabledDefault = true;
+    public boolean enabled;
+    public static final boolean enabledDefault = true;
 
     /**
      * Whether this instance allows use of exclusion triggers.
@@ -143,8 +143,8 @@ public class Notification {
                         new Trigger("Profile name"),
                         new Trigger("Display name")
                 )),
-                new ArrayList<>(),
-                new ArrayList<>()
+                exclusionTriggersDefault.get(),
+                responseMessagesDefault.get()
         );
     }
 
@@ -154,37 +154,27 @@ public class Notification {
      */
     static Notification createBlank(Sound sound, TextStyle textStyle) {
         return new Notification(
-                true,
-                false,
-                false,
-                false,
+                enabledDefault,
+                exclusionEnabledDefault,
+                responseEnabledDefault,
+                blockMessageDefault,
                 sound,
                 textStyle,
-                new TitleText(),
+                titleTextDefault.get(),
                 new ArrayList<>(List.of(
                         new Trigger("")
                 )),
-                new ArrayList<>(),
-                new ArrayList<>()
+                exclusionTriggersDefault.get(),
+                responseMessagesDefault.get()
         );
     }
-
-    // Notifications can be enabled and disabled manually, but for user
-    // convenience we also perform some actions automatically.
 
     /**
      * @return {@code true} if this instance is eligible for activation, 
      * {@code false} otherwise.
      */
-    public boolean isEnabled() {
+    public boolean canActivate() {
         return enabled && !editing;
-    }
-
-    /**
-     * Enables or disables this instance.
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
     
     // List reordering
