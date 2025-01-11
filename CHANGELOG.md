@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.8
+
+- Fixed processing of certain translatable message formats
+
 ## 2.3.0-beta.7
 
 - Fixed notification status display

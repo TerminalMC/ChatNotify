@@ -92,8 +92,7 @@ public class FormatUtil {
 
         // Split on the known argument string to get the literal translation
         List<String> translatedSplit = new ArrayList<>(List.of(translated.split(ARGUMENT_STRING)));
-        // Pad start and end
-        if (translated.startsWith(ARGUMENT_STRING)) translatedSplit.addFirst("");
+        // Pad end
         if (translated.endsWith(ARGUMENT_STRING)) translatedSplit.addLast("");
 
         if (translatedSplit.size() == 1) {
