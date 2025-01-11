@@ -96,14 +96,11 @@ public class FormatUtil {
         if (translated.startsWith(ARGUMENT_STRING)) translatedSplit.addFirst("");
         if (translated.endsWith(ARGUMENT_STRING)) translatedSplit.addLast("");
 
-        if (translatedSplit.size() == 1) { // No args
-            // Create component from translated string
+        if (translatedSplit.size() == 1) {
+            // No args, create component from translated string
             text = Component.literal(translatedSplit.getFirst()).withStyle(text.getStyle());
-        } else { // One or more args
-            // Create an empty component, and add each part of the translated
-            // string and each arg as siblings in sequence
-            text = Component.empty().withStyle(text.getStyle());
-            List<Component> siblings = text.getSiblings();
+        } else { 
+            // One or more args, create component from translated string and args
             Object[] args = contents.getArgs();
             
             // Verify that split translated string and args match
@@ -112,8 +109,14 @@ public class FormatUtil {
                         args.length, translatedSplit.size());
                 ChatNotify.LOG.error("Text: {}", text.getString());
                 ChatNotify.LOG.error("Raw: {}", text.toString());
+                ChatNotify.LOG.error("Translated: {}", translated);
                 throw new IllegalArgumentException();
             }
+            
+            // Create an empty component, and add each part of the translated
+            // string and each arg as siblings in sequence
+            text = Component.empty().withStyle(text.getStyle());
+            List<Component> siblings = text.getSiblings();
             
             for (int i = 0; i < contents.getArgs().length; i++) {
                 // Add translated substring

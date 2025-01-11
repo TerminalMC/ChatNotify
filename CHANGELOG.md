@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.6
+
+- Improved format util error logging
+
 ## 2.3.0-beta.5
 
 - Fixed translatable message processing
