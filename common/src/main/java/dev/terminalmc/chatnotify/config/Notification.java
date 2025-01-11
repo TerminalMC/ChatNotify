@@ -182,25 +182,9 @@ public class Notification {
 
     /**
      * Enables or disables this instance.
-     * 
-     * <p>If sound and text style are disabled and {@code enabled} is true, 
-     * enables sound and text style.</p>
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-        if (enabled && !sound.isEnabled() && !textStyle.isEnabled()) {
-            sound.setEnabled(true);
-            textStyle.doColor = true;
-        }
-    }
-
-    /**
-     * Disables this instance if sound and text style are both disabled.
-     */
-    public void autoDisable() {
-        if (!sound.isEnabled() && !textStyle.isEnabled()) {
-            enabled = false;
-        }
     }
     
     // List reordering
@@ -267,8 +251,6 @@ public class Notification {
     // Cleanup and validation
 
     public void cleanup() {
-        autoDisable();
-
         // Remove all blank triggers, and convert all key triggers to lowercase.
         triggers.removeIf(trigger -> trigger.string.isBlank());
         for (Trigger t : triggers) {

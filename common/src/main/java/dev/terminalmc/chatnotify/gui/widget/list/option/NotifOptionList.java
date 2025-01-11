@@ -110,7 +110,6 @@ public class NotifOptionList extends OptionList {
     @Override
     public void onClose() {
         notif.editing = false;
-        notif.autoDisable();
     }
 
     private void openTriggerConfig(Trigger trigger) {

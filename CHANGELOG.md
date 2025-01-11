@@ -5,6 +5,7 @@
 - Improved format util error logging
 - Fixed response message sending via chat screen
 - Fixed inversion of response message modes
+- Removed automatic notification enabling/disabling
 
 ## 2.3.0-beta.5
 
