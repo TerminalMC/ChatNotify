@@ -191,7 +191,7 @@ public class MessageUtil {
                 }
                 
                 activated = true;
-                if (!soundPlayed || Config.get().notifMode.equals(Config.NotifMode.MULTIPLE)) {
+                if (!soundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
                     soundPlayed = playSound(notif);
                 }
                 showTitle(notif);

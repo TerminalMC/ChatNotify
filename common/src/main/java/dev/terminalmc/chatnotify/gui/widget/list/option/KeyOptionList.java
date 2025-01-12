@@ -139,7 +139,7 @@ public class KeyOptionList extends OptionList {
                         .size(list.tinyWidgetWidth, height)
                         .build();
                 editorButton.setTooltip(Tooltip.create(
-                        localized("option", "notif.trigger_editor.tooltip")));
+                        localized("option", "notif.trigger.editor.tooltip")));
                 editorButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(editorButton);
             }

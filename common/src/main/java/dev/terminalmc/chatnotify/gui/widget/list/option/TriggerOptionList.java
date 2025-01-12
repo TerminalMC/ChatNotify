@@ -228,7 +228,7 @@ public class TriggerOptionList extends OptionList {
                         .build();
                 if (trigger.styleString == null) {
                     styleButton.setTooltip(Tooltip.create(
-                            localized("option", "notif.style_string.add.tooltip")));
+                            localized("option", "notif.restyle_string.add.tooltip")));
                     styleButton.setTooltipDelay(Duration.ofMillis(500));
                 } else {
                     styleButton.active = false;
@@ -250,7 +250,7 @@ public class TriggerOptionList extends OptionList {
                         Component.literal("\u2139"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(
-                        localized("option", "notif.style_string.tooltip")));
+                        localized("option", "notif.restyle_string.tooltip")));
                 infoIcon.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
@@ -267,7 +267,7 @@ public class TriggerOptionList extends OptionList {
                     list.addChat();
                 });
                 stringField.setTooltip(Tooltip.create(
-                        localized("option", "notif.style_string.field.tooltip")));
+                        localized("option", "notif.restyle_string.field.tooltip")));
                 stringField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(stringField);
                 movingX = x + width - list.tinyWidgetWidth;

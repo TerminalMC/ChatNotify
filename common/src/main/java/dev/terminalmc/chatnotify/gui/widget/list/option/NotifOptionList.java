@@ -298,7 +298,7 @@ public class NotifOptionList extends OptionList {
                         .size(list.tinyWidgetWidth, height)
                         .build();
                 editorButton.setTooltip(Tooltip.create(
-                        localized("option", "notif.trigger_editor.tooltip")));
+                        localized("option", "notif.trigger.editor.tooltip")));
                 editorButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(editorButton);
                 movingX += list.tinyWidgetWidth;
@@ -314,7 +314,7 @@ public class NotifOptionList extends OptionList {
                         .build();
                 if (trigger.styleString == null) {
                     styleButton.setTooltip(Tooltip.create(
-                            localized("option", "notif.style_string.add.tooltip")));
+                            localized("option", "notif.restyle_string.add.tooltip")));
                     styleButton.setTooltipDelay(Duration.ofMillis(500));
                 } else {
                     styleButton.active = false;
@@ -347,7 +347,7 @@ public class NotifOptionList extends OptionList {
                         Component.literal("\u2139"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(
-                        localized("option", "notif.style_string.tooltip")));
+                        localized("option", "notif.restyle_string.tooltip")));
                 infoIcon.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
@@ -358,7 +358,7 @@ public class NotifOptionList extends OptionList {
                 stringField.setValue(trigger.styleString);
                 stringField.setResponder((string) -> trigger.styleString = string.strip());
                 stringField.setTooltip(Tooltip.create(
-                        localized("option", "notif.style_string.field.tooltip")));
+                        localized("option", "notif.restyle_string.field.tooltip")));
                 stringField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(stringField);
                 movingX = x + width - list.tinyWidgetWidth;
@@ -488,7 +488,7 @@ public class NotifOptionList extends OptionList {
 
             private Tooltip getTooltip(TextStyle.FormatMode mode) {
                 return mode.equals(TextStyle.FormatMode.DISABLED)
-                        ? Tooltip.create(localized("option", "notif.format.tooltip"))
+                        ? Tooltip.create(localized("option", "notif.format.disabled.tooltip"))
                         : null;
             }
         }

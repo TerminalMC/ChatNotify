@@ -242,16 +242,16 @@ public class GlobalOptionList extends OptionList {
                         .withValues(SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "global.sound_source.tooltip")))
+                                localized("option", "sound.source.tooltip")))
                         .create(x, 0, width - list.smallWidgetWidth - SPACING, height,
-                                localized("option", "global.sound_source"),
+                                localized("option", "sound.source"),
                                 (button, status) -> Config.get().soundSource = status));
 
                 elements.add(Button.builder(Component.literal("\uD83D\uDD0A"),
                                 (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
                                         list.screen, Minecraft.getInstance().options)))
                         .tooltip(Tooltip.create(
-                                localized("option", "global.sound_source.minecraft_volume")))
+                                localized("option", "sound.source.minecraft_volume")))
                         .pos(x + width - list.smallWidgetWidth, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());

@@ -70,8 +70,8 @@ public class Config {
      */
     public DetectionMode detectionMode;
     public enum DetectionMode {
-        HUD_KNOWN_TAGS_ONLY,
-        HUD_ALL,
+        HUD_KNOWN_TAGS,
+        HUD,
         PACKET,
     }
 
@@ -80,18 +80,18 @@ public class Config {
      */
     public DebugMode debugMode;
     public enum DebugMode {
-        OFF,
+        NONE,
         ALL,
     }
 
     /**
-     * Controls how {@link Notification}s are activated.
+     * Controls how many {@link Notification}s can be activated.
      */
     public NotifMode notifMode;
     public enum NotifMode {
+        ALL_SINGLE_SOUND,
+        ALL,
         SINGLE,
-        MULTIPLE_SINGLE_SOUND,
-        MULTIPLE,
     }
 
     /**
@@ -99,9 +99,10 @@ public class Config {
      */
     public RestyleMode restyleMode;
     public enum RestyleMode {
-        SINGLE,
         ALL_INSTANCES,
         ALL_TRIGGERS,
+        ALL,
+        SINGLE,
     }
 
     /**

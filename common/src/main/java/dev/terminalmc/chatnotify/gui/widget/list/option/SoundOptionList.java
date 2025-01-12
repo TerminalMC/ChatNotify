@@ -141,7 +141,6 @@ public class SoundOptionList extends OptionList {
                         "entity.pillager.ambient",
                         "entity.vindicator.ambient",
                         "entity.evoker.ambient",
-
                 };
         for (String s : villagerSounds) {
             addEntry(new Entry.SoundOption(entryX, entryWidth, entryHeight, this, sound, s));
@@ -241,9 +240,9 @@ public class SoundOptionList extends OptionList {
                         .withValues(SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "global.sound_source.tooltip")))
+                                localized("option", "sound.source.tooltip")))
                         .create(x, 0, mainButtonWidth, height,
-                                localized("option", "global.sound_source"),
+                                localized("option", "sound.source"),
                                 (button, status) -> Config.get().soundSource = status));
 
                 elements.add(Button.builder(
@@ -251,7 +250,7 @@ public class SoundOptionList extends OptionList {
                                 (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
                                         list.screen, Minecraft.getInstance().options)))
                         .tooltip(Tooltip.create(
-                                localized("option", "global.sound_source.minecraft_volume")))
+                                localized("option", "sound.source.minecraft_volume")))
                         .pos(x + width - list.smallWidgetWidth, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());

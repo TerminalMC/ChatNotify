@@ -364,7 +364,7 @@ public class AdvancedOptionList extends OptionList {
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
                         .withTooltip((type) -> Tooltip.create(
-                                localized("option", "notif.trigger.type." + type.name() + ".tooltip")))
+                                localized("option", "notif.trigger.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     trigger.type = type;
@@ -468,13 +468,13 @@ public class AdvancedOptionList extends OptionList {
                                             list.reload();
                                         }, keys));
                             });
-                    keyField1.setTooltip(Tooltip.create(localized(
-                            "option", "advanced.response.tooltip.commandkeys.limit_key")));
+                    Component tooltip1 = localized("option", "advanced.response.commandkeys.limit_key.tooltip");
+                    keyField1.setTooltip(Tooltip.create(tooltip1));
                     keyField1.setMaxLength(240);
                     keyField1.setValidator((val) -> {
                         if (keys.contains(val)) return Optional.empty();
-                        else return Optional.of(localized("option", "advanced.key.error")
-                                .withStyle(ChatFormatting.RED));
+                        else return Optional.of(tooltip1.copy().append("\n").append(
+                                localized("option", "advanced.key.error").withStyle(ChatFormatting.RED)));
                     });
                     keyField1.setValue(response.string.matches(".+-.+") ? response.string.split("-")[0] : "");
                     elements.add(keyField1);
@@ -494,13 +494,13 @@ public class AdvancedOptionList extends OptionList {
                                             list.reload();
                                         }, keys));
                             });
-                    keyField2.setTooltip(Tooltip.create(localized(
-                            "option", "advanced.response.tooltip.commandkeys.key")));
+                    Component tooltip2 = localized("option", "advanced.response.commandkeys.key.tooltip");
+                    keyField2.setTooltip(Tooltip.create(tooltip2));
                     keyField2.setMaxLength(240);
                     keyField2.setValidator((val) -> {
                         if (keys.contains(val)) return Optional.empty();
-                        else return Optional.of(localized("option", "key.error")
-                                .withStyle(ChatFormatting.RED));
+                        else return Optional.of(tooltip2.copy().append("\n").append(
+                                localized("option", "advanced.key.error").withStyle(ChatFormatting.RED)));
                     });
                     keyField2.setValue(response.string.matches(".+-.+") ? response.string.split("-")[1] : "");
                     elements.add(keyField2);
