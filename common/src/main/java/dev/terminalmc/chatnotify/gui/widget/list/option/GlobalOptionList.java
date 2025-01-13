@@ -46,7 +46,7 @@ public class GlobalOptionList extends OptionList {
                             int entryWidth, int entryHeight) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
 
-        addEntry(new Entry.MixinAndKeyDebugEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.DetectAndDebugEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.SelfCheckAndSendModeEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.MultiModeEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
@@ -85,8 +85,8 @@ public class GlobalOptionList extends OptionList {
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class MixinAndKeyDebugEntry extends MainOptionList.Entry {
-            MixinAndKeyDebugEntry(int x, int width, int height) {
+        private static class DetectAndDebugEntry extends MainOptionList.Entry {
+            DetectAndDebugEntry(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACING) / 2;
 

@@ -33,7 +33,7 @@
   "option.chatnotify.global.debug_mode.NONE.tooltip": "No debug logging.",
   "option.chatnotify.global.default_color": "Цвет по умолчанию",
   "option.chatnotify.global.default_sound": "Звук по умолчанию: %s",
-  "option.chatnotify.global.detection_mode": "Detection",
+  "option.chatnotify.global.detection_mode": "Detect",
   "option.chatnotify.global.detection_mode.HUD": "HUD",
   "option.chatnotify.global.detection_mode.HUD.tooltip": "Detect messages when they are added to the chat HUD.",
   "option.chatnotify.global.detection_mode.HUD_KNOWN_TAGS": "HUD (Tags)",
