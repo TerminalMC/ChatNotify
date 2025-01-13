@@ -142,6 +142,10 @@ public class MessageUtil {
      */
     private static @Nullable Component tryNotify(Component msg, String cleanStr, 
                                                  String cleanOwnedStr) {
+        boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL) 
+                || Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
+        boolean restyleAllTriggers = Config.get().restyleMode.equals(Config.RestyleMode.ALL)
+                || Config.get().restyleMode.equals(Config.RestyleMode.ALL_TRIGGERS);
         boolean activated = false;
         boolean soundPlayed = false;
         
@@ -227,8 +231,7 @@ public class MessageUtil {
                             restyled = true;
                             do {
                                 msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
-                            } while (Config.get().restyleMode.equals(
-                                    Config.RestyleMode.ALL_INSTANCES) && m.find());
+                            } while (restyleAllInstances && m.find());
                         }
                     }
                     // If style string not usable, attempt to restyle trigger
@@ -239,15 +242,13 @@ public class MessageUtil {
                                     msg = restyleLeaves(msg, notif.textStyle,
                                             matcher.start() + matcher.group(1).length(),
                                             matcher.end() - matcher.group(2).length());
-                                } while (Config.get().restyleMode.equals(
-                                        Config.RestyleMode.ALL_INSTANCES) && matcher.find());
+                                } while (restyleAllInstances && matcher.find());
                             }
                             case REGEX -> {
                                 do {
                                     msg = restyleLeaves(msg, notif.textStyle,
                                             matcher.start(), matcher.end());
-                                } while (Config.get().restyleMode.equals(
-                                        Config.RestyleMode.ALL_INSTANCES) && matcher.find());
+                                } while (restyleAllInstances && matcher.find());
                             }
                             case KEY -> msg = restyleRoot(msg, notif.textStyle);
                         }
@@ -258,7 +259,7 @@ public class MessageUtil {
                 showStatusBarMsg(notif, msg, subsMatcher);
                 showTitleMsg(notif, msg, subsMatcher);
                 
-                if (!Config.get().restyleMode.equals(Config.RestyleMode.ALL_TRIGGERS)) break;
+                if (!restyleAllTriggers) break;
             }
             if (activated && Config.get().notifMode.equals(Config.NotifMode.SINGLE)) return msg;
         }

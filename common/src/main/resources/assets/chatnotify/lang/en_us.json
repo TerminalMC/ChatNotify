@@ -51,6 +51,8 @@
   "option.chatnotify.global.prefixes": "Message Modifier Prefixes %s",
   "option.chatnotify.global.prefixes.tooltip": "A prefix is a character or command that you type before a chat message to modify it.\n\nFor example, '!' or '/shout' may be used on some servers to communicate in global chat.\n\nThis may be useful for preventing spurious notifications.",
   "option.chatnotify.global.restyle_mode": "Restyle",
+  "option.chatnotify.global.restyle_mode.ALL": "All",
+  "option.chatnotify.global.restyle_mode.ALL.tooltip": "Restyle all instances of all matching triggers.",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES": "All Instances",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES.tooltip": "Restyle all instances of the first matching trigger.",
   "option.chatnotify.global.restyle_mode.ALL_TRIGGERS": "All Triggers",

@@ -51,6 +51,8 @@
   "option.chatnotify.global.prefixes": "Префиксы модификаторов сообщений %s",
   "option.chatnotify.global.prefixes.tooltip": "Префикс - это символ или команда, которую вы вводите перед сообщением, чтобы изменить его. Например, '!' или '/shout' могут использоваться на некоторых серверах для общения в глобальном чате. Это может быть полезно для предотвращения ложных уведомлений.",
   "option.chatnotify.global.restyle_mode": "Restyle",
+  "option.chatnotify.global.restyle_mode.ALL": "All",
+  "option.chatnotify.global.restyle_mode.ALL.tooltip": "Restyle all instances of all matching triggers.",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES": "All Instances",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES.tooltip": "Restyle all instances of the first matching trigger.",
   "option.chatnotify.global.restyle_mode.ALL_TRIGGERS": "All Triggers",

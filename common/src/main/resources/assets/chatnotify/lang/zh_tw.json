@@ -51,6 +51,8 @@
   "option.chatnotify.global.prefixes": "訊息修飾字首 %s",
   "option.chatnotify.global.prefixes.tooltip": "字首是您在訊息之前輸入的字元或指令，用於修改訊息。\n例如，某些伺服器可能會使用「！」或「/shout」在全域聊天中進行通訊。\n這可能有助於防止出現虛假通知。",
   "option.chatnotify.global.restyle_mode": "Restyle",
+  "option.chatnotify.global.restyle_mode.ALL": "All",
+  "option.chatnotify.global.restyle_mode.ALL.tooltip": "Restyle all instances of all matching triggers.",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES": "All Instances",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES.tooltip": "Restyle all instances of the first matching trigger.",
   "option.chatnotify.global.restyle_mode.ALL_TRIGGERS": "All Triggers",

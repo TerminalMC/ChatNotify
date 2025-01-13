@@ -89,6 +89,8 @@ public class TriggerOptionList extends OptionList {
     
     private void addChat() {
         Minecraft mc = Minecraft.getInstance();
+        boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES)
+                || Config.get().restyleMode.equals(Config.RestyleMode.ALL);
         List<Pair<Component, MutableComponent>> allChat = ChatNotify.unmodifiedChat.stream()
                 .map((msg) -> new Pair<>(msg, FormatUtil.convertToStyledLiteral(msg.copy())))
                 .toList().reversed();
@@ -118,8 +120,7 @@ public class TriggerOptionList extends OptionList {
                     Matcher m = MessageUtil.styleSearch(msg.getString(), trigger.styleString);
                     do {
                         msg = MessageUtil.restyleLeaves(msg, textStyle, m.start(), m.end());
-                    } while (Config.get().restyleMode.equals(
-                            Config.RestyleMode.ALL_INSTANCES) && m.find());
+                    } while (restyleAllInstances && m.find());
                 } else {
                     switch(trigger.type) {
                         case NORMAL -> {
@@ -127,15 +128,13 @@ public class TriggerOptionList extends OptionList {
                                 msg = MessageUtil.restyleLeaves(msg, textStyle,
                                         matcher.start() + matcher.group(1).length(),
                                         matcher.end() - matcher.group(2).length());
-                            } while (Config.get().restyleMode.equals(
-                                    Config.RestyleMode.ALL_INSTANCES) && matcher.find());
+                            } while (restyleAllInstances && matcher.find());
                         }
                         case REGEX -> {
                             do {
                                 msg = MessageUtil.restyleLeaves(msg, textStyle,
                                         matcher.start(), matcher.end());
-                            } while (Config.get().restyleMode.equals(
-                                    Config.RestyleMode.ALL_INSTANCES) && matcher.find());
+                            } while (restyleAllInstances && matcher.find());
                         }
                         case KEY -> msg = MessageUtil.restyleRoot(msg, textStyle);
                     }

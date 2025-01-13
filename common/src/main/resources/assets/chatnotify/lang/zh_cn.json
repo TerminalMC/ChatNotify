@@ -51,6 +51,8 @@
   "option.chatnotify.global.prefixes": "消息修饰符前缀%s",
   "option.chatnotify.global.prefixes.tooltip": "前缀是你在消息前输入的字符或命令，用于修改消息。\n例如，某些服务器可能会使用“!”或“/shout”进行全局聊天。\n这可能有助于防止虚假通知。",
   "option.chatnotify.global.restyle_mode": "Restyle",
+  "option.chatnotify.global.restyle_mode.ALL": "All",
+  "option.chatnotify.global.restyle_mode.ALL.tooltip": "Restyle all instances of all matching triggers.",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES": "All Instances",
   "option.chatnotify.global.restyle_mode.ALL_INSTANCES.tooltip": "Restyle all instances of the first matching trigger.",
   "option.chatnotify.global.restyle_mode.ALL_TRIGGERS": "All Triggers",
