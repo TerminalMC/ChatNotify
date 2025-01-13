@@ -78,7 +78,7 @@ public class MainOptionList extends OptionList {
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().addNotif();
-                    openNotificationConfig(Config.get().getNotifs().size() - 1);
+                    reload();
                 }));
     }
 
