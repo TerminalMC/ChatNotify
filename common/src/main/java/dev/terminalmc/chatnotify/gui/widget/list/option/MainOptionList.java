@@ -21,23 +21,35 @@ import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
+import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
+import dev.terminalmc.chatnotify.gui.widget.RightClickableButton;
+import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
+import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
+import java.time.Duration;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
+import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
  * Contains a button linking to global options, and a dynamic list of buttons
@@ -59,7 +71,7 @@ public class MainOptionList extends OptionList {
 
         List<Notification> notifs = Config.get().getNotifs();
         for (int i = 0; i < notifs.size(); i++) {
-            addEntry(new Entry.NotifConfigEntry(entryX, entryWidth, entryHeight, this, notifs, i));
+            addEntry(new Entry.NotifConfigEntry(dynEntryX, dynEntryWidth, entryHeight, this, notifs, i));
         }
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
@@ -87,6 +99,18 @@ public class MainOptionList extends OptionList {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "notif"),
                 new NotifOptionList(minecraft, width, height, getY(), itemHeight,
                         entryWidth, entryHeight, Config.get().getNotifs().get(index))));
+    }
+
+    private void openTriggerConfig(Notification notif, Trigger trigger) {
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
+                new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
+                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", false, true)));
+    }
+
+    private void openSoundConfig(Notification notif) {
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
+                new SoundOptionList(minecraft, width, height, getY(), itemHeight,
+                        entryWidth, entryHeight, notif.sound)));
     }
 
     // Notification button dragging
@@ -156,11 +180,230 @@ public class MainOptionList extends OptionList {
                              List<Notification> notifs, int index) {
                 super();
                 Notification notif = notifs.get(index);
+                
+                @Nullable Trigger trigger = notif.triggers.size() == 1 
+                        ? notif.triggers.getFirst() : null;
+                boolean singleTrig = trigger != null;
+                
+                int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF++"); // ~54
+                int soundFieldWidth = colorFieldWidth; // Base width
                 int statusButtonWidth = Math.max(24, height);
-                int mainButtonWidth = width - statusButtonWidth - SPACING;
+                
+                boolean showColorField = false;
+                boolean showSoundField = false;
+                
+                int triggerWidth = width
+                        - SPACING
+                        - list.smallWidgetWidth
+                        - SPACING
+                        - list.tinyWidgetWidth
+                        - SPACING
+                        - list.tinyWidgetWidth
+                        - SPACING
+                        - statusButtonWidth;
+                
+                // Show sound field if trigger will still have 200 space
+                if (triggerWidth >= (200 + soundFieldWidth)) {
+                    triggerWidth -= soundFieldWidth;
+                    showSoundField = true;
+                }
+                
+                // Split the excess over 200 between trigger and sound
+                if (showSoundField) {
+                    int excess = triggerWidth - 200;
+                    triggerWidth -= excess;
+                    
+                    // Up to 120, sound takes 70%
+                    int soundBonus = (int)(excess * 0.7);
+                    // Above 120, sound takes 35% (return 50% of extra)
+                    int soundMargin = Math.max(0, soundFieldWidth + soundBonus - 120);
+                    soundBonus -= (int)(soundMargin * 0.5);
+                    // Above 140, sound takes nothing (return 100% of extra)
+                    soundMargin = Math.max(0, soundFieldWidth + soundBonus - 140);
+                    soundBonus -= soundMargin;
+                    
+                    soundFieldWidth += soundBonus;
+                    triggerWidth += (excess - soundBonus);
+                }
+                
+                // If sound field reaches 120, add color field
+                if (soundFieldWidth >= 120) {
+                    soundFieldWidth -= 20;
+                    triggerWidth -= (colorFieldWidth - 20);
+                    showColorField = true;
+                }
+                
+                int triggerFieldWidth = triggerWidth - (singleTrig ? list.tinyWidgetWidth * 2 : 0);
+                int movingX = x;
+                
+                if (singleTrig) {
+                    // Type button
+                    CycleButton<Trigger.Type> typeButton = CycleButton.<Trigger.Type>builder(
+                                    (type) -> Component.literal(type.icon))
+                            .withValues(Trigger.Type.values())
+                            .displayOnlyValue()
+                            .withInitialValue(trigger.type)
+                            .withTooltip((type) -> Tooltip.create(
+                                    localized("option", "notif.trigger.type." + type + ".tooltip")))
+                            .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
+                                    (button, type) -> {
+                                        trigger.type = type;
+                                        list.reload();
+                                    });
+                    typeButton.setTooltipDelay(Duration.ofMillis(200));
+                    elements.add(typeButton);
+                    movingX += list.tinyWidgetWidth;
+                }
 
-                if (index > 0) {
-                    // Drag reorder button
+                // Trigger field
+                TextField triggerField = singleTrig
+                        ? new TextField(movingX, 0, triggerFieldWidth, height)
+                        : new FakeTextField(movingX, 0, triggerFieldWidth, height,
+                        () -> list.openNotificationConfig(index));
+                if (singleTrig && trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
+                triggerField.setMaxLength(240);
+                if (singleTrig) triggerField.setResponder((str) -> trigger.string = str.strip());
+                triggerField.setValue(singleTrig 
+                        ? trigger.string 
+                        : createLabel(notif, triggerFieldWidth - 10).getString());
+                triggerField.setTooltip(Tooltip.create(
+                        localized("option", "main.trigger.tooltip")));
+                triggerField.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(triggerField);
+                movingX += triggerFieldWidth + (singleTrig ? 0 : SPACING);
+
+                if (singleTrig) {
+                    // Trigger editor button
+                    Button editorButton = Button.builder(Component.literal("\u270e"),
+                                    (button) -> list.openTriggerConfig(notif, trigger))
+                            .pos(movingX, 0)
+                            .size(list.tinyWidgetWidth, height)
+                            .build();
+                    editorButton.setTooltip(Tooltip.create(
+                            localized("option", "notif.trigger.editor.tooltip")));
+                    editorButton.setTooltipDelay(Duration.ofMillis(200));
+                    elements.add(editorButton);
+                    movingX += list.tinyWidgetWidth + SPACING;
+                }
+
+                // Options button
+
+                ImageButton editButton = new ImageButton(movingX, 0,
+                        list.smallWidgetWidth, height, OPTION_SPRITES,
+                        (button) -> {
+                            list.openNotificationConfig(index);
+                            list.reload();
+                        });
+                editButton.setTooltip(Tooltip.create(localized(
+                        "option", "main.options.tooltip")));
+                editButton.setTooltipDelay(Duration.ofMillis(200));
+                elements.add(editButton);
+                movingX += list.smallWidgetWidth + SPACING;
+                
+                // Color
+
+                if (showColorField) {
+                    TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
+                    colorField.hexColorValidator();
+                    colorField.setMaxLength(7);
+                    colorField.setResponder((val) -> {
+                        TextColor textColor = ColorUtil.parseColor(val);
+                        if (textColor != null) {
+                            int color = textColor.getValue();
+                            notif.textStyle.color = color;
+                            float[] hsv = new float[3];
+                            Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
+                                    FastColor.ARGB32.blue(color), hsv);
+                            if (hsv[2] < 0.1) colorField.setTextColor(16777215);
+                            else colorField.setTextColor(color);
+                        }
+                    });
+                    colorField.setValue(TextColor.fromRgb(notif.textStyle.color).formatValue());
+                    colorField.setTooltip(Tooltip.create(
+                            localized("option", "main.color.tooltip")));
+                    colorField.setTooltipDelay(Duration.ofMillis(500));
+                    elements.add(colorField);
+                    movingX += colorFieldWidth;
+                }
+                RightClickableButton colorEditButton = new RightClickableButton(
+                        movingX, 0, list.tinyWidgetWidth, height,
+                        Component.literal("\uD83C\uDF22").withColor(notif.textStyle.doColor 
+                                ? notif.textStyle.color
+                                : 0xffffff
+                        ), (button) -> {
+                            // Open color picker overlay widget
+                            int cpHeight = HsvColorPicker.MIN_HEIGHT;
+                            int cpWidth = Math.min(HsvColorPicker.MAX_WIDTH, 
+                                    Math.max(HsvColorPicker.MIN_WIDTH, width));
+                            list.screen.setOverlayWidget(new HsvColorPicker(
+                                    x, list.screen.height / 2 - cpHeight / 2,
+                                    cpWidth, cpHeight,
+                                    () -> notif.textStyle.color,
+                                    (color) -> notif.textStyle.color = color,
+                                    (widget) -> {
+                                        list.screen.removeOverlayWidget();
+                                        list.reload();
+                                    }));
+                        }, (button) -> {
+                            // Toggle color
+                            notif.textStyle.doColor = !notif.textStyle.doColor;
+                            list.reload();
+                        });
+                colorEditButton.setTooltip(Tooltip.create(localized(
+                        "option", "main.color.status.tooltip." 
+                                + (notif.textStyle.doColor ? "enabled" : "disabled"))
+                        .append("\n")
+                        .append(localized("option", "main.edit.click"))));
+                colorEditButton.setTooltipDelay(Duration.ofMillis(200));
+                elements.add(colorEditButton);
+                movingX += list.tinyWidgetWidth + SPACING;
+                
+                // Sound
+
+                if (showSoundField) {
+                    TextField soundField = new TextField(movingX, 0, soundFieldWidth, height);
+                    soundField.soundValidator();
+                    soundField.setMaxLength(240);
+                    soundField.setResponder(notif.sound::setId);
+                    soundField.setValue(notif.sound.getId());
+                    soundField.setTooltip(Tooltip.create(
+                            localized("option", "main.sound.tooltip")));
+                    soundField.setTooltipDelay(Duration.ofMillis(500));
+                    elements.add(soundField);
+                    movingX += soundFieldWidth;
+                }
+                RightClickableButton soundEditButton = new RightClickableButton(
+                        movingX, 0, list.tinyWidgetWidth, height, 
+                        Component.literal("\uD83D\uDD0A").withStyle(notif.sound.isEnabled() 
+                                ? ChatFormatting.WHITE
+                                : ChatFormatting.RED
+                        ), (button) -> {
+                            // Open sound selection screen
+                            list.openSoundConfig(notif);
+                        }, (button) -> {
+                            // Toggle sound
+                            notif.sound.setEnabled(!notif.sound.isEnabled());
+                            list.reload();
+                        });
+                soundEditButton.setTooltip(Tooltip.create(localized(
+                        "option", "main.sound.status.tooltip." 
+                                + (notif.sound.isEnabled() ? "enabled" : "disabled"))
+                        .append("\n")
+                        .append(localized("option", "main.edit.click"))));
+                soundEditButton.setTooltipDelay(Duration.ofMillis(200));
+                elements.add(soundEditButton);
+
+                // On/off button
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .displayOnlyValue()
+                        .withInitialValue(notif.enabled)
+                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
+                                Component.empty(), (button, status) -> notif.enabled = status));
+                
+                if (index != 0) {
+                    // Drag reorder button (left-side extension)
                     elements.add(Button.builder(Component.literal("\u2191\u2193"),
                                     (button) -> {
                                         this.setDragging(true);
@@ -169,26 +412,8 @@ public class MainOptionList extends OptionList {
                             .pos(x - list.smallWidgetWidth - SPACING, 0)
                             .size(list.smallWidgetWidth, height)
                             .build());
-                }
 
-                // Main button
-                elements.add(Button.builder(createLabel(notif, mainButtonWidth - 10),
-                                (button) -> list.openNotificationConfig(index))
-                        .pos(x, 0)
-                        .size(mainButtonWidth, height)
-                        .build());
-
-                // On/off button
-                elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .displayOnlyValue()
-                        .withInitialValue(notif.enabled)
-                        .create(x + mainButtonWidth + SPACING, 0, statusButtonWidth, height,
-                                Component.empty(), (button, status) -> notif.enabled = status));
-
-                if (index > 0) {
-                    // Delete button
+                    // Delete button (right-side extension)
                     elements.add(Button.builder(Component.literal("\u274C")
                                             .withStyle(ChatFormatting.RED),
                                     (button) -> {
@@ -232,7 +457,7 @@ public class MainOptionList extends OptionList {
                     // Delete trigger strings until label is small enough
                     // Not the most efficient approach, but simple is nice
                     while(font.width(compileLabel(strList)) > maxWidth) {
-                        if (strList.size() == 1 || (strList.size() == 2
+                        if (strList.size() == 1 || (strList.size() == 2 
                                 && plusNumPattern.matcher(strList.getLast()).matches())) {
                             break;
                         }
@@ -240,6 +465,14 @@ public class MainOptionList extends OptionList {
                             strList.removeLast();
                         }
                         strList.add(String.format(plusNumFormat, usedStrings.size() - strList.size()));
+                    }
+
+                    // Only one trigger (and possibly a number indicator)
+                    // but if the first trigger is too long we trim it
+                    while(font.width(compileLabel(strList)) > maxWidth) {
+                        String str = strList.getFirst();
+                        if (str.length() < 3) break;
+                        strList.set(0, str.substring(0, str.length() - 5) + " ...");
                     }
 
                     label = Component.literal(compileLabel(strList));
@@ -252,9 +485,9 @@ public class MainOptionList extends OptionList {
 
             private String getString(Trigger trigger) {
                 if (trigger.type == Trigger.Type.KEY) {
-                    return localized("option", "main.label.key", (trigger.string.equals(".")
-                            ? localized("option", "key.id..")
-                            : trigger.string)).getString();
+                    String key = translationKey("option", "key.id") + "." + trigger.string;
+                    return localized("option", "main.label.key", 
+                            I18n.exists(key) ? I18n.get(key) : trigger.string).getString();
                 } else {
                     return trigger.string;
                 }

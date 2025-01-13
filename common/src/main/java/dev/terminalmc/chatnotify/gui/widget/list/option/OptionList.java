@@ -16,6 +16,7 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list.option;
 
+import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,6 +28,7 @@ import net.minecraft.network.chat.Component;
 import dev.terminalmc.chatnotify.gui.widget.slider.DoubleSlider;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +73,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                       int entryWidth, int entryHeight) {
         super(mc, width, height, y, itemHeight);
         this.entryWidth = entryWidth;
-        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 5.0F * 3));
+        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 100F * 70F));
         this.entryHeight = entryHeight;
         this.entryX = width / 2 - (entryWidth / 2);
         this.dynEntryX = width / 2 - (dynEntryWidth / 2);
@@ -90,6 +92,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     @Override
     protected int getScrollbarPosition() {
         return width / 2 + rowWidth / 2;
+    }
+
+    @Override
+    protected boolean isValidMouseClick(int button) {
+        return button == 0 || button == 1;
     }
 
     protected void reload() {
@@ -111,6 +118,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
         public static final int SPACING = 4;
+
+        public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
+                ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/options_button"),
+                ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/options_button_disabled"),
+                ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/options_button_highlighted"));
 
         public final List<AbstractWidget> elements;
 

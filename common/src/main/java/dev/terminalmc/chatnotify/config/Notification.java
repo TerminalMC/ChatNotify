@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Notification {
-    public final int version = 4;
+    public final int version = 5;
 
     /**
      * Indicates that this instance is being edited, and should not be activated
@@ -57,12 +57,6 @@ public class Notification {
     public static final boolean responseEnabledDefault = false;
 
     /**
-     * Whether messages activating this instance should be blocked from chat.
-     */
-    public boolean blockMessage;
-    public static final boolean blockMessageDefault = false;
-
-    /**
      * The {@link Sound} to play on activation.
      */
     public final Sound sound;
@@ -75,10 +69,28 @@ public class Notification {
     public static final Supplier<TextStyle> textStyleDefault = TextStyle::new;
 
     /**
-     * The {@link TitleText} to show on activation.
+     * Message to replace the triggering chat message.
      */
-    public TitleText titleText;
-    public static final Supplier<TitleText> titleTextDefault = TitleText::new;
+    public String replacementMsg;
+    public static final String replacementMsgDefault = "";
+    public boolean replacementMsgEnabled;
+    public static final boolean replacementMsgEnabledDefault = false;
+
+    /**
+     * Message to display in the status bar (above the hotbar).
+     */
+    public String statusBarMsg;
+    public static final String statusBarMsgDefault = "";
+    public boolean statusBarMsgEnabled;
+    public static final boolean statusBarMsgEnabledDefault = false;
+
+    /**
+     * Message to display in title text (large-font, center-screen).
+     */
+    public String titleMsg;
+    public static final String titleMsgDefault = "";
+    public boolean titleMsgEnabled;
+    public static final boolean titleMsgEnabledDefault = false;
 
     /**
      * The list of {@link Trigger}s which can activate this instance.
@@ -106,10 +118,14 @@ public class Notification {
             boolean enabled,
             boolean exclusionEnabled,
             boolean responseEnabled,
-            boolean blockMessage,
             Sound sound,
             TextStyle textStyle,
-            TitleText titleText,
+            String replacementMsg,
+            boolean replacementMsgEnabled,
+            String statusBarMsg,
+            boolean statusBarMsgEnabled,
+            String titleMsg,
+            boolean titleMsgEnabled,
             List<Trigger> triggers,
             List<Trigger> exclusionTriggers,
             List<ResponseMessage> responseMessages
@@ -117,10 +133,14 @@ public class Notification {
         this.enabled = enabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
-        this.blockMessage = blockMessage;
         this.sound = sound;
         this.textStyle = textStyle;
-        this.titleText = titleText;
+        this.replacementMsg = replacementMsg;
+        this.replacementMsgEnabled = replacementMsgEnabled; 
+        this.statusBarMsg = statusBarMsg;
+        this.statusBarMsgEnabled = statusBarMsgEnabled; 
+        this.titleMsg = titleMsg;
+        this.titleMsgEnabled = titleMsgEnabled; 
         this.triggers = triggers;
         this.exclusionTriggers = exclusionTriggers;
         this.responseMessages = responseMessages;
@@ -135,10 +155,14 @@ public class Notification {
                 enabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
-                blockMessageDefault,
                 soundDefault.get(),
                 textStyleDefault.get(),
-                titleTextDefault.get(),
+                replacementMsgDefault,
+                replacementMsgEnabledDefault,
+                statusBarMsgDefault,
+                statusBarMsgEnabledDefault,
+                titleMsgDefault,
+                titleMsgEnabledDefault,
                 new ArrayList<>(List.of(
                         new Trigger("Profile name"),
                         new Trigger("Display name")
@@ -157,10 +181,14 @@ public class Notification {
                 enabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
-                blockMessageDefault,
                 sound,
                 textStyle,
-                titleTextDefault.get(),
+                replacementMsgDefault,
+                replacementMsgEnabledDefault,
+                statusBarMsgDefault,
+                statusBarMsgEnabledDefault,
+                titleMsgDefault,
+                titleMsgEnabledDefault,
                 new ArrayList<>(List.of(
                         new Trigger("")
                 )),
@@ -230,8 +258,6 @@ public class Notification {
      * Sets all advanced settings to their respective defaults.
      */
     public void resetAdvanced() {
-        blockMessage = blockMessageDefault;
-        titleText = titleTextDefault.get();
         exclusionEnabled = exclusionEnabledDefault;
         exclusionTriggers.clear();
         responseEnabled = responseEnabledDefault;
@@ -286,11 +312,6 @@ public class Notification {
                     ? obj.get(f).getAsBoolean()
                     : responseEnabledDefault;
 
-            f = "blockMessage";
-            boolean blockMessage = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : blockMessageDefault;
-
             f = "sound";
             Sound sound = obj.has(f) && obj.get(f).isJsonObject()
                     ? ctx.deserialize(obj.get(f), Sound.class)
@@ -301,10 +322,35 @@ public class Notification {
                     ? ctx.deserialize(obj.get(f), TextStyle.class)
                     : textStyleDefault.get();
 
-            f = "titleText";
-            TitleText titleText = obj.has(f) && obj.get(f).isJsonObject()
-                    ? ctx.deserialize(obj.get(f), TitleText.class)
-                    : titleTextDefault.get();
+            f = "replacementMsg";
+            String replacementMsg = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? obj.get(f).getAsString()
+                    : replacementMsgDefault;
+
+            f = "replacementMsgEnabled";
+            boolean replacementMsgEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : replacementMsgEnabledDefault;
+
+            f = "statusBarMsg";
+            String statusBarMsg = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? obj.get(f).getAsString()
+                    : statusBarMsgDefault;
+
+            f = "statusBarMsgEnabled";
+            boolean statusBarMsgEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : statusBarMsgEnabledDefault;
+
+            f = "titleMsg";
+            String titleMsg = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? obj.get(f).getAsString()
+                    : titleMsgDefault;
+
+            f = "titleMsgEnabled";
+            boolean titleMsgEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
+                    ? obj.get(f).getAsBoolean()
+                    : titleMsgEnabledDefault;
 
             f = "triggers";
             List<Trigger> triggers = obj.has(f) && obj.get(f).isJsonArray()
@@ -337,8 +383,22 @@ public class Notification {
                 }
             }
 
-            return new Notification(enabled, exclusionEnabled, responseEnabled, blockMessage,
-                    sound, textStyle, titleText, triggers, exclusionTriggers, responseMessages);
+            return new Notification(
+                    enabled,
+                    exclusionEnabled,
+                    responseEnabled,
+                    sound,
+                    textStyle,
+                    replacementMsg,
+                    replacementMsgEnabled,
+                    statusBarMsg,
+                    statusBarMsgEnabled,
+                    titleMsg,
+                    titleMsgEnabled,
+                    triggers,
+                    exclusionTriggers,
+                    responseMessages
+            );
         }
     }
 }

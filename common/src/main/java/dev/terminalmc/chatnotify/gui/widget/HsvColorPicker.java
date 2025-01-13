@@ -106,10 +106,10 @@ public class HsvColorPicker extends OverlayWidget {
 
     private boolean updateFromCursor;
 
-    public HsvColorPicker(int x, int y, int width, int height, Component msg,
+    public HsvColorPicker(int x, int y, int width, int height, 
                           Supplier<Integer> source, Consumer<Integer> dest,
                           Consumer<OverlayWidget> close) {
-        super(x, y, width, height, msg, close);
+        super(x, y, width, height, Component.empty(), close);
         this.source = source;
         this.dest = dest;
         this.updateColorFromSource();

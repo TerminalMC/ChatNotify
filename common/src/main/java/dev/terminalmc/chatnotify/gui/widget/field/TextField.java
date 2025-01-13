@@ -24,6 +24,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,6 +45,10 @@ public class TextField extends EditBox {
     public boolean lenient = false;
     private int defaultTextColor;
     private Tooltip defaultTooltip;
+    private final Font font;
+    private double dragOriginX;
+    private int dragOriginPos;
+    private long lastClickTime;
 
     public TextField(int x, int y, int width, int height) {
         this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
@@ -53,6 +58,7 @@ public class TextField extends EditBox {
     public TextField(Font font, int x, int y, int width, int height, Component msg,
                      Function<String, Optional<Component>> validator) {
         super(font, x, y, width, height, msg);
+        this.font = font;
         this.validator = new Validator.Custom(validator);
         this.defaultTextColor = 14737632;
     }
@@ -104,6 +110,47 @@ public class TextField extends EditBox {
     public void setTextColor(int color) {
         defaultTextColor = color;
         super.setTextColor(color);
+    }
+    
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) {
+            // Double-click to select all
+            long time = System.currentTimeMillis();
+            if (lastClickTime + 250L > time) {
+                moveCursorToEnd(false);
+                setHighlightPos(0);
+            }
+            lastClickTime = time;
+            
+            // Reset drag origin
+            dragOriginX = mouseX;
+            dragOriginPos = getCursorPosition();
+            
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (button != 0) return false;
+        String str = getValue();
+        
+        if (mouseX < dragOriginX) { // Dragging left
+            String subLeft = str.substring(0, dragOriginPos);
+            int offsetChars = font.plainSubstrByWidth(subLeft,
+                    Mth.floor(dragOriginX - mouseX), true).length();
+            moveCursorTo(dragOriginPos - offsetChars, true);
+        }
+        else { // Dragging right
+            String subRight = str.substring(dragOriginPos);
+            int offsetChars = font.plainSubstrByWidth(subRight,
+                    Mth.floor(mouseX - dragOriginX), false).length();
+            moveCursorTo(dragOriginPos + offsetChars, true);
+        }
+        
+        return true;
     }
 
     private boolean valid(String str) {

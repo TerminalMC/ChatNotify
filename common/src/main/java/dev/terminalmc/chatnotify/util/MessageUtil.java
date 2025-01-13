@@ -24,6 +24,7 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -183,20 +184,37 @@ public class MessageUtil {
                 if (exHit) continue;
                 
                 // Activate notification
-                
-                if (notif.blockMessage) {
-                    ChatNotify.LOG.info("Message '{}' blocked by trigger '{}'", 
-                            msg.getString(), trig.string);
-                    if (!activated) return null;
-                }
-                
                 activated = true;
+                
+                // Send custom messages
+                Matcher subsMatcher = trig.type == Trigger.Type.REGEX ? matcher : null;
+                showStatusBarMsg(notif, subsMatcher);
+                showTitleMsg(notif, subsMatcher);
+                
+                // Play sound
                 if (!soundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
                     soundPlayed = playSound(notif);
                 }
-                showTitle(notif);
-                sendResponses(notif, trig.type == Trigger.Type.REGEX ? matcher : null);
                 
+                // Send response messages
+                sendResponses(notif, subsMatcher);
+
+                // If replacement enabled, process
+                if (notif.replacementMsgEnabled) {
+                    msg = convertMsg(notif.replacementMsg, subsMatcher);
+                    String str = msg.getString();
+                    
+                    // No other notifications can activate on a blank message
+                    if (str.isBlank()) return null;
+
+                    cleanStr = FormatUtil.stripCodes(str);
+                    cleanOwnedStr = cleanStr;
+
+                    // Break to avoid restyling or checking other triggers
+                    break;
+                }
+                
+                // Restyle
                 try {
                     // Convert message into a format suitable for recursive processing
                     msg = FormatUtil.convertToStyledLiteral(msg.copy());
@@ -291,30 +309,65 @@ public class MessageUtil {
     }
 
     /**
-     * Plays the sound of the specified notification, if the relevant control is
-     * enabled.
-     * @param notif the Notification.
+     * Plays the sound of the specified {@link Notification}, if enabled.
+     * @param notif the {@link Notification}.
      */
     private static boolean playSound(Notification notif) {
         if (notif.sound.isEnabled() && notif.sound.getVolume() > 0) {
-            Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(
-                    notif.sound.getResourceLocation(), Config.get().soundSource,
-                    notif.sound.getVolume(), notif.sound.getPitch(),
-                    SoundInstance.createUnseededRandom(), false, 0,
-                    SoundInstance.Attenuation.NONE, 0, 0, 0, true));
-            return true;
+            ResourceLocation location = notif.sound.getResourceLocation();
+            if (location != null) {
+                Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(
+                        notif.sound.getResourceLocation(), Config.get().soundSource,
+                        notif.sound.getVolume(), notif.sound.getPitch(),
+                        SoundInstance.createUnseededRandom(), false, 0,
+                        SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+                return true;
+            }
         }
         return false;
     }
 
     /**
-     * Displays the title text for the notification, if enabled.
-     * @param notif the Notification.
+     * Converts a custom message string into a {@link Component} for sending.
+     * @param msg the custom message string.
+     * @param matcher a regex matcher for capturing group substitution.
+     * @return the message, converted and with all substitutions done.
      */
-    private static void showTitle(Notification notif) {
-        if (notif.titleText.canDisplay()) {
+    private static Component convertMsg(String msg, @Nullable Matcher matcher) {
+        // Replace $ with section sign
+        msg = msg.replaceAll(Matcher.quoteReplacement("$"), "\u00A7");
+        // Substitute capturing groups
+        if (matcher != null) {
+            for (int i = 0; i <= matcher.groupCount(); i++) {
+                msg = msg.replace("(" + i + ")", matcher.group(i));
+            }
+        }
+        return Component.literal(msg);
+    }
+
+    /**
+     * Displays the title text for the {@link Notification}, if enabled.
+     * @param notif the {@link Notification}.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
+     *                was used, {@code null} otherwise.
+     */
+    private static void showStatusBarMsg(Notification notif, Matcher matcher) {
+        if (notif.statusBarMsgEnabled && !notif.statusBarMsg.isBlank()) {
+            Minecraft.getInstance().gui.setOverlayMessage(
+                    convertMsg(notif.statusBarMsg, matcher), false);
+        }
+    }
+
+    /**
+     * Displays the title text for the {@link Notification}, if enabled.
+     * @param notif the {@link Notification}.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
+     *                was used, {@code null} otherwise.
+     */
+    private static void showTitleMsg(Notification notif, Matcher matcher) {
+        if (notif.titleMsgEnabled && !notif.titleMsg.isBlank()) {
             Minecraft.getInstance().gui.setTitle(
-                    Component.literal(notif.titleText.text).withColor(notif.titleText.color));
+                    convertMsg(notif.titleMsg, matcher));
         }
     }
 

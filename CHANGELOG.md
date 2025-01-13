@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.0-beta.9
+
+- Overhauled top-level options GUI
+- Added replacement message and status bar message options
+- Moved title message option
+
 ## 2.3.0-beta.8
 
 - Fixed processing of certain translatable message formats

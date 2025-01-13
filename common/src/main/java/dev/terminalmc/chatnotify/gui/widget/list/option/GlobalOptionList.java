@@ -185,7 +185,7 @@ public class GlobalOptionList extends OptionList {
                             int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
                             list.screen.setOverlayWidget(new HsvColorPicker(
                                     x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
-                                    Component.empty(), () -> Config.get().defaultColor,
+                                    () -> Config.get().defaultColor,
                                     (val) -> Config.get().defaultColor = val,
                                     (widget) -> {
                                         list.screen.removeOverlayWidget();

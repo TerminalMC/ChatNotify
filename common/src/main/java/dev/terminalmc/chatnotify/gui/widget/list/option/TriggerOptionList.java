@@ -70,7 +70,7 @@ public class TriggerOptionList extends OptionList {
         textDisplayBox = new MultiLineEditBox(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, 
                 localized("option", "trigger.text.placeholder"), Component.empty());
         textDisplayBox.setValue(displayText);
-        keyDisplayBox = new EditBox(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, Component.empty());
+        keyDisplayBox = new TextField(dynEntryX, 0, dynEntryWidth, entryHeight);
         keyDisplayBox.setMaxLength(256);
         keyDisplayBox.setValue(displayKey);
         
@@ -320,8 +320,9 @@ public class TriggerOptionList extends OptionList {
                                     int cpHeight = Math.max(HsvColorPicker.MIN_HEIGHT, list.height / 2);
                                     int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
                                     list.screen.setOverlayWidget(new HsvColorPicker(
-                                            x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
-                                            Component.empty(), () -> list.textStyle.color,
+                                            x, list.screen.height / 2 - cpHeight / 2, 
+                                            cpWidth, cpHeight,
+                                            () -> list.textStyle.color,
                                             (val) -> list.textStyle.color = val,
                                             (widget) -> {
                                                 list.screen.removeOverlayWidget();
