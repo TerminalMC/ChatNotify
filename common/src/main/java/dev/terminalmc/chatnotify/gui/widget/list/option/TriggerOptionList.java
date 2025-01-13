@@ -379,14 +379,12 @@ public class TriggerOptionList extends OptionList {
         private static class MessageEntry extends Entry {
             private final TriggerOptionList list;
             private final Component msg;
-            private final Component restyledMsg;
 
             MessageEntry(int x, int width, TriggerOptionList list, 
                          Component msg, Component restyledMsg) {
                 super();
                 this.list = list;
                 this.msg = msg;
-                this.restyledMsg = restyledMsg;
                 MultiLineTextWidget widget = new MultiLineTextWidget(x, 0, restyledMsg,
                         Minecraft.getInstance().font);
                 widget.setMaxWidth(width);
