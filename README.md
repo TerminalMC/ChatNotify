@@ -4,7 +4,7 @@
 
 ## ChatNotify
 
-Set up audio and visual notifications for chat messages.
+Plays a ping sound when your name is mentioned, with options to create custom alerts.
 
 [![Environment](https://img.shields.io/badge/Environment-Client-blue?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AYht+malUqDnYQEclQneyiIo6likWwUNoKrTqYXPoHTRqSFBdHwbXg4M9i1cHFWVcHV0EQ/AFxdnBSdJESv0sKLWI8uLuH97735e47QGhUmGp2RQFVs4xUPCZmc6ti4BU9CKCP1jGJmXoivZiB5/i6h4/vdxGe5V335xhQ8iYDfCJxlOmGRbxBPLtp6Zz3iUOsJCnE58STBl2Q+JHrsstvnIsOCzwzZGRS88QhYrHYwXIHs5KhEs8QhxVVo3wh67LCeYuzWqmx1j35C4N5bSXNdZqjiGMJCSQhQkYNZVRgIUK7RoqJFJ3HPPwjjj9JLplcZTByLKAKFZLjB/+D3701C9NTblIwBnS/2PbHOBDYBZp12/4+tu3mCeB/Bq60tr/aAOY+Sa+3tfARMLgNXFy3NXkPuNwBhp90yZAcyU9TKBSA9zP6phwwdAv0r7l9a53j9AHIUK+Wb4CDQ2CiSNnrHu/u7ezbvzWt/v0ATphymIBZ6aQAAAAGYktHRAAKAAwAGd6C8noAAAAJcEhZcwAADdcAAA3XAUIom3gAAAAHdElNRQfoBgcOHRYlcgoRAAABRklEQVR42u2YMUoDQRRAX0axUzCteIZ4hKn0FDmFhalSWKkgnkHt9AQWwhzBNr2tBGNno82ACwm6EZvxvwdTzP8s7P8zu8w8EJHIDABKKfvAFXAIbP/zmt+AR2CSc54NavFPwDDY4s+BUaorPwy4+3eBy1S3fVSOUoBv/jt2UmMv/A6cAHt1TGqsb36JzcYaMM05X3Tm56UUgLOe+SVa2wE3K2LXa+Sbb8BgRWxjjXzzDRj/EBv3fOarY6WUj8Z+glPgtlPcKbDVM998A/6cVM/GUXlN9WIQlYdUDwvzgMW/AMcp5zwDRsA9sAhQ+AK4Aw5yzs8aEZHY6AR1gjpBnaBOsLHrsE6wM9cJohPUCeoE0Qn+Hp0gOkGdoE5QRMKiE9QJ6gR1gjrBxq7DOsHOXCeITlAnqBNEJ/h7dILoBHWCOkERCcsncuextWq5TzoAAAAASUVORK5CYII=)]()
 [![Latest Minecraft](https://img.shields.io/modrinth/game-versions/Iudurxl8?label=Latest%20Minecraft&color=%2300AF5C&logo=data:image/png;base64,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)](https://modrinth.com/mod/Iudurxl8/versions)
@@ -19,15 +19,207 @@ Set up audio and visual notifications for chat messages.
 
 ### Features
 
-- Extensive customizability and control.
-- Access to the full range of Minecraft sound effects, plus resourcepack sounds, with adjustable volume and pitch.
-- Custom color picker widget for easy selection of any RGB color.
-- Support for three trigger types:
-  - `Normal`: uses a 'fuzzy' matching pattern to detect words or phrases.
-  - `Key`: matches vanilla message types such as whispers and advancements.
-  - `Regex`: pure regex pattern matching for ultimate control.
-- Exclusion triggers for fine-tuning activation.
+- Easy access to all Minecraft sound effects, plus sounds from resourcepacks.
+- Customizable volume and pitch for alert sounds.
+- Text highlighting with full RGB color and format control.
+- Complete control over alert triggers with optional regex support and anti-triggers.
 - Automatic response messages with optional delay.
+- Fully custom options GUI for efficient configuration.
+
+### Setup
+
+<details open>
+<summary><b>Level 0: "Just ping me when my name is mentioned"</b></summary>
+
+- If you only want to get pinged when someone says your name, the mod works automatically - no setup is required.
+</details>
+
+<details>
+<summary><b>Level 1A (Normal): "Ping me when someone says hello"</b></summary>
+
+1. Access the options screen via [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on NeoForge.
+2. Click the `+` button to add a new notification.
+3. Type your custom notification trigger (e.g. "hello") in the field on the left.
+4. To change the highlight color, click the `🌢` button.
+5. To change the notification sound, click the `🔊` button.
+   1. Select a common sound by clicking one of the buttons, or
+   2. Click the field at the top to search for other sounds.
+6. To disable highlighting or sound, right-click the `🌢` or `🔊` button.
+7. When you're finished, click `Done` to exit.
+</details>
+
+<details>
+<summary><b>Level 1B (Normal): "Also ping me when someone says hi"</b></summary>
+
+1. Access the options screen and find your notification from `Level 1A`.
+2. Click the square `'More Options'` button on the right of the trigger field.
+3. On the new screen, click the large `+` button below the existing trigger.
+4. Type your custom notification trigger (e.g. "hi") into the new field.
+5. Click `Done` to return to the main screen, then `Done` again to exit.
+</details>
+
+<details>
+<summary><b>Level 2A (Key): "Ping me when someone gets an advancement"</b></summary>
+
+1. Access the options screen and click the `+` button to add a new notification.
+2. Click the `~` button on the left twice, so it shows a key. A new `🔍` button will appear.
+3. Click the `🔍` button.
+4. On the new screen, click the `Any Advancement` button, then click `Done`.
+5. Change the color and sound if you want (as in `Level 1A`), then click `Done` to exit.
+- **Note**: Some servers remove keys from messages, which prevents this type of trigger from working. 
+- To check whether a message has a key, follow `Level 3` and look at the `Key` field after clicking the message.
+- If the message does not have a key (or uses a generic key), you must use a normal (`~`) trigger instead.
+</details>
+
+<details>
+<summary><b>Level 2B (Key): "Play a sound for every new message"</b></summary>
+
+1. Access the options screen and add a new notification (`+`).
+2. Click the `~` button on the left twice, so it shows a key. A new `🔍` button will appear.
+3. Click the `🔍` button.
+4. On the new screen, click the `Any Message` button, then click `Done`.
+5. Change the color and sound if you want (as in `Level 1A`), then click `Done` again.
+- **Note**: Because this notification will activate for every message, you probably want it to be last.
+- On the options screen, click and drag the button on the far left to change the notification order.
+</details>
+
+<details>
+<summary><b>Level 3 (Normal): "Ping me when a specific server message appears"</b></summary>
+
+1. Join the server and wait for the message to appear in chat.
+2. Access the options screen and add a new notification (`+`).
+3. Click the `✎` button on the right of the trigger field to open the trigger editor.
+4. Chat messages will be displayed in a list, most recent first.
+5. Find your message, and click on it. 
+6. The message text will be placed into the `Text` field.
+7. Use the message text to create a custom trigger in the top field.
+8. To test your trigger, toggle the `Filter` button.
+9. When the filter is on, only messages that match the trigger will be shown.
+10. Once you're satisfied, click `Done` to return to the options screen.
+</details>
+
+<details>
+<summary><b>Level 4 (Regex): "I want more control"</b></summary>
+
+1. If the message might contain special characters, follow `Level 3` to copy the message text.
+2. Optionally use a tool like [regex101](https://regex101.com) to help build a proper regex pattern for the message.
+3. Access the options screen and add a new notification (`+`).
+4. Click the `~` button on the left, so it shows `.*`.
+5. Enter your regex pattern into the trigger field.
+
+</details>
+
+### Other Features
+
+#### Global Options
+
+To access, click the `Global Options` button from the options screen.
+
+<details>
+<summary><b>Detection Mode</b></summary>
+
+- Controls where and how incoming messages are intercepted. 
+- Useful if you have client-side mods sending messages that you want to detect or ignore.
+- Default is `HUD (Tags)`.
+</details>
+
+<details>
+<summary><b>Send Mode</b></summary>
+
+- Controls where and how response messages are sent. 
+- Useful if you want other client-side to detect or ignore response messages.
+- Default is `Packet`.
+</details>
+
+<details>
+<summary><b>Activation Mode</b></summary>
+
+- Controls how many notifications can be triggered by a single message.
+- Preference only.
+- Default is `Single Sound`.
+</details>
+
+<details>
+<summary><b>Restyle Mode</b></summary>
+
+- Controls how many triggers (or instances of triggers) will be restyled, per notification.
+- Preference only.
+- Default is `All Instances`.
+</details>
+
+#### Notification Options
+
+To access, click the `'More Options'` button for the notification you want to edit.
+
+<details>
+<summary><b>Restyle String</b></summary>
+
+- This feature provides finer control over which part of a message is highlighted (restyled).
+- For example, if you have a regex trigger that matches "correct horse battery staple" but you only want to highlight
+  "battery", you can specify "battery" as a restyle string.
+- To set a restyle string, access the `Notification Options` screen then press the small `+` button to the right
+  of the trigger field.
+</details>
+
+<details>
+<summary><b>Custom Messages</b></summary>
+
+- This feature allows you to send yourself messages when a notification is activated. 
+- See below for the different types.
+
+
+- Custom messages support color and format codes using `$` instead of `§`.
+- For more information on codes, refer to [the Minecraft Wiki](https://minecraft.wiki/w/Formatting_codes).
+
+
+- If the notification has a regex trigger, you can access capturing groups from the match using "`(n)`" in the custom 
+  message.
+- For example, if the trigger is `(\d+) stacks`, and you have a replacement message `(1)x64`, the message "23 stacks" 
+  will be replaced by "23x64".
+
+<details>
+<summary><b>Replacement Messages</b></summary>
+
+- This feature allows you to replace the triggering chat message with a custom message.
+- **Note**: If you switch this to `ON` and leave the field blank, the message will be blocked.
+- If a message is blocked, any subsequent notifications cannot be activated, but previous ones that have already
+  activated may still play sounds or send response messages, so use this feature with caution.
+</details>
+
+<details>
+<summary><b>Status Bar Messages</b></summary>
+
+- This feature allows you to send a custom message to your own status bar (above the hotbar).
+- **Note**: If you switch this to `ON` and leave the field blank, the entire message will be forwarded.
+</details>
+
+<details>
+<summary><b>Title Messages</b></summary>
+
+- This feature allows you to display a custom message as title text (large font, center-screen).
+- **Note**: If you switch this to `ON` and leave the field blank, the entire message will be forwarded.
+</details>
+</details>
+
+#### Advanced Options
+
+<details>
+<summary><b>Exclusion Triggers</b></summary>
+
+- Exclusion triggers allow you to restrict the activation conditions of notifications.
+- For example, if you want a notification to activate a message contains "shark", but only if the message does not also 
+  contain "fish", create a trigger for "shark" and an exclusion trigger for "fish".
+</details>
+
+<details>
+<summary><b>Response Messages</b></summary>
+
+- Response messages are sent in chat when a notification is activated.
+- Regex (`.*`) response messages can access capturing groups from a regex trigger using `(1)`, `(2)` etc., like custom 
+  messages.
+- **Note**: Response messages allow you to do things like spamming chat and creating infinite loops of notifications 
+  and responses, so you should exercise caution when using this feature.
+</details>
 
 <table style="width:100%;">
   <tr>
@@ -36,9 +228,30 @@ Set up audio and visual notifications for chat messages.
   </tr>
 </table>
 
+#### GUI Tweaks
+
+<details>
+<summary><b>Special Widgets</b></summary>
+
+- ChatNotify uses several custom GUI widgets to behave differently to normal Minecraft. Some are listed below.
+
+1. Color (`🌢`) and sound (`🔊`) status buttons on the options screen support right-click to toggle status.
+2. Single-line text fields have been modified to support double-clicking or clicking and dragging to select text.
+3. Fullscreen overlay widgets such as the color picker and drop-down text field support clicking outside to cancel.
+
+</details>
+
+<details>
+<summary><b>Chat Height Slider</b></summary>
+
+- ChatNotify modifies the chat height slider (in `Chat Settings`) to increase the maximum value to `500px`.
+- The set value is not affected, so your existing setting will stay the same unless you decide to change it.
+
+</details>
+
 ### Dependencies
 
-Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/), [ModMenu](https://modrinth.com/mod/mOgUt4GM/)
+Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH), [ModMenu](https://modrinth.com/mod/mOgUt4GM)
 
 NeoForge: None
 
