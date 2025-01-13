@@ -146,12 +146,13 @@ public class MessageUtil {
                 || Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
         boolean restyleAllTriggers = Config.get().restyleMode.equals(Config.RestyleMode.ALL)
                 || Config.get().restyleMode.equals(Config.RestyleMode.ALL_TRIGGERS);
-        boolean activated = false;
-        boolean soundPlayed = false;
+        boolean anyActivated = false;
+        boolean anySoundPlayed = false;
         
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
             if (!notif.canActivate()) continue;
+            boolean activated = false;
             
             // Trigger search
             for (Trigger trig : notif.triggers) {
@@ -173,6 +174,12 @@ public class MessageUtil {
                     case KEY -> keySearch(msg, trig.string);
                 };
                 if (!hit) continue;
+                
+                if (activated) {
+                    // Previously activated, restyle only
+                    msg = restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAllInstances);
+                    continue;
+                }
 
                 // Exclusion search
                 boolean exHit = false;
@@ -188,11 +195,12 @@ public class MessageUtil {
                 if (exHit) continue;
                 
                 // Activate notification
+                anyActivated = true;
                 activated = true;
                 
                 // Play sound
-                if (!soundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
-                    soundPlayed = playSound(notif);
+                if (!anySoundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
+                    anySoundPlayed = playSound(notif);
                 }
                 
                 // Send response messages
@@ -215,45 +223,7 @@ public class MessageUtil {
                 }
                 
                 // Restyle
-                try {
-                    // Convert message into a format suitable for recursive processing
-                    msg = FormatUtil.convertToStyledLiteral(msg.copy());
-                    if (debug) {
-                        ChatNotify.LOG.warn("Converted Message");
-                        ChatNotify.LOG.warn(msg.toString());
-                    }
-
-                    // Restyle, using style string if possible
-                    boolean restyled = false;
-                    if (trig.styleString != null) {
-                        Matcher m = styleSearch(cleanStr, trig.styleString);
-                        if (m.find()) {
-                            restyled = true;
-                            do {
-                                msg = restyleLeaves(msg, notif.textStyle, m.start(), m.end());
-                            } while (restyleAllInstances && m.find());
-                        }
-                    }
-                    // If style string not usable, attempt to restyle trigger
-                    if (!restyled) {
-                        switch(trig.type) {
-                            case NORMAL -> {
-                                do {
-                                    msg = restyleLeaves(msg, notif.textStyle,
-                                            matcher.start() + matcher.group(1).length(),
-                                            matcher.end() - matcher.group(2).length());
-                                } while (restyleAllInstances && matcher.find());
-                            }
-                            case REGEX -> {
-                                do {
-                                    msg = restyleLeaves(msg, notif.textStyle,
-                                            matcher.start(), matcher.end());
-                                } while (restyleAllInstances && matcher.find());
-                            }
-                            case KEY -> msg = restyleRoot(msg, notif.textStyle);
-                        }
-                    }
-                } catch (IllegalArgumentException ignored) {}
+                msg = restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAllInstances);
 
                 // Send custom messages
                 showStatusBarMsg(notif, msg, subsMatcher);
@@ -261,8 +231,52 @@ public class MessageUtil {
                 
                 if (!restyleAllTriggers) break;
             }
-            if (activated && Config.get().notifMode.equals(Config.NotifMode.SINGLE)) return msg;
+            if (anyActivated && Config.get().notifMode.equals(Config.NotifMode.SINGLE)) return msg;
         }
+        return msg;
+    }
+    
+    private static Component restyle(Component msg, String cleanStr, Trigger trig, Matcher matcher, 
+                                     TextStyle textStyle, boolean restyleAllInstances) {
+        try {
+            // Convert message into a format suitable for recursive processing
+            msg = FormatUtil.convertToStyledLiteral(msg.copy());
+            if (debug) {
+                ChatNotify.LOG.warn("Converted Message");
+                ChatNotify.LOG.warn(msg.toString());
+            }
+
+            // Restyle, using style string if possible
+            boolean restyled = false;
+            if (trig.styleString != null) {
+                Matcher m = styleSearch(cleanStr, trig.styleString);
+                if (m.find()) {
+                    restyled = true;
+                    do {
+                        msg = restyleLeaves(msg, textStyle, m.start(), m.end());
+                    } while (restyleAllInstances && m.find());
+                }
+            }
+            // If style string not usable, attempt to restyle trigger
+            if (!restyled) {
+                switch(trig.type) {
+                    case NORMAL -> {
+                        do {
+                            msg = restyleLeaves(msg, textStyle,
+                                    matcher.start() + matcher.group(1).length(),
+                                    matcher.end() - matcher.group(2).length());
+                        } while (restyleAllInstances && matcher.find());
+                    }
+                    case REGEX -> {
+                        do {
+                            msg = restyleLeaves(msg, textStyle,
+                                    matcher.start(), matcher.end());
+                        } while (restyleAllInstances && matcher.find());
+                    }
+                    case KEY -> msg = restyleRoot(msg, textStyle);
+                }
+            }
+        } catch (IllegalArgumentException ignored) {}
         return msg;
     }
 
