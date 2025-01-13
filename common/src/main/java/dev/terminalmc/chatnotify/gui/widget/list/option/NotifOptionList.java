@@ -123,8 +123,8 @@ public class NotifOptionList extends OptionList {
                         .append("\n\n").append(localized("option", "notif.msg.info.blank_original"))));
 
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
-                localized("option", "notif.advanced"),
-                Tooltip.create(localized("option", "notif.advanced.tooltip")), 500,
+                localized("option", "advanced"),
+                Tooltip.create(localized("option", "advanced.tooltip")), 500,
                 (button) -> openAdvancedConfig()));
     }
 
