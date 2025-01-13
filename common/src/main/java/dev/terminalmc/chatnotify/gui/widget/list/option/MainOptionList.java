@@ -19,6 +19,7 @@ package dev.terminalmc.chatnotify.gui.widget.list.option;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
+import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
@@ -107,9 +108,15 @@ public class MainOptionList extends OptionList {
                         entryWidth, entryHeight, trigger, notif.textStyle, "", "", false, true)));
     }
 
+    private void openKeyConfig(Trigger trigger, TextStyle textStyle) {
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
+                new KeyOptionList(minecraft, width, height, getY(),
+                        entryWidth, entryHeight, trigger, textStyle)));
+    }
+
     private void openSoundConfig(Notification notif) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
-                new SoundOptionList(minecraft, width, height, getY(), itemHeight,
+                new SoundOptionList(minecraft, width, height, getY(),
                         entryWidth, entryHeight, notif.sound)));
     }
 
@@ -180,10 +187,12 @@ public class MainOptionList extends OptionList {
                              List<Notification> notifs, int index) {
                 super();
                 Notification notif = notifs.get(index);
+                int SPACING_NARROW = 2;
                 
                 @Nullable Trigger trigger = notif.triggers.size() == 1 
                         ? notif.triggers.getFirst() : null;
                 boolean singleTrig = trigger != null;
+                boolean keyTrig = singleTrig && trigger.type == Trigger.Type.KEY;
                 
                 int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF++"); // ~54
                 int soundFieldWidth = colorFieldWidth; // Base width
@@ -193,13 +202,13 @@ public class MainOptionList extends OptionList {
                 boolean showSoundField = false;
                 
                 int triggerWidth = width
-                        - SPACING
+                        - SPACING_NARROW
                         - list.smallWidgetWidth
-                        - SPACING
+                        - SPACING_NARROW
                         - list.tinyWidgetWidth
-                        - SPACING
+                        - SPACING_NARROW
                         - list.tinyWidgetWidth
-                        - SPACING
+                        - SPACING_NARROW
                         - statusButtonWidth;
                 
                 // Show sound field if trigger will still have 200 space
@@ -233,7 +242,9 @@ public class MainOptionList extends OptionList {
                     showColorField = true;
                 }
                 
-                int triggerFieldWidth = triggerWidth - (singleTrig ? list.tinyWidgetWidth * 2 : 0);
+                int triggerFieldWidth = triggerWidth;
+                if (singleTrig) triggerFieldWidth -= (list.tinyWidgetWidth * 2);
+                if (keyTrig) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
                 
                 if (singleTrig) {
@@ -270,8 +281,22 @@ public class MainOptionList extends OptionList {
                         localized("option", "main.trigger.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
-                movingX += triggerFieldWidth + (singleTrig ? 0 : SPACING);
+                movingX += triggerFieldWidth + (singleTrig ? 0 : SPACING_NARROW);
 
+                if (keyTrig) {
+                    // Key selection button
+                    Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"),
+                                    (button) -> list.openKeyConfig(trigger, notif.textStyle))
+                            .pos(movingX, 0)
+                            .size(list.tinyWidgetWidth, height)
+                            .build();
+                    keySelectButton.setTooltip(Tooltip.create(
+                            localized("option", "notif.trigger.key.tooltip")));
+                    keySelectButton.setTooltipDelay(Duration.ofMillis(200));
+                    elements.add(keySelectButton);
+                    movingX += list.tinyWidgetWidth;
+                }
+                
                 if (singleTrig) {
                     // Trigger editor button
                     Button editorButton = Button.builder(Component.literal("\u270e"),
@@ -283,7 +308,7 @@ public class MainOptionList extends OptionList {
                             localized("option", "notif.trigger.editor.tooltip")));
                     editorButton.setTooltipDelay(Duration.ofMillis(200));
                     elements.add(editorButton);
-                    movingX += list.tinyWidgetWidth + SPACING;
+                    movingX += list.tinyWidgetWidth + SPACING_NARROW;
                 }
 
                 // Options button
@@ -298,7 +323,7 @@ public class MainOptionList extends OptionList {
                         "option", "main.options.tooltip")));
                 editButton.setTooltipDelay(Duration.ofMillis(200));
                 elements.add(editButton);
-                movingX += list.smallWidgetWidth + SPACING;
+                movingX += list.smallWidgetWidth + SPACING_NARROW;
                 
                 // Color
 
@@ -356,7 +381,7 @@ public class MainOptionList extends OptionList {
                         .append(localized("option", "main.edit.click"))));
                 colorEditButton.setTooltipDelay(Duration.ofMillis(200));
                 elements.add(colorEditButton);
-                movingX += list.tinyWidgetWidth + SPACING;
+                movingX += list.tinyWidgetWidth + SPACING_NARROW;
                 
                 // Sound
 

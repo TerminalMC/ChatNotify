@@ -21,6 +21,7 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.FormatUtil;
@@ -160,6 +161,12 @@ public class TriggerOptionList extends OptionList {
         }
     }
 
+    private void openKeyConfig() {
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
+                new KeyOptionList(minecraft, width, height, getY(),
+                        entryWidth, entryHeight, trigger, textStyle)));
+    }
+
     @Override
     protected OptionList reload(int width, int height, double scrollAmount) {
         TriggerOptionList newList = new TriggerOptionList(minecraft, width, height,
@@ -175,9 +182,9 @@ public class TriggerOptionList extends OptionList {
             TriggerFieldEntry(int x, int width, int height, TriggerOptionList list, 
                               Trigger trigger) {
                 super();
-                int fieldSpacing = 1;
-                int triggerFieldWidth = width - (list.tinyWidgetWidth * 2) - (fieldSpacing * 2);
-                TextField triggerField = new TextField(0, 0, triggerFieldWidth, height);
+                int triggerFieldWidth = width - (list.tinyWidgetWidth * 2);
+                boolean keyTrigger = trigger.type == Trigger.Type.KEY;
+                if (keyTrigger) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
 
                 // Type button
@@ -195,10 +202,10 @@ public class TriggerOptionList extends OptionList {
                                 });
                 typeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(typeButton);
-                movingX += list.tinyWidgetWidth + fieldSpacing;
+                movingX += list.tinyWidgetWidth;
 
                 // Trigger field
-                triggerField.setPosition(movingX, 0);
+                TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((str) -> {
@@ -215,7 +222,21 @@ public class TriggerOptionList extends OptionList {
                         localized("option", "notif.trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
-                movingX = x + width - list.tinyWidgetWidth;
+                movingX += triggerFieldWidth;
+
+                if (keyTrigger) {
+                    // Key selection button
+                    Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"),
+                                    (button) -> list.openKeyConfig())
+                            .pos(movingX, 0)
+                            .size(list.tinyWidgetWidth, height)
+                            .build();
+                    keySelectButton.setTooltip(Tooltip.create(
+                            localized("option", "notif.trigger.key.tooltip")));
+                    keySelectButton.setTooltipDelay(Duration.ofMillis(500));
+                    elements.add(keySelectButton);
+                    movingX += list.tinyWidgetWidth;
+                }
 
                 // Style string add button
                 Button styleButton = Button.builder(Component.literal("+"),

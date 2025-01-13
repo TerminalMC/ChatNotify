@@ -44,7 +44,7 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 public class SoundOptionList extends OptionList {
     private final Sound sound;
 
-    public SoundOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
+    public SoundOptionList(Minecraft mc, int width, int height, int y, 
                            int entryWidth, int entryHeight, Sound sound) {
         super(mc, width, height, y, entryHeight + 1, entryWidth, entryHeight);
         this.sound = sound;
@@ -177,7 +177,7 @@ public class SoundOptionList extends OptionList {
     @Override
     public SoundOptionList reload(int width, int height, double scrollAmount) {
         SoundOptionList newList = new SoundOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, sound);
+                getY(), entryWidth, entryHeight, sound);
         newList.setScrollAmount(scrollAmount);
         return newList;
     }
@@ -191,12 +191,15 @@ public class SoundOptionList extends OptionList {
 
     private void playNotifSound() {
         minecraft.getSoundManager().stop();
-        minecraft.getSoundManager().play(new SimpleSoundInstance(
-                sound.getResourceLocation(),
-                Config.get().soundSource,
-                sound.getVolume(), sound.getPitch(),
-                SoundInstance.createUnseededRandom(), false, 0,
-                SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+        ResourceLocation location = sound.getResourceLocation();
+        if (location != null) {
+            minecraft.getSoundManager().play(new SimpleSoundInstance(
+                    location,
+                    Config.get().soundSource,
+                    sound.getVolume(), sound.getPitch(),
+                    SoundInstance.createUnseededRandom(), false, 0,
+                    SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+        }
     }
 
     private abstract static class Entry extends OptionList.Entry {

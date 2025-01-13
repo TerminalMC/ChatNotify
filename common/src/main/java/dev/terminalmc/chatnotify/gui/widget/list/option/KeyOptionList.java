@@ -18,12 +18,12 @@ package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
-import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 
@@ -33,9 +33,9 @@ public class KeyOptionList extends OptionList {
     private final Trigger trigger;
     private final TextStyle textStyle;
 
-    public KeyOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
+    public KeyOptionList(Minecraft mc, int width, int height, int y,
                          int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+        super(mc, width, height, y, entryHeight + 1, entryWidth, entryHeight);
         this.trigger = trigger;
         this.textStyle = textStyle;
 
@@ -43,7 +43,7 @@ public class KeyOptionList extends OptionList {
                 localized("option", "key.trigger", "\u2139"),
                 Tooltip.create(localized("option", "key.trigger.tooltip")), -1));
 
-        addEntry(new Entry.TriggerFieldEntry(dynEntryX, dynEntryWidth, entryHeight, this, trigger));
+        addEntry(new Entry.TriggerFieldEntry(dynEntryX, dynEntryWidth, entryHeight, trigger));
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.chat"), null, -1));
@@ -57,8 +57,9 @@ public class KeyOptionList extends OptionList {
                 "chat.type.team.sent",
                 "chat.type.team.text",
         };
-        for (String s : chatKeys) {
-            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger, s));
+        for (int i = 0; i < chatKeys.length; i++) {
+            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
+                    chatKeys[i], i < chatKeys.length - 1 ? chatKeys[++i] : null));
         }
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -68,8 +69,9 @@ public class KeyOptionList extends OptionList {
                 "multiplayer.player.left",
                 "death.",
         };
-        for (String s : playerKeys) {
-            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger, s));
+        for (int i = 0; i < playerKeys.length; i++) {
+            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
+                    playerKeys[i], i < playerKeys.length - 1 ? playerKeys[++i] : null));
         }
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -80,8 +82,9 @@ public class KeyOptionList extends OptionList {
                 "chat.type.advancement.goal",
                 "chat.type.advancement.challenge",
         };
-        for (String s : advancementKeys) {
-            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger, s));
+        for (int i = 0; i < advancementKeys.length; i++) {
+            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
+                    advancementKeys[i], i < advancementKeys.length - 1 ? advancementKeys[++i] : null));
         }
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -92,37 +95,26 @@ public class KeyOptionList extends OptionList {
                 "commands.message.display.incoming",
                 "commands.message.display.outgoing",
         };
-        for (String s : commandKeys) {
-            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger, s));
+        for (int i = 0; i < commandKeys.length; i++) {
+            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
+                    commandKeys[i], i < commandKeys.length - 1 ? commandKeys[++i] : null));
         }
     }
 
     @Override
     public KeyOptionList reload(int width, int height, double scrollAmount) {
         KeyOptionList newList = new KeyOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, trigger, textStyle);
+                getY(), entryWidth, entryHeight, trigger, textStyle);
         newList.setScrollAmount(scrollAmount);
         return newList;
-    }
-
-    private void openTriggerConfig(Trigger trigger) {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
-                new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
-                        entryWidth, entryHeight, trigger, textStyle, "", "", false, true)));
     }
 
     private abstract static class Entry extends OptionList.Entry {
 
         private static class TriggerFieldEntry extends Entry {
-            TriggerFieldEntry(int x, int width, int height, KeyOptionList list,
-                              Trigger trigger) {
+            TriggerFieldEntry(int x, int width, int height, Trigger trigger) {
                 super();
-                int fieldSpacing = 1;
-                int triggerFieldWidth = width - list.tinyWidgetWidth - fieldSpacing;
-                TextField triggerField = new TextField(0, 0, triggerFieldWidth, height);
-
-                // Trigger field
-                triggerField.setPosition(x, 0);
+                TextField triggerField = new TextField(x, 0, width, height);
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((str) -> trigger.string = str.strip());
@@ -131,33 +123,38 @@ public class KeyOptionList extends OptionList {
                         localized("option", "notif.trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
-
-                // Trigger editor button
-                Button editorButton = Button.builder(Component.literal("\u270e"),
-                                (button) -> list.openTriggerConfig(trigger))
-                        .pos(x + width - list.tinyWidgetWidth, 0)
-                        .size(list.tinyWidgetWidth, height)
-                        .build();
-                editorButton.setTooltip(Tooltip.create(
-                        localized("option", "notif.trigger.editor.tooltip")));
-                editorButton.setTooltipDelay(Duration.ofMillis(500));
-                elements.add(editorButton);
             }
         }
 
         private static class KeyOption extends Entry {
-            KeyOption(int x, int width, int height, KeyOptionList list, Trigger trigger, String key) {
+            KeyOption(int x, int width, int height, KeyOptionList list, Trigger trigger,
+                      String key1, @Nullable String key2) {
                 super();
-                elements.add(Button.builder(localized("option", "key.id." + key), 
+                int buttonWidth = (width - 1) / 2;
+                
+                elements.add(Button.builder(localized("option", "key.id." + key1), 
                         (button) -> {
-                            trigger.string = key;
+                            trigger.string = key1;
                             list.setScrollAmount(0);
                             list.reload();
                         })
-                        .tooltip(Tooltip.create(Component.literal(key)))
+                        .tooltip(Tooltip.create(Component.literal(key1)))
                         .pos(x, 0)
-                        .size(width, height)
+                        .size(buttonWidth, height)
                         .build());
+
+                if (key2 != null) {
+                    elements.add(Button.builder(localized("option", "key.id." + key2),
+                                    (button) -> {
+                                        trigger.string = key2;
+                                        list.setScrollAmount(0);
+                                        list.reload();
+                                    })
+                            .tooltip(Tooltip.create(Component.literal(key2)))
+                            .pos(x + width - buttonWidth, 0)
+                            .size(buttonWidth, height)
+                            .build());
+                }
             }
         }
     }

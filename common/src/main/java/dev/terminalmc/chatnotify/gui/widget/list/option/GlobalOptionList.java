@@ -79,7 +79,7 @@ public class GlobalOptionList extends OptionList {
 
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
-                new SoundOptionList(minecraft, width, height, getY(), itemHeight,
+                new SoundOptionList(minecraft, width, height, getY(),
                         entryWidth, entryHeight, Config.get().defaultSound)));
     }
 

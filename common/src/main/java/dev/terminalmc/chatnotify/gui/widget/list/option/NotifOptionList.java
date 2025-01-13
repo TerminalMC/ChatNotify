@@ -19,7 +19,6 @@ package dev.terminalmc.chatnotify.gui.widget.list.option;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
-import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.ColorUtil;
@@ -147,13 +146,13 @@ public class NotifOptionList extends OptionList {
 
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
-                new KeyOptionList(minecraft, width, height, getY(), itemHeight,
+                new KeyOptionList(minecraft, width, height, getY(),
                         entryWidth, entryHeight, trigger, notif.textStyle)));
     }
 
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
-                new SoundOptionList(minecraft, width, height, getY(), itemHeight,
+                new SoundOptionList(minecraft, width, height, getY(),
                         entryWidth, entryHeight, notif.sound)));
     }
 
@@ -270,12 +269,9 @@ public class NotifOptionList extends OptionList {
             TriggerFieldEntry(int x, int width, int height, NotifOptionList list,
                               Notification notif, Trigger trigger, int index) {
                 super();
-                int fieldSpacing = 1;
-                int triggerFieldWidth = width - (list.tinyWidgetWidth * 3) - (fieldSpacing * 2);
-                TextField triggerField = trigger.type == Trigger.Type.KEY
-                        ? new FakeTextField(0, 0, triggerFieldWidth, height, 
-                                () -> list.openKeyConfig(trigger))
-                        : new TextField(0, 0, triggerFieldWidth, height);
+                int triggerFieldWidth = width - (list.tinyWidgetWidth * 3);
+                boolean keyTrigger = trigger.type == Trigger.Type.KEY;
+                if (keyTrigger) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
 
                 // Drag reorder button
@@ -304,10 +300,10 @@ public class NotifOptionList extends OptionList {
                                 });
                 typeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(typeButton);
-                movingX += list.tinyWidgetWidth + fieldSpacing;
+                movingX += list.tinyWidgetWidth;
 
                 // Trigger field
-                triggerField.setPosition(movingX, 0);
+                TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((str) -> trigger.string = str.strip());
@@ -316,7 +312,21 @@ public class NotifOptionList extends OptionList {
                         localized("option", "notif.trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
-                movingX = x + width - list.tinyWidgetWidth * 2;
+                movingX += triggerFieldWidth;
+
+                if (keyTrigger) {
+                    // Key selection button
+                    Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"), 
+                                    (button) -> list.openKeyConfig(trigger))
+                            .pos(movingX, 0)
+                            .size(list.tinyWidgetWidth, height)
+                            .build();
+                    keySelectButton.setTooltip(Tooltip.create(
+                            localized("option", "notif.trigger.key.tooltip")));
+                    keySelectButton.setTooltipDelay(Duration.ofMillis(500));
+                    elements.add(keySelectButton);
+                    movingX += list.tinyWidgetWidth + SPACING;
+                }
                 
                 // Trigger editor button
                 Button editorButton = Button.builder(Component.literal("\u270e"),
