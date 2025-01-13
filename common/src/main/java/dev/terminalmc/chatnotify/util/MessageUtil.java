@@ -186,17 +186,13 @@ public class MessageUtil {
                 // Activate notification
                 activated = true;
                 
-                // Send custom messages
-                Matcher subsMatcher = trig.type == Trigger.Type.REGEX ? matcher : null;
-                showStatusBarMsg(notif, subsMatcher);
-                showTitleMsg(notif, subsMatcher);
-                
                 // Play sound
                 if (!soundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
                     soundPlayed = playSound(notif);
                 }
                 
                 // Send response messages
+                Matcher subsMatcher = trig.type == Trigger.Type.REGEX ? matcher : null;
                 sendResponses(notif, subsMatcher);
 
                 // If replacement enabled, process
@@ -257,6 +253,10 @@ public class MessageUtil {
                         }
                     }
                 } catch (IllegalArgumentException ignored) {}
+
+                // Send custom messages
+                showStatusBarMsg(notif, msg, subsMatcher);
+                showTitleMsg(notif, msg, subsMatcher);
                 
                 if (!Config.get().restyleMode.equals(Config.RestyleMode.ALL_TRIGGERS)) break;
             }
@@ -346,28 +346,34 @@ public class MessageUtil {
     }
 
     /**
-     * Displays the title text for the {@link Notification}, if enabled.
+     * Displays the status bar message for the {@link Notification}, if enabled.
      * @param notif the {@link Notification}.
+     * @param msg the original message.
      * @param matcher the {@link Matcher} for the trigger, if a regex trigger
      *                was used, {@code null} otherwise.
      */
-    private static void showStatusBarMsg(Notification notif, Matcher matcher) {
-        if (notif.statusBarMsgEnabled && !notif.statusBarMsg.isBlank()) {
-            Minecraft.getInstance().gui.setOverlayMessage(
-                    convertMsg(notif.statusBarMsg, matcher), false);
+    private static void showStatusBarMsg(Notification notif, Component msg, Matcher matcher) {
+        if (notif.statusBarMsgEnabled) {
+            Component displayMsg = notif.statusBarMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.statusBarMsg, matcher);
+            Minecraft.getInstance().gui.setOverlayMessage(displayMsg, false);
         }
     }
 
     /**
-     * Displays the title text for the {@link Notification}, if enabled.
+     * Displays the title message for the {@link Notification}, if enabled.
      * @param notif the {@link Notification}.
+     * @param msg the original message.
      * @param matcher the {@link Matcher} for the trigger, if a regex trigger
      *                was used, {@code null} otherwise.
      */
-    private static void showTitleMsg(Notification notif, Matcher matcher) {
-        if (notif.titleMsgEnabled && !notif.titleMsg.isBlank()) {
-            Minecraft.getInstance().gui.setTitle(
-                    convertMsg(notif.titleMsg, matcher));
+    private static void showTitleMsg(Notification notif, Component msg, Matcher matcher) {
+        if (notif.titleMsgEnabled) {
+            Component displayMsg = notif.titleMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.titleMsg, matcher);
+            Minecraft.getInstance().gui.setTitle(displayMsg);
         }
     }
 

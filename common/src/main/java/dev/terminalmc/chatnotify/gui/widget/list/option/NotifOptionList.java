@@ -101,7 +101,8 @@ public class NotifOptionList extends OptionList {
                 localized("option", "notif.msg.replacement").append(".\n")
                         .append(localized("option", "notif.msg.replacement.tooltip"))
                         .append("\n\n").append(localized("option", "notif.msg.info.format_codes"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))));
+                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))
+                        .append("\n\n").append(localized("option", "notif.msg.info.blank_hide"))));
         addEntry(new Entry.MessageConfigEntry(entryX, entryWidth, entryHeight, notif, this,
                 () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
                 () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
@@ -109,7 +110,8 @@ public class NotifOptionList extends OptionList {
                 localized("option", "notif.msg.status_bar").append(".\n")
                         .append(localized("option", "notif.msg.status_bar.tooltip"))
                         .append("\n\n").append(localized("option", "notif.msg.info.format_codes"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))));
+                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))
+                        .append("\n\n").append(localized("option", "notif.msg.info.blank_original"))));
         addEntry(new Entry.MessageConfigEntry(entryX, entryWidth, entryHeight, notif, this,
                 () -> notif.titleMsg, (str) -> notif.titleMsg = str,
                 () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
@@ -117,7 +119,8 @@ public class NotifOptionList extends OptionList {
                 localized("option", "notif.msg.title").append(".\n")
                         .append(localized("option", "notif.msg.title.tooltip"))
                         .append("\n\n").append(localized("option", "notif.msg.info.format_codes"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))));
+                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))
+                        .append("\n\n").append(localized("option", "notif.msg.info.blank_original"))));
 
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "notif.advanced"),
