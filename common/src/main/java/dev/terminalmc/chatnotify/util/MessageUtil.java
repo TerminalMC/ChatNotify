@@ -236,7 +236,7 @@ public class MessageUtil {
         return msg;
     }
     
-    private static Component restyle(Component msg, String cleanStr, Trigger trig, Matcher matcher, 
+    public static Component restyle(Component msg, String cleanStr, Trigger trig, Matcher matcher, 
                                      TextStyle textStyle, boolean restyleAllInstances) {
         try {
             // Convert message into a format suitable for recursive processing
@@ -248,7 +248,7 @@ public class MessageUtil {
 
             // Restyle, using style string if possible
             boolean restyled = false;
-            if (trig.styleString != null) {
+            if (trig.styleString != null && !trig.styleString.isBlank()) {
                 Matcher m = styleSearch(cleanStr, trig.styleString);
                 if (m.find()) {
                     restyled = true;

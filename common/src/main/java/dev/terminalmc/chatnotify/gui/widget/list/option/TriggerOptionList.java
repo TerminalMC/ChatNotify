@@ -115,30 +115,8 @@ public class TriggerOptionList extends OptionList {
             };
             if (filter && !hit) continue;
             else if (restyle && hit) {
-                // Restyle, using style string if possible
-                if (trigger.styleString != null) {
-                    Matcher m = MessageUtil.styleSearch(msg.getString(), trigger.styleString);
-                    do {
-                        msg = MessageUtil.restyleLeaves(msg, textStyle, m.start(), m.end());
-                    } while (restyleAllInstances && m.find());
-                } else {
-                    switch(trigger.type) {
-                        case NORMAL -> {
-                            do {
-                                msg = MessageUtil.restyleLeaves(msg, textStyle,
-                                        matcher.start() + matcher.group(1).length(),
-                                        matcher.end() - matcher.group(2).length());
-                            } while (restyleAllInstances && matcher.find());
-                        }
-                        case REGEX -> {
-                            do {
-                                msg = MessageUtil.restyleLeaves(msg, textStyle,
-                                        matcher.start(), matcher.end());
-                            } while (restyleAllInstances && matcher.find());
-                        }
-                        case KEY -> msg = MessageUtil.restyleRoot(msg, textStyle);
-                    }
-                }
+                msg = MessageUtil.restyle(msg, FormatUtil.stripCodes(msg.getString()), trigger, 
+                        matcher, textStyle, restyleAllInstances);
             }
             filteredChat.add(new Pair<>(pair.getFirst(), msg));
         }

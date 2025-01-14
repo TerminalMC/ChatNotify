@@ -1,6 +1,10 @@
 # Changelog
 
-## 2.3.0-beta.10
+## 2.3.0-beta.11
+
+- Fixed a crash when adding a restyle string using the trigger editor
+
+## 2.3.0
 
 - Redesigned options GUI
 - Added trigger editor with recent chat message display
@@ -14,7 +18,8 @@
 - Added support for activating multiple notifications on a single message
 - Added message replacement option
 - Added status bar message option
-- Added title message option
+- Adjusted title message option to match other custom message options
+- Special thanks to Aqua (aquahonoredhi) for helping with design and testing of this update
 
 ## 2.2.0
 
