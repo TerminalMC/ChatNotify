@@ -26,6 +26,8 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 - Automatic response messages with optional delay.
 - Fully custom options GUI for efficient configuration.
 
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_02.png" style="width:50%;">
+
 ### Overview
 
 ### Setup
@@ -45,6 +47,17 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 - You can create and customize your own notifications via the options screen, which can be opened using 
   [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on NeoForge.
 - See below for basic guides on setting up your own custom notifications.
+
+<table style="width:100%;">
+  <tr>
+    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_main_01.png" style="width:100%;"></td>
+    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_trigger_01.png" style="width:100%;"></td>
+  </tr>
+  <tr>
+    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_colorpicker_01.png" style="width:100%;"></td>
+    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_soundselector_01.png" style="width:100%;"></td>
+  </tr>
+</table>
 </details>
 
 <details open>
@@ -134,6 +147,8 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 
 To access, click the `Global Options` button from the options screen.
 
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_global_01.png" style="width:50%;">
+
 <details>
 <summary><b>Detection Mode</b></summary>
 
@@ -170,6 +185,8 @@ To access, click the `Global Options` button from the options screen.
 
 To access, click the `'More Options'` button for the notification you want to edit.
 
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_notification_01.png" style="width:50%;">
+
 <details>
 <summary><b>Restyle String</b></summary>
 
@@ -183,6 +200,8 @@ To access, click the `'More Options'` button for the notification you want to ed
 #### Advanced Options
 
 To access, first go to the `Notification Options` screen, then click the `Advanced Options` button.
+
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_advanced_01.png" style="width:50%;">
 
 <details>
 <summary><b>Custom Messages</b></summary>
@@ -238,13 +257,6 @@ To access, first go to the `Notification Options` screen, then click the `Advanc
 - **Note**: Response messages allow you to do things like spamming chat and creating infinite loops of notifications
   and responses, so you should exercise caution when using this feature.
 </details>
-
-<table style="width:100%;">
-  <tr>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_01.png" style="width:100%;"></td>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/config_01.png" style="width:100%;"></td>
-  </tr>
-</table>
 
 #### GUI Tweaks
 
