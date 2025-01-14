@@ -354,7 +354,8 @@ public class MessageUtil {
         // Substitute capturing groups
         if (matcher != null) {
             for (int i = 0; i <= matcher.groupCount(); i++) {
-                msg = msg.replace("(" + i + ")", matcher.group(i));
+                String replacement = matcher.group(i) == null ? "" : matcher.group(i);
+                msg = msg.replace("(" + i + ")", replacement);
             }
         }
         return Component.literal(msg);
@@ -405,7 +406,8 @@ public class MessageUtil {
                 if (matcher != null && msg.type.equals(ResponseMessage.Type.REGEX)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {
-                        msg.sendingString = msg.sendingString.replace("(" + i + ")", matcher.group(i));
+                        String replacement = matcher.group(i) == null ? "" : matcher.group(i);
+                        msg.sendingString = msg.sendingString.replace("(" + i + ")", replacement);
                     }
                 }
                 totalDelay += msg.delayTicks;

@@ -3,6 +3,7 @@
 ## 2.3.0-beta.14
 
 - Improved color field and status button logic
+- Fixed a network protocol error caused by referencing an empty capturing group
 
 ## 2.3.0-beta.13
 
