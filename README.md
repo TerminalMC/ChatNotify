@@ -42,10 +42,9 @@ Plays a ping sound when your name is mentioned, with options to create custom al
    1. The message will be restyled, to highlight the trigger that activated the notification.
    2. A sound will be played.
 
-- You can create and customize your own notifications via the options screen.
-- The options screen can be opened using [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on 
-  NeoForge.
-- See below for some guides on setting up your own custom notifications.
+- You can create and customize your own notifications via the options screen, which can be opened using 
+  [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on NeoForge.
+- See below for basic guides on setting up your own custom notifications.
 </details>
 
 <details open>
