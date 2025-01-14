@@ -298,7 +298,7 @@ public class NotifOptionList extends OptionList {
                             localized("option", "notif.trigger.key.tooltip")));
                     keySelectButton.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(keySelectButton);
-                    movingX += list.tinyWidgetWidth + SPACING;
+                    movingX += list.tinyWidgetWidth;
                 }
                 
                 // Trigger editor button

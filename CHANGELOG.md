@@ -4,6 +4,7 @@
 
 - Updated Russian translation (rfin0)
 - Fixed a bug breaking click-drag on dropdown text fields
+- Fixed a button spacing issue on the notification options screen
 
 ## 2.3.0-beta.12
 
