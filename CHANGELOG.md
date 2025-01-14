@@ -3,6 +3,7 @@
 ## 2.3.0-beta.12
 
 - Fixed a text field rendering bug introduced in beta.11
+- Fixed overflow when resizing multiline text fields
 
 ## 2.3.0-beta.11
 

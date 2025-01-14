@@ -68,6 +68,13 @@ public class MultiLineTextField extends MultiLineEditBox {
         defaultTooltip = tooltip;
         super.setTooltip(tooltip);
     }
+    
+    @Override
+    public void setWidth(int width) {
+        super.setWidth(width);
+        ((MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this)
+                .getTextField()).setWidth(width);
+    }
 
     public int getTextColor() {
         return textColor;
