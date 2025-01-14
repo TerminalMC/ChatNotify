@@ -133,7 +133,7 @@
   "option.chatnotify.notif.restyle_string.tooltip": "When a trigger matches a message, that part of the message will be automatically restyled.\n\nIf you want to restyle a different part of the message instead, specify a restyle string.\n\nIf the message does not contain the provided restyle string, the trigger will be used as normal.",
   "option.chatnotify.notif.sound": "Sound: %s",
   "option.chatnotify.notif.trigger.editor.tooltip": "Open trigger editor",
-  "option.chatnotify.notif.trigger.field.tooltip": "Trigger",
+  "option.chatnotify.trigger.field.tooltip": "Trigger",
   "option.chatnotify.notif.trigger.key.tooltip": "Open key selector",
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Profile name\n(updated automatically)",

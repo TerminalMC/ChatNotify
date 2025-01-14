@@ -23,6 +23,7 @@ import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
+import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.MessageUtil;
@@ -61,24 +62,28 @@ public class TriggerOptionList extends OptionList {
         this.filter = filter;
         this.restyle = restyle;
         
-        addEntry(new Entry.TriggerFieldEntry(dynEntryX, dynEntryWidth, entryHeight, 
-                this, trigger));
+        Entry triggerFieldEntry = new Entry.TriggerFieldEntry(
+                dynEntryX, dynEntryWidth, entryHeight + itemHeight, this, trigger);
+        addEntry(triggerFieldEntry);
+        addEntry(new SpaceEntry(triggerFieldEntry));
+        
         if (trigger.styleString != null) {
             addEntry(new Entry.StyleStringFieldEntry(dynEntryX, dynEntryWidth, entryHeight, 
                     this, trigger));
         }
 
-        textDisplayBox = new MultiLineEditBox(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, 
+        textDisplayBox = new MultiLineTextField(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, 
                 localized("option", "trigger.text.placeholder"), Component.empty());
         textDisplayBox.setValue(displayText);
         keyDisplayBox = new TextField(dynEntryX, 0, dynEntryWidth, entryHeight);
         keyDisplayBox.setMaxLength(256);
         keyDisplayBox.setValue(displayKey);
         
-        Entry e = new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight + itemHeight, 
+        Entry messageFieldEntry = new Entry.MessageFieldEntry(
+                dynEntryX, dynEntryWidth, entryHeight + itemHeight, 
                 textDisplayBox, localized("option", "trigger.message.text"));
-        addEntry(e);
-        addEntry(new SpaceEntry(e));
+        addEntry(messageFieldEntry);
+        addEntry(new SpaceEntry(messageFieldEntry));
         addEntry(new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight, keyDisplayBox, 
                 localized("option", "trigger.message.key")));
         
@@ -182,10 +187,11 @@ public class TriggerOptionList extends OptionList {
                 movingX += list.tinyWidgetWidth;
 
                 // Trigger field
-                TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
+                MultiLineTextField triggerField = new MultiLineTextField(
+                        Minecraft.getInstance().font, movingX, 0, triggerFieldWidth, height,
+                        localized("option", "trigger.field.tooltip"), Component.empty());
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
-                triggerField.setMaxLength(240);
-                triggerField.setResponder((str) -> {
+                triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
                     if (list.children().size() > 4) {
                         list.children().removeIf((entry) -> entry instanceof MessageEntry 
@@ -196,7 +202,7 @@ public class TriggerOptionList extends OptionList {
                 });
                 triggerField.setValue(trigger.string);
                 triggerField.setTooltip(Tooltip.create(
-                        localized("option", "notif.trigger.field.tooltip")));
+                        localized("option", "trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
                 movingX += triggerFieldWidth;

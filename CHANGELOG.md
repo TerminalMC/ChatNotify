@@ -4,6 +4,7 @@
 
 - Fixed a crash when adding a restyle string using the trigger editor
 - Moved custom messages to advanced options screen
+- Switched to multi-line text field for trigger editor
 
 ## 2.3.0
 

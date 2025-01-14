@@ -282,7 +282,7 @@ public class NotifOptionList extends OptionList {
                 triggerField.setResponder((str) -> trigger.string = str.strip());
                 triggerField.setValue(trigger.string);
                 triggerField.setTooltip(Tooltip.create(
-                        localized("option", "notif.trigger.field.tooltip")));
+                        localized("option", "trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
                 movingX += triggerFieldWidth;

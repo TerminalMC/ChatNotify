@@ -393,7 +393,7 @@ public class AdvancedOptionList extends OptionList {
                 triggerField.setResponder((string) -> trigger.string = string.strip());
                 triggerField.setValue(trigger.string);
                 triggerField.setTooltip(Tooltip.create(
-                        localized("option", "notif.trigger.field.tooltip")));
+                        localized("option", "trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
 

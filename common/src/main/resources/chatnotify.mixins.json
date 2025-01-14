@@ -10,8 +10,11 @@
     "MixinChatComponent",
     "MixinChatListener",
     "MixinClientPacketListener",
+    "MixinMultiLineEditBox",
     "MixinOptionInstance",
     "accessor.KeyAccessor",
+    "accessor.MultiLineEditBoxAccessor",
+    "accessor.MultilineTextFieldAccessor",
     "accessor.ScreenAccessor"
   ],
   "server": [

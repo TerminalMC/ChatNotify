@@ -133,7 +133,7 @@
   "option.chatnotify.notif.restyle_string.tooltip": "通常，ChatNotify会尝试重新设置与触发器匹配的消息部分的样式，除非触发器是键或正则表达式模式。\n设置样式目标字符串允许你准确指定要重新设置样式的内容。",
   "option.chatnotify.notif.sound": "音效：%s",
   "option.chatnotify.notif.trigger.editor.tooltip": "Open trigger editor",
-  "option.chatnotify.notif.trigger.field.tooltip": "触发器",
+  "option.chatnotify.trigger.field.tooltip": "触发器",
   "option.chatnotify.notif.trigger.key.tooltip": "Open key selector",
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Profile name\n(updated automatically)",

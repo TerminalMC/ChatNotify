@@ -60,7 +60,7 @@ public class TextField extends EditBox {
         super(font, x, y, width, height, msg);
         this.font = font;
         this.validator = new Validator.Custom(validator);
-        this.defaultTextColor = 14737632;
+        this.defaultTextColor = 0xE0E0E0;
     }
 
     public TextField setValidator(Function<String, Optional<Component>> validator) {
@@ -157,7 +157,7 @@ public class TextField extends EditBox {
         Optional<Component> error = validator.validate(str);
         if (error.isPresent()) {
             super.setTooltip(Tooltip.create(error.get()));
-            super.setTextColor(16733525);
+            super.setTextColor(0xFF5555);
             return false;
         } else {
             super.setTextColor(defaultTextColor);
@@ -254,7 +254,7 @@ public class TextField extends EditBox {
      * <p>Also, messages contain carriage-return characters which don't play
      * well with Minecraft so this method removes them.</p>
      */
-    private static String fixRegexMessage(String str) {
+    public static String fixRegexMessage(String str) {
         // Remove carriage returns
         str = str.replaceAll("\\u000D", "");
 

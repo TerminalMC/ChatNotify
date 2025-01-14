@@ -133,7 +133,7 @@
   "option.chatnotify.notif.restyle_string.tooltip": "通常，ChatNotify 會嘗試重新設定與觸發條件相符的訊息部分的樣式，除非觸發條件是鍵或 Regex 模式。\n設定樣式目標字串可讓您精確指定要重新設定樣式的內容。",
   "option.chatnotify.notif.sound": "音效：%s",
   "option.chatnotify.notif.trigger.editor.tooltip": "Open trigger editor",
-  "option.chatnotify.notif.trigger.field.tooltip": "觸發條件",
+  "option.chatnotify.trigger.field.tooltip": "觸發條件",
   "option.chatnotify.notif.trigger.key.tooltip": "Open key selector",
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Profile name\n(updated automatically)",

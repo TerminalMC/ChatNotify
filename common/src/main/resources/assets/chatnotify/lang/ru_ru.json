@@ -133,7 +133,7 @@
   "option.chatnotify.notif.restyle_string.tooltip": "Обычно ChatNotify пытается изменить стиль той части сообщения, которая соответствует триггеру, если только триггер не является ключом или шаблоном Regex. Настройка целевой строки стиля позволяет вам точно указать, что именно вы хотите изменить.",
   "option.chatnotify.notif.sound": "Звук: %s",
   "option.chatnotify.notif.trigger.editor.tooltip": "Open trigger editor",
-  "option.chatnotify.notif.trigger.field.tooltip": "Триггер",
+  "option.chatnotify.trigger.field.tooltip": "Триггер",
   "option.chatnotify.notif.trigger.key.tooltip": "Open key selector",
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Profile name\n(updated automatically)",
