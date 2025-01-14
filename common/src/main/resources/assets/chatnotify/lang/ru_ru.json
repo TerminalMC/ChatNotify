@@ -149,7 +149,7 @@
   "option.chatnotify.sound.group.illager": "Звуки рейдеров",
   "option.chatnotify.sound.group.misc": "Разные звуки",
   "option.chatnotify.sound.group.noteblock": "Звуки блока заметок",
-  "option.chatnotify.sound.group.power": "Звуки энергии/порталов",
+  "option.chatnotify.sound.group.power": "Звуки энергии/портала",
   "option.chatnotify.sound.id.block.amethyst_block.hit": "Аметист 1",
   "option.chatnotify.sound.id.block.amethyst_cluster.place": "Аметист 2",
   "option.chatnotify.sound.id.block.anvil.land": "Размещение наковальни",
