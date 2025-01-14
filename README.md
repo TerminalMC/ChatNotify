@@ -26,7 +26,7 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 - Automatic response messages with optional delay.
 - Fully custom options GUI for efficient configuration.
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_02.png" style="width:50%;">
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_02.png" width="50%">
 
 ### Overview
 
@@ -147,7 +147,7 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 
 To access, click the `Global Options` button from the options screen.
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_global_01.png" style="width:50%;">
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_global_01.png" width="50%">
 
 <details>
 <summary><b>Detection Mode</b></summary>
@@ -185,7 +185,7 @@ To access, click the `Global Options` button from the options screen.
 
 To access, click the `'More Options'` button for the notification you want to edit.
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_notification_01.png" style="width:50%;">
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_notification_01.png" width="50%">
 
 <details>
 <summary><b>Restyle String</b></summary>
@@ -201,7 +201,7 @@ To access, click the `'More Options'` button for the notification you want to ed
 
 To access, first go to the `Notification Options` screen, then click the `Advanced Options` button.
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_advanced_01.png" style="width:50%;">
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_advanced_01.png" width="50%">
 
 <details>
 <summary><b>Custom Messages</b></summary>
