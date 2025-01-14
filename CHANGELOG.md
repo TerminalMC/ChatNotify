@@ -3,6 +3,7 @@
 ## 2.3.0-beta.11
 
 - Fixed a crash when adding a restyle string using the trigger editor
+- Moved custom messages to advanced options screen
 
 ## 2.3.0
 

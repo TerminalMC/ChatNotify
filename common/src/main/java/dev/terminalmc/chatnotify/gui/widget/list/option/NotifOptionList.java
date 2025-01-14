@@ -82,7 +82,7 @@ public class NotifOptionList extends OptionList {
 
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                localized("option", "notif.controls"), null, -1));
+                localized("option", "notif"), null, -1));
 
         addEntry(new Entry.SoundConfigEntry(entryX, entryWidth, entryHeight, notif, this));
         addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, this,
@@ -91,36 +91,6 @@ public class NotifOptionList extends OptionList {
                 localized("option", "notif.color")));
         addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, true));
         addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, false));
-
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                localized("option", "notif.message"), null, -1));
-        addEntry(new Entry.MessageConfigEntry(entryX, entryWidth, entryHeight, notif, this,
-                () -> notif.replacementMsg, (str) -> notif.replacementMsg = str,
-                () -> notif.replacementMsgEnabled, (val) -> notif.replacementMsgEnabled = val,
-                localized("option", "notif.msg.replacement").getString(),
-                localized("option", "notif.msg.replacement").append(".\n")
-                        .append(localized("option", "notif.msg.replacement.tooltip"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.format_codes"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.blank_hide"))));
-        addEntry(new Entry.MessageConfigEntry(entryX, entryWidth, entryHeight, notif, this,
-                () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
-                () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
-                localized("option", "notif.msg.status_bar").getString(),
-                localized("option", "notif.msg.status_bar").append(".\n")
-                        .append(localized("option", "notif.msg.status_bar.tooltip"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.format_codes"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.blank_original"))));
-        addEntry(new Entry.MessageConfigEntry(entryX, entryWidth, entryHeight, notif, this,
-                () -> notif.titleMsg, (str) -> notif.titleMsg = str,
-                () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
-                localized("option", "notif.msg.title").getString(),
-                localized("option", "notif.msg.title").append(".\n")
-                        .append(localized("option", "notif.msg.title.tooltip"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.format_codes"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.regex_groups"))
-                        .append("\n\n").append(localized("option", "notif.msg.info.blank_original"))));
 
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced"),
@@ -536,12 +506,6 @@ public class NotifOptionList extends OptionList {
         static class ColorConfigEntry extends Entry {
             ColorConfigEntry(int x, int width, int height, OptionList list,
                              Supplier<Integer> supplier, Consumer<Integer> consumer,
-                             MutableComponent text) {
-                this(x, width, height, list, supplier, consumer, () -> false, (val) -> {}, text, false);
-            }
-
-            ColorConfigEntry(int x, int width, int height, OptionList list,
-                             Supplier<Integer> supplier, Consumer<Integer> consumer,
                              Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
                              MutableComponent text) {
                 this(x, width, height, list, supplier, consumer, statusSupplier, statusConsumer, text, true);
@@ -607,46 +571,6 @@ public class NotifOptionList extends OptionList {
                             .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
                                     Component.empty(), (button, status) -> statusConsumer.accept(status)));
                 }
-            }
-        }
-
-        private static class MessageConfigEntry extends Entry {
-            MessageConfigEntry(int x, int width, int height, Notification notif, NotifOptionList list,
-                               Supplier<String> textSupplier, Consumer<String> textConsumer,
-                               Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
-                               String placeholder, Component tooltip) {
-                super();
-                int statusButtonWidth = Math.max(24, height);
-                int fieldWidth = width - statusButtonWidth - SPACING;
-
-                // Title text field
-                TextField titleField = new TextField(x, 0, fieldWidth, height);
-                titleField.setMaxLength(256);
-                if (textSupplier.get().isBlank()) {
-                    // Shenanigans for placeholder text
-                    titleField.setValue(placeholder);
-                    titleField.setTextColor(0x555555);
-                    titleField.setResponder((str) -> {
-                        titleField.setTextColor(0xffffff);
-                        titleField.setResponder(textConsumer);
-                        titleField.setValue("");
-                    });
-                } else {
-                    titleField.setValue(textSupplier.get());
-                    titleField.setResponder(textConsumer);
-                }
-                titleField.setTooltip(Tooltip.create(tooltip));
-                elements.add(titleField);
-
-                // Status button
-                elements.add(CycleButton.booleanBuilder(
-                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .displayOnlyValue()
-                        .withInitialValue(statusSupplier.get())
-                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
-                                Component.empty(), (button, status) -> 
-                                        statusConsumer.accept(status)));
             }
         }
     }

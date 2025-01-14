@@ -30,12 +30,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -51,6 +54,32 @@ public class AdvancedOptionList extends OptionList {
                               int entryWidth, int entryHeight, Notification notif) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
         this.notif = notif;
+
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                localized("option", "advanced.msg", "\u2139"), 
+                Tooltip.create(localized("option", "advanced.msg.info.format_codes").append("\n\n")
+                        .append(localized("option", "advanced.msg.info.regex_groups"))), -1));
+        addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
+                () -> notif.replacementMsg, (str) -> notif.replacementMsg = str,
+                () -> notif.replacementMsgEnabled, (val) -> notif.replacementMsgEnabled = val,
+                localized("option", "advanced.msg.replacement").getString(),
+                localized("option", "advanced.msg.replacement").append(".\n")
+                        .append(localized("option", "advanced.msg.replacement.tooltip"))
+                        .append("\n\n").append(localized("option", "advanced.msg.info.blank_hide"))));
+        addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
+                () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
+                () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
+                localized("option", "advanced.msg.status_bar").getString(),
+                localized("option", "advanced.msg.status_bar").append(".\n")
+                        .append(localized("option", "advanced.msg.status_bar.tooltip"))
+                        .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
+        addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
+                () -> notif.titleMsg, (str) -> notif.titleMsg = str,
+                () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
+                localized("option", "advanced.msg.title").getString(),
+                localized("option", "advanced.msg.title").append(".\n")
+                        .append(localized("option", "advanced.msg.title.tooltip"))
+                        .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
         
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.exclusion", "\u2139"),
@@ -264,6 +293,46 @@ public class AdvancedOptionList extends OptionList {
     }
 
     private abstract static class Entry extends OptionList.Entry {
+
+        private static class MessageConfigEntry extends NotifOptionList.Entry {
+            MessageConfigEntry(int x, int width, int height,
+                               Supplier<String> textSupplier, Consumer<String> textConsumer,
+                               Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
+                               String placeholder, Component tooltip) {
+                super();
+                int statusButtonWidth = Math.max(24, height);
+                int fieldWidth = width - statusButtonWidth - SPACING;
+
+                // Title text field
+                TextField titleField = new TextField(x, 0, fieldWidth, height);
+                titleField.setMaxLength(256);
+                if (textSupplier.get().isBlank()) {
+                    // Shenanigans for placeholder text
+                    titleField.setValue(placeholder);
+                    titleField.setTextColor(0x555555);
+                    titleField.setResponder((str) -> {
+                        titleField.setTextColor(0xffffff);
+                        titleField.setResponder(textConsumer);
+                        titleField.setValue("");
+                    });
+                } else {
+                    titleField.setValue(textSupplier.get());
+                    titleField.setResponder(textConsumer);
+                }
+                titleField.setTooltip(Tooltip.create(tooltip));
+                elements.add(titleField);
+
+                // Status button
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .displayOnlyValue()
+                        .withInitialValue(statusSupplier.get())
+                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
+                                Component.empty(), (button, status) ->
+                                        statusConsumer.accept(status)));
+            }
+        }
 
         private static class ExclusionToggleEntry extends Entry {
             ExclusionToggleEntry(int x, int width, int height, Notification notif,
