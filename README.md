@@ -36,13 +36,11 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 - ChatNotify has a list of `Notifications`, which you can view on the options screen.
 - Each notification has one or more `Triggers`, and options to control what happens when the notification is activated.
 
-
-- When a new message arrives in chat, ChatNotify starts checking the triggers of each notification.
-- If a trigger matches the chat message, that notification will be activated.
-- When a notification is activated, two things will happen;
-  1. The message will be restyled, to highlight the trigger that activated the notification.
-  2. A sound will be played.
-
+1. When a new message arrives in chat, ChatNotify starts checking the triggers of each notification.
+2. If a trigger matches the chat message, that notification will be activated.
+3. When a notification is activated, two things will happen;
+   1. The message will be restyled, to highlight the trigger that activated the notification.
+   2. A sound will be played.
 
 - You can create and customize your own notifications via the options screen.
 - The options screen can be opened using [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on 
@@ -190,17 +188,14 @@ To access, first go to the `Notification Options` screen, then click the `Advanc
 <details>
 <summary><b>Custom Messages</b></summary>
 
-- This feature allows you to send messages to yourself when a notification is activated.
-- See below for the different types.
+- This feature allows you to send messages to yourself when a notification is activated. See below for the different 
+  types.
 
-
-- All custom messages support color and format codes using `$` instead of `§`.
-- For more information on codes, refer to [the Minecraft Wiki](https://minecraft.wiki/w/Formatting_codes).
-
+- All custom messages support color and format codes using `$` instead of `§`. For more information on codes, refer to 
+  [the Minecraft Wiki](https://minecraft.wiki/w/Formatting_codes).
 
 - If the notification has a regex trigger, you can access capturing groups from the match using `(1)`, `(2)` etc. in the
-  custom message.
-- For example, if the trigger is `(\d+) stacks`, and you have a replacement message `(1)x64`, the message "23 stacks"
+  custom message. For example, if the trigger is `(\d+) stacks`, and you have a replacement message `(1)x64`, the message "23 stacks"
   will be replaced by "23x64".
 
 <details>
