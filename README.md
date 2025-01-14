@@ -26,7 +26,29 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 - Automatic response messages with optional delay.
 - Fully custom options GUI for efficient configuration.
 
+### Overview
+
 ### Setup
+
+<details open>
+<summary><b>How it Works</b></summary>
+
+- ChatNotify has a list of `Notifications`, which you can view on the options screen.
+- Each notification has one or more `Triggers`, and options to control what happens when the notification is activated.
+
+
+- When a new message arrives in chat, ChatNotify starts checking the triggers of each notification.
+- If a trigger matches the chat message, that notification will be activated.
+- When a notification is activated, two things will happen;
+  1. The message will be restyled, to highlight the trigger that activated the notification.
+  2. A sound will be played.
+
+
+- You can create and customize your own notifications via the options screen.
+- The options screen can be opened using [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on 
+  NeoForge.
+- See below for some guides on setting up your own custom notifications.
+</details>
 
 <details open>
 <summary><b>Level 0: "Just ping me when my name is mentioned"</b></summary>
@@ -37,13 +59,13 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 <details>
 <summary><b>Level 1A (Normal): "Ping me when someone says hello"</b></summary>
 
-1. Access the options screen via [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on NeoForge.
+1. Access the options screen.
 2. Click the `+` button to add a new notification.
 3. Type your custom notification trigger (e.g. "hello") in the field on the left.
 4. To change the highlight color, click the `🌢` button.
 5. To change the notification sound, click the `🔊` button.
-   1. Select a common sound by clicking one of the buttons, or
-   2. Click the field at the top to search for other sounds.
+    1. Select a common sound by clicking one of the buttons, or
+    2. Click the field at the top to search for other sounds.
 6. To disable highlighting or sound, right-click the `🌢` or `🔊` button.
 7. When you're finished, click `Done` to exit.
 </details>
@@ -66,7 +88,7 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 3. Click the `🔍` button.
 4. On the new screen, click the `Any Advancement` button, then click `Done`.
 5. Change the color and sound if you want (as in `Level 1A`), then click `Done` to exit.
-- **Note**: Some servers remove keys from messages, which prevents this type of trigger from working. 
+- **Note**: Some servers remove keys from messages, which prevents this type of trigger from working.
 - To check whether a message has a key, follow `Level 3` and look at the `Key` field after clicking the message.
 - If the message does not have a key (or uses a generic key), you must use a normal (`~`) trigger instead.
 </details>
@@ -90,7 +112,7 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 2. Access the options screen and add a new notification (`+`).
 3. Click the `✎` button on the right of the trigger field to open the trigger editor.
 4. Chat messages will be displayed in a list, most recent first.
-5. Find your message, and click on it. 
+5. Find your message, and click on it.
 6. The message text will be placed into the `Text` field.
 7. Use the message text to create a custom trigger in the top field.
 8. To test your trigger, toggle the `Filter` button.
@@ -109,7 +131,7 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 
 </details>
 
-### Other Features
+### Other Options
 
 #### Global Options
 
@@ -118,7 +140,7 @@ To access, click the `Global Options` button from the options screen.
 <details>
 <summary><b>Detection Mode</b></summary>
 
-- Controls where and how incoming messages are intercepted. 
+- Controls where and how incoming messages are intercepted.
 - Useful if you have client-side mods sending messages that you want to detect or ignore.
 - Default is `HUD (Tags)`.
 </details>
@@ -126,7 +148,7 @@ To access, click the `Global Options` button from the options screen.
 <details>
 <summary><b>Send Mode</b></summary>
 
-- Controls where and how response messages are sent. 
+- Controls where and how response messages are sent.
 - Useful if you want other client-side to detect or ignore response messages.
 - Default is `Packet`.
 </details>
@@ -161,20 +183,24 @@ To access, click the `'More Options'` button for the notification you want to ed
   of the trigger field.
 </details>
 
+#### Advanced Options
+
+To access, first go to the `Notification Options` screen, then click the `Advanced Options` button.
+
 <details>
 <summary><b>Custom Messages</b></summary>
 
-- This feature allows you to send yourself messages when a notification is activated. 
+- This feature allows you to send messages to yourself when a notification is activated.
 - See below for the different types.
 
 
-- Custom messages support color and format codes using `$` instead of `§`.
+- All custom messages support color and format codes using `$` instead of `§`.
 - For more information on codes, refer to [the Minecraft Wiki](https://minecraft.wiki/w/Formatting_codes).
 
 
-- If the notification has a regex trigger, you can access capturing groups from the match using "`(n)`" in the custom 
-  message.
-- For example, if the trigger is `(\d+) stacks`, and you have a replacement message `(1)x64`, the message "23 stacks" 
+- If the notification has a regex trigger, you can access capturing groups from the match using `(1)`, `(2)` etc. in the
+  custom message.
+- For example, if the trigger is `(\d+) stacks`, and you have a replacement message `(1)x64`, the message "23 stacks"
   will be replaced by "23x64".
 
 <details>
@@ -182,32 +208,30 @@ To access, click the `'More Options'` button for the notification you want to ed
 
 - This feature allows you to replace the triggering chat message with a custom message.
 - **Note**: If you switch this to `ON` and leave the field blank, the message will be blocked.
-- If a message is blocked, any subsequent notifications cannot be activated, but previous ones that have already
-  activated may still play sounds or send response messages, so use this feature with caution.
+  - If a message is blocked, any subsequent notifications cannot be activated, but previous ones that have already
+    activated may still play sounds or send response messages, so use this feature with caution.
 </details>
 
 <details>
 <summary><b>Status Bar Messages</b></summary>
 
-- This feature allows you to send a custom message to your own status bar (above the hotbar).
+- This feature allows you to send a custom message to the status bar (above the hotbar).
 - **Note**: If you switch this to `ON` and leave the field blank, the entire message will be forwarded.
 </details>
 
 <details>
 <summary><b>Title Messages</b></summary>
 
-- This feature allows you to display a custom message as title text (large font, center-screen).
+- This feature allows you to display a custom message as a title (large text in the middle of the screen).
 - **Note**: If you switch this to `ON` and leave the field blank, the entire message will be forwarded.
 </details>
 </details>
-
-#### Advanced Options
 
 <details>
 <summary><b>Exclusion Triggers</b></summary>
 
 - Exclusion triggers allow you to restrict the activation conditions of notifications.
-- For example, if you want a notification to activate a message contains "shark", but only if the message does not also 
+- For example, if you want a notification to activate a message contains "shark", but only if the message does not also
   contain "fish", create a trigger for "shark" and an exclusion trigger for "fish".
 </details>
 
@@ -215,9 +239,9 @@ To access, click the `'More Options'` button for the notification you want to ed
 <summary><b>Response Messages</b></summary>
 
 - Response messages are sent in chat when a notification is activated.
-- Regex (`.*`) response messages can access capturing groups from a regex trigger using `(1)`, `(2)` etc., like custom 
+- Regex (`.*`) response messages can access capturing groups from a regex trigger using `(1)`, `(2)` etc., like custom
   messages.
-- **Note**: Response messages allow you to do things like spamming chat and creating infinite loops of notifications 
+- **Note**: Response messages allow you to do things like spamming chat and creating infinite loops of notifications
   and responses, so you should exercise caution when using this feature.
 </details>
 
