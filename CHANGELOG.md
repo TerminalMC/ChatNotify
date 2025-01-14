@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.14
+
+- Improved color field and status button logic
+
 ## 2.3.0-beta.13
 
 - Updated Russian translation (rfin0)

@@ -235,10 +235,9 @@ public class MainOptionList extends OptionList {
                     triggerWidth += (excess - soundBonus);
                 }
                 
-                // If sound field reaches 120, add color field
-                if (soundFieldWidth >= 120) {
-                    soundFieldWidth -= 20;
-                    triggerWidth -= (colorFieldWidth - 20);
+                // If sound field reaches 110, add color field
+                if (soundFieldWidth >= 110 && notif.textStyle.doColor) {
+                    triggerWidth -= colorFieldWidth;
                     showColorField = true;
                 }
                 
@@ -326,30 +325,7 @@ public class MainOptionList extends OptionList {
                 movingX += list.smallWidgetWidth + SPACING_NARROW;
                 
                 // Color
-
-                if (showColorField) {
-                    TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
-                    colorField.hexColorValidator();
-                    colorField.setMaxLength(7);
-                    colorField.setResponder((val) -> {
-                        TextColor textColor = ColorUtil.parseColor(val);
-                        if (textColor != null) {
-                            int color = textColor.getValue();
-                            notif.textStyle.color = color;
-                            float[] hsv = new float[3];
-                            Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
-                                    FastColor.ARGB32.blue(color), hsv);
-                            if (hsv[2] < 0.1) colorField.setTextColor(16777215);
-                            else colorField.setTextColor(color);
-                        }
-                    });
-                    colorField.setValue(TextColor.fromRgb(notif.textStyle.color).formatValue());
-                    colorField.setTooltip(Tooltip.create(
-                            localized("option", "main.color.tooltip")));
-                    colorField.setTooltipDelay(Duration.ofMillis(500));
-                    elements.add(colorField);
-                    movingX += colorFieldWidth;
-                }
+                
                 RightClickableButton colorEditButton = new RightClickableButton(
                         movingX, 0, list.tinyWidgetWidth, height,
                         Component.literal("\uD83C\uDF22").withColor(notif.textStyle.doColor 
@@ -380,6 +356,33 @@ public class MainOptionList extends OptionList {
                         .append("\n")
                         .append(localized("option", "main.edit.click"))));
                 colorEditButton.setTooltipDelay(Duration.ofMillis(200));
+                if (showColorField) {
+                    TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
+                    colorField.hexColorValidator();
+                    colorField.setMaxLength(7);
+                    colorField.setResponder((val) -> {
+                        TextColor textColor = ColorUtil.parseColor(val);
+                        if (textColor != null) {
+                            int color = textColor.getValue();
+                            notif.textStyle.color = color;
+                            float[] hsv = new float[3];
+                            Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
+                                    FastColor.ARGB32.blue(color), hsv);
+                            if (hsv[2] < 0.1) colorField.setTextColor(16777215);
+                            else colorField.setTextColor(color);
+                            // Update status button color
+                            colorEditButton.setMessage(
+                                    colorEditButton.getMessage().copy().withColor(color));
+                        }
+                    });
+                    colorField.setValue(TextColor.fromRgb(notif.textStyle.color).formatValue());
+                    colorField.setTooltip(Tooltip.create(
+                            localized("option", "main.color.tooltip")));
+                    colorField.setTooltipDelay(Duration.ofMillis(500));
+                    elements.add(colorField);
+                    movingX += colorFieldWidth;
+                }
+                colorEditButton.setPosition(movingX, 0);
                 elements.add(colorEditButton);
                 movingX += list.tinyWidgetWidth + SPACING_NARROW;
                 
