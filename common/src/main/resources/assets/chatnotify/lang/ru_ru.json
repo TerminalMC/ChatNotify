@@ -13,7 +13,7 @@
   "option.chatnotify.advanced.msg.status_bar": "Сообщение в строке состояния",
   "option.chatnotify.advanced.msg.status_bar.tooltip": "Отображается над хотбаром (панелью быстрого доступа) несколько секунд.",
   "option.chatnotify.advanced.msg.title": "Заголовок сообщения",
-  "option.chatnotify.advanced.msg.title.всплывающая подсказка": "Отображается в середине экрана в течение нескольких секунд",
+  "option.chatnotify.advanced.msg.title.tooltip": "Отображается в середине экрана в течение нескольких секунд",
   "option.chatnotify.advanced.reset.broken": "Всё сломано?",
   "option.chatnotify.advanced.reset.level_1": "Сбросить дополнительные настройки",
   "option.chatnotify.advanced.reset.level_1.tooltip": "Сбросить все дополнительные настройки для ЭТОГО уведомления.",
