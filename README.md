@@ -20,9 +20,9 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 ### Features
 
 - Easy access to all Minecraft sound effects, plus sounds from resourcepacks.
-- Customizable volume and pitch for alert sounds.
-- Text highlighting with full RGB color and format control.
-- Complete control over alert triggers with optional regex support and anti-triggers.
+- Customizable volume and pitch for notification sounds.
+- Text restyling (highlighting) with full RGB color and format control.
+- Complete control over notification triggers with optional regex support.
 - Automatic response messages with optional delay.
 - Fully custom options GUI for efficient configuration.
 
