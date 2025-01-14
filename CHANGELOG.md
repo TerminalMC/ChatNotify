@@ -3,6 +3,7 @@
 ## 2.3.0-beta.13
 
 - Updated Russian translation (rfin0)
+- Fixed a bug breaking click-drag on dropdown text fields
 
 ## 2.3.0-beta.12
 

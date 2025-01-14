@@ -256,8 +256,7 @@ public class DropdownTextField extends OverlayWidget {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (textField.isFocused()) {
-            dropdown.setFocused(null);
+        if (textField.isFocused() && mouseOnWidget(textField, mouseX, mouseY)) {
             return textField.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
         return false;
