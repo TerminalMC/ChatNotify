@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.12
+
+- Fixed a text field rendering bug introduced in beta.11
+
 ## 2.3.0-beta.11
 
 - Fixed a crash when adding a restyle string using the trigger editor

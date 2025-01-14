@@ -376,7 +376,7 @@ public class TriggerOptionList extends OptionList {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                list.textDisplayBox.setValue(msg.getString());
+                list.textDisplayBox.setValue(FormatUtil.stripCodes(msg.getString()));
                 list.keyDisplayBox.setValue(msg.getContents() instanceof TranslatableContents tc
                         ? tc.getKey() : localized("option", "trigger.key.none").getString());
                 list.setScrollAmount(0);

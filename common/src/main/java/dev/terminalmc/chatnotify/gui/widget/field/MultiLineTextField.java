@@ -48,6 +48,7 @@ public class MultiLineTextField extends MultiLineEditBox {
         super(font, x, y, width, height, placeholder, message);
         this.validator = new Validator.Default();
         this.defaultTextColor = 0xE0E0E0;
+        this.textColor = defaultTextColor;
     }
 
     public MultiLineTextField regexValidator() {
