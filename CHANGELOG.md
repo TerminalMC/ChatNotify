@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0-beta.15
+
+- Fixed message blocking also disabling response and custom messages
+
 ## 2.3.0-beta.14
 
 - Improved color field and status button logic

@@ -206,12 +206,19 @@ public class MessageUtil {
                 // Send response messages
                 Matcher subsMatcher = trig.type == Trigger.Type.REGEX ? matcher : null;
                 sendResponses(notif, subsMatcher);
+                
+                // Restyle
+                msg = restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAllInstances);
+
+                // Send custom messages
+                showStatusBarMsg(notif, msg, subsMatcher);
+                showTitleMsg(notif, msg, subsMatcher);
 
                 // If replacement enabled, process
                 if (notif.replacementMsgEnabled) {
                     msg = convertMsg(notif.replacementMsg, subsMatcher);
                     String str = msg.getString();
-                    
+
                     // No other notifications can activate on a blank message
                     if (str.isBlank()) return null;
 
@@ -221,13 +228,6 @@ public class MessageUtil {
                     // Break to avoid restyling or checking other triggers
                     break;
                 }
-                
-                // Restyle
-                msg = restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAllInstances);
-
-                // Send custom messages
-                showStatusBarMsg(notif, msg, subsMatcher);
-                showTitleMsg(notif, msg, subsMatcher);
                 
                 if (!restyleAllTriggers) break;
             }
