@@ -63,7 +63,7 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 <details open>
 <summary><b>Level 0: "Just ping me when my name is mentioned"</b></summary>
 
-- If you only want to get pinged when someone says your name, the mod works automatically - no setup is required.
+- ChatNotify automatically pings you when your name is mentioned - no setup is required.
 </details>
 
 <details>
