@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.0-beta.16
+
+- Removed unused translation keys
+- Fixed a widget overflow bug on the main options screen
+
 ## 2.3.0-beta.15
 
 - Fixed message blocking also disabling response and custom messages

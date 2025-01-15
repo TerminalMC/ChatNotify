@@ -214,9 +214,9 @@ public class MainOptionList extends OptionList {
                         - SPACING_NARROW
                         - statusButtonWidth;
                 // Must be updated if any calculation constants are changed
-                boolean showAllFields = triggerWidth >= 335;
-                if (showAllFields) {
-                    showColorField = true;
+                boolean canShowAllFields = triggerWidth >= 335;
+                if (canShowAllFields) {
+                    showColorField = showColorFieldNominal;
                     showSoundField = true;
                 }
                 
@@ -252,7 +252,7 @@ public class MainOptionList extends OptionList {
 
                     // If trigger space is still at least 225 and color is 
                     // enabled, add color
-                    if (triggerWidth >= 225 && showColorFieldNominal) {
+                    if (triggerWidth >= 225 && (showColorFieldNominal || showColorField)) {
                         triggerWidth -= colorFieldWidth;
                         showColorField = true;
                     }
