@@ -96,6 +96,7 @@
 - Added message replacement option
 - Added status bar message option
 - Adjusted title message option to match other custom message options
+- Fixed a network protocol error caused by referencing an empty capturing group
 - Special thanks to Aqua (aquahonoredhi) for helping with design and testing of this update
 
 ## 2.2.0
