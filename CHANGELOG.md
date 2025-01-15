@@ -3,6 +3,7 @@
 ## 2.3.0-beta.15
 
 - Fixed message blocking also disabling response and custom messages
+- Removed multi-trigger restyling
 
 ## 2.3.0-beta.14
 

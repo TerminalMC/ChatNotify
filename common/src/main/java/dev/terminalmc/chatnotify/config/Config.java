@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  * the enum.</p>
  */
 public class Config {
-    public final int version = 7;
+    public final int version = 8;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     private static final String BACKUP_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
@@ -99,8 +99,6 @@ public class Config {
     public RestyleMode restyleMode;
     public enum RestyleMode {
         ALL_INSTANCES,
-        ALL_TRIGGERS,
-        ALL,
         SINGLE,
     }
 

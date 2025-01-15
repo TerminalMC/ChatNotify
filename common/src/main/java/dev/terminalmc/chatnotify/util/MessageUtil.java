@@ -142,17 +142,13 @@ public class MessageUtil {
      */
     private static @Nullable Component tryNotify(Component msg, String cleanStr, 
                                                  String cleanOwnedStr) {
-        boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL) 
-                || Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
-        boolean restyleAllTriggers = Config.get().restyleMode.equals(Config.RestyleMode.ALL)
-                || Config.get().restyleMode.equals(Config.RestyleMode.ALL_TRIGGERS);
+        boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
         boolean anyActivated = false;
         boolean anySoundPlayed = false;
         
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
             if (!notif.canActivate()) continue;
-            boolean activated = false;
             
             // Trigger search
             for (Trigger trig : notif.triggers) {
@@ -174,12 +170,6 @@ public class MessageUtil {
                     case KEY -> keySearch(msg, trig.string);
                 };
                 if (!hit) continue;
-                
-                if (activated) {
-                    // Previously activated, restyle only
-                    msg = restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAllInstances);
-                    continue;
-                }
 
                 // Exclusion search
                 boolean exHit = false;
@@ -196,7 +186,6 @@ public class MessageUtil {
                 
                 // Activate notification
                 anyActivated = true;
-                activated = true;
                 
                 // Play sound
                 if (!anySoundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
@@ -221,16 +210,11 @@ public class MessageUtil {
 
                     // No other notifications can activate on a blank message
                     if (str.isBlank()) return null;
-
-                    cleanStr = FormatUtil.stripCodes(str);
-                    cleanOwnedStr = cleanStr;
-
-                    // Break to avoid restyling or checking other triggers
-                    break;
                 }
                 
-                if (!restyleAllTriggers) break;
+                break;
             }
+            // If only activating single, return early
             if (anyActivated && Config.get().notifMode.equals(Config.NotifMode.SINGLE)) return msg;
         }
         return msg;

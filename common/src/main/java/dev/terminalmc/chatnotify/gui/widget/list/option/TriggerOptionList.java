@@ -94,8 +94,7 @@ public class TriggerOptionList extends OptionList {
     
     private void addChat() {
         Minecraft mc = Minecraft.getInstance();
-        boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES)
-                || Config.get().restyleMode.equals(Config.RestyleMode.ALL);
+        boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
         List<Pair<Component, MutableComponent>> allChat = ChatNotify.unmodifiedChat.stream()
                 .map((msg) -> new Pair<>(msg, FormatUtil.convertToStyledLiteral(msg.copy())))
                 .toList().reversed();
