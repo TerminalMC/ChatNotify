@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1
+
+- Fixed an issue with checking notifications on a replacement message
+
 ## 2.3.0
 
 - Redesigned options GUI
@@ -16,6 +20,7 @@
 - Added status bar message option
 - Adjusted title message option to match other custom message options
 - Fixed a network protocol error caused by referencing an empty capturing group
+- Updated Russian translation (rfin0)
 - Special thanks to aquahonoredhi for helping with design and testing of this update
 
 ## 2.3.0-beta.16

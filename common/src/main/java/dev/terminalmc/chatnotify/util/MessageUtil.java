@@ -207,6 +207,8 @@ public class MessageUtil {
                 if (notif.replacementMsgEnabled) {
                     msg = convertMsg(notif.replacementMsg, subsMatcher);
                     String str = msg.getString();
+                    cleanStr = FormatUtil.stripCodes(str);
+                    cleanOwnedStr = cleanStr;
 
                     // No other notifications can activate on a blank message
                     if (str.isBlank()) return null;
