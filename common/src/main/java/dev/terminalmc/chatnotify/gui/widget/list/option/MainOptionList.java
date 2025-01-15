@@ -194,12 +194,15 @@ public class MainOptionList extends OptionList {
                 boolean singleTrig = trigger != null;
                 boolean keyTrig = singleTrig && trigger.type == Trigger.Type.KEY;
                 
-                int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF++"); // ~54
-                int soundFieldWidth = colorFieldWidth; // Base width
+                int baseFieldWidth = Minecraft.getInstance().font.width("#FFAAFF++"); // ~54
+                int colorFieldWidth = baseFieldWidth;
+                int soundFieldWidth = baseFieldWidth;
                 int statusButtonWidth = Math.max(24, height);
                 
                 boolean showColorField = false;
+                boolean showColorFieldNominal = notif.textStyle.doColor;
                 boolean showSoundField = false;
+                boolean showSoundFieldNominal = notif.sound.isEnabled();
                 
                 int triggerWidth = width
                         - SPACING_NARROW
@@ -210,14 +213,27 @@ public class MainOptionList extends OptionList {
                         - list.tinyWidgetWidth
                         - SPACING_NARROW
                         - statusButtonWidth;
-                
-                // Show sound field if trigger will still have 200 space
-                if (triggerWidth >= (200 + soundFieldWidth)) {
-                    triggerWidth -= soundFieldWidth;
+                // Must be updated if any calculation constants are changed
+                boolean showAllFields = triggerWidth >= 335;
+                if (showAllFields) {
+                    showColorField = true;
                     showSoundField = true;
                 }
                 
-                // Split the excess over 200 between trigger and sound
+                // Add a field if trigger will still have 200 space
+                if (triggerWidth >= (200 + baseFieldWidth)) {
+                    triggerWidth -= baseFieldWidth;
+                    // If color is enabled and sound is disabled, show color.
+                    // Otherwise, show sound
+                    if (showColorFieldNominal && !showSoundFieldNominal) {
+                        showColorField = true;
+                    } else {
+                        showSoundField = true;
+                    }
+                }
+                
+                // If sound field is enabled, split the trigger's excess over 
+                // 200 between trigger and sound
                 if (showSoundField) {
                     int excess = triggerWidth - 200;
                     triggerWidth -= excess;
@@ -233,12 +249,13 @@ public class MainOptionList extends OptionList {
                     
                     soundFieldWidth += soundBonus;
                     triggerWidth += (excess - soundBonus);
-                }
-                
-                // If sound field reaches 110, add color field
-                if (soundFieldWidth >= 110 && notif.textStyle.doColor) {
-                    triggerWidth -= colorFieldWidth;
-                    showColorField = true;
+
+                    // If trigger space is still at least 225 and color is 
+                    // enabled, add color
+                    if (triggerWidth >= 225 && showColorFieldNominal) {
+                        triggerWidth -= colorFieldWidth;
+                        showColorField = true;
+                    }
                 }
                 
                 int triggerFieldWidth = triggerWidth;

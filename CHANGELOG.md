@@ -4,6 +4,7 @@
 
 - Fixed message blocking also disabling response and custom messages
 - Removed multi-trigger restyling
+- Adjusted display conditions of color and sound fields on main options screen
 
 ## 2.3.0-beta.14
 
