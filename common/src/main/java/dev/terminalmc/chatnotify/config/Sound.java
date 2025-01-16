@@ -71,8 +71,8 @@ public class Sound {
         if (!validId(id)) throw new IllegalArgumentException("Specified id is not a valid sound.");
         this.enabled = enabled;
         this.id = id;
-        setVolume(volume);
-        setPitch(pitch);
+        this.volume = volume;
+        this.pitch = pitch;
     }
 
     /**

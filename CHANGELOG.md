@@ -4,6 +4,7 @@
 
 - Fixed an issue with checking notifications on a replacement message
 - Added high contrast button textures
+- Fixed sound automatically enabling itself on restart
 
 ## 2.3.0
 
