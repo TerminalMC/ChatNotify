@@ -3,6 +3,7 @@
 ## 2.3.1
 
 - Fixed an issue with checking notifications on a replacement message
+- Added high contrast button textures
 
 ## 2.3.0
 

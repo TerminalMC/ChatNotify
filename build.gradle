@@ -77,7 +77,7 @@ subprojects {
                             embeds { id = mrId }
                         }
                     }
-                    // Sync Modrinth description with GitHub README
+                    // Sync Modrinth description with README
                     projectDescription = providers.fileContents(layout.projectDirectory.file("README.md")).asText
                 }
                 curseforge {
