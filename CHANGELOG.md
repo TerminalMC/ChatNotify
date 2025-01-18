@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.3
+
+- Fixed version metadata
+
 ## 2.3.2
 
 - Fixed an issue causing certain messages to be converted to blank strings
