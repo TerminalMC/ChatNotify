@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.2
+
+- Fixed an issue causing certain messages to be converted to blank strings
+
 ## 2.3.1
 
 - Fixed an issue with checking notifications on a replacement message

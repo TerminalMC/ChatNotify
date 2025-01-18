@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.util;
 
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.config.Config;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -45,11 +46,9 @@ public class FormatUtil {
     }
 
     /**
-     * Recursively converts all format codes in the {@link MutableComponent} 
-     * to {@link Style}s.
-     * 
-     * <p><b>Note:</b> To ensure full conversion, all translatable contents
-     * are first converted to literal contents.</p>
+     * Recursively converts any {@link TranslatableContents} elements of the 
+     * {@link MutableComponent} tree to {@link PlainTextContents} elements, 
+     * and in the process converts any format codes to {@link Style}s.
      */
     public static MutableComponent convertToStyledLiteral(MutableComponent text) 
             throws IllegalArgumentException {
@@ -73,10 +72,20 @@ public class FormatUtil {
      * Converts the contents of the {@link MutableComponent} from 
      * {@link TranslatableContents} to {@link PlainTextContents}.
      * 
-     * <p><b>Note:</b> does not recurse, only affects root.</p>
+     * <p><b>Note:</b> Does not recurse, only affects root. Caller must recurse
+     * if required.</p>
      */
     private static MutableComponent convertToLiteral(MutableComponent text) 
             throws IllegalArgumentException {
+        boolean debug = Config.get().debugMode.equals(Config.DebugMode.ALL);
+        if (debug) {
+            ChatNotify.LOG.warn("Converting message to literal");
+            ChatNotify.LOG.warn("Text:");
+            ChatNotify.LOG.warn(text.getString());
+            ChatNotify.LOG.warn("Tree:");
+            ChatNotify.LOG.warn(text.toString());
+        }
+        
         if (!(text.getContents() instanceof TranslatableContents contents)) return text;
         
         // Detach siblings
@@ -89,11 +98,23 @@ public class FormatUtil {
         // Translate the contents using the new argument array
         // TODO I18n.get() ?
         String translated = Component.translatable(contents.getKey(), (Object[])array).getString();
-
-        // Split on the known argument string to get the literal translation
-        List<String> translatedSplit = new ArrayList<>(List.of(translated.split(ARGUMENT_STRING)));
-        // Pad end
-        if (translated.endsWith(ARGUMENT_STRING)) translatedSplit.addLast("");
+        List<String> translatedSplit;
+        if (translated.equals(ARGUMENT_STRING)) {
+            // Pad start and end
+            translatedSplit = new ArrayList<>(List.of("", ""));
+        } else {
+            // Split on the known argument string to get the literal translation
+            translatedSplit = new ArrayList<>(List.of(translated.split(ARGUMENT_STRING)));
+            // Pad end (start is already padded)
+            if (translated.endsWith(ARGUMENT_STRING)) translatedSplit.addLast("");
+        }
+        
+        if (debug) {
+            ChatNotify.LOG.warn("Search translated:");
+            ChatNotify.LOG.warn(translated);
+            ChatNotify.LOG.warn("Size of translated split: {}", translatedSplit.size());
+        }
+        
 
         if (translatedSplit.size() == 1) {
             // No args, create component from translated string
@@ -120,12 +141,31 @@ public class FormatUtil {
             for (int i = 0; i < contents.getArgs().length; i++) {
                 // Add translated substring
                 if (!translatedSplit.get(i).isEmpty()) {
+                    if (debug) {
+                        ChatNotify.LOG.warn("Adding translated substring:");
+                        ChatNotify.LOG.warn(translatedSplit.get(i));
+                    }
                     siblings.add(Component.literal(translatedSplit.get(i)));
                 }
                 // Add subsequent arg
                 if (args[i] instanceof Component argComponent) {
+                    if (debug) {
+                        ChatNotify.LOG.warn("Adding arg component");
+                        ChatNotify.LOG.warn("Text:");
+                        ChatNotify.LOG.warn(argComponent.getString());
+                        ChatNotify.LOG.warn("Tree:");
+                        ChatNotify.LOG.warn(argComponent.toString());
+                    }
                     siblings.add(argComponent);
                 } else {
+                    if (debug) {
+                        ChatNotify.LOG.warn("Adding arg object");
+                        ChatNotify.LOG.warn("getClass():");
+                        ChatNotify.LOG.warn(args[i].getClass().getName());
+                        ChatNotify.LOG.warn("toString():");
+                        ChatNotify.LOG.warn(args[i].toString());
+                        
+                    }
                     siblings.add(Component.literal(args[i].toString()));
                 }
             }

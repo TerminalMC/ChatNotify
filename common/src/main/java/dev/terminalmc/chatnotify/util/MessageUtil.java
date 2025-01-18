@@ -53,7 +53,10 @@ public class MessageUtil {
         ChatNotify.unmodifiedChat.add(msg);
         
         if (debug) {
-            ChatNotify.LOG.warn("Original Message");
+            ChatNotify.LOG.warn("Processing new message");
+            ChatNotify.LOG.warn("Original text:");
+            ChatNotify.LOG.warn(msg.getString());
+            ChatNotify.LOG.warn("Original tree:");
             ChatNotify.LOG.warn(msg.toString());
         }
 
@@ -63,6 +66,9 @@ public class MessageUtil {
         // Check owner
         String cleanOwnedStr = checkOwner(cleanStr);
         if (cleanOwnedStr == null) {
+            if (debug) {
+                ChatNotify.LOG.warn("Ignoring user-sent message");
+            }
             // Message was identified as being sent by the user and config
             // is set to ignore such messages, so return the original
             return msg;
@@ -72,8 +78,15 @@ public class MessageUtil {
         msg = tryNotify(msg.copy(), cleanStr, cleanOwnedStr);
 
         if (debug) {
-            ChatNotify.LOG.warn("Modified Message");
-            ChatNotify.LOG.warn(msg == null ? "null" : msg.toString());
+            ChatNotify.LOG.warn("Finished processing message");
+            if (msg == null) {
+                ChatNotify.LOG.warn("null");
+            } else {
+                ChatNotify.LOG.warn("Final text:");
+                ChatNotify.LOG.warn(msg.getString());
+                ChatNotify.LOG.warn("Final tree:");
+                ChatNotify.LOG.warn(msg.toString());
+            }
         }
         
         return msg;
@@ -228,7 +241,10 @@ public class MessageUtil {
             // Convert message into a format suitable for recursive processing
             msg = FormatUtil.convertToStyledLiteral(msg.copy());
             if (debug) {
-                ChatNotify.LOG.warn("Converted Message");
+                ChatNotify.LOG.warn("Converting message prior to initiating restyle");
+                ChatNotify.LOG.warn("Converted text:");
+                ChatNotify.LOG.warn(msg.getString());
+                ChatNotify.LOG.warn("Converted tree:");
                 ChatNotify.LOG.warn(msg.toString());
             }
 
@@ -245,6 +261,10 @@ public class MessageUtil {
             }
             // If style string not usable, attempt to restyle trigger
             if (!restyled) {
+                if (debug) {
+                    ChatNotify.LOG.warn("Style string '{}' not found in message", trig.styleString);
+                    ChatNotify.LOG.warn("Defaulting to trigger restyle");
+                }
                 switch(trig.type) {
                     case NORMAL -> {
                         do {
@@ -424,7 +444,7 @@ public class MessageUtil {
      * @return the restyled message.
      */
     public static Component restyleLeaves(Component msg, TextStyle style, int start, int end) {
-        return style.isEnabled() ? restyle(msg.copy(), style, start, end, 0) : msg;
+        return style.isEnabled() ? recursiveRestyle(msg.copy(), style, start, end, 0) : msg;
     }
 
     /**
@@ -441,8 +461,9 @@ public class MessageUtil {
      * @param index the index of the start of {@code msg} in the root string.
      * @return the message, restyled if applicable.
      */
-    private static MutableComponent restyle(MutableComponent msg, TextStyle style, int start, int end, int index) {
-        if (debug) ChatNotify.LOG.warn("restyle('{}', {}, {}, {})", 
+    private static MutableComponent recursiveRestyle(MutableComponent msg, TextStyle style, 
+                                                     int start, int end, int index) {
+        if (debug) ChatNotify.LOG.warn("recursiveRestyle('{}', {}, {}, {})", 
                 msg.getString(), start, end, index);
         
         // Detach siblings
@@ -480,7 +501,7 @@ public class MessageUtil {
         for (Component sibling : oldSiblings) {
             String str = sibling.getString();
             if (index + str.length() >= start && index < end) {
-                siblings.add(restyle(sibling.copy(), style, start, end, index));
+                siblings.add(recursiveRestyle(sibling.copy(), style, start, end, index));
             } else {
                 siblings.add(sibling);
             }
