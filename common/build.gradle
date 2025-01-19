@@ -9,6 +9,9 @@ dependencies {
 
     // CommandKeys
     implementation("maven.modrinth:65UyswbY:${commandkeys_version}")
+
+    // ChatHeads
+    implementation("maven.modrinth:Wb5oqrBJ:${chatheads_version}")
 }
 
 neoForge {

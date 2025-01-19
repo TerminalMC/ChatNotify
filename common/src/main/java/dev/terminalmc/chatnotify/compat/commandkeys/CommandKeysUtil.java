@@ -20,7 +20,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 
-public class CommandKeys {
+public class CommandKeysUtil {
     /**
      * Parses the specified string into two {@link InputConstants.Key} 
      * instances, and passes them to CommandKeys' keypress handler.

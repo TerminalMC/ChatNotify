@@ -20,6 +20,9 @@ dependencies {
     // CommandKeys
     modImplementation("maven.modrinth:65UyswbY:${commandkeys_version}")
 
+    // ChatHeads
+    modImplementation("maven.modrinth:Wb5oqrBJ:${chatheads_version}")
+
     // ModMenu
     modImplementation("maven.modrinth:mOgUt4GM:${modmenu_version}")
 }

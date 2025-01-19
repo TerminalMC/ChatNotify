@@ -39,16 +39,16 @@ import java.util.stream.Collectors;
  * maintain an instance at index 0 for the user's name. This instance is handled
  * differently in several ways, but is kept in the list for iteration purposes.
  * </p>
- * 
+ *
  * <p>The {@code version} field of a config class must be incremented whenever 
  * the json structure of the class is changed, to facilitate correct 
  * deserialization.</p>
- * 
+ *
  * <p><b>Note:</b> For enum controls, the default value is the first value of
  * the enum.</p>
  */
 public class Config {
-    public final int version = 8;
+    public final int version = 9;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     private static final String BACKUP_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
@@ -113,6 +113,15 @@ public class Config {
     }
 
     /**
+     * Controls how {@link ResponseMessage}s are sent.
+     */
+    public SenderDetectionMode senderDetectionMode;
+    public enum SenderDetectionMode {
+        COMBINED,
+        SENT_MATCH,
+    }
+
+    /**
      * Whether messages identified as sent by the user should be able to 
      * activate {@link Notification}s.
      */
@@ -143,7 +152,7 @@ public class Config {
      * message was sent by the user.
      */
     public final List<String> prefixes;
-    public static final Supplier<List<String>> prefixesDefault = 
+    public static final Supplier<List<String>> prefixesDefault =
             () -> new ArrayList<>(List.of("/shout", "/me", "!"));
 
     /**
@@ -151,7 +160,7 @@ public class Config {
      * at least one instance.
      */
     private final List<Notification> notifications;
-    private static final Supplier<List<Notification>> notificationsDefault = 
+    private static final Supplier<List<Notification>> notificationsDefault =
             () -> new ArrayList<>(List.of(Notification.createUser()));
 
     /**
@@ -164,11 +173,12 @@ public class Config {
                 NotifMode.values()[0],
                 RestyleMode.values()[0],
                 SendMode.values()[0],
+                SenderDetectionMode.values()[0],
                 checkOwnMessagesDefault,
-                soundSourceDefault, 
-                defaultColorDefault, 
-                defaultSoundDefault.get(), 
-                prefixesDefault.get(), 
+                soundSourceDefault,
+                defaultColorDefault,
+                defaultSoundDefault.get(),
+                prefixesDefault.get(),
                 notificationsDefault.get()
         );
     }
@@ -177,16 +187,17 @@ public class Config {
      * Not validated.
      */
     Config(
-            DetectionMode detectionMode, 
-            DebugMode debugMode, 
-            NotifMode notifMode, 
-            RestyleMode restyleMode, 
-            SendMode sendMode, 
-            boolean checkOwnMessages, 
-            SoundSource soundSource, 
-            int defaultColor, 
-            Sound defaultSound, 
-            List<String> prefixes, 
+            DetectionMode detectionMode,
+            DebugMode debugMode,
+            NotifMode notifMode,
+            RestyleMode restyleMode,
+            SendMode sendMode,
+            SenderDetectionMode senderDetectionMode,
+            boolean checkOwnMessages,
+            SoundSource soundSource,
+            int defaultColor,
+            Sound defaultSound,
+            List<String> prefixes,
             List<Notification> notifications
     ) {
         this.detectionMode = detectionMode;
@@ -194,6 +205,7 @@ public class Config {
         this.notifMode = notifMode;
         this.restyleMode = restyleMode;
         this.sendMode = sendMode;
+        this.senderDetectionMode = senderDetectionMode;
         this.checkOwnMessages = checkOwnMessages;
         this.soundSource = soundSource;
         this.defaultColor = defaultColor;
@@ -351,7 +363,7 @@ public class Config {
             ChatNotify.LOG.error("Unable to save config", e);
         }
     }
-    
+
     // Cleanup and validation
 
     /**
@@ -362,7 +374,7 @@ public class Config {
         // Remove blank prefixes and sort by decreasing length
         prefixes.removeIf(String::isBlank);
         prefixes.sort(Comparator.comparingInt(String::length).reversed());
-        
+
         // Validate username notification
         validateUserNotif();
 
@@ -371,9 +383,9 @@ public class Config {
             n.cleanup();
             return (
                     n != notifications.getFirst()
-                    && n.triggers.isEmpty()
-                    && n.exclusionTriggers.isEmpty()
-                    && n.responseMessages.isEmpty()
+                            && n.triggers.isEmpty()
+                            && n.exclusionTriggers.isEmpty()
+                            && n.responseMessages.isEmpty()
             );
         });
     }
@@ -393,59 +405,66 @@ public class Config {
     }
 
     // Deserialization
-    
+
     public static class Deserializer implements JsonDeserializer<Config> {
         @Override
         public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
-            
+
             String f = "detectionMode";
             DetectionMode detectionMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(DetectionMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString()) 
-                        ? DetectionMode.valueOf(obj.get(f).getAsString())
-                        : DetectionMode.values()[0] 
+                    ? Arrays.stream(DetectionMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                    ? DetectionMode.valueOf(obj.get(f).getAsString())
+                    : DetectionMode.values()[0]
                     : DetectionMode.values()[0];
 
             f = "debugMode";
             DebugMode debugMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
                     ? Arrays.stream(DebugMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? DebugMode.valueOf(obj.get(f).getAsString())
-                        : DebugMode.values()[0]
+                    ? DebugMode.valueOf(obj.get(f).getAsString())
+                    : DebugMode.values()[0]
                     : DebugMode.values()[0];
 
             f = "notifMode";
             NotifMode notifMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
                     ? Arrays.stream(NotifMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? NotifMode.valueOf(obj.get(f).getAsString())
-                        : NotifMode.values()[0]
+                    ? NotifMode.valueOf(obj.get(f).getAsString())
+                    : NotifMode.values()[0]
                     : NotifMode.values()[0];
 
             f = "restyleMode";
             RestyleMode restyleMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
                     ? Arrays.stream(RestyleMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? RestyleMode.valueOf(obj.get(f).getAsString())
-                        : RestyleMode.values()[0]
+                    ? RestyleMode.valueOf(obj.get(f).getAsString())
+                    : RestyleMode.values()[0]
                     : RestyleMode.values()[0];
 
             f = "sendMode";
             SendMode sendMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
                     ? Arrays.stream(SendMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? SendMode.valueOf(obj.get(f).getAsString())
-                        : SendMode.values()[0]
+                    ? SendMode.valueOf(obj.get(f).getAsString())
+                    : SendMode.values()[0]
                     : SendMode.values()[0];
 
+            f = "senderDetectionMode";
+            SenderDetectionMode senderDetectionMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(SenderDetectionMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                    ? SenderDetectionMode.valueOf(obj.get(f).getAsString())
+                    : SenderDetectionMode.values()[0]
+                    : SenderDetectionMode.values()[0];
+
             f = "checkOwnMessages";
-            boolean checkOwnMessages = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean() 
+            boolean checkOwnMessages = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
                     ? obj.get(f).getAsBoolean()
                     : checkOwnMessagesDefault;
 
             f = "soundSource";
             SoundSource soundSource = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
                     ? Arrays.stream(SoundSource.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? SoundSource.valueOf(obj.get(f).getAsString())
-                        : soundSourceDefault
+                    ? SoundSource.valueOf(obj.get(f).getAsString())
+                    : soundSourceDefault
                     : soundSourceDefault;
 
             f = "defaultColor";
@@ -462,23 +481,35 @@ public class Config {
             f = "prefixes";
             List<String> prefixes = obj.has(f) && obj.get(f).isJsonArray()
                     ? new ArrayList<>(obj.getAsJsonArray(f).asList().stream()
-                        .filter((je) -> (je.isJsonPrimitive() && je.getAsJsonPrimitive().isString()))
-                        .map(JsonElement::getAsString).toList())
+                    .filter((je) -> (je.isJsonPrimitive() && je.getAsJsonPrimitive().isString()))
+                    .map(JsonElement::getAsString).toList())
                     : prefixesDefault.get();
 
             f = "notifications";
             List<Notification> notifications = obj.has(f) && obj.get(f).isJsonArray()
                     ? obj.getAsJsonArray(f).asList().stream()
-                        .filter(JsonElement::isJsonObject)
-                        .map((je) -> (Notification)ctx.deserialize(je, Notification.class)).toList()
-                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
+                    .filter(JsonElement::isJsonObject)
+                    .map((je) -> (Notification)ctx.deserialize(je, Notification.class)).toList()
+                    .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
                     : notificationsDefault.get();
             if (notifications.isEmpty()) notifications.add(Notification.createUser());
             else if (notifications.getFirst().triggers.size() < 2) notifications.set(0, Notification.createUser());
-            
-            
-            return new Config(detectionMode, debugMode, notifMode, restyleMode, sendMode, 
-                    checkOwnMessages, soundSource, defaultColor, defaultSound, prefixes, notifications);
+
+
+            return new Config(
+                    detectionMode,
+                    debugMode,
+                    notifMode,
+                    restyleMode,
+                    sendMode,
+                    senderDetectionMode,
+                    checkOwnMessages,
+                    soundSource,
+                    defaultColor,
+                    defaultSound,
+                    prefixes,
+                    notifications
+            );
         }
     }
 }

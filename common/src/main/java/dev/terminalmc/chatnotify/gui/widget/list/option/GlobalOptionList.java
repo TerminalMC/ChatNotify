@@ -34,7 +34,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FastColor;
 
 import java.awt.*;
-import java.util.Locale;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -49,6 +48,7 @@ public class GlobalOptionList extends OptionList {
         addEntry(new Entry.DetectAndDebugEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.SelfCheckAndSendModeEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.MultiModeEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SenderDetectionModeEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
@@ -173,6 +173,24 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
+        private static class SenderDetectionModeEntry extends MainOptionList.Entry {
+            SenderDetectionModeEntry(int x, int width, int height) {
+                super();
+
+                elements.add(CycleButton.<Config.SenderDetectionMode>builder((status) ->
+                                localized("option", "global.sender_detection_mode." + status.name()))
+                        .withValues(Config.SenderDetectionMode.values())
+                        .withInitialValue(Config.get().senderDetectionMode)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "global.sender_detection_mode."
+                                        + status.name() + ".tooltip")))
+                        .create(x, 0, width, height,
+                                localized("option", "global.sender_detection_mode"),
+                                (button, status) -> 
+                                        Config.get().senderDetectionMode = status));
+            }
+        }
+
         private static class DefaultColorEntry extends MainOptionList.Entry {
             DefaultColorEntry(int x, int width, int height, GlobalOptionList list) {
                 super();
@@ -264,8 +282,8 @@ public class GlobalOptionList extends OptionList {
 
                 EditBox prefixField = new TextField(x, 0, width, height);
                 prefixField.setMaxLength(30);
-                prefixField.setResponder((prefix) -> Config.get().prefixes.set(
-                        index, prefix.strip().toLowerCase(Locale.ROOT)));
+                prefixField.setResponder((prefix) -> 
+                        Config.get().prefixes.set(index, prefix.strip()));
                 prefixField.setValue(Config.get().prefixes.get(index));
                 elements.add(prefixField);
 

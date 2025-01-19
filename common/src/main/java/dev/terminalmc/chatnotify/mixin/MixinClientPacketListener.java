@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.mixin;
 
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.util.FormatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -30,8 +31,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Locale;
 
 /*
  * If an incoming message is the return of a message sent by the user,
@@ -99,7 +98,7 @@ public class MixinClientPacketListener {
                 && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())
                 && entry.displayName() != null
         ) {
-            Config.get().setDisplayName(entry.displayName().getString());
+            Config.get().setDisplayName(FormatUtil.stripCodes(entry.displayName().getString()));
         }
     }
 
@@ -124,8 +123,7 @@ public class MixinClientPacketListener {
     private void chatNotify$storeMessage(String message) {
         long time = System.nanoTime();
         chatNotify$removeOldMessages(time);
-
-        message = message.toLowerCase(Locale.ROOT);
+        
         String plainMsg = "";
 
         // If message starts with a prefix, remove the prefix.
@@ -146,7 +144,7 @@ public class MixinClientPacketListener {
 
         // The command '/' is removed before this point, so add it back before
         // checking against prefixes.
-        command = '/' + command.toLowerCase(Locale.ROOT);
+        command = '/' + command;
 
         // If command starts with a prefix, cut the prefix and store the command
         for (String prefix : Config.get().prefixes) {

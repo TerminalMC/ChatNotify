@@ -16,9 +16,12 @@
 
 package dev.terminalmc.chatnotify.util;
 
+import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
 import dev.terminalmc.chatnotify.config.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.*;
@@ -32,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static dev.terminalmc.chatnotify.ChatNotify.recentMessages;
+import static dev.terminalmc.chatnotify.config.Config.SenderDetectionMode.COMBINED;
 
 public class MessageUtil {
     private static boolean debug = false;
@@ -64,13 +68,9 @@ public class MessageUtil {
         String cleanStr = FormatUtil.stripCodes(str);
         
         // Check owner
-        String cleanOwnedStr = checkOwner(cleanStr);
+        String cleanOwnedStr = checkOwner(cleanStr, debug);
         if (cleanOwnedStr == null) {
-            if (debug) {
-                ChatNotify.LOG.warn("Ignoring user-sent message");
-            }
-            // Message was identified as being sent by the user and config
-            // is set to ignore such messages, so return the original
+            if (debug) ChatNotify.LOG.warn("Ignoring user-sent message");
             return msg;
         }
         
@@ -96,43 +96,80 @@ public class MessageUtil {
      * Determines whether a message was sent by the user and modifies it if
      * necessary to prevent unwanted notifications.
      *
-     * <p>The message is identified as sent by the user if it contains a stored
-     * message (or command) sent by the user, and the part preceding the stored
-     * message contains a trigger of the username notification.</p>
+     * <p>If the global option {@link Config#senderDetectionMode} is set to 
+     * {@link Config.SenderDetectionMode#COMBINED} and the ChatHeads mod is
+     * available, it will be queried to determine the message owner.</p>
+     * 
+     * <p>Otherwise, the message will be compared to recently sent messages 
+     * and checked for triggers of the username notification to determine
+     * whether it was sent by the mod user.</p>
      *
      * <p>If the message is positively identified, it is set to {@code null} if
-     * ChatNotify is configured to ignore such messages, else the part of the
-     * prefix that matched a trigger is removed to prevent it being detected by
-     * trigger search.</p>
-     * @param msg the message to check.
-     * @return the message, a modified copy, or {@code null} depending on the
+     * the global option {@link Config#checkOwnMessages} is false, else the part
+     * of the prefix that matched a trigger is removed to prevent it being 
+     * detected by trigger search.</p>
+     * @param cleanStr the clean (no format codes) string to check.
+     * @return the string, a modified copy, or {@code null} depending on the
      * result of the check.
      */
-    private static @Nullable String checkOwner(String msg) {
-        // Stored messages are always converted to lowercase, convert to match
-        String msgLow = msg.toLowerCase(Locale.ROOT);
-        // Check for a matching stored message
-        for (int i = 0; i < recentMessages.size(); i++) {
-            int lastMatchIdx = msgLow.lastIndexOf(recentMessages.get(i).getSecond());
-            if (lastMatchIdx > 0) {
-                // Matched against a stored message
-                // Check for a username trigger in the part before the match
-                String prefix = msg.substring(0, lastMatchIdx);
-                for (Trigger trigger : Config.get().getUserNotif().triggers) {
-                    Matcher matcher = normalSearch(prefix, trigger.string);
-                    if (matcher.find()) { 
-                        // Matched against a username trigger
-                        // Remove stored message
-                        recentMessages.remove(i);
-                        // Modify message according to config
-                        return Config.get().checkOwnMessages 
-                                ? msg.substring(0, matcher.start()) + msg.substring(matcher.end()) 
-                                : null;
+    private static @Nullable String checkOwner(String cleanStr, boolean debug) {
+        boolean checkSuccessful = false;
+        String cleanOwnedStr = cleanStr;
+        if (Config.get().senderDetectionMode == COMBINED) {
+            // Ask chat heads who the message owner is
+            Pair<PlayerInfo,Integer> info = ChatHeadsWrapper.getPlayerInfo();
+            if (info != null) { // null indicates ChatHeads failure
+                checkSuccessful = true;
+                if (debug) ChatNotify.LOG.warn("Owner check using ChatHeads");
+                if (info.getFirst() != null && Minecraft.getInstance().player != null) {
+                    UUID id = info.getFirst().getProfile().getId();
+                    if (id.equals(Minecraft.getInstance().player.getUUID())) {
+                        if (debug) ChatNotify.LOG.warn("Matched user's UUID");
+                        for (Trigger t : Config.get().getUserNotif().triggers) {
+                            Matcher matcher = normalSearch(cleanStr, t.string);
+                            if (matcher.find()) {
+                                if (debug) ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
+                                // Modify message according to config
+                                cleanOwnedStr = Config.get().checkOwnMessages
+                                        ? cleanStr.substring(0, matcher.start())
+                                                + cleanStr.substring(matcher.end())
+                                        : null;
+                                break;
+                            }
+                        }
                     }
                 }
             }
         }
-        return msg;
+        // Default to sent-message-match heuristic
+        if (!checkSuccessful) {
+            if (debug) ChatNotify.LOG.warn("Owner check using heuristic");
+            // Check for a matching stored message
+            for (int i = 0; i < recentMessages.size(); i++) {
+                Matcher matcher = Pattern.compile("(?iU)" + 
+                                Pattern.quote(recentMessages.get(i).getSecond())).matcher(cleanStr);
+                if (matcher.find()) {
+                    if (debug) ChatNotify.LOG.warn("Matched a recent message");
+                    // Matched against a stored message, check for a username trigger
+                    String prefix = cleanStr.substring(0, matcher.start());
+                    for (Trigger t : Config.get().getUserNotif().triggers) {
+                        matcher = normalSearch(prefix, t.string);
+                        if (matcher.find()) {
+                            if (debug) ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
+                            recentMessages.remove(i); // Remove stored message
+                            // Modify message according to config
+                            cleanOwnedStr = Config.get().checkOwnMessages
+                                    ? cleanStr.substring(0, matcher.start())
+                                    + cleanStr.substring(matcher.end())
+                                    : null;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (debug) ChatNotify.LOG.warn("Owner-checked string: '{}'", cleanOwnedStr);
+        return cleanOwnedStr;
     }
 
     /**

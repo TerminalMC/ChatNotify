@@ -16,17 +16,23 @@
 
 package dev.terminalmc.chatnotify.compat.commandkeys;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
+/**
+ * Wraps {@link CommandKeysUtil} to catch errors caused by the CommandKeys mod 
+ * not being available.
+ */
 public class CommandKeysWrapper {
     private static boolean hasFailed = false;
 
     /**
-     * Wraps {@link CommandKeys#send} to catch errors caused by the CommandKeys
-     * mod not being available.
+     * Parses the specified string into two {@link InputConstants.Key}
+     * instances, and passes them to CommandKeys' keypress handler.
      */
     public static void trySend(String str) {
         if (hasFailed) return;
         try {
-            CommandKeys.send(str);
+            CommandKeysUtil.send(str);
         } catch (NoClassDefFoundError | NoSuchMethodError ignored) {
             hasFailed = true;
         }

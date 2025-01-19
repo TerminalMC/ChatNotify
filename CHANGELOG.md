@@ -6,8 +6,9 @@
 - Fixed a bug causing exclusion triggers to be checked even when disabled
 - Fixed a crash caused by processing invalid message structures
 - Fixed trigger editor restyle preview not working for key-type triggers
-- Added option to use regex for style target
+- Added an option to use regex for style target
 - Prevented notifications from being activated while editing
+- Added an option to use ChatHeads for message sender detection
 
 ## 2.3.2
 

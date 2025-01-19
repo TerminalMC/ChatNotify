@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -270,7 +269,7 @@ public class Notification {
         // Remove all blank triggers, and convert all key triggers to lowercase.
         triggers.removeIf(trigger -> trigger.string.isBlank());
         for (Trigger t : triggers) {
-            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
+            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase();
             if (t.styleTarget.string.isBlank()) t.styleTarget.enabled = false;
         }
 
@@ -279,7 +278,7 @@ public class Notification {
         exclusionTriggers.removeIf(trigger -> trigger.string.isBlank());
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
         for (Trigger t : exclusionTriggers) {
-            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
+            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase();
         }
 
         // Remove all blank response messages, and disable response if there are
