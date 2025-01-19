@@ -134,7 +134,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     }
 
     @Override
-    protected int getScrollbarPosition() {
+    protected int scrollBarX() {
         return getX() + width - SCROLLBAR_WIDTH;
     }
 
