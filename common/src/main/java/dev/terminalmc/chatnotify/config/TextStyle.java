@@ -112,7 +112,8 @@ public class TextStyle {
 
     public Style getStyle() {
         return new Style(
-                doColor ? TextColor.fromRgb(color) : null,
+                doColor ? TextColor.fromRgb(color) : null, 
+                null,
                 bold != FormatMode.DISABLED ? bold == FormatMode.ON : null,
                 italic != FormatMode.DISABLED ? italic == FormatMode.ON : null,
                 underlined != FormatMode.DISABLED ? underlined == FormatMode.ON : null,
