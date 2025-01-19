@@ -254,6 +254,7 @@ public class FormatUtil {
         Style createStyle() {
             return new Style(
                     color == null ? null : TextColor.fromLegacyFormat(color),
+                    null,
                     bold ? true : null,
                     italic ? true : null,
                     underline ? true : null,
