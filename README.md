@@ -41,10 +41,10 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 1. When a new message arrives in chat, ChatNotify starts checking the triggers of each notification.
 2. If a trigger matches the chat message, that notification will be activated.
 3. When a notification is activated, two things will happen;
-   1. The message will be restyled, to highlight the trigger that activated the notification.
-   2. A sound will be played.
+    1. The message will be restyled, to highlight the trigger that activated the notification.
+    2. A sound will be played.
 
-- You can create and customize your own notifications via the options screen, which can be opened using 
+- You can create and customize your own notifications via the options screen, which can be opened using
   [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on NeoForge.
 - See below for basic guides on setting up your own custom notifications.
 
@@ -188,13 +188,14 @@ To access, click the `'More Options'` button for the notification you want to ed
 <img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_notification_01.png" width="50%">
 
 <details>
-<summary><b>Restyle String</b></summary>
+<summary><b>Style Target</b></summary>
 
 - This feature provides finer control over which part of a message is highlighted (restyled).
-- For example, if you have a regex trigger that matches "correct horse battery staple" but you only want to highlight
-  "battery", you can specify "battery" as a restyle string.
-- To set a restyle string, access the `Notification Options` screen then press the small `+` button to the right
+- For example, if you have a trigger that matches messages starting with "\[Mod Team\]" for a group chat, but you want
+  to highlight what people say (which comes after a `:` character), you can specify `(?<=: ).*` as a regex style target.
+- To set a style target, access the `Notification Options` screen then press the small `+` button to the right
   of the trigger field.
+- Consider using a tool such as [regex101](https://regex101.com) to help with creation of regex style targets.
 </details>
 
 #### Advanced Options
@@ -206,10 +207,10 @@ To access, first go to the `Notification Options` screen, then click the `Advanc
 <details>
 <summary><b>Custom Messages</b></summary>
 
-- This feature allows you to send messages to yourself when a notification is activated. See below for the different 
+- This feature allows you to send messages to yourself when a notification is activated. See below for the different
   types.
 
-- All custom messages support color and format codes using `$` instead of `§`. For more information on codes, refer to 
+- All custom messages support color and format codes using `$` instead of `§`. For more information on codes, refer to
   [the Minecraft Wiki](https://minecraft.wiki/w/Formatting_codes).
 
 - If the notification has a regex trigger, you can access capturing groups from the match using `(1)`, `(2)` etc. in the
@@ -221,8 +222,8 @@ To access, first go to the `Notification Options` screen, then click the `Advanc
 
 - This feature allows you to replace the triggering chat message with a custom message.
 - **Note**: If you switch this to `ON` and leave the field blank, the message will be blocked.
-  - If a message is blocked, any subsequent notifications cannot be activated, but previous ones that have already
-    activated may still play sounds or send response messages, so use this feature with caution.
+    - If a message is blocked, any subsequent notifications cannot be activated, but previous ones that have already
+      activated may still play sounds or send response messages, so use this feature with caution.
 </details>
 
 <details>

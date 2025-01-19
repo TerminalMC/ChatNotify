@@ -271,7 +271,7 @@ public class Notification {
         triggers.removeIf(trigger -> trigger.string.isBlank());
         for (Trigger t : triggers) {
             if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
-            if (t.styleString != null && t.styleString.isBlank()) t.styleString = null;
+            if (t.styleTarget.string.isBlank()) t.styleTarget.enabled = false;
         }
 
         // Remove all blank exclusion triggers, convert all key triggers to

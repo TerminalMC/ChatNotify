@@ -19,6 +19,7 @@ package dev.terminalmc.chatnotify.gui.widget.list.option;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.config.StyleTarget;
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
@@ -32,7 +33,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
@@ -67,9 +67,9 @@ public class TriggerOptionList extends OptionList {
         addEntry(triggerFieldEntry);
         addEntry(new SpaceEntry(triggerFieldEntry));
         
-        if (trigger.styleString != null) {
-            addEntry(new Entry.StyleStringFieldEntry(dynEntryX, dynEntryWidth, entryHeight, 
-                    this, trigger));
+        if (trigger.styleTarget.enabled) {
+            addEntry(new Entry.StyleTargetFieldEntry(dynEntryX, dynEntryWidth, entryHeight, 
+                    this, trigger.styleTarget));
         }
 
         textDisplayBox = new MultiLineTextField(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, 
@@ -221,15 +221,15 @@ public class TriggerOptionList extends OptionList {
                 // Style string add button
                 Button styleButton = Button.builder(Component.literal("+"),
                                 (button) -> {
-                                    trigger.styleString = "";
+                                    trigger.styleTarget.enabled = true;
                                     list.reload();
                                 })
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
                         .build();
-                if (trigger.styleString == null) {
+                if (!trigger.styleTarget.enabled) {
                     styleButton.setTooltip(Tooltip.create(
-                            localized("option", "notif.restyle_string.add.tooltip")));
+                            localized("option", "notif.style_target.add.tooltip")));
                     styleButton.setTooltipDelay(Duration.ofMillis(500));
                 } else {
                     styleButton.active = false;
@@ -238,12 +238,11 @@ public class TriggerOptionList extends OptionList {
             }
         }
 
-        private static class StyleStringFieldEntry extends Entry {
-            StyleStringFieldEntry(int x, int width, int height, TriggerOptionList list, 
-                                  Trigger trigger) {
+        private static class StyleTargetFieldEntry extends Entry {
+            StyleTargetFieldEntry(int x, int width, int height, TriggerOptionList list,
+                                  StyleTarget styleTarget) {
                 super();
-                int fieldSpacing = 1;
-                int stringFieldWidth = width - (list.tinyWidgetWidth * 3) - (fieldSpacing * 2);
+                int stringFieldWidth = width - (list.tinyWidgetWidth * 4);
                 int movingX = x + list.tinyWidgetWidth;
 
                 // Info icon
@@ -251,24 +250,42 @@ public class TriggerOptionList extends OptionList {
                         Component.literal("\u2139"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(
-                        localized("option", "notif.restyle_string.tooltip")));
+                        localized("option", "notif.style_target.tooltip")));
                 infoIcon.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(infoIcon);
-                movingX += list.tinyWidgetWidth + fieldSpacing;
+                movingX += list.tinyWidgetWidth;
+
+                // Type button
+                CycleButton<StyleTarget.Type> typeButton = CycleButton.<StyleTarget.Type>builder(
+                                (type) -> Component.literal(type.icon))
+                        .withValues(StyleTarget.Type.values())
+                        .displayOnlyValue()
+                        .withInitialValue(styleTarget.type)
+                        .withTooltip((type) -> Tooltip.create(
+                                localized("option", "notif.style_target.type." + type + ".tooltip")))
+                        .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
+                                (button, type) -> {
+                                    styleTarget.type = type;
+                                    list.reload();
+                                });
+                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(typeButton);
+                movingX += list.tinyWidgetWidth;
 
                 // Style string field
                 TextField stringField = new TextField(movingX, 0, stringFieldWidth, height);
+                if (styleTarget.type == StyleTarget.Type.REGEX) stringField.regexValidator();
                 stringField.setMaxLength(240);
-                stringField.setValue(trigger.styleString);
+                stringField.setValue(styleTarget.string);
                 stringField.setResponder((string) -> {
-                    trigger.styleString = string.strip();
+                    styleTarget.string = string.strip();
                     list.children().removeIf((entry) -> entry instanceof MessageEntry
                             || entry instanceof TextEntry
                             || (entry instanceof SpaceEntry && list.children().indexOf(entry) > 4));
                     list.addChat();
                 });
                 stringField.setTooltip(Tooltip.create(
-                        localized("option", "notif.restyle_string.field.tooltip")));
+                        localized("option", "notif.style_target.field.tooltip")));
                 stringField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(stringField);
                 movingX = x + width - list.tinyWidgetWidth;
@@ -276,7 +293,7 @@ public class TriggerOptionList extends OptionList {
                 // Delete button
                 elements.add(Button.builder(Component.literal("\u274C"),
                                 (button) -> {
-                                    trigger.styleString = null;
+                                    styleTarget.enabled = false;
                                     list.reload();
                                 })
                         .pos(movingX, 0)

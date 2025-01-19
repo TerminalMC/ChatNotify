@@ -22,21 +22,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class Trigger {
-    public final int version = 4;
+public class StyleTarget {
+    public final int version = 1;
 
     /**
-     * Not currently used.
+     * Whether this instance is eligible for editing or usage.
      */
     public boolean enabled;
-    public static final boolean enabledDefault = true;
+    public static final boolean enabledDefault = false;
 
     /**
-     * The trigger string.
+     * The target string.
      */
     public @NotNull String string;
     public static final @NotNull String stringDefault = "";
@@ -49,28 +48,18 @@ public class Trigger {
     public transient @Nullable Pattern pattern;
 
     /**
-     * The restyle target.
-     */
-    public StyleTarget styleTarget;
-    public static final Supplier<StyleTarget> styleTargetDefault = StyleTarget::new;
-
-    /**
      * Controls how {@link Trigger#string} is interpreted.
      */
     public Type type;
     public enum Type {
         /**
-         * Case-ignorant 'fuzzy' word/phrase matching.
+         * Case-ignorant substring matching.
          */
         NORMAL("~"),
         /**
          * Regex matching.
          */
-        REGEX(".*"),
-        /**
-         * Translation key substring matching.
-         */
-        KEY("\uD83D\uDD11");
+        REGEX(".*");
 
         public final String icon;
 
@@ -82,18 +71,21 @@ public class Trigger {
     /**
      * Creates a default instance.
      */
-    public Trigger() {
-        this(stringDefault);
+    public StyleTarget() {
+        this(
+                enabledDefault,
+                stringDefault,
+                Type.values()[0]
+        );
     }
 
     /**
-     * Creates a default instance with the specified value.
+     * Creates a default instance, enabled, with the specified value.
      */
-    public Trigger(@NotNull String string) {
+    public StyleTarget(@NotNull String string) {
         this(
-                enabledDefault,
+                true,
                 string,
-                styleTargetDefault.get(),
                 Type.values()[0]
         );
     }
@@ -101,15 +93,13 @@ public class Trigger {
     /**
      * Not validated.
      */
-    Trigger(
+    StyleTarget(
             boolean enabled,
             @NotNull String string,
-            StyleTarget styleTarget,
             Type type
     ) {
         this.enabled = enabled;
         this.string = string;
-        this.styleTarget = styleTarget;
         this.type = type;
     }
 
@@ -123,11 +113,11 @@ public class Trigger {
     }
 
     // Deserialization
-    
-    public static class Deserializer implements JsonDeserializer<Trigger> {
+
+    public static class Deserializer implements JsonDeserializer<StyleTarget> {
         @Override
-        public @Nullable Trigger deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
-                                             JsonDeserializationContext ctx) throws JsonParseException {
+        public @Nullable StyleTarget deserialize(JsonElement json, java.lang.reflect.Type typeOfT, 
+                                                 JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
 
@@ -141,38 +131,14 @@ public class Trigger {
                     ? obj.get(f).getAsString()
                     : stringDefault;
 
-            StyleTarget styleTarget;
-            if (version < 4) { // 2025-01-19
-                f = "styleString";
-                String styleString = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                        ? obj.get(f).getAsString()
-                        : null;
-                styleTarget = new StyleTarget(styleString == null ? StyleTarget.stringDefault : styleString);
-            } else {
-                f = "styleTarget";
-                styleTarget = obj.has(f) && obj.get(f).isJsonObject()
-                        ? ctx.deserialize(obj.get(f), StyleTarget.class)
-                        : styleTargetDefault.get();
-            }
-
             f = "type";
             Type type = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
                     ? Arrays.stream(Type.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? Type.valueOf(obj.get(f).getAsString())
-                        : Type.values()[0]
+                    ? Type.valueOf(obj.get(f).getAsString())
+                    : Type.values()[0]
                     : Type.values()[0];
-            if (version < 3) { // 2024-08-25
-                f = "isKey";
-                boolean isKey = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                        ? obj.get(f).getAsBoolean()
-                        : false;
-                boolean isRegex = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                        ? obj.get(f).getAsBoolean()
-                        : false;
-                type = isKey ? Type.KEY : (isRegex ? Type.REGEX : Type.NORMAL);
-            }
 
-            return new Trigger(enabled, string, styleTarget, type);
+            return new StyleTarget(enabled, string, type);
         }
     }
 }

@@ -58,6 +58,7 @@ public class Config {
             .registerTypeAdapter(Sound.class, new Sound.Deserializer())
             .registerTypeAdapter(TextStyle.class, new TextStyle.Deserializer())
             .registerTypeAdapter(Trigger.class, new Trigger.Deserializer())
+            .registerTypeAdapter(StyleTarget.class, new StyleTarget.Deserializer())
             .registerTypeAdapter(ResponseMessage.class, new ResponseMessage.Deserializer())
             .setPrettyPrinting()
             .create();

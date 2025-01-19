@@ -252,19 +252,35 @@ public class MessageUtil {
 
             // Restyle, using style string if possible
             boolean restyled = false;
-            if (trig.styleString != null && !trig.styleString.isBlank()) {
-                Matcher m = styleSearch(cleanStr, trig.styleString);
-                if (m.find()) {
-                    restyled = true;
-                    do {
-                        msg = restyleLeaves(msg, textStyle, m.start(), m.end());
-                    } while (restyleAllInstances && m.find());
+            if (trig.styleTarget.enabled && !trig.styleTarget.string.isBlank()) {
+                switch(trig.styleTarget.type) {
+                    case NORMAL -> {
+                        Matcher m = styleSearch(cleanStr, trig.styleTarget.string);
+                        if (m.find()) {
+                            restyled = true;
+                            do {
+                                msg = restyleLeaves(msg, textStyle, m.start(), m.end());
+                            } while (restyleAllInstances && m.find());
+                        }
+                    }
+                    case REGEX -> {
+                        if (trig.styleTarget.pattern != null) {
+                            Matcher m = trig.styleTarget.pattern.matcher(cleanStr);
+                            if (m.find()) {
+                                restyled = true;
+                                do {
+                                    msg = restyleLeaves(msg, textStyle, m.start(), m.end());
+                                } while (restyleAllInstances && m.find());
+                            }
+                        }
+                    }
                 }
             }
             // If style string not usable, attempt to restyle trigger
             if (!restyled) {
                 if (debug) {
-                    ChatNotify.LOG.warn("Style string '{}' not found in message", trig.styleString);
+                    ChatNotify.LOG.warn("Style target '{}' (type {})", 
+                            trig.styleTarget.string, trig.styleTarget.type);
                     ChatNotify.LOG.warn("Defaulting to trigger restyle");
                 }
                 switch(trig.type) {
