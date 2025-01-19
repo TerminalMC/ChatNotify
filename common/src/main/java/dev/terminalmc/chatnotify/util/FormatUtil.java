@@ -114,7 +114,6 @@ public class FormatUtil {
             ChatNotify.LOG.warn(translated);
             ChatNotify.LOG.warn("Size of translated split: {}", translatedSplit.size());
         }
-        
 
         if (translatedSplit.size() == 1) {
             // No args, create component from translated string
@@ -122,15 +121,22 @@ public class FormatUtil {
         } else { 
             // One or more args, create component from translated string and args
             Object[] args = contents.getArgs();
+            int numPlaceholders = translatedSplit.size() - 1;
             
-            // Verify that split translated string and args match
-            if (args.length != translatedSplit.size() - 1) {
-                ChatNotify.LOG.error("Unable to process translatable with {} args and {} splits",
-                        args.length, translatedSplit.size());
-                ChatNotify.LOG.error("Text: {}", text.getString());
-                ChatNotify.LOG.error("Raw: {}", text.toString());
-                ChatNotify.LOG.error("Translated: {}", translated);
-                throw new IllegalArgumentException();
+            // Number of placeholders (%s) in translation is now translatedSplit.size() - 1.
+            // In theory args.length should match that, but in practice some mods and
+            // plugins misbehave, so if there are not enough args we pad with %s, and if
+            // there are too many we ignore the excess by only iterating over 
+            // translatedSplit.size() - 1 when constructing the message below.
+            if (args.length < numPlaceholders) {
+                Object[] newArgs = new Object[numPlaceholders];
+                System.arraycopy(args, 0, newArgs, 0, args.length);
+                for (int i = 0; i < newArgs.length; i++) {
+                    if (newArgs[i] == null) {
+                        newArgs[i] = "%s";
+                    }
+                }
+                args = newArgs;
             }
             
             // Create an empty component, and add each part of the translated
@@ -138,7 +144,7 @@ public class FormatUtil {
             text = Component.empty().withStyle(text.getStyle());
             List<Component> siblings = text.getSiblings();
             
-            for (int i = 0; i < contents.getArgs().length; i++) {
+            for (int i = 0; i < numPlaceholders; i++) {
                 // Add translated substring
                 if (!translatedSplit.get(i).isEmpty()) {
                     if (debug) {
@@ -164,7 +170,6 @@ public class FormatUtil {
                         ChatNotify.LOG.warn(args[i].getClass().getName());
                         ChatNotify.LOG.warn("toString():");
                         ChatNotify.LOG.warn(args[i].toString());
-                        
                     }
                     siblings.add(Component.literal(args[i].toString()));
                 }

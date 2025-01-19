@@ -4,6 +4,7 @@
 
 - Fixed version metadata
 - Fixed a bug causing exclusion triggers to be checked even when disabled
+- Fixed a crash caused by processing invalid message structures
 
 ## 2.3.2
 
