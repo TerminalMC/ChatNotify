@@ -43,11 +43,13 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  */
 public class SoundOptionList extends OptionList {
     private final Sound sound;
+    private final Runnable closeRunnable;
 
     public SoundOptionList(Minecraft mc, int width, int height, int y, 
-                           int entryWidth, int entryHeight, Sound sound) {
+                           int entryWidth, int entryHeight, Sound sound, Runnable closeRunnable) {
         super(mc, width, height, y, entryHeight + 1, entryWidth, entryHeight);
         this.sound = sound;
+        this.closeRunnable = closeRunnable;
 
         addEntry(new Entry.SoundFieldEntry(entryX, entryWidth, entryHeight, sound, this));
 
@@ -177,9 +179,14 @@ public class SoundOptionList extends OptionList {
     @Override
     public SoundOptionList reload(int width, int height, double scrollAmount) {
         SoundOptionList newList = new SoundOptionList(minecraft, width, height,
-                getY(), entryWidth, entryHeight, sound);
+                getY(), entryWidth, entryHeight, sound, closeRunnable);
         newList.setScrollAmount(scrollAmount);
         return newList;
+    }
+
+    @Override
+    public void onClose() {
+        closeRunnable.run();
     }
 
     private void refreshSoundField() {

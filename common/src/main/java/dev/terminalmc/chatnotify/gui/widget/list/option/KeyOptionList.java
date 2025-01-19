@@ -32,12 +32,15 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 public class KeyOptionList extends OptionList {
     private final Trigger trigger;
     private final TextStyle textStyle;
+    private final Runnable closeRunnable;
 
     public KeyOptionList(Minecraft mc, int width, int height, int y,
-                         int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle) {
+                         int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle, 
+                         Runnable closeRunnable) {
         super(mc, width, height, y, entryHeight + 1, entryWidth, entryHeight);
         this.trigger = trigger;
         this.textStyle = textStyle;
+        this.closeRunnable = closeRunnable;
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "key.trigger", "\u2139"),
@@ -104,9 +107,14 @@ public class KeyOptionList extends OptionList {
     @Override
     public KeyOptionList reload(int width, int height, double scrollAmount) {
         KeyOptionList newList = new KeyOptionList(minecraft, width, height,
-                getY(), entryWidth, entryHeight, trigger, textStyle);
+                getY(), entryWidth, entryHeight, trigger, textStyle, closeRunnable);
         newList.setScrollAmount(scrollAmount);
         return newList;
+    }
+
+    @Override
+    public void onClose() {
+        closeRunnable.run();
     }
 
     private abstract static class Entry extends OptionList.Entry {

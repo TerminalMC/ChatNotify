@@ -47,12 +47,15 @@ public class NotifOptionList extends OptionList {
     private final Notification notif;
     private int dragSourceSlot = -1;
     private boolean dragHasStyleField = false;
+    private final Runnable closeRunnable;
 
     public NotifOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
-                           int entryWidth, int entryHeight, Notification notif) {
+                           int entryWidth, int entryHeight, Notification notif, 
+                           Runnable closeRunnable) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
         this.notif = notif;
         notif.editing = true;
+        this.closeRunnable = closeRunnable;
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "notif.triggers", "\u2139"),
@@ -101,32 +104,33 @@ public class NotifOptionList extends OptionList {
     @Override
     public NotifOptionList reload(int width, int height, double scrollAmount) {
         NotifOptionList newList = new NotifOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, notif);
+                getY(), itemHeight, entryWidth, entryHeight, notif, closeRunnable);
         newList.setScrollAmount(scrollAmount);
         return newList;
     }
 
     @Override
     public void onClose() {
-        notif.editing = false;
+        closeRunnable.run();
     }
 
     private void openTriggerConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
                 new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
-                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", false, true)));
+                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", 
+                        false, true, () -> {})));
     }
 
     private void openKeyConfig(Trigger trigger) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
                 new KeyOptionList(minecraft, width, height, getY(),
-                        entryWidth, entryHeight, trigger, notif.textStyle)));
+                        entryWidth, entryHeight, trigger, notif.textStyle, () -> {})));
     }
 
     private void openSoundConfig() {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
                 new SoundOptionList(minecraft, width, height, getY(),
-                        entryWidth, entryHeight, notif.sound)));
+                        entryWidth, entryHeight, notif.sound, () -> {})));
     }
 
     private void openAdvancedConfig() {

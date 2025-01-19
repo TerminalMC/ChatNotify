@@ -7,6 +7,7 @@
 - Fixed a crash caused by processing invalid message structures
 - Fixed trigger editor restyle preview not working for key-type triggers
 - Added option to use regex for style target
+- Prevented notifications from being activated while editing
 
 ## 2.3.2
 

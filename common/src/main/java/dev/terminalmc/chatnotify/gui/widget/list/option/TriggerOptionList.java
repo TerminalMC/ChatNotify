@@ -52,15 +52,18 @@ public class TriggerOptionList extends OptionList {
     private boolean restyle;
     final MultiLineEditBox textDisplayBox;
     final EditBox keyDisplayBox;
+    private final Runnable closeRunnable;
     
     public TriggerOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
                              int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle, 
-                             String displayText, String displayKey, boolean filter, boolean restyle) {
+                             String displayText, String displayKey, boolean filter, boolean restyle,
+                             Runnable closeRunnable) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
         this.trigger = trigger;
         this.textStyle = textStyle;
         this.filter = filter;
         this.restyle = restyle;
+        this.closeRunnable = closeRunnable;
         
         Entry triggerFieldEntry = new Entry.TriggerFieldEntry(
                 dynEntryX, dynEntryWidth, entryHeight + itemHeight, this, trigger);
@@ -140,19 +143,24 @@ public class TriggerOptionList extends OptionList {
         }
     }
 
-    private void openKeyConfig() {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
-                new KeyOptionList(minecraft, width, height, getY(),
-                        entryWidth, entryHeight, trigger, textStyle)));
-    }
-
     @Override
     protected OptionList reload(int width, int height, double scrollAmount) {
         TriggerOptionList newList = new TriggerOptionList(minecraft, width, height,
                 getY(), itemHeight, entryWidth, entryHeight, trigger, textStyle, 
-                textDisplayBox.getValue(), keyDisplayBox.getValue(), filter, restyle);
+                textDisplayBox.getValue(), keyDisplayBox.getValue(), filter, restyle, closeRunnable);
         newList.setScrollAmount(scrollAmount);
         return newList;
+    }
+
+    @Override
+    public void onClose() {
+        closeRunnable.run();
+    }
+
+    private void openKeyConfig() {
+        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
+                new KeyOptionList(minecraft, width, height, getY(),
+                        entryWidth, entryHeight, trigger, textStyle, () -> {})));
     }
 
     abstract static class Entry extends OptionList.Entry {

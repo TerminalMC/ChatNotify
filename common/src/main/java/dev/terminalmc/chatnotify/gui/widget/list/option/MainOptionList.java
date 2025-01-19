@@ -97,27 +97,33 @@ public class MainOptionList extends OptionList {
     }
 
     private void openNotificationConfig(int index) {
+        Notification notif = Config.get().getNotifs().get(index);
+        notif.editing = true;
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "notif"),
                 new NotifOptionList(minecraft, width, height, getY(), itemHeight,
-                        entryWidth, entryHeight, Config.get().getNotifs().get(index))));
+                        entryWidth, entryHeight, notif, () -> notif.editing = false)));
     }
 
     private void openTriggerConfig(Notification notif, Trigger trigger) {
+        notif.editing = true;
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
                 new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
-                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", false, true)));
+                        entryWidth, entryHeight, trigger, notif.textStyle, "", "", 
+                        false, true, () -> notif.editing = false)));
     }
 
-    private void openKeyConfig(Trigger trigger, TextStyle textStyle) {
+    private void openKeyConfig(Notification notif, Trigger trigger, TextStyle textStyle) {
+        notif.editing = true;
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
-                new KeyOptionList(minecraft, width, height, getY(),
-                        entryWidth, entryHeight, trigger, textStyle)));
+                new KeyOptionList(minecraft, width, height, getY(), entryWidth, entryHeight, 
+                        trigger, textStyle, () -> notif.editing = false)));
     }
 
     private void openSoundConfig(Notification notif) {
+        notif.editing = true;
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
-                new SoundOptionList(minecraft, width, height, getY(),
-                        entryWidth, entryHeight, notif.sound)));
+                new SoundOptionList(minecraft, width, height, getY(), entryWidth, entryHeight, 
+                        notif.sound, () -> notif.editing = false)));
     }
 
     // Notification button dragging
@@ -302,7 +308,7 @@ public class MainOptionList extends OptionList {
                 if (keyTrig) {
                     // Key selection button
                     Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"),
-                                    (button) -> list.openKeyConfig(trigger, notif.textStyle))
+                                    (button) -> list.openKeyConfig(notif, trigger, notif.textStyle))
                             .pos(movingX, 0)
                             .size(list.tinyWidgetWidth, height)
                             .build();
