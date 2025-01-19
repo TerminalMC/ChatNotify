@@ -3,6 +3,7 @@
 ## 2.3.3
 
 - Fixed version metadata
+- Fixed a bug causing exclusion triggers to be checked even when disabled
 
 ## 2.3.2
 

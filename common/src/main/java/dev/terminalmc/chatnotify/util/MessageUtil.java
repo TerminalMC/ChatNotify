@@ -186,14 +186,16 @@ public class MessageUtil {
 
                 // Exclusion search
                 boolean exHit = false;
-                for (Trigger exTrig : notif.exclusionTriggers) {
-                    if (trig.string.isBlank()) continue;
-                    exHit = switch(exTrig.type) {
-                        case NORMAL -> normalSearch(cleanOwnedStr, exTrig.string).find();
-                        case REGEX -> exTrig.pattern != null && exTrig.pattern.matcher(cleanStr).find();
-                        case KEY -> keySearch(msg, exTrig.string);
-                    };
-                    if (exHit) break;
+                if (notif.exclusionEnabled) {
+                    for (Trigger exTrig : notif.exclusionTriggers) {
+                        if (trig.string.isBlank()) continue;
+                        exHit = switch(exTrig.type) {
+                            case NORMAL -> normalSearch(cleanOwnedStr, exTrig.string).find();
+                            case REGEX -> exTrig.pattern != null && exTrig.pattern.matcher(cleanStr).find();
+                            case KEY -> keySearch(msg, exTrig.string);
+                        };
+                        if (exHit) break;
+                    }
                 }
                 if (exHit) continue;
                 
