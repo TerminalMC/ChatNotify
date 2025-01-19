@@ -90,12 +90,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     }
 
     @Override
-    protected int getScrollbarPosition() {
+    protected int scrollBarX() {
         return width / 2 + rowWidth / 2;
     }
 
     @Override
-    protected boolean isValidMouseClick(int button) {
+    protected boolean isValidClickButton(int button) {
         return button == 0 || button == 1;
     }
 
