@@ -121,6 +121,10 @@ public class TriggerOptionList extends OptionList {
             };
             if (filter && !hit) continue;
             else if (restyle && hit) {
+                if (trigger.styleTarget.enabled && trigger.styleTarget.type == StyleTarget.Type.REGEX) {
+                    // Compile style target string if required prior to restyle
+                    trigger.styleTarget.tryCompilePattern();
+                }
                 restyledMsg = MessageUtil.restyle(msg, msgStr, trigger, 
                         matcher, textStyle, restyleAllInstances);
             }

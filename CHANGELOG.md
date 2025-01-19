@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.4
+
+- Fixed restyle preview in trigger editor not working for regex style targets
+
 ## 2.3.3
 
 - Fixed version metadata
