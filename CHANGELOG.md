@@ -5,6 +5,7 @@
 - Fixed version metadata
 - Fixed a bug causing exclusion triggers to be checked even when disabled
 - Fixed a crash caused by processing invalid message structures
+- Fixed trigger editor restyle preview not working for key-type triggers
 
 ## 2.3.2
 

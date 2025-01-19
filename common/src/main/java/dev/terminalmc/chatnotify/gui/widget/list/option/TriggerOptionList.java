@@ -95,12 +95,10 @@ public class TriggerOptionList extends OptionList {
     private void addChat() {
         Minecraft mc = Minecraft.getInstance();
         boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
-        List<Pair<Component, MutableComponent>> allChat = ChatNotify.unmodifiedChat.stream()
-                .map((msg) -> new Pair<>(msg, FormatUtil.convertToStyledLiteral(msg.copy())))
-                .toList().reversed();
+        List<Component> allChat = ChatNotify.unmodifiedChat.stream().toList().reversed();
         List<Pair<Component, Component>> filteredChat = new ArrayList<>();
-        for (Pair<Component, MutableComponent> pair : allChat) {
-            Component msg = pair.getSecond();
+        for (Component msg : allChat) {
+            Component restyledMsg = msg.copy();
             Matcher matcher = null;
             boolean hit = switch(trigger.type) {
                 case NORMAL -> {
@@ -119,10 +117,10 @@ public class TriggerOptionList extends OptionList {
             };
             if (filter && !hit) continue;
             else if (restyle && hit) {
-                msg = MessageUtil.restyle(msg, FormatUtil.stripCodes(msg.getString()), trigger, 
+                restyledMsg = MessageUtil.restyle(msg, FormatUtil.stripCodes(msg.getString()), trigger, 
                         matcher, textStyle, restyleAllInstances);
             }
-            filteredChat.add(new Pair<>(pair.getFirst(), msg));
+            filteredChat.add(new Pair<>(msg, restyledMsg));
         }
         filteredChat.forEach((pair) -> {
             Entry.MessageEntry entry = new Entry.MessageEntry(dynEntryX, dynEntryWidth,
