@@ -103,14 +103,15 @@ public class TriggerOptionList extends OptionList {
         for (Component msg : allChat) {
             Component restyledMsg = msg.copy();
             Matcher matcher = null;
+            String msgStr = FormatUtil.stripCodes(msg.getString());
             boolean hit = switch(trigger.type) {
                 case NORMAL -> {
-                    matcher = MessageUtil.normalSearch(msg.getString(), trigger.string);
+                    matcher = MessageUtil.normalSearch(msgStr, trigger.string);
                     yield matcher.find();
                 }
                 case REGEX -> {
                     try {
-                        matcher = Pattern.compile(trigger.string).matcher(msg.getString());
+                        matcher = Pattern.compile(trigger.string).matcher(msgStr);
                         yield matcher.find();
                     } catch (PatternSyntaxException ignored) {
                         yield false;
@@ -120,7 +121,7 @@ public class TriggerOptionList extends OptionList {
             };
             if (filter && !hit) continue;
             else if (restyle && hit) {
-                restyledMsg = MessageUtil.restyle(msg, FormatUtil.stripCodes(msg.getString()), trigger, 
+                restyledMsg = MessageUtil.restyle(msg, msgStr, trigger, 
                         matcher, textStyle, restyleAllInstances);
             }
             filteredChat.add(new Pair<>(msg, restyledMsg));
