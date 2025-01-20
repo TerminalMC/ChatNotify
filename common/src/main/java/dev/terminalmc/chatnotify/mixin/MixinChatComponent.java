@@ -21,7 +21,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.util.MessageUtil;
 import net.minecraft.client.GuiMessageTag;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
@@ -80,5 +82,13 @@ public class MixinChatComponent {
         } else {
             return message;
         }
+    }
+    
+    @WrapMethod(method = "getHeight()I")
+    private int wrapGetHeight(Operation<Integer> original) {
+        if (Minecraft.getInstance().screen instanceof ChatScreen cs) {
+            return Math.min(cs.height - 50, original.call());
+        }
+        return original.call();
     }
 }
