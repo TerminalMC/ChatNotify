@@ -316,17 +316,9 @@ public class MessageUtil {
                     ChatNotify.LOG.warn("Defaulting to trigger restyle");
                 }
                 switch(trig.type) {
-                    case NORMAL -> {
+                    case NORMAL, REGEX -> {
                         do {
-                            msg = restyleLeaves(msg, textStyle,
-                                    matcher.start() + matcher.group(1).length(),
-                                    matcher.end() - matcher.group(2).length());
-                        } while (restyleAllInstances && matcher.find());
-                    }
-                    case REGEX -> {
-                        do {
-                            msg = restyleLeaves(msg, textStyle,
-                                    matcher.start(), matcher.end());
+                            msg = restyleLeaves(msg, textStyle, matcher.start(), matcher.end());
                         } while (restyleAllInstances && matcher.find());
                     }
                     case KEY -> msg = restyleRoot(msg, textStyle);
@@ -353,7 +345,8 @@ public class MessageUtil {
     }
 
     /**
-     * Performs a slightly 'fuzzy' search for the string within the message.
+     * Performs a case-insensitive word-boundary search for the string within 
+     * the message.
      * @param msg the message to search.
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.
@@ -364,13 +357,12 @@ public class MessageUtil {
         100-character msg and 10-character str is approx 1.18 microseconds
         per check without flag, 1.31 microseconds with.
          */
-        return Pattern.compile(
-                "(?iU)(?<!\\w)(\\W?)" + Pattern.quote(str) + "(\\W?)(?!\\w)")
-                .matcher(msg);
+        return Pattern.compile("(?iU)\\b" + Pattern.quote(str) + "\\b").matcher(msg);
     }
 
     /**
-     * Performs a case-insensitive search for the string within the message.
+     * Performs a case-insensitive substring search for the string within the 
+     * message.
      * @param msg the message to search.
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.

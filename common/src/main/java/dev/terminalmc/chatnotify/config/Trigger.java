@@ -60,7 +60,7 @@ public class Trigger {
     public Type type;
     public enum Type {
         /**
-         * Case-ignorant word-break matching.
+         * Case-ignorant word-boundary matching.
          */
         NORMAL("~"),
         /**
