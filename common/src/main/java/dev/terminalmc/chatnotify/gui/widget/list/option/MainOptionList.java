@@ -357,10 +357,10 @@ public class MainOptionList extends OptionList {
                         ), (button) -> {
                             // Open color picker overlay widget
                             int cpHeight = HsvColorPicker.MIN_HEIGHT;
-                            int cpWidth = Math.min(HsvColorPicker.MAX_WIDTH, 
-                                    Math.max(HsvColorPicker.MIN_WIDTH, width));
+                            int cpWidth = HsvColorPicker.MIN_WIDTH;
                             list.screen.setOverlayWidget(new HsvColorPicker(
-                                    x, list.screen.height / 2 - cpHeight / 2,
+                                    x + width / 2 - cpWidth / 2,
+                                    list.screen.height / 2 - cpHeight / 2,
                                     cpWidth, cpHeight,
                                     () -> notif.textStyle.color,
                                     (color) -> notif.textStyle.color = color,

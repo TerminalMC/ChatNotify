@@ -199,10 +199,12 @@ public class GlobalOptionList extends OptionList {
                 Button mainButton = Button.builder(localized("option", "global.default_color")
                                         .setStyle(Style.EMPTY.withColor(Config.get().defaultColor)),
                         (button) -> {
-                            int cpHeight = Math.max(HsvColorPicker.MIN_HEIGHT, list.height / 2);
-                            int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
+                            int cpHeight = HsvColorPicker.MIN_HEIGHT;
+                            int cpWidth = HsvColorPicker.MIN_WIDTH;
                             list.screen.setOverlayWidget(new HsvColorPicker(
-                                    x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
+                                    x + width / 2 - cpWidth / 2,
+                                    list.screen.height / 2 - cpHeight / 2,
+                                    cpWidth, cpHeight,
                                     () -> Config.get().defaultColor,
                                     (val) -> Config.get().defaultColor = val,
                                     (widget) -> {

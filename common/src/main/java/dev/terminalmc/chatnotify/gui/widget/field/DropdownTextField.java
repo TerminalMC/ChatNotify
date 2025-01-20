@@ -67,7 +67,7 @@ public class DropdownTextField extends OverlayWidget {
     public DropdownTextField(int x, int y, int width, int height, Component msg,
                              Supplier<String> source, Consumer<String> dest,
                              Consumer<OverlayWidget> close, Collection<String> dropdownValues) {
-        super(x, y, width, height, msg, close);
+        super(x, y, width, height, false, msg, close);
         this.source = source;
         this.dest = dest;
         this.dropdownValues = dropdownValues;

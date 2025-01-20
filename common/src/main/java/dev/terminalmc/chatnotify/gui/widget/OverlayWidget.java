@@ -32,16 +32,18 @@ import java.util.function.Consumer;
  */
 public abstract class OverlayWidget extends AbstractWidget {
     private final Consumer<OverlayWidget> close;
+    public final boolean fixedSize;
     public final double nominalWidthRatio;
     public final double nominalHeightRatio;
 
-    public OverlayWidget(int x, int y, int width, int height, Component msg,
-                         Consumer<OverlayWidget> close) {
+    public OverlayWidget(int x, int y, int width, int height, boolean fixedSize, 
+                         Component msg, Consumer<OverlayWidget> close) {
         super(x, y, width, height, msg);
         checkWidth(width);
         checkHeight(height);
         this.close = close;
         Window window = Minecraft.getInstance().getWindow();
+        this.fixedSize = fixedSize;
         this.nominalWidthRatio = width / (double)window.getGuiScaledWidth();
         this.nominalHeightRatio = height / (double)window.getGuiScaledHeight();
     }
@@ -79,10 +81,12 @@ public abstract class OverlayWidget extends AbstractWidget {
      */
 
     public int getNominalWidth(int screenWidth) {
+        if (fixedSize) return width;
         return Math.min(Math.max(getMinWidth(), (int)(screenWidth * nominalWidthRatio)), getMaxWidth());
     }
 
     public int getNominalHeight(int screenHeight) {
+        if (fixedSize) return height;
         return Math.min(Math.max(getMinHeight(), (int)(screenHeight * nominalHeightRatio)), getMaxHeight());
     }
 

@@ -546,9 +546,11 @@ public class NotifOptionList extends OptionList {
                 Button mainButton = Button.builder(text.withColor(supplier.get()),
                                 (button) -> {
                                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
-                                    int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
+                                    int cpWidth = HsvColorPicker.MIN_WIDTH;
                                     list.screen.setOverlayWidget(new HsvColorPicker(
-                                            x, list.screen.height / 2 - cpHeight / 2, cpWidth, cpHeight,
+                                            x + width / 2 - cpWidth / 2,
+                                            list.screen.height / 2 - cpHeight / 2,
+                                            cpWidth, cpHeight,
                                             supplier, consumer,
                                             (widget) -> {
                                                 list.screen.removeOverlayWidget();

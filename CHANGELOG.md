@@ -4,6 +4,8 @@
 
 - Fixed restyle preview in trigger editor not working for regex style targets
 - Added advanced option to override global self-notify control
+- Fixed sound dropdown list scrollbar not working after selection
+- Fixed color picker size and position inconsistency
 
 ## 2.3.3
 
@@ -24,7 +26,6 @@
 - Fixed an issue with checking notifications on a replacement message
 - Added high contrast button textures
 - Fixed sound automatically enabling itself on restart
-- Fixed sound dropdown list scrollbar not working after selection
 
 ## 2.3.0
 

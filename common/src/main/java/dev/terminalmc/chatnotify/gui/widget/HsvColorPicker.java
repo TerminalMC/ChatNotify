@@ -47,7 +47,7 @@ public class HsvColorPicker extends OverlayWidget {
     public static final int GUI_LIGHT = 160;
     public static final int GUI_DARK = 44;
 
-    public static final int MIN_WIDTH = 100;
+    public static final int MIN_WIDTH = 200;
     public static final int MIN_HEIGHT = 80;
     public static final int MAX_WIDTH = 400;
     public static final int MAX_HEIGHT = 300;
@@ -109,7 +109,7 @@ public class HsvColorPicker extends OverlayWidget {
     public HsvColorPicker(int x, int y, int width, int height, 
                           Supplier<Integer> source, Consumer<Integer> dest,
                           Consumer<OverlayWidget> close) {
-        super(x, y, width, height, Component.empty(), close);
+        super(x, y, width, height, true, Component.empty(), close);
         this.source = source;
         this.dest = dest;
         this.updateColorFromSource();

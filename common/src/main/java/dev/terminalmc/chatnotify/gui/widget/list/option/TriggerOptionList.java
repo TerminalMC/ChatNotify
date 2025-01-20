@@ -348,10 +348,11 @@ public class TriggerOptionList extends OptionList {
                 elements.add(Button.builder(localized("option", "notif.color")
                                         .setStyle(Style.EMPTY.withColor(list.textStyle.color)), 
                                 (button) -> {
-                                    int cpHeight = Math.max(HsvColorPicker.MIN_HEIGHT, list.height / 2);
-                                    int cpWidth = Math.max(HsvColorPicker.MIN_WIDTH, width);
+                                    int cpHeight = HsvColorPicker.MIN_HEIGHT;
+                                    int cpWidth = HsvColorPicker.MIN_WIDTH;
                                     list.screen.setOverlayWidget(new HsvColorPicker(
-                                            x, list.screen.height / 2 - cpHeight / 2, 
+                                            x + width / 2 - cpWidth / 2, 
+                                            list.screen.height / 2 - cpHeight / 2, 
                                             cpWidth, cpHeight,
                                             () -> list.textStyle.color,
                                             (val) -> list.textStyle.color = val,
