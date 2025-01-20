@@ -24,6 +24,7 @@
 - Fixed an issue with checking notifications on a replacement message
 - Added high contrast button textures
 - Fixed sound automatically enabling itself on restart
+- Fixed sound dropdown list scrollbar not working after selection
 
 ## 2.3.0
 
