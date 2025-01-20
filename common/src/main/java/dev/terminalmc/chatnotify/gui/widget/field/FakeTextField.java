@@ -16,6 +16,10 @@
 
 package dev.terminalmc.chatnotify.gui.widget.field;
 
+/**
+ * A {@link TextField} which renders like a normal editable field, but when
+ * clicked, runs a custom {@link Runnable} instead of becoming selected.
+ */
 public class FakeTextField extends TextField {
     private final Runnable onClick;
 
@@ -28,6 +32,7 @@ public class FakeTextField extends TextField {
 
     @Override
     public boolean clicked(double mouseX, double mouseY) {
+        // Skip the 'active' requirement
         return (visible
                 && mouseX >= (double)getX()
                 && mouseY >= (double)getY()

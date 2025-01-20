@@ -20,32 +20,62 @@ import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * Consists of:
+ * 
+ * <p>A list of {@link Trigger} instances, to be checked against incoming 
+ * messages to determine whether the {@link Notification} should be activated.
+ * </p>
+ * 
+ * <p>A list of exclusion {@link Trigger} instances which, if matched, prevent
+ * activation.</p>
+ * 
+ * <p>A list of {@link ResponseMessage} instances, to be sent on activation.</p>
+ * 
+ * <p>A {@link TextStyle} instance, defining how the triggering message should 
+ * be restyled.</p>
+ * 
+ * <p>A {@link Sound} instance, defining what sound should be played on 
+ * activation.</p>
+ * 
+ * <p>A series of custom message strings, to be optionally displayed to the user
+ * in different ways on activation.</p>
+ * 
+ * <p>A range of control fields (boolean or enum) defining the status of other 
+ * elements.</p>
+ */
 public class Notification {
     public final int version = 5;
 
     /**
-     * Indicates that this instance is being edited, and should not be activated
-     * irrespective of {@link Notification#enabled}
+     * A status flag to indicate that this instance is being edited, and should 
+     * not be activated irrespective of {@link Notification#enabled}.
      */
     public transient boolean editing = false;
 
     // Options
 
     /**
-     * Whether this instance is eligible for activation.
+     * Whether this instance is set by the user to be eligible for activation.
+     * 
+     * <p>Necessary but not sufficient condition; never activate if this is 
+     * {@code false}, but it being {@code true} does not mean that this instance
+     * can be safely activated. Instead, check {@link Notification#canActivate}.
+     * </p>
      */
     public boolean enabled;
     public static final boolean enabledDefault = true;
 
     /**
-     * Whether this instance is eligible for activation on user-sent messages.
+     * Controls whether this instance is eligible for activation on user-sent 
+     * messages.
+     * 
+     * <p>{@link CheckOwnMode#DEFER} means that {@link Config#checkOwnMessages}
+     * should be used instead.</p>
      */
     public CheckOwnMode checkOwnMode;
     public enum CheckOwnMode {
@@ -79,7 +109,7 @@ public class Notification {
     public static final Supplier<TextStyle> textStyleDefault = TextStyle::new;
 
     /**
-     * Message to replace the triggering chat message.
+     * Optional message to replace the triggering chat message.
      */
     public String replacementMsg;
     public static final String replacementMsgDefault = "";
@@ -87,7 +117,7 @@ public class Notification {
     public static final boolean replacementMsgEnabledDefault = false;
 
     /**
-     * Message to display in the status bar (above the hotbar).
+     * Optional message to display in the status bar (above the hotbar).
      */
     public String statusBarMsg;
     public static final String statusBarMsgDefault = "";
@@ -95,7 +125,7 @@ public class Notification {
     public static final boolean statusBarMsgEnabledDefault = false;
 
     /**
-     * Message to display in title text (large-font, center-screen).
+     * Optional message to display in title text (large-font, center-screen).
      */
     public String titleMsg;
     public static final String titleMsgDefault = "";
@@ -109,8 +139,12 @@ public class Notification {
     public static final Supplier<List<Trigger>> triggersDefault = ArrayList::new;
 
     /**
-     * The list of {@link Trigger}s which can cancel activation of this 
+     * The list of {@link Trigger}s which can prevent activation of this 
      * instance.
+     * 
+     * <p><b>Note:</b> For simplicity, this list uses the same {@link Trigger}
+     * class as {@link Notification#triggers}. However, instances in this list
+     * will never use the {@link Trigger#styleTarget} field.</p>
      */
     public final List<Trigger> exclusionTriggers;
     public static final Supplier<List<Trigger>> exclusionTriggersDefault = ArrayList::new;
@@ -212,7 +246,8 @@ public class Notification {
     }
 
     /**
-     * @return {@code true} if this instance is eligible for activation, 
+     * @return {@code true} if this instance is eligible for activation (on a
+     * message sent by the user if {@code ownMsg} is {@code true}), 
      * {@code false} otherwise.
      */
     public boolean canActivate(boolean ownMsg) {
@@ -284,6 +319,15 @@ public class Notification {
      * Sets all advanced settings to their respective defaults.
      */
     public void resetAdvanced() {
+        checkOwnMode = CheckOwnMode.values()[0];
+        
+        replacementMsg = replacementMsgDefault;
+        replacementMsgEnabled = replacementMsgEnabledDefault;
+        statusBarMsg = statusBarMsgDefault;
+        statusBarMsgEnabled = statusBarMsgEnabledDefault;
+        titleMsg = titleMsgDefault;
+        titleMsgEnabled = titleMsgEnabledDefault;
+        
         exclusionEnabled = exclusionEnabledDefault;
         exclusionTriggers.clear();
         responseEnabled = responseEnabledDefault;
@@ -293,23 +337,24 @@ public class Notification {
     // Cleanup and validation
 
     public void cleanup() {
-        // Remove all blank triggers, and convert all key triggers to lowercase.
+        // Remove all blank triggers
         triggers.removeIf(trigger -> trigger.string.isBlank());
         for (Trigger t : triggers) {
-            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase();
+            // Convert key-type triggers to lowercase
+            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
+            // Disable blank style targets
             if (t.styleTarget.string.isBlank()) t.styleTarget.enabled = false;
         }
 
-        // Remove all blank exclusion triggers, convert all key triggers to
-        // lowercase, and disable exclusion if there are none remaining.
+        // Remove all blank exclusion triggers, and disable if none remain
         exclusionTriggers.removeIf(trigger -> trigger.string.isBlank());
         if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
         for (Trigger t : exclusionTriggers) {
-            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase();
+            // Convert key-type triggers to lowercase
+            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
         }
 
-        // Remove all blank response messages, and disable response if there are
-        // none remaining.
+        // Remove all blank response messages, and disable if none remain
         responseMessages.removeIf(responseMessage -> responseMessage.string.isBlank());
         if (responseMessages.isEmpty()) responseEnabled = false;
     }

@@ -37,7 +37,7 @@ import java.util.List;
  * {@link ExpandingList#highlightIndex}.</p>
  */
 public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.Entry> {
-    public static final int HIGHLIGHT_COLOR = -1770489736;
+    public static final int HIGHLIGHT_COLOR = 0x96787878;
     public static final int SCROLLBAR_WIDTH = 6;
     public static final int VERTICAL_BUFFER = 6;
 

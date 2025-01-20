@@ -40,6 +40,11 @@ import java.util.regex.PatternSyntaxException;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
+/**
+ * A custom {@link EditBox} which supports click-dragging to select text,
+ * double-clicking to select all text, and content validation with text color 
+ * and tooltip change.
+ */
 public class TextField extends EditBox {
     private Validator validator;
     public boolean lenient = false;
@@ -100,6 +105,19 @@ public class TextField extends EditBox {
         });
     }
 
+    private boolean valid(String str) {
+        Optional<Component> error = validator.validate(str);
+        if (error.isPresent()) {
+            super.setTooltip(Tooltip.create(error.get()));
+            super.setTextColor(0xFF5555);
+            return false;
+        } else {
+            super.setTextColor(defaultTextColor);
+            super.setTooltip(defaultTooltip);
+            return true;
+        }
+    }
+
     @Override
     public void setTooltip(@Nullable Tooltip tooltip) {
         defaultTooltip = tooltip;
@@ -151,19 +169,6 @@ public class TextField extends EditBox {
         }
         
         return true;
-    }
-
-    private boolean valid(String str) {
-        Optional<Component> error = validator.validate(str);
-        if (error.isPresent()) {
-            super.setTooltip(Tooltip.create(error.get()));
-            super.setTextColor(0xFF5555);
-            return false;
-        } else {
-            super.setTextColor(defaultTextColor);
-            super.setTooltip(defaultTooltip);
-            return true;
-        }
     }
 
     public interface Validator {

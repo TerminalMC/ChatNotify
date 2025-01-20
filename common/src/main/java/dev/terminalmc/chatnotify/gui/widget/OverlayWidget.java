@@ -25,6 +25,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
+/**
+ * An {@link OverlayWidget} is designed for display on a 
+ * {@link dev.terminalmc.chatnotify.gui.screen.OptionsScreen}, on top of any 
+ * other GUI elements.
+ */
 public abstract class OverlayWidget extends AbstractWidget {
     private final Consumer<OverlayWidget> close;
     public final double nominalWidthRatio;

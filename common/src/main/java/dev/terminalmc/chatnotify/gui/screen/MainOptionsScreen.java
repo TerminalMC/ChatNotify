@@ -25,6 +25,8 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /**
  * The root {@link OptionsScreen}, containing a {@link MainOptionList}.
+ * 
+ * <p>Config is saved only when this {@link Screen} is closed.</p>
  */
 public class MainOptionsScreen extends OptionsScreen {
     public MainOptionsScreen(Screen lastScreen) {

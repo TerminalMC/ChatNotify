@@ -43,8 +43,8 @@ public class Trigger {
 
     /**
      * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
-     * {@code null} if type is not {@link Type#REGEX} or the string could not 
-     * be compiled.
+     * {@code null} if {@link Trigger#type} is not {@link Type#REGEX} or the 
+     * string could not be compiled.
      */
     public transient @Nullable Pattern pattern;
 
@@ -60,7 +60,7 @@ public class Trigger {
     public Type type;
     public enum Type {
         /**
-         * Case-ignorant 'fuzzy' word/phrase matching.
+         * Case-ignorant word-break matching.
          */
         NORMAL("~"),
         /**

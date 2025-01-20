@@ -28,14 +28,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * Requires a mixin to change the text render color.
+ * A custom {@link MultiLineEditBox} which supports resizing, double-clicking
+ * to select all text, and when combined with 
+ * {@link dev.terminalmc.chatnotify.mixin.MixinMultiLineEditBox}, supports
+ * content validation with text color and tooltip change.
  */
 public class MultiLineTextField extends MultiLineEditBox {
+    public static final int NORMAL_COLOR = 0xE0E0E0;
+    public static final int ERROR_COLOR = 0xFF5555;
+    public static final long DOUBLE_CLICK_TIME = 250L;
     private TextField.Validator validator;
     public boolean lenient = false;
     private int defaultTextColor;
@@ -47,7 +52,7 @@ public class MultiLineTextField extends MultiLineEditBox {
                               Component placeholder, Component message) {
         super(font, x, y, width, height, placeholder, message);
         this.validator = new Validator.Default();
-        this.defaultTextColor = 0xE0E0E0;
+        this.defaultTextColor = NORMAL_COLOR;
         this.textColor = defaultTextColor;
     }
 
@@ -63,12 +68,25 @@ public class MultiLineTextField extends MultiLineEditBox {
         });
     }
 
+    private boolean valid(String str) {
+        Optional<Component> error = validator.validate(str);
+        if (error.isPresent()) {
+            super.setTooltip(Tooltip.create(error.get()));
+            this.textColor = ERROR_COLOR;
+            return false;
+        } else {
+            this.textColor = defaultTextColor;
+            super.setTooltip(defaultTooltip);
+            return true;
+        }
+    }
+
     @Override
     public void setTooltip(@Nullable Tooltip tooltip) {
         defaultTooltip = tooltip;
         super.setTooltip(tooltip);
     }
-    
+
     @Override
     public void setWidth(int width) {
         super.setWidth(width);
@@ -90,7 +108,7 @@ public class MultiLineTextField extends MultiLineEditBox {
         if (super.mouseClicked(mouseX, mouseY, button)) {
             // Double-click to select all
             long time = System.currentTimeMillis();
-            if (lastClickTime + 250L > time) {
+            if (lastClickTime + DOUBLE_CLICK_TIME > time) {
                 ((MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this)
                         .getTextField()).setCursor(this.getValue().length());
                 ((MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this)
@@ -102,36 +120,10 @@ public class MultiLineTextField extends MultiLineEditBox {
         return false;
     }
 
-    private boolean valid(String str) {
-        Optional<Component> error = validator.validate(str);
-        if (error.isPresent()) {
-            super.setTooltip(Tooltip.create(error.get()));
-            this.textColor = 0xFF5555;
-            return false;
-        } else {
-            this.textColor = defaultTextColor;
-            super.setTooltip(defaultTooltip);
-            return true;
-        }
-    }
-
     public interface Validator {
         Optional<Component> validate(String str);
 
         // Implementations
-
-        class Custom implements TextField.Validator {
-            private final Function<String, Optional<Component>> validator;
-
-            public Custom(Function<String, Optional<Component>> validator) {
-                this.validator = validator;
-            }
-
-            @Override
-            public Optional<Component> validate(String str) {
-                return validator.apply(str);
-            }
-        }
 
         class Default implements TextField.Validator {
             @Override

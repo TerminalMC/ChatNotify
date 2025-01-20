@@ -63,6 +63,8 @@ public class OptionsScreen extends OptionsSubScreen {
         super(lastScreen, Minecraft.getInstance().options, title);
         this.listWidget = listWidget;
     }
+    
+    // Overrides
 
     @Override
     protected void init() {
@@ -77,7 +79,6 @@ public class OptionsScreen extends OptionsSubScreen {
     @Override
     public void resize(@NotNull Minecraft mc, int width, int height) {
         super.resize(mc, width, height);
-        clearWidgets();
         init();
     }
 
@@ -95,6 +96,8 @@ public class OptionsScreen extends OptionsSubScreen {
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
     }
+    
+    // Extensions
 
     /**
      * Clears all widgets, reloads the {@link OptionList}, recreates all fixed

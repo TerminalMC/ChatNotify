@@ -42,8 +42,8 @@ public class StyleTarget {
 
     /**
      * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
-     * {@code null} if type is not {@link Type#REGEX} or the string could not 
-     * be compiled.
+     * {@code null} if {@link StyleTarget#type} is not {@link Type#REGEX} or 
+     * the string could not be compiled.
      */
     public transient @Nullable Pattern pattern;
 
