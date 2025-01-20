@@ -35,6 +35,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -45,6 +46,12 @@ import java.util.regex.PatternSyntaxException;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
+/**
+ * Contains trigger and style target editing fields, no-responder display fields
+ * for message text and key, and a list of recent messages.
+ * 
+ * <p>The message list can be restyled and/or filtered based on the trigger.</p>
+ */
 public class TriggerOptionList extends OptionList {
     private final Trigger trigger;
     private final TextStyle textStyle;
@@ -53,17 +60,19 @@ public class TriggerOptionList extends OptionList {
     final MultiLineEditBox textDisplayBox;
     final EditBox keyDisplayBox;
     private final Runnable closeRunnable;
+    private final List<Component> allChat;
     
     public TriggerOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
-                             int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle, 
+                             int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle,
                              String displayText, String displayKey, boolean filter, boolean restyle,
-                             Runnable closeRunnable) {
+                             Runnable closeRunnable, @Nullable List<Component> allChat) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
         this.trigger = trigger;
         this.textStyle = textStyle;
         this.filter = filter;
         this.restyle = restyle;
         this.closeRunnable = closeRunnable;
+        this.allChat = allChat == null ? getRecentChat() : allChat;
         
         Entry triggerFieldEntry = new Entry.TriggerFieldEntry(
                 dynEntryX, dynEntryWidth, entryHeight + itemHeight, this, trigger);
@@ -90,16 +99,22 @@ public class TriggerOptionList extends OptionList {
         addEntry(new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight, keyDisplayBox, 
                 localized("option", "trigger.message.key")));
         
-        addEntry(new Entry.FilterAndRestyleEntry(dynEntryX, dynEntryWidth, entryHeight, this));
+        addEntry(new Entry.ControlsEntry(dynEntryX, dynEntryWidth, entryHeight, this));
         
-        addChat();
+        addChat(this.allChat);
     }
     
-    private void addChat() {
+    private List<Component> getRecentChat() {
+        return ChatNotify.unmodifiedChat.stream().toList().reversed();
+    }
+    
+    private void addChat(List<Component> allChat) {
         Minecraft mc = Minecraft.getInstance();
-        boolean restyleAllInstances = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
-        List<Component> allChat = ChatNotify.unmodifiedChat.stream().toList().reversed();
-        List<Pair<Component, Component>> filteredChat = new ArrayList<>();
+        boolean restyleAll = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
+        
+        // Filter and restyle, retaining original copies of messages to use
+        // when displaying text and key of a clicked message.
+        List<Pair<Component, Component>> displayChat = new ArrayList<>();
         for (Component msg : allChat) {
             Component restyledMsg = msg.copy();
             Matcher matcher = null;
@@ -125,12 +140,14 @@ public class TriggerOptionList extends OptionList {
                     // Compile style target string if required prior to restyle
                     trigger.styleTarget.tryCompilePattern();
                 }
-                restyledMsg = MessageUtil.restyle(msg, msgStr, trigger, 
-                        matcher, textStyle, restyleAllInstances);
+                restyledMsg = MessageUtil.restyle(
+                        msg, msgStr, trigger, matcher, textStyle, restyleAll);
             }
-            filteredChat.add(new Pair<>(msg, restyledMsg));
+            displayChat.add(new Pair<>(msg, restyledMsg));
         }
-        filteredChat.forEach((pair) -> {
+        
+        // Add message entries
+        displayChat.forEach((pair) -> {
             Entry.MessageEntry entry = new Entry.MessageEntry(dynEntryX, dynEntryWidth,
                     this, pair.getFirst(), pair.getSecond());
             addEntry(entry);
@@ -142,6 +159,8 @@ public class TriggerOptionList extends OptionList {
                 requiredHeight -= itemHeight;
             }
         });
+        
+        // If no message entries, add note
         if (!(children().getLast() instanceof Entry.MessageEntry)) {
             addEntry(new OptionList.Entry.TextEntry(dynEntryX, dynEntryWidth, entryHeight,
                     localized("option", "trigger.recent_messages.none"), null, -1));
@@ -152,7 +171,8 @@ public class TriggerOptionList extends OptionList {
     protected OptionList reload(int width, int height, double scrollAmount) {
         TriggerOptionList newList = new TriggerOptionList(minecraft, width, height,
                 getY(), itemHeight, entryWidth, entryHeight, trigger, textStyle, 
-                textDisplayBox.getValue(), keyDisplayBox.getValue(), filter, restyle, closeRunnable);
+                textDisplayBox.getValue(), keyDisplayBox.getValue(), filter, restyle, 
+                closeRunnable, allChat);
         newList.setScrollAmount(scrollAmount);
         return newList;
     }
@@ -207,7 +227,7 @@ public class TriggerOptionList extends OptionList {
                         list.children().removeIf((entry) -> entry instanceof MessageEntry 
                                 || entry instanceof TextEntry 
                                 || (entry instanceof SpaceEntry && list.children().indexOf(entry) > 4));
-                        list.addChat();
+                        list.addChat(list.allChat);
                     }
                 });
                 triggerField.setValue(trigger.string);
@@ -295,7 +315,7 @@ public class TriggerOptionList extends OptionList {
                     list.children().removeIf((entry) -> entry instanceof MessageEntry
                             || entry instanceof TextEntry
                             || (entry instanceof SpaceEntry && list.children().indexOf(entry) > 4));
-                    list.addChat();
+                    list.addChat(list.allChat);
                 });
                 stringField.setTooltip(Tooltip.create(
                         localized("option", "notif.style_target.field.tooltip")));
@@ -315,8 +335,8 @@ public class TriggerOptionList extends OptionList {
             }
         }
 
-        private static class FilterAndRestyleEntry extends MainOptionList.Entry {
-            FilterAndRestyleEntry(int x, int width, int height, TriggerOptionList list) {
+        private static class ControlsEntry extends MainOptionList.Entry {
+            ControlsEntry(int x, int width, int height, TriggerOptionList list) {
                 super();
                 int buttonWidth = (width - SPACING * 2) / 3;
                 int movingX = x;

@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.TextStyle;
@@ -109,7 +110,7 @@ public class MainOptionList extends OptionList {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "trigger"),
                 new TriggerOptionList(minecraft, width, height, getY(), itemHeight,
                         entryWidth, entryHeight, trigger, notif.textStyle, "", "", 
-                        false, true, () -> notif.editing = false)));
+                        false, true, () -> notif.editing = false, null)));
     }
 
     private void openKeyConfig(Notification notif, Trigger trigger, TextStyle textStyle) {

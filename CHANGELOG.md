@@ -6,6 +6,7 @@
 - Added advanced option to override global self-notify control
 - Fixed sound dropdown list scrollbar not working after selection
 - Fixed color picker size and position inconsistency
+- Prevented recent chat list in trigger editor from receiving new messages
 
 ## 2.3.3
 
