@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -42,6 +43,16 @@ public class Notification {
      */
     public boolean enabled;
     public static final boolean enabledDefault = true;
+
+    /**
+     * Whether this instance is eligible for activation on user-sent messages.
+     */
+    public CheckOwnMode checkOwnMode;
+    public enum CheckOwnMode {
+        DEFER,
+        ON,
+        OFF,
+    }
 
     /**
      * Whether this instance allows use of exclusion triggers.
@@ -115,6 +126,7 @@ public class Notification {
      */
     Notification(
             boolean enabled,
+            CheckOwnMode checkOwnMode,
             boolean exclusionEnabled,
             boolean responseEnabled,
             Sound sound,
@@ -130,6 +142,7 @@ public class Notification {
             List<ResponseMessage> responseMessages
     ) {
         this.enabled = enabled;
+        this.checkOwnMode = checkOwnMode;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
         this.sound = sound;
@@ -152,6 +165,7 @@ public class Notification {
     static Notification createUser() {
         return new Notification(
                 enabledDefault,
+                CheckOwnMode.values()[0],
                 exclusionEnabledDefault,
                 responseEnabledDefault,
                 soundDefault.get(),
@@ -178,6 +192,7 @@ public class Notification {
     static Notification createBlank(Sound sound, TextStyle textStyle) {
         return new Notification(
                 enabledDefault,
+                CheckOwnMode.values()[0],
                 exclusionEnabledDefault,
                 responseEnabledDefault,
                 sound,
@@ -200,8 +215,20 @@ public class Notification {
      * @return {@code true} if this instance is eligible for activation, 
      * {@code false} otherwise.
      */
-    public boolean canActivate() {
-        return enabled && !editing;
+    public boolean canActivate(boolean ownMsg) {
+        if (enabled && !editing) {
+            if (ownMsg) {
+                return switch(checkOwnMode) {
+                    case DEFER -> Config.get().checkOwnMessages;
+                    case ON -> true;
+                    case OFF -> false;
+                };
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
     
     // List reordering
@@ -306,6 +333,13 @@ public class Notification {
                     ? obj.get(f).getAsBoolean()
                     : exclusionEnabledDefault;
 
+            f = "checkOwnMode";
+            CheckOwnMode checkOwnMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
+                    ? Arrays.stream(CheckOwnMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
+                        ? CheckOwnMode.valueOf(obj.get(f).getAsString())
+                        : CheckOwnMode.values()[0]
+                    : CheckOwnMode.values()[0];
+
             f = "responseEnabled";
             boolean responseEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
                     ? obj.get(f).getAsBoolean()
@@ -384,6 +418,7 @@ public class Notification {
 
             return new Notification(
                     enabled,
+                    checkOwnMode,
                     exclusionEnabled,
                     responseEnabled,
                     sound,

@@ -3,6 +3,7 @@
 ## 2.3.4
 
 - Fixed restyle preview in trigger editor not working for regex style targets
+- Added advanced option to override global self-notify control
 
 ## 2.3.3
 

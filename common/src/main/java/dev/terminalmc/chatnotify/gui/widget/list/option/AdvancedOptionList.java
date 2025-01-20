@@ -56,6 +56,10 @@ public class AdvancedOptionList extends OptionList {
         this.notif = notif;
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                localized("option", "advanced.control"), null, -1));
+        addEntry(new Entry.CheckOwnModeEntry(entryX, entryWidth, entryHeight, notif));
+
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.msg", "\u2139"), 
                 Tooltip.create(localized("option", "advanced.msg.info.format_codes").append("\n\n")
                         .append(localized("option", "advanced.msg.info.regex_groups"))), -1));
@@ -293,6 +297,24 @@ public class AdvancedOptionList extends OptionList {
     }
 
     private abstract static class Entry extends OptionList.Entry {
+
+        private static class CheckOwnModeEntry extends Entry {
+            CheckOwnModeEntry(int x, int width, int height, Notification notif) {
+                super();
+
+                elements.add(CycleButton.<Notification.CheckOwnMode>builder((status) ->
+                                localized("option", "advanced.check_own_mode." + status.name()))
+                        .withValues(Notification.CheckOwnMode.values())
+                        .withInitialValue(notif.checkOwnMode)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "advanced.check_own_mode."
+                                        + status.name() + ".tooltip")))
+                        .create(x, 0, width, height,
+                                localized("option", "advanced.check_own_mode"),
+                                (button, status) ->
+                                        notif.checkOwnMode = status));
+            }
+        }
 
         private static class MessageConfigEntry extends NotifOptionList.Entry {
             MessageConfigEntry(int x, int width, int height,

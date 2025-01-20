@@ -39,6 +39,7 @@ import static dev.terminalmc.chatnotify.config.Config.SenderDetectionMode.COMBIN
 
 public class MessageUtil {
     private static boolean debug = false;
+    private static boolean ownMsg = false;
     
     /**
      * Initiates the message processing algorithm.
@@ -48,6 +49,7 @@ public class MessageUtil {
      */
     public static @Nullable Component processMessage(Component msg) {
         debug = Config.get().debugMode.equals(Config.DebugMode.ALL);
+        ownMsg = false;
         
         String str = msg.getString();
         if (str.isBlank()) return msg; // Ignore blank messages
@@ -68,11 +70,8 @@ public class MessageUtil {
         String cleanStr = FormatUtil.stripCodes(str);
         
         // Check owner
-        String cleanOwnedStr = checkOwner(cleanStr, debug);
-        if (cleanOwnedStr == null) {
-            if (debug) ChatNotify.LOG.warn("Ignoring user-sent message");
-            return msg;
-        }
+        String cleanOwnedStr = checkOwner(cleanStr);
+        ownMsg = !cleanOwnedStr.equals(cleanStr);
         
         // Process notifications
         msg = tryNotify(msg.copy(), cleanStr, cleanOwnedStr);
@@ -112,7 +111,7 @@ public class MessageUtil {
      * @return the string, a modified copy, or {@code null} depending on the
      * result of the check.
      */
-    private static @Nullable String checkOwner(String cleanStr, boolean debug) {
+    private static String checkOwner(String cleanStr) {
         boolean checkSuccessful = false;
         String cleanOwnedStr = cleanStr;
         if (Config.get().senderDetectionMode == COMBINED) {
@@ -130,10 +129,8 @@ public class MessageUtil {
                             if (matcher.find()) {
                                 if (debug) ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
                                 // Modify message according to config
-                                cleanOwnedStr = Config.get().checkOwnMessages
-                                        ? cleanStr.substring(0, matcher.start())
-                                                + cleanStr.substring(matcher.end())
-                                        : null;
+                                cleanOwnedStr = cleanStr.substring(0, matcher.start()) 
+                                        + cleanStr.substring(matcher.end());
                                 break;
                             }
                         }
@@ -158,10 +155,8 @@ public class MessageUtil {
                             if (debug) ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
                             recentMessages.remove(i); // Remove stored message
                             // Modify message according to config
-                            cleanOwnedStr = Config.get().checkOwnMessages
-                                    ? cleanStr.substring(0, matcher.start())
-                                    + cleanStr.substring(matcher.end())
-                                    : null;
+                            cleanOwnedStr = cleanStr.substring(0, matcher.start()) 
+                                    + cleanStr.substring(matcher.end());
                             break;
                         }
                     }
@@ -198,7 +193,7 @@ public class MessageUtil {
         
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
-            if (!notif.canActivate()) continue;
+            if (!notif.canActivate(ownMsg)) continue;
             
             // Trigger search
             for (Trigger trig : notif.triggers) {
