@@ -2,6 +2,7 @@
 
 ## 2.3.5
 
+- Updated Russian translation (rfin0)
 - Fixed message text pre-conversion occurring even when style is disabled
 
 ## 2.3.4
