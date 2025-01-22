@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.5
+
+- Fixed message text pre-conversion occurring even when style is disabled
+
 ## 2.3.4
 
 - Fixed restyle preview in trigger editor not working for regex style targets

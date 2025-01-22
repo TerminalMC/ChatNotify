@@ -28,6 +28,7 @@ import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.MessageUtil;
+import dev.terminalmc.chatnotify.util.StyleUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
@@ -140,7 +141,7 @@ public class TriggerOptionList extends OptionList {
                     // Compile style target string if required prior to restyle
                     trigger.styleTarget.tryCompilePattern();
                 }
-                restyledMsg = MessageUtil.restyle(
+                restyledMsg = StyleUtil.restyle(
                         msg, msgStr, trigger, matcher, textStyle, restyleAll);
             }
             displayChat.add(new Pair<>(msg, restyledMsg));
