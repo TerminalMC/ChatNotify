@@ -82,7 +82,14 @@ public class StyleUtil {
                     ChatNotify.LOG.warn("Defaulting to trigger restyle");
                 }
                 switch(trig.type) {
-                    case NORMAL, REGEX -> {
+                    case NORMAL -> {
+                        do {
+                            msg = restyleLeaves(msg, textStyle,
+                                    matcher.start() + matcher.group(1).length(),
+                                    matcher.end() - matcher.group(2).length());
+                        } while (restyleAllInstances && matcher.find());
+                    }
+                    case REGEX -> {
                         do {
                             msg = restyleLeaves(msg, textStyle, matcher.start(), matcher.end());
                         } while (restyleAllInstances && matcher.find());
