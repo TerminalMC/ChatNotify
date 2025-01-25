@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.widget.field;
 
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
@@ -46,6 +47,8 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * and tooltip change.
  */
 public class TextField extends EditBox {
+    public static final long CLICK_CHAIN_TIME = 250L;
+    
     private Validator validator;
     public boolean lenient = false;
     private int defaultTextColor;
@@ -53,7 +56,9 @@ public class TextField extends EditBox {
     private final Font font;
     private double dragOriginX;
     private int dragOriginPos;
+    
     private long lastClickTime;
+    private int chainedClicks;
 
     public TextField(int x, int y, int width, int height) {
         this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
@@ -133,11 +138,35 @@ public class TextField extends EditBox {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) {
-            // Double-click to select all
-            long time = System.currentTimeMillis();
-            if (lastClickTime + 250L > time) {
-                moveCursorToEnd(false);
-                setHighlightPos(0);
+            long time = Util.getMillis();
+            if (lastClickTime + CLICK_CHAIN_TIME > time) {
+                switch (++chainedClicks) {
+                    case 1 -> {
+                        // double-click: select word
+                        int pos = getCursorPosition();
+                        int start = pos;
+                        // If next char is space or previous char is not space, 
+                        // go backwards to the start of the word.
+                        if (getValue().charAt(pos) == ' ' || getValue().charAt(pos - 1) != ' ') {
+                            start = getWordPosition(-1);
+                        }
+                        int end = getWordPosition(1);
+                        moveCursorTo(start, false);
+                        moveCursorTo(end, true);
+                    }
+                    case 2 -> {
+                        // triple-click: select all
+                        moveCursorToEnd(false);
+                        setHighlightPos(0);
+                    }
+                    case 3 -> {
+                        // quadruple-click: reset chain and deselect all
+                        chainedClicks = 0;
+                        setHighlightPos(getCursorPosition());
+                    }
+                }
+            } else {
+                chainedClicks = 0;
             }
             lastClickTime = time;
             

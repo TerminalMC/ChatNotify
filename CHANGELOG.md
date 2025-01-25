@@ -5,6 +5,7 @@
 - Updated Russian translation (rfin0)
 - Fixed message text pre-conversion occurring even when style is disabled
 - Fixed a bug in matching normal-type triggers introduced in v2.3.4
+- Switched double-click to select-word and added triple-click for select-all
 
 ## 2.3.4
 

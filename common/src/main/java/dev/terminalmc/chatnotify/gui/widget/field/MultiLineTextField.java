@@ -18,10 +18,14 @@ package dev.terminalmc.chatnotify.gui.widget.field;
 
 import dev.terminalmc.chatnotify.mixin.accessor.MultiLineEditBoxAccessor;
 import dev.terminalmc.chatnotify.mixin.accessor.MultilineTextFieldAccessor;
+import dev.terminalmc.chatnotify.mixin.accessor.StringViewAccessor;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.components.MultilineTextField;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.Whence;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,13 +44,16 @@ import java.util.regex.PatternSyntaxException;
 public class MultiLineTextField extends MultiLineEditBox {
     public static final int NORMAL_COLOR = 0xE0E0E0;
     public static final int ERROR_COLOR = 0xFF5555;
-    public static final long DOUBLE_CLICK_TIME = 250L;
+    public static final long CLICK_CHAIN_TIME = 250L;
+    
     private TextField.Validator validator;
     public boolean lenient = false;
     private int defaultTextColor;
     private Tooltip defaultTooltip;
     private int textColor;
+    
     private long lastClickTime;
+    private int chainedClicks;
     
     public MultiLineTextField(Font font, int x, int y, int width, int height, 
                               Component placeholder, Component message) {
@@ -107,12 +114,33 @@ public class MultiLineTextField extends MultiLineEditBox {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) {
             // Double-click to select all
-            long time = System.currentTimeMillis();
-            if (lastClickTime + DOUBLE_CLICK_TIME > time) {
-                ((MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this)
-                        .getTextField()).setCursor(this.getValue().length());
-                ((MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this)
-                        .getTextField()).setSelectCursor(0);
+            long time = Util.getMillis();
+            if (lastClickTime + CLICK_CHAIN_TIME > time) {
+                switch (++chainedClicks) {
+                    case 1 -> {
+                        // double-click: select word
+                        MultilineTextField field = ((MultiLineEditBoxAccessor)this).getTextField();
+                        MultilineTextFieldAccessor fieldAcc = (MultilineTextFieldAccessor)field;
+                        field.seekCursor(Whence.ABSOLUTE, ((StringViewAccessor)(Object)field.getNextWord()).getBeginIndex());
+                        int pos = fieldAcc.getCursor();
+                        field.seekCursor(Whence.ABSOLUTE, ((StringViewAccessor)(Object)field.getPreviousWord()).getBeginIndex());
+                        fieldAcc.setSelectCursor(pos);
+                    }
+                    case 2 -> {
+                        // triple-click: select all
+                        MultilineTextFieldAccessor field = (MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this).getTextField();
+                        field.setCursor(this.getValue().length());
+                        field.setSelectCursor(0);
+                    }
+                    case 3 -> {
+                        // quadruple-click: reset chain and deselect all
+                        chainedClicks = 0;
+                        MultilineTextFieldAccessor field = (MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this).getTextField();
+                        field.setSelectCursor(field.getCursor());
+                    }
+                }
+            } else {
+                chainedClicks = 0;
             }
             lastClickTime = time;
             return true;

@@ -15,7 +15,8 @@
     "accessor.KeyAccessor",
     "accessor.MultiLineEditBoxAccessor",
     "accessor.MultilineTextFieldAccessor",
-    "accessor.ScreenAccessor"
+    "accessor.ScreenAccessor",
+    "accessor.StringViewAccessor"
   ],
   "server": [
   ],

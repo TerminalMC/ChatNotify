@@ -23,6 +23,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(MultilineTextField.class)
 public interface MultilineTextFieldAccessor {
+    @Accessor
+    int getCursor();
+    
     @Accessor("cursor") 
     void setCursor(int cursor);
 

@@ -267,7 +267,7 @@ To access, first go to the `Notification Options` screen, then click the `Advanc
 - ChatNotify uses several custom GUI widgets to behave differently to normal Minecraft. Some are listed below.
 
 1. Color (`🌢`) and sound (`🔊`) status buttons on the options screen support right-click to toggle status.
-2. Single-line text fields have been modified to support double-clicking or clicking and dragging to select text.
+2. Text fields have been modified to support double-clicking, triple-clicking or clicking and dragging to select text.
 3. Fullscreen overlay widgets such as the color picker and drop-down text field support clicking outside to cancel.
 
 </details>
