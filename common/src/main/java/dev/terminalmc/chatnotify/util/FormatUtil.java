@@ -19,6 +19,7 @@ package dev.terminalmc.chatnotify.util;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import net.minecraft.ChatFormatting;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -28,13 +29,15 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class FormatUtil {
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("\\u00A7.?");
-    private static final String ARGUMENT_STRING = "c`h!a~t;n#o]t-i,f@y";
+    private static final String PLACEHOLDER_PATTERN_STRING 
+            = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(PLACEHOLDER_PATTERN_STRING);
     
     /**
      * {@link net.minecraft.util.StringUtil#stripColor} only strips valid 
@@ -77,7 +80,10 @@ public class FormatUtil {
      */
     private static MutableComponent convertToLiteral(MutableComponent text) 
             throws IllegalArgumentException {
+        if (!(text.getContents() instanceof TranslatableContents contents)) return text;
+        
         boolean debug = Config.get().debugMode.equals(Config.DebugMode.ALL);
+        
         if (debug) {
             ChatNotify.LOG.warn("Converting message to literal");
             ChatNotify.LOG.warn("Text:");
@@ -86,97 +92,102 @@ public class FormatUtil {
             ChatNotify.LOG.warn(text.toString());
         }
         
-        if (!(text.getContents() instanceof TranslatableContents contents)) return text;
-        
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(text.getSiblings());
         
-        // Create an array of arguments
-        String[] array = new String[contents.getArgs().length];
-        Arrays.fill(array, ARGUMENT_STRING);
-        
-        // Translate the contents using the new argument array
-        // TODO I18n.get() ?
-        String translated = Component.translatable(contents.getKey(), (Object[])array).getString();
-        List<String> translatedSplit;
-        if (translated.equals(ARGUMENT_STRING)) {
-            // Pad start and end
-            translatedSplit = new ArrayList<>(List.of("", ""));
-        } else {
-            // Split on the known argument string to get the literal translation
-            translatedSplit = new ArrayList<>(List.of(translated.split(ARGUMENT_STRING)));
-            // Pad end (start is already padded)
-            if (translated.endsWith(ARGUMENT_STRING)) translatedSplit.addLast("");
-        }
-        
-        if (debug) {
-            ChatNotify.LOG.warn("Search translated:");
-            ChatNotify.LOG.warn(translated);
-            ChatNotify.LOG.warn("Size of translated split: {}", translatedSplit.size());
-        }
+        // Process translatable contents
+        Language lang = Language.getInstance();
+        String key = contents.getKey();
+        @Nullable String fallback = contents.getFallback();
 
-        if (translatedSplit.size() == 1) {
-            // No args, create component from translated string
-            text = Component.literal(translatedSplit.getFirst()).withStyle(text.getStyle());
-        } else { 
-            // One or more args, create component from translated string and args
-            Object[] args = contents.getArgs();
-            int numPlaceholders = translatedSplit.size() - 1;
-            
-            // Number of placeholders (%s) in translation is now translatedSplit.size() - 1.
-            // In theory args.length should match that, but in practice some mods and
-            // plugins misbehave, so if there are not enough args we pad with %s, and if
-            // there are too many we ignore the excess by only iterating over 
-            // translatedSplit.size() - 1 when constructing the message below.
-            if (args.length < numPlaceholders) {
-                Object[] newArgs = new Object[numPlaceholders];
-                System.arraycopy(args, 0, newArgs, 0, args.length);
-                for (int i = 0; i < newArgs.length; i++) {
-                    if (newArgs[i] == null) {
-                        newArgs[i] = "%s";
-                    }
-                }
-                args = newArgs;
+        // This is the unformatted string to be shown to the user
+        String string = fallback == null
+                ? lang.getOrDefault(key)
+                : lang.getOrDefault(key, fallback);
+        
+        // Minecraft will not attempt to process the placeholders if the string
+        // format is invalid, so we check that here
+        boolean validFormat = true;
+        try {
+            String.format(string, contents.getArgs());
+        } catch (IllegalFormatException e) {
+            validFormat = false;
+            text = Component.literal(string).withStyle(text.getStyle());
+            if (debug) {
+                ChatNotify.LOG.warn("Invalid string format:");
+                ChatNotify.LOG.warn(e.getMessage());
+                ChatNotify.LOG.warn(string);
             }
+        }
+        
+        if (validFormat) {
+            // Split on placeholders to get an array of plain text elements
+            List<String> split = new ArrayList<>(List.of(PLACEHOLDER_PATTERN.split(string)));
             
-            // Create an empty component, and add each part of the translated
-            // string and each arg as siblings in sequence
-            text = Component.empty().withStyle(text.getStyle());
-            List<Component> siblings = text.getSiblings();
-            
-            for (int i = 0; i < numPlaceholders; i++) {
-                // Add translated substring
-                if (!translatedSplit.get(i).isEmpty()) {
-                    if (debug) {
-                        ChatNotify.LOG.warn("Adding translated substring:");
-                        ChatNotify.LOG.warn(translatedSplit.get(i));
-                    }
-                    siblings.add(Component.literal(translatedSplit.get(i)));
-                }
-                // Add subsequent arg
-                if (args[i] instanceof Component argComponent) {
-                    if (debug) {
-                        ChatNotify.LOG.warn("Adding arg component");
-                        ChatNotify.LOG.warn("Text:");
-                        ChatNotify.LOG.warn(argComponent.getString());
-                        ChatNotify.LOG.warn("Tree:");
-                        ChatNotify.LOG.warn(argComponent.toString());
-                    }
-                    siblings.add(argComponent);
-                } else {
-                    if (debug) {
-                        ChatNotify.LOG.warn("Adding arg object");
-                        ChatNotify.LOG.warn("getClass():");
-                        ChatNotify.LOG.warn(args[i].getClass().getName());
-                        ChatNotify.LOG.warn("toString():");
-                        ChatNotify.LOG.warn(args[i].toString());
-                    }
-                    siblings.add(Component.literal(args[i].toString()));
-                }
+            // Pad the array if necessary for ease of iteration
+            if (split.isEmpty()) {
+                split.add(""); // Pad start
+                split.add(""); // Pad end
+            } else if (!string.endsWith(split.getLast())) {
+                split.add(""); // Pad end only (start is already padded)
             }
-            // Add final translated substring
-            if (!translatedSplit.getLast().isEmpty()) {
-                siblings.add(Component.literal(translatedSplit.getLast()));
+
+            if (debug) {
+                ChatNotify.LOG.warn("Format string:");
+                ChatNotify.LOG.warn(string);
+                ChatNotify.LOG.warn("Size of split array: {}", split.size());
+                ChatNotify.LOG.warn("Size of args array: {}", contents.getArgs().length);
+            }
+
+            if (split.size() == 1) {
+                // No placeholders, create component from literal string
+                text = Component.literal(string).withStyle(text.getStyle());
+            } else {
+                // Create component by alternating literal elements and args
+                // Note: args.length is at least numPlaceholders at this point,
+                // else the earlier String.format check would have failed.
+                Object[] args = contents.getArgs();
+                int numPlaceholders = split.size() - 1;
+
+                // Create an empty component, and add each literal element and 
+                // each arg as siblings in sequence
+                text = Component.empty().withStyle(text.getStyle());
+                List<Component> siblings = text.getSiblings();
+
+                for (int i = 0; i < numPlaceholders; i++) {
+                    // Add translated substring
+                    if (!split.get(i).isEmpty()) {
+                        if (debug) {
+                            ChatNotify.LOG.warn("Adding translated substring:");
+                            ChatNotify.LOG.warn(split.get(i));
+                        }
+                        siblings.add(Component.literal(split.get(i)));
+                    }
+                    // Add subsequent arg
+                    if (args[i] instanceof Component argComponent) {
+                        if (debug) {
+                            ChatNotify.LOG.warn("Adding arg component");
+                            ChatNotify.LOG.warn("Text:");
+                            ChatNotify.LOG.warn(argComponent.getString());
+                            ChatNotify.LOG.warn("Tree:");
+                            ChatNotify.LOG.warn(argComponent.toString());
+                        }
+                        siblings.add(argComponent);
+                    } else {
+                        if (debug) {
+                            ChatNotify.LOG.warn("Adding arg object");
+                            ChatNotify.LOG.warn("getClass():");
+                            ChatNotify.LOG.warn(args[i].getClass().getName());
+                            ChatNotify.LOG.warn("toString():");
+                            ChatNotify.LOG.warn(args[i].toString());
+                        }
+                        siblings.add(Component.literal(args[i].toString()));
+                    }
+                }
+                // Add final translated substring
+                if (!split.getLast().isEmpty()) {
+                    siblings.add(Component.literal(split.getLast()));
+                }
             }
         }
         
