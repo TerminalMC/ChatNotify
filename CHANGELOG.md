@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.6
+
+- Fixed a network protocol crash when processing capturing groups in custom messages
+
 ## 2.3.5
 
 - Updated Russian translation (rfin0)

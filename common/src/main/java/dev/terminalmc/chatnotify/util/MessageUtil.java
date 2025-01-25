@@ -245,7 +245,8 @@ public class MessageUtil {
                 // Restyle
                 msg = StyleUtil.restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAll);
 
-                // Send custom messages
+                // Send custom messages, after restyle in case of forwarding
+                // the entire message. Reset match by subsMatcher.find(0)
                 showStatusBarMsg(notif, msg, subsMatcher);
                 showTitleMsg(notif, msg, subsMatcher);
 
@@ -335,10 +336,10 @@ public class MessageUtil {
         // Replace $ with section sign
         msg = msg.replaceAll(Matcher.quoteReplacement("$"), "\u00A7");
         // Substitute capturing groups
-        if (matcher != null) {
+        if (matcher != null && matcher.find(0)) {
             for (int i = 0; i <= matcher.groupCount(); i++) {
                 String replacement = matcher.group(i) == null ? "" : matcher.group(i);
-                msg = msg.replace("(" + i + ")", replacement);
+                msg = msg.replaceAll("\\(" + i + "\\)", replacement);
             }
         }
         return Component.literal(msg);
@@ -386,11 +387,12 @@ public class MessageUtil {
             int totalDelay = 0;
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
-                if (matcher != null && msg.type.equals(ResponseMessage.Type.REGEX)) {
+                if (msg.type.equals(ResponseMessage.Type.REGEX) 
+                        && matcher != null && matcher.find(0)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {
                         String replacement = matcher.group(i) == null ? "" : matcher.group(i);
-                        msg.sendingString = msg.sendingString.replace("(" + i + ")", replacement);
+                        msg.sendingString = msg.sendingString.replaceAll("\\(" + i + "\\)", replacement);
                     }
                 }
                 totalDelay += msg.delayTicks;
