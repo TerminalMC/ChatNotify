@@ -268,7 +268,8 @@ To access, first go to the `Notification Options` screen, then click the `Advanc
 
 1. Color (`🌢`) and sound (`🔊`) status buttons on the options screen support right-click to toggle status.
 2. Text fields have been modified to support double-clicking, triple-clicking or clicking and dragging to select text.
-3. Text fields have also been modified to support `CTRL+Z` to undo and `CTRL+Y` to redo edits.
+3. Text fields have also been modified to support `CTRL+Z` to undo and `CTRL+Y` to redo edits. Note that edit history
+   will be erased whenever the GUI is 'reloaded', which often happens when you click on another widget.
 4. Fullscreen overlay widgets such as the color picker and drop-down text field support clicking outside to cancel.
 
 </details>
