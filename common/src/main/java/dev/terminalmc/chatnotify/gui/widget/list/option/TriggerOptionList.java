@@ -137,9 +137,13 @@ public class TriggerOptionList extends OptionList {
             };
             if (filter && !hit) continue;
             else if (restyle && hit) {
-                if (trigger.styleTarget.enabled && trigger.styleTarget.type == StyleTarget.Type.REGEX) {
-                    // Compile style target string if required prior to restyle
-                    trigger.styleTarget.tryCompilePattern();
+                if (trigger.styleTarget.enabled) {
+                    // Process style target string if required prior to restyle
+                    if (trigger.styleTarget.type == StyleTarget.Type.REGEX) {
+                        trigger.styleTarget.tryCompilePattern();
+                    } else if (trigger.styleTarget.type == StyleTarget.Type.CAPTURING) {
+                        trigger.styleTarget.tryParseIndexes();
+                    }
                 }
                 restyledMsg = StyleUtil.restyle(
                         msg, msgStr, trigger, matcher, textStyle, restyleAll);

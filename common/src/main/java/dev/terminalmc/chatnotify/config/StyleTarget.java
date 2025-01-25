@@ -21,12 +21,14 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class StyleTarget {
-    public final int version = 1;
+    public final int version = 2;
 
     /**
      * Whether this instance is eligible for editing or usage.
@@ -48,6 +50,13 @@ public class StyleTarget {
     public transient @Nullable Pattern pattern;
 
     /**
+     * A list of integers parsed from {@link StyleTarget#string}, or an empty
+     * list if {@link StyleTarget#type} is not {@link Type#CAPTURING} or the
+     * string could not be parsed.
+     */
+    public transient final List<Integer> groupIndexes = new ArrayList<>();
+
+    /**
      * Controls how {@link Trigger#string} is interpreted.
      */
     public Type type;
@@ -59,7 +68,11 @@ public class StyleTarget {
         /**
          * Regex matching.
          */
-        REGEX(".*");
+        REGEX(".*"),
+        /**
+         * Regex capturing group indexing.
+         */
+        CAPTURING("()");
 
         public final String icon;
 
@@ -107,8 +120,21 @@ public class StyleTarget {
         try {
             pattern = Pattern.compile(string);
         } catch (PatternSyntaxException e) {
-            ChatNotify.LOG.warn("ChatNotify: Error processing regex: " + e);
+            ChatNotify.LOG.warn("Error processing regex: " + e);
             pattern = null;
+        }
+    }
+    
+    public void tryParseIndexes() {
+        groupIndexes.clear();
+        String[] split = string.split(",");
+        for (String str : split) {
+            try {
+                groupIndexes.add(Integer.parseInt(str));
+            } catch (NumberFormatException e) {
+                ChatNotify.LOG.warn("Error processing style target: " + e);
+                pattern = null;
+            }
         }
     }
 

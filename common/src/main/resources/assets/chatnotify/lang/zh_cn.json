@@ -142,6 +142,7 @@
   "option.chatnotify.notif.style_target.add.tooltip": "添加样式目标字符串",
   "option.chatnotify.notif.style_target.field.tooltip": "样式字符串",
   "option.chatnotify.notif.style_target.tooltip": "通常，ChatNotify会尝试重新设置与触发器匹配的消息部分的样式，除非触发器是键或正则表达式模式。\n设置样式目标字符串允许你准确指定要重新设置样式的内容。",
+  "option.chatnotify.notif.style_target.type.CAPTURING.tooltip": "Type: Capturing\n\nTo restyle capturing groups from a regex-type trigger, list their indices here.\n\nExample: 1,2,3",
   "option.chatnotify.notif.style_target.type.NORMAL.tooltip": "Type: Normal\n\nSubstring matching.\n\nNot case-sensitive.",
   "option.chatnotify.notif.style_target.type.REGEX.tooltip": "Type: Regex\n\nPure regex pattern-matching.\n\nUse a tool such as regex101.com to build regex patterns.",
   "option.chatnotify.notif.trigger.editor.tooltip": "Open trigger editor",

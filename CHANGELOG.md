@@ -7,6 +7,8 @@
 - Fixed a bug in matching normal-type triggers introduced in v2.3.4
 - Switched double-click to select-word and added triple-click for select-all
 - Added support for CTRL+Z undo and CTRL+Y redo in text fields
+- Fixed some edge-case issues with translatable message processing
+- Added support for restyling capturing groups from a regex-type trigger
 
 ## 2.3.4
 
@@ -15,7 +17,6 @@
 - Fixed sound dropdown list scrollbar not working after selection
 - Fixed color picker size and position inconsistency
 - Prevented recent chat list in trigger editor from receiving new messages
-- Fixed some edge-case issues with translatable message processing
 
 ## 2.3.3
 

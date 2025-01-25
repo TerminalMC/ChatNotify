@@ -72,6 +72,17 @@ public class StyleUtil {
                             }
                         }
                     }
+                    case CAPTURING -> {
+                        if (trig.type == Trigger.Type.REGEX && matcher.groupCount() >= 1) {
+                            for (int i = 1; i <= matcher.groupCount(); i++) {
+                                if (trig.styleTarget.groupIndexes.contains(i)) {
+                                    restyled = true;
+                                    msg = restyleLeaves(msg, textStyle, 
+                                            matcher.start(i), matcher.end(i));
+                                }
+                            }
+                        }
+                    }
                 }
             }
             // If style string not usable, attempt to restyle trigger

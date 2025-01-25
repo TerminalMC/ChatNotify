@@ -142,6 +142,7 @@
   "option.chatnotify.notif.style_target.add.tooltip": "Добавить строку для переоформления",
   "option.chatnotify.notif.style_target.field.tooltip": "Строка для переоформления",
   "option.chatnotify.notif.style_target.tooltip": "Когда триггер совпадает с сообщением, соответствующая часть сообщения будет автоматически переоформлена.\n\nЕсли вы хотите переоформить другую часть сообщения, укажите строку для переоформления.\n\nЕсли сообщение не содержит указанной строки, триггер будет использоваться как обычно.",
+  "option.chatnotify.notif.style_target.type.CAPTURING.tooltip": "Type: Capturing\n\nTo restyle capturing groups from a regex-type trigger, list their indices here.\n\nExample: 1,2,3",
   "option.chatnotify.notif.style_target.type.NORMAL.tooltip": "Type: Normal\n\nSubstring matching.\n\nNot case-sensitive.",
   "option.chatnotify.notif.style_target.type.REGEX.tooltip": "Type: Regex\n\nPure regex pattern-matching.\n\nUse a tool such as regex101.com to build regex patterns.",
   "option.chatnotify.notif.trigger.editor.tooltip": "Открыть редактор триггеров",

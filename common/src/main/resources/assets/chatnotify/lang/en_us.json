@@ -142,6 +142,7 @@
   "option.chatnotify.notif.style_target.add.tooltip": "Add style target",
   "option.chatnotify.notif.style_target.field.tooltip": "Style target",
   "option.chatnotify.notif.style_target.tooltip": "When a trigger matches a message, that part of the message will be automatically restyled.\n\nIf you want to restyle a different part of the message instead, specify a style target.\n\nIf the provided style target cannot be used, the trigger will be used as normal.",
+  "option.chatnotify.notif.style_target.type.CAPTURING.tooltip": "Type: Capturing\n\nTo restyle capturing groups from a regex-type trigger, list their indices here.\n\nExample: 1,2,3",
   "option.chatnotify.notif.style_target.type.NORMAL.tooltip": "Type: Normal\n\nSubstring matching.\n\nNot case-sensitive.",
   "option.chatnotify.notif.style_target.type.REGEX.tooltip": "Type: Regex\n\nPure regex pattern-matching.\n\nUse a tool such as regex101.com to build regex patterns.",
   "option.chatnotify.notif.trigger.editor.tooltip": "Open trigger editor",

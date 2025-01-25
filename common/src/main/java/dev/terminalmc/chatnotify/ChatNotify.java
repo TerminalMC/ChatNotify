@@ -63,7 +63,11 @@ public class ChatNotify {
         for (Notification notif : config.getNotifs()) {
             for (Trigger trig : notif.triggers) {
                 if (trig.type == Trigger.Type.REGEX) trig.tryCompilePattern();
-                if (trig.styleTarget.type == StyleTarget.Type.REGEX) trig.styleTarget.tryCompilePattern();
+                if (trig.styleTarget.type == StyleTarget.Type.REGEX) {
+                    trig.styleTarget.tryCompilePattern();
+                } else if (trig.styleTarget.type == StyleTarget.Type.CAPTURING) {
+                    trig.styleTarget.tryParseIndexes();
+                }
             }
             for (Trigger trig : notif.exclusionTriggers) {
                 if (trig.type == Trigger.Type.REGEX) trig.tryCompilePattern();
