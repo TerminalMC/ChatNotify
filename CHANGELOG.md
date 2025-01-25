@@ -4,6 +4,7 @@
 
 - Updated Russian translation (rfin0)
 - Fixed message text pre-conversion occurring even when style is disabled
+- Fixed a bug in matching normal-type triggers introduced in v2.3.4
 
 ## 2.3.4
 

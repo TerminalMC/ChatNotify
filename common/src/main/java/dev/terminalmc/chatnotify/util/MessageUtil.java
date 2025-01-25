@@ -25,7 +25,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -297,8 +296,14 @@ public class MessageUtil {
         U flag for full Unicode comparison, performance using randomly-generated
         100-character msg and 10-character str is approx 1.18 microseconds
         per check without flag, 1.31 microseconds with.
+        
+        The word-boundary regex \b is a zero-width assertion that matches if 
+        there is \w on one side, and either there is \W on the other or the 
+        position is beginning or end of string. Thus, it cannot be used here as
+        it will fail to match for a trigger starting or ending in \W.
          */
-        return Pattern.compile("(?iU)\\b" + Pattern.quote(str) + "\\b").matcher(msg);
+        return Pattern.compile("(?iU)(?<!\\w)(\\W?)" + Pattern.quote(str) + "(\\W?)(?!\\w)")
+                .matcher(msg);
     }
 
     /**
