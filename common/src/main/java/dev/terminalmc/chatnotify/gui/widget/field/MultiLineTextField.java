@@ -30,6 +30,8 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -51,7 +53,12 @@ public class MultiLineTextField extends MultiLineEditBox {
     private int defaultTextColor;
     private Tooltip defaultTooltip;
     private int textColor;
-    
+
+    // Undo-redo history
+    private final List<String> history = new ArrayList<>();
+    private int historyIndex = -1;
+
+    // Double and triple-click selection
     private long lastClickTime;
     private int chainedClicks;
     
@@ -71,7 +78,10 @@ public class MultiLineTextField extends MultiLineEditBox {
     @Override
     public void setValueListener(@NotNull Consumer<String> responder) {
         super.setValueListener((str) -> {
-            if (valid(str) || lenient) responder.accept(str);
+            if (valid(str) || lenient) {
+                updateHistory(str);
+                responder.accept(str);
+            }
         });
     }
 
@@ -110,6 +120,8 @@ public class MultiLineTextField extends MultiLineEditBox {
         defaultTextColor = color;
     }
 
+    // Chained clicks
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) {
@@ -147,6 +159,51 @@ public class MultiLineTextField extends MultiLineEditBox {
         }
         return false;
     }
+
+    // Undo-redo history
+
+    private void updateHistory(String str) {
+        if (historyIndex == -1 || !history.get(historyIndex).equals(str)) {
+            if (historyIndex < history.size() - 1) {
+                // Remove old history before writing new
+                for (int i = history.size() - 1; i > historyIndex; i--) {
+                    history.removeLast();
+                }
+            }
+            history.add(str);
+            historyIndex++;
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!super.keyPressed(keyCode, scanCode, modifiers)) {
+            if (TextField.isUndo(keyCode)) {
+                undo();
+                return true;
+            }
+            else if (TextField.isRedo(keyCode)) {
+                redo();
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void undo() {
+        if (historyIndex > 0) {
+            setValue(history.get(--historyIndex));
+        }
+    }
+
+    private void redo() {
+        if (historyIndex < history.size() - 1) {
+            setValue(history.get(++historyIndex));
+        }
+    }
+    
+    // Validator
 
     public interface Validator {
         Optional<Component> validate(String str);

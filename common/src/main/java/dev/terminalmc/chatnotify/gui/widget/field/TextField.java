@@ -16,6 +16,7 @@
 
 package dev.terminalmc.chatnotify.gui.widget.field;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -23,16 +24,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -54,9 +53,16 @@ public class TextField extends EditBox {
     private int defaultTextColor;
     private Tooltip defaultTooltip;
     private final Font font;
+
+    // Undo-redo history
+    private final List<String> history = new ArrayList<>();
+    private int historyIndex = -1;
+    
+    // Click-drag selection
     private double dragOriginX;
     private int dragOriginPos;
     
+    // Double and triple-click selection
     private long lastClickTime;
     private int chainedClicks;
 
@@ -106,7 +112,10 @@ public class TextField extends EditBox {
     @Override
     public void setResponder(@NotNull Consumer<String> responder) {
         super.setResponder((str) -> {
-            if (valid(str) || lenient) responder.accept(str);
+            if (valid(str) || lenient) {
+                updateHistory(str);
+                responder.accept(str);
+            }
         });
     }
 
@@ -134,6 +143,8 @@ public class TextField extends EditBox {
         defaultTextColor = color;
         super.setTextColor(color);
     }
+    
+    // Chained clicks and click-drag
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -199,6 +210,51 @@ public class TextField extends EditBox {
         
         return true;
     }
+
+    // Undo-redo history
+
+    private void updateHistory(String str) {
+        if (historyIndex == -1 || !history.get(historyIndex).equals(str)) {
+            if (historyIndex < history.size() - 1) {
+                // Remove old history before writing new
+                for (int i = history.size() - 1; i > historyIndex; i--) {
+                    history.removeLast();
+                }
+            }
+            history.add(str);
+            historyIndex++;
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!super.keyPressed(keyCode, scanCode, modifiers)) {
+            if (isUndo(keyCode)) {
+                undo();
+                return true;
+            }
+            else if (isRedo(keyCode)) {
+                redo();
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void undo() {
+        if (historyIndex > 0) {
+            setValue(history.get(--historyIndex));
+        }
+    }
+
+    private void redo() {
+        if (historyIndex < history.size() - 1) {
+            setValue(history.get(++historyIndex));
+        }
+    }
+    
+    // Validator
 
     public interface Validator {
         Optional<Component> validate(String str);
@@ -274,6 +330,22 @@ public class TextField extends EditBox {
                 }
             }
         }
+    }
+    
+    // Static methods
+
+    public static boolean isUndo(int keyCode) {
+        return keyCode == InputConstants.KEY_Z
+                && Screen.hasControlDown()
+                && !Screen.hasShiftDown()
+                && !Screen.hasAltDown();
+    }
+
+    public static boolean isRedo(int keyCode) {
+        return keyCode == InputConstants.KEY_Y
+                && Screen.hasControlDown()
+                && !Screen.hasShiftDown()
+                && !Screen.hasAltDown();
     }
 
     /**

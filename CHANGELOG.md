@@ -3,9 +3,10 @@
 ## 2.3.5
 
 - Updated Russian translation (rfin0)
-- Fixed message text pre-conversion occurring even when style is disabled
+- Fixed message text pre-conversion occurring even when style was disabled
 - Fixed a bug in matching normal-type triggers introduced in v2.3.4
 - Switched double-click to select-word and added triple-click for select-all
+- Added support for CTRL+Z undo and CTRL+Y redo in text fields
 
 ## 2.3.4
 
