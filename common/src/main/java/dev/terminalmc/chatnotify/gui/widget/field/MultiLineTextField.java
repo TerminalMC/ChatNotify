@@ -138,14 +138,15 @@ public class MultiLineTextField extends MultiLineEditBox {
                         field.seekCursor(Whence.ABSOLUTE, ((StringViewAccessor)(Object)field.getPreviousWord()).getBeginIndex());
                         fieldAcc.setSelectCursor(pos);
                     }
-                    case 2 -> {
+                    case 2, 3 -> {
                         // triple-click: select all
+                        // duplicated for quadruple to inhibit overshoot
                         MultilineTextFieldAccessor field = (MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this).getTextField();
                         field.setCursor(this.getValue().length());
                         field.setSelectCursor(0);
                     }
-                    case 3 -> {
-                        // quadruple-click: reset chain and deselect all
+                    case 4 -> {
+                        // quintuple-click: reset chain and deselect all
                         chainedClicks = 0;
                         MultilineTextFieldAccessor field = (MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this).getTextField();
                         field.setSelectCursor(field.getCursor());

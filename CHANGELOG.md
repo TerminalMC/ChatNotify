@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.7
+
+- Fixed a crash when double-clicking certain areas of text fields
+
 ## 2.3.6
 
 - Fixed a network protocol crash when processing capturing groups in custom messages

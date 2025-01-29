@@ -158,20 +158,25 @@ public class TextField extends EditBox {
                         int start = pos;
                         // If next char is space or previous char is not space, 
                         // go backwards to the start of the word.
-                        if (getValue().charAt(pos) == ' ' || getValue().charAt(pos - 1) != ' ') {
+                        if (pos < 0) {
+                            start = 0;
+                        } else if (pos >= getValue().length() 
+                                || getValue().charAt(pos) == ' ' 
+                                || (pos > 0 && getValue().charAt(pos - 1) != ' ')) {
                             start = getWordPosition(-1);
                         }
                         int end = getWordPosition(1);
                         moveCursorTo(start, false);
                         moveCursorTo(end, true);
                     }
-                    case 2 -> {
+                    case 2, 3 -> {
                         // triple-click: select all
+                        // duplicated for quadruple to inhibit overshoot
                         moveCursorToEnd(false);
                         setHighlightPos(0);
                     }
-                    case 3 -> {
-                        // quadruple-click: reset chain and deselect all
+                    case 4 -> {
+                        // quintuple-click: reset chain and deselect all
                         chainedClicks = 0;
                         setHighlightPos(getCursorPosition());
                     }
