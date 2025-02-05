@@ -4,6 +4,7 @@
 
 - Fixed a crash when double-clicking certain areas of text fields
 - Improved stability of config deserializers
+- Fixed some issues with message ownership detection
 
 ## 2.3.6
 
