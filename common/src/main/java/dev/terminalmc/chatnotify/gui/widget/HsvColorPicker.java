@@ -27,11 +27,11 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
@@ -231,8 +231,7 @@ public class HsvColorPicker extends OverlayWidget {
 
     public void updateColorFromSource() {
         int color = source.get();
-        Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color), hsv);
+        Color.RGBtoHSB(ARGB.red(color), ARGB.green(color), ARGB.blue(color), hsv);
         oldColor = color;
         if (hexField != null) {
             hexField.setValue(TextColor.fromRgb(color).formatValue());
@@ -251,8 +250,7 @@ public class HsvColorPicker extends OverlayWidget {
         if (textColor != null) {
             int color = textColor.getValue();
             if (!updateFromCursor) {
-                Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
-                        FastColor.ARGB32.blue(color), hsv);
+                Color.RGBtoHSB(ARGB.red(color), ARGB.green(color), ARGB.blue(color), hsv);
                 updateHCursor();
                 updateSvCursor();
             }
@@ -409,7 +407,7 @@ public class HsvColorPicker extends OverlayWidget {
 
     private void drawQuads(GuiGraphics graphics) {
         // Setup
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
         RenderSystem.depthFunc(GlConst.GL_ALWAYS);
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
@@ -554,9 +552,9 @@ public class HsvColorPicker extends OverlayWidget {
 
         // New color
         int color = Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]);
-        int colorR = FastColor.ARGB32.red(color);
-        int colorG = FastColor.ARGB32.green(color);
-        int colorB = FastColor.ARGB32.blue(color);
+        int colorR = ARGB.red(color);
+        int colorG = ARGB.green(color);
+        int colorB = ARGB.blue(color);
         builder.addVertex(x+newCFieldX, y+newCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
         builder.addVertex(x+newCFieldX, y+newCFieldY+newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
         builder.addVertex(x+newCFieldX+newCFieldWidth, y+newCFieldY+newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
@@ -569,9 +567,9 @@ public class HsvColorPicker extends OverlayWidget {
         builder.addVertex(x+oldCFieldX+oldCFieldWidth+OUTLINE, y+oldCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // Old color
-        colorR = FastColor.ARGB32.red(oldColor);
-        colorG = FastColor.ARGB32.green(oldColor);
-        colorB = FastColor.ARGB32.blue(oldColor);
+        colorR = ARGB.red(oldColor);
+        colorG = ARGB.green(oldColor);
+        colorB = ARGB.blue(oldColor);
         builder.addVertex(x+oldCFieldX, y+oldCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
         builder.addVertex(x+oldCFieldX, y+oldCFieldY+oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
         builder.addVertex(x+oldCFieldX+oldCFieldWidth, y+oldCFieldY+oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
