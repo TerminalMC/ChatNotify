@@ -18,16 +18,18 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.util.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class Trigger {
-    public final int version = 4;
+    public static final int VERSION = 4;
+    public final int version = VERSION;
 
     /**
      * Not currently used.
@@ -122,57 +124,55 @@ public class Trigger {
         }
     }
 
+    // Validation
+
+    Trigger validate() {
+        if (type == Type.KEY) string = string.toLowerCase(Locale.ROOT);
+        styleTarget.validate();
+        if (styleTarget.string.isBlank()) styleTarget.enabled = false;
+        return this;
+    }
+
     // Deserialization
-    
+
     public static class Deserializer implements JsonDeserializer<Trigger> {
         @Override
         public @Nullable Trigger deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
                                              JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
 
-            String f = "enabled";
-            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : enabledDefault;
+            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
+                    enabledDefault, silent);
 
-            f = "string";
-            String string = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? obj.get(f).getAsString()
-                    : stringDefault;
+            String string = JsonUtil.getOrDefault(obj, "string",
+                    stringDefault, silent);
 
             StyleTarget styleTarget;
             if (version < 4) { // 2025-01-19
-                f = "styleString";
-                String styleString = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                        ? obj.get(f).getAsString()
-                        : null;
-                styleTarget = new StyleTarget(styleString == null ? StyleTarget.stringDefault : styleString);
+                String styleString = JsonUtil.getOrDefault(obj, "styleString",
+                        stringDefault, silent);
+                styleTarget = new StyleTarget(styleString);
             } else {
-                f = "styleTarget";
-                styleTarget = obj.has(f) && obj.get(f).isJsonObject()
-                        ? ctx.deserialize(obj.get(f), StyleTarget.class)
-                        : styleTargetDefault.get();
+                styleTarget = JsonUtil.getOrDefault(ctx, obj, "styleTarget",
+                        StyleTarget.class, styleTargetDefault.get(), silent);
             }
 
-            f = "type";
-            Type type = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(Type.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? Type.valueOf(obj.get(f).getAsString())
-                        : Type.values()[0]
-                    : Type.values()[0];
+            Type type = JsonUtil.getOrDefault(obj, "type",
+                    Type.class, Type.values()[0], silent);
             if (version < 3) { // 2024-08-25
-                f = "isKey";
-                boolean isKey = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                        ? obj.get(f).getAsBoolean()
-                        : false;
-                boolean isRegex = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                        ? obj.get(f).getAsBoolean()
-                        : false;
+                boolean isKey = JsonUtil.getOrDefault(obj, "isKey", false, silent);
+                boolean isRegex = JsonUtil.getOrDefault(obj, "isRegex", false, silent);
                 type = isKey ? Type.KEY : (isRegex ? Type.REGEX : Type.NORMAL);
             }
 
-            return new Trigger(enabled, string, styleTarget, type);
+            return new Trigger(
+                    enabled,
+                    string,
+                    styleTarget,
+                    type
+            ).validate();
         }
     }
 }

@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Root configuration options class.
@@ -48,10 +48,12 @@ import java.util.stream.Collectors;
  * the enum.</p>
  */
 public class Config {
-    public final int version = 9;
+    public static final int VERSION = 9;
+    public final int version = VERSION;
     private static final Path DIR_PATH = Path.of("config");
-    private static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
-    private static final String BACKUP_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
+    public static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
+    public static final String UNREADABLE_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
+    public static final String OLD_FILE_NAME = ChatNotify.MOD_ID + ".old.json";
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Config.class, new Deserializer())
             .registerTypeAdapter(Notification.class, new Notification.Deserializer())
@@ -309,10 +311,14 @@ public class Config {
         Path file = DIR_PATH.resolve(FILE_NAME);
         Config config = null;
         if (Files.exists(file)) {
+            JsonUtil.reset();
             config = load(file, GSON);
             if (config == null) {
-                backup();
+                backup(UNREADABLE_FILE_NAME);
                 ChatNotify.LOG.warn("Resetting config");
+                ChatNotify.hasResetConfig = true;
+            } else if (JsonUtil.hasChanged) {
+                backup(OLD_FILE_NAME);
             }
         }
         return config != null ? config : new Config();
@@ -330,12 +336,12 @@ public class Config {
         }
     }
 
-    private static void backup() {
+    private static void backup(String path) {
         try {
-            ChatNotify.LOG.warn("Copying {} to {}", FILE_NAME, BACKUP_FILE_NAME);
+            ChatNotify.LOG.warn("Copying {} to {}", FILE_NAME, path);
             if (!Files.isDirectory(DIR_PATH)) Files.createDirectories(DIR_PATH);
             Path file = DIR_PATH.resolve(FILE_NAME);
-            Path backupFile = file.resolveSibling(BACKUP_FILE_NAME);
+            Path backupFile = file.resolveSibling(path);
             Files.move(file, backupFile, StandardCopyOption.ATOMIC_MOVE,
                     StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -345,7 +351,7 @@ public class Config {
 
     public static void save() {
         if (instance == null) return;
-        instance.cleanup();
+        instance.validate();
         try {
             if (!Files.isDirectory(DIR_PATH)) Files.createDirectories(DIR_PATH);
             Path file = DIR_PATH.resolve(FILE_NAME);
@@ -364,30 +370,31 @@ public class Config {
         }
     }
 
-    // Cleanup and validation
+    // Validation
 
     /**
-     * Cleanup and validation method to be called after config editing and 
-     * before saving.
+     * Validation method to be called after config editing and before saving.
      */
-    public void cleanup() {
+    private Config validate() {
+        if (defaultColor < 0 || defaultColor > 16777215) defaultColor = defaultColorDefault;
+        defaultSound.validate();
+
         // Remove blank prefixes and sort by decreasing length
         prefixes.removeIf(String::isBlank);
         prefixes.sort(Comparator.comparingInt(String::length).reversed());
 
-        // Validate username notification
-        validateUserNotif();
-
         // Cleanup notifications and remove any blanks except first
         notifications.removeIf((n) -> {
-            n.cleanup();
+            n.validate();
             return (
                     n != notifications.getFirst()
-                    && n.triggers.isEmpty()
-                    && n.exclusionTriggers.isEmpty()
-                    && n.responseMessages.isEmpty()
+                            && n.triggers.isEmpty()
+                            && n.exclusionTriggers.isEmpty()
+                            && n.responseMessages.isEmpty()
             );
         });
+
+        return this;
     }
 
     /**
@@ -400,7 +407,7 @@ public class Config {
             notifications.add(Notification.createUser());
         } else if (notifications.getFirst().triggers.size() < 2) {
             ChatNotify.LOG.error("Username notification missing triggers! Recreating...");
-            notifications.add(Notification.createUser());
+            notifications.set(0, Notification.createUser());
         }
     }
 
@@ -412,89 +419,42 @@ public class Config {
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
 
-            String f = "detectionMode";
-            DetectionMode detectionMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(DetectionMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? DetectionMode.valueOf(obj.get(f).getAsString())
-                        : DetectionMode.values()[0]
-                    : DetectionMode.values()[0];
+            DetectionMode detectionMode = JsonUtil.getOrDefault(obj, "detectionMode",
+                    DetectionMode.class, DetectionMode.values()[0], silent);
 
-            f = "debugMode";
-            DebugMode debugMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(DebugMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? DebugMode.valueOf(obj.get(f).getAsString())
-                        : DebugMode.values()[0]
-                    : DebugMode.values()[0];
+            DebugMode debugMode = JsonUtil.getOrDefault(obj, "debugMode",
+                    DebugMode.class, DebugMode.values()[0], silent);
 
-            f = "notifMode";
-            NotifMode notifMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(NotifMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? NotifMode.valueOf(obj.get(f).getAsString())
-                        : NotifMode.values()[0]
-                    : NotifMode.values()[0];
+            NotifMode notifMode = JsonUtil.getOrDefault(obj, "notifMode",
+                    NotifMode.class, NotifMode.values()[0], silent);
 
-            f = "restyleMode";
-            RestyleMode restyleMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(RestyleMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? RestyleMode.valueOf(obj.get(f).getAsString())
-                        : RestyleMode.values()[0]
-                    : RestyleMode.values()[0];
+            RestyleMode restyleMode = JsonUtil.getOrDefault(obj, "restyleMode",
+                    RestyleMode.class, RestyleMode.values()[0], silent);
 
-            f = "sendMode";
-            SendMode sendMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(SendMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? SendMode.valueOf(obj.get(f).getAsString())
-                        : SendMode.values()[0]
-                    : SendMode.values()[0];
+            SendMode sendMode = JsonUtil.getOrDefault(obj, "sendMode",
+                    SendMode.class, SendMode.values()[0], silent);
 
-            f = "senderDetectionMode";
-            SenderDetectionMode senderDetectionMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(SenderDetectionMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? SenderDetectionMode.valueOf(obj.get(f).getAsString())
-                        : SenderDetectionMode.values()[0]
-                    : SenderDetectionMode.values()[0];
+            SenderDetectionMode senderDetectionMode = JsonUtil.getOrDefault(obj, "senderDetectionMode",
+                    SenderDetectionMode.class, SenderDetectionMode.values()[0], silent);
 
-            f = "checkOwnMessages";
-            boolean checkOwnMessages = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : checkOwnMessagesDefault;
+            boolean checkOwnMessages = JsonUtil.getOrDefault(obj, "checkOwnMessages",
+                    checkOwnMessagesDefault, silent);
 
-            f = "soundSource";
-            SoundSource soundSource = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(SoundSource.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? SoundSource.valueOf(obj.get(f).getAsString())
-                        : soundSourceDefault
-                    : soundSourceDefault;
+            SoundSource soundSource = JsonUtil.getOrDefault(obj, "soundSource",
+                    SoundSource.class, soundSourceDefault, silent);
 
-            f = "defaultColor";
-            int defaultColor = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
-                    ? obj.get(f).getAsNumber().intValue()
-                    : defaultColorDefault;
-            if (defaultColor < 0 || defaultColor > 16777215) defaultColor = defaultColorDefault;
+            int defaultColor = JsonUtil.getOrDefault(obj, "defaultColor",
+                    defaultColorDefault, silent);
 
-            f = "defaultSound";
-            Sound defaultSound = obj.has(f) && obj.get(f).isJsonObject()
-                    ? ctx.deserialize(obj.get(f), Sound.class)
-                    : defaultSoundDefault.get();
+            Sound defaultSound = JsonUtil.getOrDefault(ctx, obj, "defaultSound",
+                    Sound.class, defaultSoundDefault.get(), silent);
 
-            f = "prefixes";
-            List<String> prefixes = obj.has(f) && obj.get(f).isJsonArray()
-                    ? new ArrayList<>(obj.getAsJsonArray(f).asList().stream()
-                        .filter((je) -> (je.isJsonPrimitive() && je.getAsJsonPrimitive().isString()))
-                        .map(JsonElement::getAsString).toList())
-                    : prefixesDefault.get();
+            List<String> prefixes = JsonUtil.getOrDefault(obj, "prefixes", prefixesDefault.get(), silent);
 
-            f = "notifications";
-            List<Notification> notifications = obj.has(f) && obj.get(f).isJsonArray()
-                    ? obj.getAsJsonArray(f).asList().stream()
-                        .filter(JsonElement::isJsonObject)
-                        .map((je) -> (Notification)ctx.deserialize(je, Notification.class)).toList()
-                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
-                    : notificationsDefault.get();
-            if (notifications.isEmpty()) notifications.add(Notification.createUser());
-            else if (notifications.getFirst().triggers.size() < 2) notifications.set(0, Notification.createUser());
-
+            List<Notification> notifications = JsonUtil.getOrDefault(ctx, obj, "notifications",
+                    Notification.class, notificationsDefault.get(), silent);
 
             return new Config(
                     detectionMode,
@@ -509,7 +469,7 @@ public class Config {
                     defaultSound,
                     prefixes,
                     notifications
-            );
+            ).validate();
         }
     }
 }

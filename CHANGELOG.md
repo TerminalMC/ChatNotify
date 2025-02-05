@@ -3,6 +3,7 @@
 ## 2.3.7
 
 - Fixed a crash when double-clicking certain areas of text fields
+- Improved stability of config deserializers
 
 ## 2.3.6
 

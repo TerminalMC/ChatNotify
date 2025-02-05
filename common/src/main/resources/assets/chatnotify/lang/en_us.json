@@ -236,5 +236,7 @@
   "option.chatnotify.trigger.message.text": "Text",
   "option.chatnotify.trigger.recent_messages.none": "[No chat messages found]",
   "option.chatnotify.trigger.restyle": "Restyle",
-  "option.chatnotify.trigger.text.placeholder": "Click on a message from the list below"
+  "option.chatnotify.trigger.text.placeholder": "Click on a message from the list below",
+  "toast.chatnotify.reset.message": "Backup saved to %s",
+  "toast.chatnotify.reset.title": "ChatNotify Options Reset - Load Error"
 }

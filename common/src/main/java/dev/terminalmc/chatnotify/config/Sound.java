@@ -17,13 +17,15 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
 public class Sound {
-    public final int version = 1;
+    public static final int VERSION = 1;
+    public final int version = VERSION;
 
     /**
      * Whether this instance is eligible for activation.
@@ -144,10 +146,10 @@ public class Sound {
 
     /**
      * Sets the sound volume.
-     * 
+     *
      * <p>If {@code volume} is {@code 0}, sets {@link Sound#enabled} to 
      * {@code false}.</p>
-     * 
+     *
      * <p>If {@code volume} is not {@code 0} and {@link Sound#enabled} is 
      * {@code false}, sets {@link Sound#enabled} to {@code true}.</p>
      *
@@ -179,8 +181,14 @@ public class Sound {
                 "Value out of range. Expected 0.5-2, got " + pitch);
         this.pitch = pitch;
     }
-    
+
     // Validation
+
+    Sound validate() {
+        if (volume < 0 || volume > 1) volume = volumeDefault;
+        if (pitch < 0.5 || pitch > 2) pitch = volumeDefault;
+        return this;
+    }
 
     /**
      * @return {@code true} if {@code id} represents a valid
@@ -191,38 +199,33 @@ public class Sound {
     }
 
     // Deserialization
-    
+
     public static class Deserializer implements JsonDeserializer<Sound> {
         @Override
         public Sound deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
 
-            String f = "enabled";
-            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : enabledDefault;
+            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
+                    enabledDefault, silent);
 
-            f = "id";
-            String id = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? obj.get(f).getAsString()
-                    : idDefault;
-            if (!validId(id)) id = idDefault;
+            String id = JsonUtil.getOrDefault(obj, "id",
+                    idDefault, silent);
 
-            f = "volume";
-            float volume = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
-                    ? obj.get(f).getAsNumber().floatValue()
-                    : volumeDefault;
-            if (volume < 0 || volume > 1) volume = volumeDefault;
+            float volume = JsonUtil.getOrDefault(obj, "volume",
+                    volumeDefault, silent);
 
-            f = "pitch";
-            float pitch = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
-                    ? obj.get(f).getAsNumber().floatValue()
-                    : pitchDefault;
-            if (pitch < 0.5 || pitch > 2) pitch = volumeDefault;
+            float pitch = JsonUtil.getOrDefault(obj, "volume",
+                    volumeDefault, silent);
 
-            return new Sound(enabled, id, volume, pitch);
+            return new Sound(
+                    enabled,
+                    id,
+                    volume,
+                    pitch
+            ).validate();
         }
     }
 }
