@@ -17,15 +17,16 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.Arrays;
 
 public class TextStyle {
-    public final int version = 2;
+    public static final int VERSION = 2;
+    public final int version = VERSION;
 
     /**
      * Whether color should be used when applying style.
@@ -38,9 +39,9 @@ public class TextStyle {
      */
     public int color;
     public static final int colorDefault = 0xffc400;
-    
+
     // Format controls
-    
+
     public FormatMode bold;
     public FormatMode italic;
     public FormatMode underlined;
@@ -108,78 +109,69 @@ public class TextStyle {
                 strikethrough != FormatMode.DISABLED ||
                 obfuscated != FormatMode.DISABLED;
     }
-    
+
     public Style getStyle() {
         return new Style(
-                doColor ? TextColor.fromRgb(color) : null, 
+                doColor ? TextColor.fromRgb(color) : null,
                 bold != FormatMode.DISABLED ? bold == FormatMode.ON : null,
                 italic != FormatMode.DISABLED ? italic == FormatMode.ON : null,
                 underlined != FormatMode.DISABLED ? underlined == FormatMode.ON : null,
                 strikethrough != FormatMode.DISABLED ? strikethrough == FormatMode.ON : null,
                 obfuscated != FormatMode.DISABLED ? obfuscated == FormatMode.ON : null,
-                null, 
-                null, 
-                null, 
+                null,
+                null,
+                null,
                 null
         );
     }
 
+    // Validation
+
+    TextStyle validate() {
+        if (color < 0 || color > 16777215) color = colorDefault;
+        return this;
+    }
+
     // Deserialization
-   
+
     public static class Deserializer implements JsonDeserializer<TextStyle> {
         @Override
         public @Nullable TextStyle deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
 
-            String f = "doColor";
-            boolean doColor = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : doColorDefault;
+            boolean doColor = JsonUtil.getOrDefault(obj, "doColor",
+                    doColorDefault, silent);
 
-            f = "color";
-            int color = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
-                    ? obj.get(f).getAsNumber().intValue()
-                    : colorDefault;
-            if (color < 0 || color > 16777215) color = colorDefault;
+            int color = JsonUtil.getOrDefault(obj, "color",
+                    colorDefault, silent);
 
-            f = "bold";
-            FormatMode bold = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? FormatMode.valueOf(obj.get(f).getAsString())
-                        : FormatMode.values()[0]
-                    : FormatMode.values()[0];
+            FormatMode bold = JsonUtil.getOrDefault(obj, "bold",
+                    FormatMode.class, FormatMode.values()[0], silent);
 
-            f = "italic";
-            FormatMode italic = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? FormatMode.valueOf(obj.get(f).getAsString())
-                        : FormatMode.values()[0]
-                    : FormatMode.values()[0];
+            FormatMode italic = JsonUtil.getOrDefault(obj, "italic",
+                    FormatMode.class, FormatMode.values()[0], silent);
 
-            f = "underlined";
-            FormatMode underlined = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? FormatMode.valueOf(obj.get(f).getAsString())
-                        : FormatMode.values()[0]
-                    : FormatMode.values()[0];
+            FormatMode underlined = JsonUtil.getOrDefault(obj, "underlined",
+                    FormatMode.class, FormatMode.values()[0], silent);
 
-            f = "strikethrough";
-            FormatMode strikethrough = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? FormatMode.valueOf(obj.get(f).getAsString())
-                        : FormatMode.values()[0]
-                    : FormatMode.values()[0];
+            FormatMode strikethrough = JsonUtil.getOrDefault(obj, "strikethrough",
+                    FormatMode.class, FormatMode.values()[0], silent);
 
-            f = "obfuscated";
-            FormatMode obfuscated = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(FormatMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? FormatMode.valueOf(obj.get(f).getAsString())
-                        : FormatMode.values()[0]
-                    : FormatMode.values()[0];
-            
-            return new TextStyle(doColor, color, bold, italic, underlined, strikethrough, obfuscated);
+            FormatMode obfuscated = JsonUtil.getOrDefault(obj, "obfuscated",
+                    FormatMode.class, FormatMode.values()[0], silent);
+
+            return new TextStyle(
+                    doColor,
+                    color,
+                    bold,
+                    italic,
+                    underlined,
+                    strikethrough,
+                    obfuscated
+            ).validate();
         }
     }
 }

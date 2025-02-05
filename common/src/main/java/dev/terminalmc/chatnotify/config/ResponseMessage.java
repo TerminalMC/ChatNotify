@@ -17,16 +17,16 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.util.JsonUtil;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-
 public class ResponseMessage {
-    public final int version = 2;
+    public static final int VERSION = 2;
+    public final int version = VERSION;
 
     public transient int countdown;
     public transient String sendingString;
-    
+
     // Options
 
     /**
@@ -97,46 +97,41 @@ public class ResponseMessage {
         this.delayTicks = delayTicks;
     }
 
+    // Validation
+
+    ResponseMessage validate() {
+        if (delayTicks < 0) delayTicks = delayTicksDefault;
+        return this;
+    }
+
     // Deserialization
-    
+
     public static class Deserializer implements JsonDeserializer<ResponseMessage> {
         @Override
-        public @Nullable ResponseMessage deserialize(JsonElement json, java.lang.reflect.Type typeOfT, 
+        public @Nullable ResponseMessage deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
                                                      JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
 
-            String f = "enabled";
-            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : enabledDefault;
+            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
+                    enabledDefault, silent);
 
-            f = "string";
-            String string = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? obj.get(f).getAsString()
-                    : stringDefault;
+            String string = JsonUtil.getOrDefault(obj, "string",
+                    stringDefault, silent);
 
-            f = "delayTicks";
-            int delayTicks = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isNumber()
-                    ? obj.get(f).getAsNumber().intValue()
-                    : delayTicksDefault;
-            if (delayTicks < 0) delayTicks = delayTicksDefault;
+            int delayTicks = JsonUtil.getOrDefault(obj, "delayTicks",
+                    delayTicksDefault, silent);
 
-            f = "type";
-            Type type = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(Type.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? Type.valueOf(obj.get(f).getAsString())
-                        : Type.values()[0]
-                    : Type.values()[0];
-            if (version < 2) { // 2024-11-24
-                f = "regexGroups";
-                boolean regexGroups = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                        ? obj.get(f).getAsBoolean()
-                        : false;
-                type = regexGroups ? Type.REGEX : Type.NORMAL;
-            }
+            Type type = JsonUtil.getOrDefault(obj, "type",
+                    Type.class, Type.values()[0], silent);
 
-            return new ResponseMessage(enabled, string, type, delayTicks);
+            return new ResponseMessage(
+                    enabled,
+                    string,
+                    type,
+                    delayTicks
+            ).validate();
         }
     }
 }

@@ -18,17 +18,18 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.util.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class StyleTarget {
-    public final int version = 2;
+    public static final int VERSION = 2;
+    public final int version = VERSION;
 
     /**
      * Whether this instance is eligible for editing or usage.
@@ -124,7 +125,7 @@ public class StyleTarget {
             pattern = null;
         }
     }
-    
+
     public void tryParseIndexes() {
         groupIndexes.clear();
         String[] split = string.split(",");
@@ -138,33 +139,36 @@ public class StyleTarget {
         }
     }
 
+    // Validation
+
+    StyleTarget validate() {
+        return this;
+    }
+
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<StyleTarget> {
         @Override
-        public @Nullable StyleTarget deserialize(JsonElement json, java.lang.reflect.Type typeOfT, 
+        public @Nullable StyleTarget deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
                                                  JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
 
-            String f = "enabled";
-            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : enabledDefault;
+            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
+                    enabledDefault, silent);
 
-            f = "string";
-            String string = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? obj.get(f).getAsString()
-                    : stringDefault;
+            String string = JsonUtil.getOrDefault(obj, "string",
+                    stringDefault, silent);
 
-            f = "type";
-            Type type = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(Type.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                    ? Type.valueOf(obj.get(f).getAsString())
-                    : Type.values()[0]
-                    : Type.values()[0];
+            Type type = JsonUtil.getOrDefault(obj, "type",
+                    Type.class, Type.values()[0], silent);
 
-            return new StyleTarget(enabled, string, type);
+            return new StyleTarget(
+                    enabled,
+                    string,
+                    type
+            ).validate();
         }
     }
 }

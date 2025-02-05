@@ -22,11 +22,15 @@ import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.util.ModLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
+
+import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class ChatNotify {
     public static final String MOD_ID = "chatnotify";
@@ -37,6 +41,7 @@ public class ChatNotify {
             .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.GOLD))
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
+    public static boolean hasResetConfig = false;
 
     /**
      * Stores messages recently sent by the client, for comparison with incoming 
@@ -77,6 +82,14 @@ public class ChatNotify {
 
     public static void onEndTick(Minecraft mc) {
         tickResponseMessages(mc);
+        
+        // Config reset warning toast
+        if (hasResetConfig && mc.screen instanceof TitleScreen) {
+            hasResetConfig = false;
+            mc.getToasts().addToast(new SystemToast(new SystemToast.SystemToastId(15000L), 
+                    localized("toast", "reset.title"), localized("toast", "reset.message",
+                    Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD))));
+        }
     }
 
     private static void tickResponseMessages(Minecraft mc) {

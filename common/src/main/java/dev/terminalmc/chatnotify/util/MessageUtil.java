@@ -142,20 +142,31 @@ public class MessageUtil {
             if (debug) ChatNotify.LOG.warn("Owner check using heuristic");
             // Check for a matching stored message
             for (int i = 0; i < recentMessages.size(); i++) {
-                Matcher matcher = Pattern.compile("(?iU)" + 
+                // Find last occurrence of recent message
+                // Case-insensitive to allow for servers with all-caps prevention
+                Matcher recentMatcher = Pattern.compile("(?iU)" + 
                                 Pattern.quote(recentMessages.get(i).getSecond())).matcher(cleanStr);
-                if (matcher.find()) {
-                    if (debug) ChatNotify.LOG.warn("Matched a recent message");
+                int recentStart = -1;
+                while(recentMatcher.find()) {
+                    recentStart = recentMatcher.start();
+                }
+                if (recentStart != -1) {
+                    if (debug) ChatNotify.LOG.warn("Matched recent message '{}' at index {}",
+                            recentMessages.get(i).getSecond(), recentStart);
                     // Matched against a stored message, check for a username trigger
-                    String prefix = cleanStr.substring(0, matcher.start());
+                    String prefix = cleanStr.substring(0, recentStart);
                     for (Trigger t : Config.get().getUserNotif().triggers) {
-                        matcher = normalSearch(prefix, t.string);
-                        if (matcher.find()) {
-                            if (debug) ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
+                        Matcher triggerMatcher = normalSearch(prefix, t.string);
+                        if (triggerMatcher.find()) {
+                            if (debug) ChatNotify.LOG.warn("Matched trigger '{}' at index {}", 
+                                    t.string, triggerMatcher.start());
                             recentMessages.remove(i); // Remove stored message
                             // Modify message according to config
-                            cleanOwnedStr = cleanStr.substring(0, matcher.start()) 
-                                    + cleanStr.substring(matcher.end());
+                            cleanOwnedStr = 
+                                    cleanStr.substring(0, triggerMatcher.start()
+                                            + triggerMatcher.group(1).length()) 
+                                    + cleanStr.substring(triggerMatcher.end()
+                                            - triggerMatcher.group(2).length());
                             break;
                         }
                     }

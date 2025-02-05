@@ -17,39 +17,40 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.util.JsonUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Consists of:
- * 
+ *
  * <p>A list of {@link Trigger} instances, to be checked against incoming 
  * messages to determine whether the {@link Notification} should be activated.
  * </p>
- * 
+ *
  * <p>A list of exclusion {@link Trigger} instances which, if matched, prevent
  * activation.</p>
- * 
+ *
  * <p>A list of {@link ResponseMessage} instances, to be sent on activation.</p>
- * 
+ *
  * <p>A {@link TextStyle} instance, defining how the triggering message should 
  * be restyled.</p>
- * 
+ *
  * <p>A {@link Sound} instance, defining what sound should be played on 
  * activation.</p>
- * 
+ *
  * <p>A series of custom message strings, to be optionally displayed to the user
  * in different ways on activation.</p>
- * 
+ *
  * <p>A range of control fields (boolean or enum) defining the status of other 
  * elements.</p>
  */
 public class Notification {
-    public final int version = 5;
+    public static final int VERSION = 5;
+    public final int version = VERSION;
 
     /**
      * A status flag to indicate that this instance is being edited, and should 
@@ -61,7 +62,7 @@ public class Notification {
 
     /**
      * Whether this instance is set by the user to be eligible for activation.
-     * 
+     *
      * <p>Necessary but not sufficient condition; never activate if this is 
      * {@code false}, but it being {@code true} does not mean that this instance
      * can be safely activated. Instead, check {@link Notification#canActivate}.
@@ -73,7 +74,7 @@ public class Notification {
     /**
      * Controls whether this instance is eligible for activation on user-sent 
      * messages.
-     * 
+     *
      * <p>{@link CheckOwnMode#DEFER} means that {@link Config#checkOwnMessages}
      * should be used instead.</p>
      */
@@ -141,7 +142,7 @@ public class Notification {
     /**
      * The list of {@link Trigger}s which can prevent activation of this 
      * instance.
-     * 
+     *
      * <p><b>Note:</b> For simplicity, this list uses the same {@link Trigger}
      * class as {@link Notification#triggers}. However, instances in this list
      * will never use the {@link Trigger#styleTarget} field.</p>
@@ -182,11 +183,11 @@ public class Notification {
         this.sound = sound;
         this.textStyle = textStyle;
         this.replacementMsg = replacementMsg;
-        this.replacementMsgEnabled = replacementMsgEnabled; 
+        this.replacementMsgEnabled = replacementMsgEnabled;
         this.statusBarMsg = statusBarMsg;
-        this.statusBarMsgEnabled = statusBarMsgEnabled; 
+        this.statusBarMsgEnabled = statusBarMsgEnabled;
         this.titleMsg = titleMsg;
-        this.titleMsgEnabled = titleMsgEnabled; 
+        this.titleMsgEnabled = titleMsgEnabled;
         this.triggers = triggers;
         this.exclusionTriggers = exclusionTriggers;
         this.responseMessages = responseMessages;
@@ -265,7 +266,7 @@ public class Notification {
             return false;
         }
     }
-    
+
     // List reordering
 
     /**
@@ -312,51 +313,50 @@ public class Notification {
         }
         return false;
     }
-    
+
     // Reset
-    
+
     /**
      * Sets all advanced settings to their respective defaults.
      */
     public void resetAdvanced() {
         checkOwnMode = CheckOwnMode.values()[0];
-        
+
         replacementMsg = replacementMsgDefault;
         replacementMsgEnabled = replacementMsgEnabledDefault;
         statusBarMsg = statusBarMsgDefault;
         statusBarMsgEnabled = statusBarMsgEnabledDefault;
         titleMsg = titleMsgDefault;
         titleMsgEnabled = titleMsgEnabledDefault;
-        
+
         exclusionEnabled = exclusionEnabledDefault;
         exclusionTriggers.clear();
         responseEnabled = responseEnabledDefault;
         responseMessages.clear();
     }
 
-    // Cleanup and validation
+    // Validation
 
-    public void cleanup() {
-        // Remove all blank triggers
-        triggers.removeIf(trigger -> trigger.string.isBlank());
-        for (Trigger t : triggers) {
-            // Convert key-type triggers to lowercase
-            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
-            // Disable blank style targets
-            if (t.styleTarget.string.isBlank()) t.styleTarget.enabled = false;
-        }
+    Notification validate() {
+        textStyle.validate();
+        sound.validate();
 
-        // Remove all blank exclusion triggers, and disable if none remain
-        exclusionTriggers.removeIf(trigger -> trigger.string.isBlank());
-        if (exclusionTriggers.isEmpty()) exclusionEnabled = false;
-        for (Trigger t : exclusionTriggers) {
-            // Convert key-type triggers to lowercase
-            if (t.type == Trigger.Type.KEY) t.string = t.string.toLowerCase(Locale.ROOT);
-        }
+        triggers.removeIf(t -> {
+            t.validate();
+            return t.string.isBlank();
+        });
 
-        // Remove all blank response messages, and disable if none remain
-        responseMessages.removeIf(responseMessage -> responseMessage.string.isBlank());
-        if (responseMessages.isEmpty()) responseEnabled = false;
+        exclusionTriggers.removeIf(t -> {
+            t.validate();
+            return t.string.isBlank();
+        });
+
+        responseMessages.removeIf(m -> {
+            m.validate();
+            return m.string.isBlank();
+        });
+
+        return this;
     }
 
     // Deserialization
@@ -367,92 +367,52 @@ public class Notification {
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
-            
-            String f = "enabled";
-            boolean enabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : enabledDefault;
+            boolean silent = version != VERSION;
 
-            f = "exclusionEnabled";
-            boolean exclusionEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : exclusionEnabledDefault;
+            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
+                    enabledDefault, silent);
 
-            f = "checkOwnMode";
-            CheckOwnMode checkOwnMode = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? Arrays.stream(CheckOwnMode.values()).map(Enum::name).toList().contains(obj.get(f).getAsString())
-                        ? CheckOwnMode.valueOf(obj.get(f).getAsString())
-                        : CheckOwnMode.values()[0]
-                    : CheckOwnMode.values()[0];
+            boolean exclusionEnabled = JsonUtil.getOrDefault(obj, "exclusionEnabled",
+                    exclusionEnabledDefault, silent);
 
-            f = "responseEnabled";
-            boolean responseEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : responseEnabledDefault;
+            CheckOwnMode checkOwnMode = JsonUtil.getOrDefault(obj, "checkOwnMode",
+                    CheckOwnMode.class, CheckOwnMode.values()[0], silent);
 
-            f = "sound";
-            Sound sound = obj.has(f) && obj.get(f).isJsonObject()
-                    ? ctx.deserialize(obj.get(f), Sound.class)
-                    : soundDefault.get();
+            boolean responseEnabled = JsonUtil.getOrDefault(obj, "responseEnabled",
+                    responseEnabledDefault, silent);
 
-            f = "textStyle";
-            TextStyle textStyle = obj.has(f) && obj.get(f).isJsonObject()
-                    ? ctx.deserialize(obj.get(f), TextStyle.class)
-                    : textStyleDefault.get();
+            Sound sound = JsonUtil.getOrDefault(ctx, obj, "sound",
+                    Sound.class, soundDefault.get(), silent);
 
-            f = "replacementMsg";
-            String replacementMsg = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? obj.get(f).getAsString()
-                    : replacementMsgDefault;
+            TextStyle textStyle = JsonUtil.getOrDefault(ctx, obj, "textStyle",
+                    TextStyle.class, textStyleDefault.get(), silent);
 
-            f = "replacementMsgEnabled";
-            boolean replacementMsgEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : replacementMsgEnabledDefault;
+            String replacementMsg = JsonUtil.getOrDefault(obj, "replacementMsg",
+                    replacementMsgDefault, silent);
 
-            f = "statusBarMsg";
-            String statusBarMsg = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? obj.get(f).getAsString()
-                    : statusBarMsgDefault;
+            boolean replacementMsgEnabled = JsonUtil.getOrDefault(obj, "replacementMsgEnabled",
+                    replacementMsgEnabledDefault, silent);
 
-            f = "statusBarMsgEnabled";
-            boolean statusBarMsgEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : statusBarMsgEnabledDefault;
+            String statusBarMsg = JsonUtil.getOrDefault(obj, "statusBarMsg",
+                    statusBarMsgDefault, silent);
 
-            f = "titleMsg";
-            String titleMsg = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isString()
-                    ? obj.get(f).getAsString()
-                    : titleMsgDefault;
+            boolean statusBarMsgEnabled = JsonUtil.getOrDefault(obj, "statusBarMsgEnabled",
+                    statusBarMsgEnabledDefault, silent);
 
-            f = "titleMsgEnabled";
-            boolean titleMsgEnabled = obj.has(f) && obj.get(f).isJsonPrimitive() && obj.get(f).getAsJsonPrimitive().isBoolean()
-                    ? obj.get(f).getAsBoolean()
-                    : titleMsgEnabledDefault;
+            String titleMsg = JsonUtil.getOrDefault(obj, "titleMsg",
+                    titleMsgDefault, silent);
 
-            f = "triggers";
-            List<Trigger> triggers = obj.has(f) && obj.get(f).isJsonArray()
-                    ? obj.getAsJsonArray(f).asList().stream()
-                        .filter(JsonElement::isJsonObject)
-                        .map((je) -> (Trigger)ctx.deserialize(je, Trigger.class)).toList()
-                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
-                    : triggersDefault.get();
+            boolean titleMsgEnabled = JsonUtil.getOrDefault(obj, "titleMsgEnabled",
+                    titleMsgEnabledDefault, silent);
 
-            f = "exclusionTriggers";
-            List<Trigger> exclusionTriggers = obj.has(f) && obj.get(f).isJsonArray()
-                    ? obj.getAsJsonArray(f).asList().stream()
-                        .filter(JsonElement::isJsonObject)
-                        .map((je) -> (Trigger)ctx.deserialize(je, Trigger.class)).toList()
-                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
-                    : exclusionTriggersDefault.get();
+            List<Trigger> triggers = JsonUtil.getOrDefault(ctx, obj, "triggers",
+                    Trigger.class, triggersDefault.get(), silent);
 
-            f = "responseMessages";
-            List<ResponseMessage> responseMessages = obj.has(f) && obj.get(f).isJsonArray()
-                    ? obj.getAsJsonArray(f).asList().stream()
-                        .filter(JsonElement::isJsonObject)
-                        .map((je) -> (ResponseMessage)ctx.deserialize(je, ResponseMessage.class)).toList()
-                        .stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new))
-                    : responseMessagesDefault.get();
+            List<Trigger> exclusionTriggers = JsonUtil.getOrDefault(ctx, obj, "exclusionTriggers",
+                    Trigger.class, exclusionTriggersDefault.get(), silent);
+
+            List<ResponseMessage> responseMessages = JsonUtil.getOrDefault(ctx, obj, "responseMessages",
+                    ResponseMessage.class, responseMessagesDefault.get(), silent);
             if (version <= 3) {
                 int totalDelay = 0;
                 for (ResponseMessage resMsg : responseMessages) {
@@ -477,7 +437,7 @@ public class Notification {
                     triggers,
                     exclusionTriggers,
                     responseMessages
-            );
+            ).validate();
         }
     }
 }
