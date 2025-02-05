@@ -237,6 +237,6 @@
   "option.chatnotify.trigger.recent_messages.none": "[Сообщения в чате не найдены]",
   "option.chatnotify.trigger.restyle": "Переоформление",
   "option.chatnotify.trigger.text.placeholder": "Нажмите на сообщение из списка ниже",
-  "toast.chatnotify.reset.message": "Backup saved to %s",
-  "toast.chatnotify.reset.title": "ChatNotify Options Reset - Load Error"
+  "toast.chatnotify.reset.message": "Резервная копия сохранена в %s",
+  "toast.chatnotify.reset.title": "Сброс настроек ChatNotify - ошибка загрузки"
 }
