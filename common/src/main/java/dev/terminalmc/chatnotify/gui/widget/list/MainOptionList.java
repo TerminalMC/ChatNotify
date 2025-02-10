@@ -104,7 +104,7 @@ public class MainOptionList extends DragReorderList {
                 }
             }
         }
-        clampScrollAmount();
+        refreshScrollAmount();
     }
     
     // Sub-screen opening

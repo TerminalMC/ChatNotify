@@ -117,7 +117,7 @@ public class NotifOptionList extends DragReorderList {
                 }
             }
         }
-        clampScrollAmount();
+        refreshScrollAmount();
     }
     
     // Sub-screen opening
