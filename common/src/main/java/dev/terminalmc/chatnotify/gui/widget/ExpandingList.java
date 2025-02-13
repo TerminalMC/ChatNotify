@@ -16,6 +16,7 @@
 
 package dev.terminalmc.chatnotify.gui.widget;
 
+import dev.terminalmc.chatnotify.mixin.accessor.AbstractWidgetAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
@@ -59,8 +60,8 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
      *                the list widget.
      */
     public ExpandingList(int x, int y, int width, int maxHeight, int itemHeight, int entryHeight, int xMargin) {
-        super(Minecraft.getInstance(), width, 0, y, itemHeight);
-        super.setX(x);
+        super(Minecraft.getInstance(), width, 0, y, y + maxHeight, itemHeight);
+        super.x0 = x;
         this.maxHeight = maxHeight;
         this.entryWidth = width - SCROLLBAR_WIDTH - (xMargin * 2);
         this.entryHeight = entryHeight;
@@ -97,7 +98,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     public void replaceWidgets(Iterable<AbstractWidget> widgets) {
         clearWidgets();
         widgets.forEach(this::addWidget);
-        setHeight(Math.min(itemHeight * children().size() + VERTICAL_BUFFER, maxHeight));
+        height = Math.min(itemHeight * children().size() + VERTICAL_BUFFER, maxHeight);
     }
 
     /**
@@ -105,7 +106,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
      */
     public void clearWidgets() {
         children().clear();
-        setHeight(0);
+        height = 0;
     }
 
     /**
@@ -114,7 +115,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
      */
     public void addWidget(AbstractWidget widget) {
         addEntry(new Entry(entryX, entryWidth, entryHeight, widget));
-        setHeight(Math.min(itemHeight * children().size() + VERTICAL_BUFFER, maxHeight));
+        height = Math.min(itemHeight * children().size() + VERTICAL_BUFFER, maxHeight);
     }
 
     @Override
@@ -135,7 +136,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
 
     @Override
     protected int getScrollbarPosition() {
-        return getX() + width - SCROLLBAR_WIDTH;
+        return x1 - SCROLLBAR_WIDTH;
     }
 
     public static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
@@ -149,7 +150,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
             widget.setX(x);
             widget.setY(0);
             widget.setWidth(width);
-            widget.setHeight(height);
+            ((AbstractWidgetAccessor)widget).setHeight(height);
             this.widget = widget;
         }
 

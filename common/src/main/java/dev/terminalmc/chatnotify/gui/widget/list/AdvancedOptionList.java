@@ -32,8 +32,8 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,9 +51,9 @@ public class AdvancedOptionList extends DragReorderList {
     private OptionList.Entry.ActionButton addExclTrigEntry;
     private OptionList.Entry.ActionButton addRespMsgEntry;
 
-    public AdvancedOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public AdvancedOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                               int entryHeight, int entrySpacing, Notification notif) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {},
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing, () -> {},
                 new HashMap<>(Map.of(
                         Entry.ExclusionOptions.class, notif::moveExclusionTrigger,
                         Entry.ResponseOptions.class, notif::moveResponseMessage
@@ -94,7 +94,7 @@ public class AdvancedOptionList extends DragReorderList {
                 () -> notif.replacementMsg, (str) -> notif.replacementMsg = str,
                 () -> notif.replacementMsgEnabled, (val) -> notif.replacementMsgEnabled = val,
                 localized("option", "advanced.msg.replacement")
-                        .withColor(TextField.TEXT_COLOR_HINT),
+                        .withStyle(Style.EMPTY.withColor(TextField.TEXT_COLOR_HINT)),
                 localized("option", "advanced.msg.replacement").append(".\n")
                         .append(localized("option", "advanced.msg.replacement.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_hide"))));
@@ -102,7 +102,7 @@ public class AdvancedOptionList extends DragReorderList {
                 () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
                 () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
                 localized("option", "advanced.msg.status_bar")
-                        .withColor(TextField.TEXT_COLOR_HINT),
+                        .withStyle(Style.EMPTY.withColor(TextField.TEXT_COLOR_HINT)),
                 localized("option", "advanced.msg.status_bar").append(".\n")
                         .append(localized("option", "advanced.msg.status_bar.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
@@ -110,7 +110,7 @@ public class AdvancedOptionList extends DragReorderList {
                 () -> notif.titleMsg, (str) -> notif.titleMsg = str,
                 () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
                 localized("option", "advanced.msg.title")
-                        .withColor(TextField.TEXT_COLOR_HINT),
+                        .withStyle(Style.EMPTY.withColor(TextField.TEXT_COLOR_HINT)),
                 localized("option", "advanced.msg.title").append(".\n")
                         .append(localized("option", "advanced.msg.title.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
@@ -294,7 +294,7 @@ public class AdvancedOptionList extends DragReorderList {
                                     trigger.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
 
@@ -306,7 +306,7 @@ public class AdvancedOptionList extends DragReorderList {
                 triggerField.setValue(trigger.string);
                 triggerField.setTooltip(Tooltip.create(localized(
                         "option", "trigger.field.tooltip")));
-                triggerField.setTooltipDelay(Duration.ofMillis(500));
+                triggerField.setTooltipDelay(500);
                 elements.add(triggerField);
 
                 // Delete button
@@ -370,7 +370,7 @@ public class AdvancedOptionList extends DragReorderList {
                                     response.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
 
@@ -382,7 +382,7 @@ public class AdvancedOptionList extends DragReorderList {
                                 int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
-                                int wY = list.getY();
+                                int wY = list.y0;
                                 list.screen.setOverlay(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> response.string.matches(".+-.+") ? response.string.split("-")[0] : "", 
@@ -394,7 +394,7 @@ public class AdvancedOptionList extends DragReorderList {
                             });
                     MutableComponent label1 = localized(
                             "option", "advanced.response.commandkeys.limit_key");
-                    keyField1.setHint(label1.copy().withColor(0x555555));
+                    keyField1.setHint(label1.copy().withStyle(Style.EMPTY.withColor(0x555555)));
                     keyField1.setTooltip(Tooltip.create(label1.append("\n\n").append(localized(
                             "option", "advanced.response.commandkeys.limit_key.tooltip"))));
                     keyField1.setMaxLength(240);
@@ -407,7 +407,7 @@ public class AdvancedOptionList extends DragReorderList {
                                 int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
-                                int wY = list.getY();
+                                int wY = list.y0;
                                 list.screen.setOverlay(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> response.string.matches(".+-.+") ? response.string.split("-")[1] : "",
@@ -419,7 +419,7 @@ public class AdvancedOptionList extends DragReorderList {
                             });
                     MutableComponent label2 = localized(
                             "option", "advanced.response.commandkeys.key");
-                    keyField2.setHint(label2.copy().withColor(0x555555));
+                    keyField2.setHint(label2.copy().withStyle(Style.EMPTY.withColor(0x555555)));
                     keyField2.setTooltip(Tooltip.create(label2.append("\n\n").append(localized(
                             "option", "advanced.response.commandkeys.key.tooltip"))));
                     keyField2.setMaxLength(240);
@@ -442,7 +442,7 @@ public class AdvancedOptionList extends DragReorderList {
                 timeField.posIntValidator().strict();
                 timeField.setTooltip(Tooltip.create(localized(
                         "option", "advanced.response.time.tooltip")));
-                timeField.setTooltipDelay(Duration.ofMillis(500));
+                timeField.setTooltipDelay(500);
                 timeField.setMaxLength(5);
                 timeField.setResponder((str) -> response.delayTicks = Integer.parseInt(str.strip()));
                 timeField.setValue(String.valueOf(response.delayTicks));

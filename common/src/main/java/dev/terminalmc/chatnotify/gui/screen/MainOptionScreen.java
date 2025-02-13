@@ -39,6 +39,7 @@ public class MainOptionScreen extends OptionScreen {
                         0,
                         0,
                         OptionScreen.HEADER_MARGIN,
+                        OptionScreen.HEADER_MARGIN,
                         OptionScreen.BASE_LIST_ENTRY_WIDTH,
                         OptionScreen.LIST_ENTRY_HEIGHT,
                         OptionScreen.LIST_ENTRY_SPACING

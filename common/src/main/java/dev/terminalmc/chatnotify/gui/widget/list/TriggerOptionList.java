@@ -23,6 +23,7 @@ import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.mixin.accessor.AbstractWidgetAccessor;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.MessageUtil;
 import dev.terminalmc.chatnotify.util.StyleUtil;
@@ -34,7 +35,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -60,13 +60,17 @@ public class TriggerOptionList extends OptionList {
     private TextField keyDisplayField;
     private String displayKey = "";
     
-    public TriggerOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public TriggerOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                              int entryHeight, int entrySpacing, Runnable onClose, Trigger trigger,
                              TextStyle textStyle) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, onClose);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing, onClose);
         this.trigger = trigger;
         this.textStyle = textStyle;
-        this.recentChat = ChatNotify.unmodifiedChat.stream().toList().reversed();
+        List<Component> recentChatReversed = ChatNotify.unmodifiedChat.stream().toList();
+        this.recentChat = new ArrayList<>();
+        for (int i = recentChatReversed.size() - 1; i >= 0; i--) {
+            this.recentChat.add(recentChatReversed.get(i));
+        }
     }
 
     @Override
@@ -171,7 +175,7 @@ public class TriggerOptionList extends OptionList {
         });
         
         // If no message entries, add note
-        if (!(children().getLast() instanceof Entry.MessageEntry)) {
+        if (!(children().get(children().size() - 1) instanceof Entry.MessageEntry)) {
             addEntry(new OptionList.Entry.Text(dynWideEntryX, dynWideEntryWidth, entryHeight,
                     localized("option", "trigger.recent_messages.none"), null, -1));
         }
@@ -181,7 +185,7 @@ public class TriggerOptionList extends OptionList {
 
     private void openKeyConfig() {
         minecraft.setScreen(new OptionScreen(minecraft.screen, localized("option", "key"),
-                new KeyOptionList(minecraft, width, height, getY(), entryWidth, entryHeight,
+                new KeyOptionList(minecraft, width, height, y0, y1, entryWidth, entryHeight,
                         () -> {}, trigger)));
     }
 
@@ -211,7 +215,7 @@ public class TriggerOptionList extends OptionList {
                                     trigger.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -224,7 +228,7 @@ public class TriggerOptionList extends OptionList {
                             .build();
                     keySelectButton.setTooltip(Tooltip.create(localized(
                             "option", "trigger.open.key_selector.tooltip")));
-                    keySelectButton.setTooltipDelay(Duration.ofMillis(500));
+                    keySelectButton.setTooltipDelay(500);
                     elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -247,7 +251,7 @@ public class TriggerOptionList extends OptionList {
                 triggerField.setValue(trigger.string);
                 triggerField.setTooltip(Tooltip.create(localized(
                         "option", "trigger.field.tooltip")));
-                triggerField.setTooltipDelay(Duration.ofMillis(500));
+                triggerField.setTooltipDelay(500);
                 elements.add(triggerField);
                 movingX += triggerFieldWidth;
 
@@ -263,7 +267,7 @@ public class TriggerOptionList extends OptionList {
                 if (!trigger.styleTarget.enabled) {
                     styleButton.setTooltip(Tooltip.create(localized(
                             "option", "trigger.style_target.add.tooltip")));
-                    styleButton.setTooltipDelay(Duration.ofMillis(500));
+                    styleButton.setTooltipDelay(500);
                 } else {
                     styleButton.active = false;
                 }
@@ -284,7 +288,7 @@ public class TriggerOptionList extends OptionList {
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option", "trigger.style_target.tooltip")));
-                infoIcon.setTooltipDelay(Duration.ofMillis(500));
+                infoIcon.setTooltipDelay(500);
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
 
@@ -301,7 +305,7 @@ public class TriggerOptionList extends OptionList {
                                     styleTarget.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -319,7 +323,7 @@ public class TriggerOptionList extends OptionList {
                 });
                 stringField.setTooltip(Tooltip.create(localized(
                         "option", "trigger.style_target.field.tooltip")));
-                stringField.setTooltipDelay(Duration.ofMillis(500));
+                stringField.setTooltipDelay(500);
                 elements.add(stringField);
                 movingX = x + width - list.tinyWidgetWidth;
 
@@ -402,7 +406,7 @@ public class TriggerOptionList extends OptionList {
                 elements.add(labelButton);
 
                 widget.setWidth(fieldWidth);
-                widget.setHeight(height);
+                ((AbstractWidgetAccessor)widget).setHeight(height);
                 widget.setX(x + width - fieldWidth);
                 elements.add(widget);
             }

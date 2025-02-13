@@ -27,7 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
+import net.minecraft.client.gui.screens.SoundOptionsScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.CommonComponents;
@@ -114,9 +114,9 @@ public class SoundOptionList extends OptionList {
     private final Sound sound;
     private @Nullable SoundInstance lastSound;
 
-    public SoundOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public SoundOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                            int entryHeight, Runnable onClose, Sound sound) {
-        super(mc, width, height, y, entryWidth, entryHeight, 1, onClose);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, 1, onClose);
         this.sound = sound;
     }
 
@@ -209,7 +209,7 @@ public class SoundOptionList extends OptionList {
                             int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                             int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                             int wX = x + (width / 2) - (wWidth / 2);
-                            int wY = list.getY();
+                            int wY = list.y0;
                             list.screen.setOverlay(new DropdownTextField(
                                     wX, wY, wWidth, wHeight, Component.empty(),
                                     sound::getId, sound::setId,

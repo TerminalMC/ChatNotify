@@ -220,11 +220,11 @@ public class Config {
 
     public Notification getUserNotif() {
         validateUserNotif();
-        return notifications.getFirst();
+        return notifications.get(0);
     }
 
     public void setProfileName(String name) {
-        getUserNotif().triggers.getFirst().string = name;
+        getUserNotif().triggers.get(0).string = name;
     }
 
     public void setDisplayName(String name) {
@@ -398,7 +398,7 @@ public class Config {
         notifications.removeIf((n) -> {
             n.validate();
             return (
-                    n != notifications.getFirst()
+                    n != notifications.get(0)
                     && n.triggers.isEmpty()
                     && n.exclusionTriggers.isEmpty()
                     && n.responseMessages.isEmpty()
@@ -416,7 +416,7 @@ public class Config {
         if (notifications.isEmpty()) {
             ChatNotify.LOG.error("Username notification does not exist! Creating...");
             notifications.add(Notification.createUser());
-        } else if (notifications.getFirst().triggers.size() < 2) {
+        } else if (notifications.get(0).triggers.size() < 2) {
             ChatNotify.LOG.error("Username notification missing triggers! Recreating...");
             notifications.set(0, Notification.createUser());
         }
