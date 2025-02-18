@@ -34,7 +34,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
@@ -411,8 +411,8 @@ public class MainOptionList extends DragReorderList {
                             int color = textColor.getValue();
                             notif.textStyle.color = color;
                             float[] hsv = new float[3];
-                            Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
-                                    FastColor.ARGB32.blue(color), hsv);
+                            Color.RGBtoHSB(ARGB.red(color), ARGB.green(color),
+                                    ARGB.blue(color), hsv);
                             if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFF);
                             else colorField.setTextColor(color);
                             // Update status button color
