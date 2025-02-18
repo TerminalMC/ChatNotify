@@ -17,19 +17,25 @@
 package dev.terminalmc.chatnotify.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.mixin.accessor.ScreenAccessor;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.options.OptionsSubScreen;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains one tightly-coupled {@link OptionList}, which is used to display
@@ -47,7 +53,7 @@ public class OptionScreen extends OptionsSubScreen {
      * reduce the GUI scale. Thus, if the option list width does not exceed this
      * value, the widths of entry elements can be safely hardcoded.
      */
-    public static final int BASE_ROW_WIDTH = Window.BASE_WIDTH;
+    public static final int BASE_ROW_WIDTH = 320;
     /**
      * Space on either side of list entries for the scrollbar.
      */
@@ -82,6 +88,11 @@ public class OptionScreen extends OptionsSubScreen {
     
     protected final OptionList list;
     private OverlayWidget overlay = null;
+    
+    boolean childrenHidden;
+    private final List<GuiEventListener> childrenAlt = new ArrayList<>();
+    private final List<Renderable> renderablesAlt = new ArrayList<>();
+    private final List<NarratableEntry> narratablesAlt = new ArrayList<>();
 
     /**
      * The {@link OptionList} passed here is not required to have the correct 
@@ -99,8 +110,8 @@ public class OptionScreen extends OptionsSubScreen {
         clearFocus();
         
         addTitle();
-        addContents();
         addFooter();
+        addContents();
         
         setInitialFocus();
     }
@@ -111,8 +122,7 @@ public class OptionScreen extends OptionsSubScreen {
         this.height = height;
         init();
     }
-
-    @Override
+    
     protected void addTitle() {
         Font font = Minecraft.getInstance().font;
         int w = font.width(title);
@@ -124,11 +134,10 @@ public class OptionScreen extends OptionsSubScreen {
         );
         addRenderableWidget(new StringWidget(x, y , w, h, title, font).alignLeft());
     }
-
-    @Override
+    
     protected void addContents() {
         // Option list
-        list.updateSizeAndPosition(width, height - HEADER_MARGIN - FOOTER_MARGIN, HEADER_MARGIN);
+        list.updateSize(width, height - HEADER_MARGIN - FOOTER_MARGIN, HEADER_MARGIN, height - FOOTER_MARGIN);
         addRenderableWidget(list);
         
         // Overlay widget
@@ -137,8 +146,7 @@ public class OptionScreen extends OptionsSubScreen {
             setOverlay(overlay);
         }
     }
-
-    @Override
+    
     protected void addFooter() {
         int w = BASE_LIST_ENTRY_WIDTH;
         int h = LIST_ENTRY_HEIGHT;
@@ -153,10 +161,21 @@ public class OptionScreen extends OptionsSubScreen {
                 .build());
     }
 
-    @Override
-    protected void addOptions() {
-        // Called only by OptionsSubScreen#addContents(), which we override so
-        // this method is not used.
+    protected void clearFocus() {
+        ComponentPath path = this.getCurrentFocusPath();
+        if (path != null) {
+            path.applyFocus(false);
+        }
+    }
+    
+    protected void setInitialFocus() {
+        if (minecraft.getLastInputType().isKeyboard()) {
+            FocusNavigationEvent.TabNavigation nav = new FocusNavigationEvent.TabNavigation(true);
+            ComponentPath path = super.nextFocusPath(nav);
+            if (path != null) {
+                changeFocus(path);
+            }
+        }
     }
 
     @Override
@@ -168,15 +187,19 @@ public class OptionScreen extends OptionsSubScreen {
         super.onClose();
     }
 
+    @Override
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        renderDirtBackground(graphics);
+        super.render(graphics, mouseX, mouseY, delta);
+    }
+
     // Overlay widget handling
     
     public void setOverlay(OverlayWidget widget) {
         removeOverlayWidget();
         overlay = widget;
         setChildrenVisible(false);
-        ((ScreenAccessor)this).getChildren().addFirst(widget);
-        ((ScreenAccessor)this).getNarratables().addFirst(widget);
-        ((ScreenAccessor)this).getRenderables().addLast(widget);
+        addRenderableWidget(overlay);
     }
 
     public void removeOverlayWidget() {
@@ -188,10 +211,20 @@ public class OptionScreen extends OptionsSubScreen {
     }
 
     private void setChildrenVisible(boolean visible) {
-        for (GuiEventListener listener : children()) {
-            if (listener instanceof AbstractWidget widget) {
-                widget.visible = visible;
-            }
+        if (visible && childrenHidden) {
+            childrenHidden = false;
+            ((ScreenAccessor)this).getChildren().addAll(childrenAlt);
+            ((ScreenAccessor)this).getRenderables().addAll(renderablesAlt);
+            ((ScreenAccessor)this).getNarratables().addAll(narratablesAlt);
+        } else if (!visible && !childrenHidden) {
+            childrenHidden = true;
+            childrenAlt.clear();
+            renderablesAlt.clear();
+            narratablesAlt.clear();
+            childrenAlt.addAll(((ScreenAccessor)this).getChildren());
+            renderablesAlt.addAll(((ScreenAccessor)this).getRenderables());
+            narratablesAlt.addAll(((ScreenAccessor)this).getNarratables());
+            clearWidgets();
         }
     }
 

@@ -73,7 +73,6 @@ public class MixinChatComponent {
                     || tag.equals(GuiMessageTag.system())
                     || tag.equals(GuiMessageTag.systemSinglePlayer())
                     || tag.equals(GuiMessageTag.chatNotSecure())
-                    || tag.equals(GuiMessageTag.chatError())
             );
             case HUD -> true;
             case PACKET -> false;

@@ -20,7 +20,6 @@ import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
-import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
@@ -31,7 +30,6 @@ import net.minecraft.util.FastColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -50,9 +48,9 @@ public class NotifOptionList extends DragReorderList {
     private @Nullable Pattern filterPattern = null;
     private OptionList.Entry.ActionButton addTriggerEntry;
 
-    public NotifOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public NotifOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                            int entryHeight, int entrySpacing, Notification notif) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, 
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing, 
                 () -> notif.editing = false, new HashMap<>(Map.of(
                         Entry.TriggerOptions.class, (source, dest) ->
                                 moveTrigger(notif, source, dest))));
@@ -117,32 +115,32 @@ public class NotifOptionList extends DragReorderList {
                 }
             }
         }
-        clampScrollAmount();
+        setScrollAmount(getScrollAmount());
     }
     
     // Sub-screen opening
 
     private void openTriggerConfig(Trigger trigger) {
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "trigger"),
-                new TriggerOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new TriggerOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         entrySpacing, () -> {}, trigger, notif.textStyle)));
     }
 
     private void openKeyConfig(Trigger trigger) {
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "key"),
-                new KeyOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new KeyOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         () -> {}, trigger)));
     }
 
     private void openSoundConfig() {
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "sound"),
-                new SoundOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new SoundOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         () -> {}, notif.sound)));
     }
 
     private void openAdvancedConfig() {
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "advanced"),
-                new AdvancedOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new AdvancedOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         entrySpacing, notif)));
     }
     
@@ -177,7 +175,7 @@ public class NotifOptionList extends DragReorderList {
                         searchFieldWidth, height);
                 searchField.setMaxLength(64);
                 searchField.setHint(localized("option", "notif.triggers.search.hint")
-                        .withColor(TextField.TEXT_COLOR_HINT));
+                        .withStyle(Style.EMPTY.withColor(TextField.TEXT_COLOR_HINT)));
                 searchField.setValue(list.filterString);
                 searchField.setResponder((str) -> {
                     list.filterString = str;
@@ -201,7 +199,7 @@ public class NotifOptionList extends DragReorderList {
                 displayField.setTooltip(Tooltip.create(first
                         ? localized("option", "notif.trigger.special.profile_name.tooltip")
                         : localized("option", "notif.trigger.special.display_name.tooltip")));
-                displayField.setTooltipDelay(Duration.ofMillis(500));
+                displayField.setTooltipDelay(500);
                 displayField.setEditable(false);
                 displayField.active = false;
                 elements.add(displayField);
@@ -252,7 +250,7 @@ public class NotifOptionList extends DragReorderList {
                                     trigger.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -265,7 +263,7 @@ public class NotifOptionList extends DragReorderList {
                             .build();
                     keySelectButton.setTooltip(Tooltip.create(localized(
                             "option", "trigger.open.key_selector.tooltip")));
-                    keySelectButton.setTooltipDelay(Duration.ofMillis(500));
+                    keySelectButton.setTooltipDelay(500);
                     elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -280,7 +278,7 @@ public class NotifOptionList extends DragReorderList {
                 triggerField.setValue(trigger.string);
                 triggerField.setTooltip(Tooltip.create(localized(
                         "option", "trigger.field.tooltip")));
-                triggerField.setTooltipDelay(Duration.ofMillis(500));
+                triggerField.setTooltipDelay(500);
                 elements.add(triggerField);
                 movingX += triggerFieldWidth;
                 
@@ -292,7 +290,7 @@ public class NotifOptionList extends DragReorderList {
                         .build();
                 editorButton.setTooltip(Tooltip.create(localized(
                         "option", "notif.open.trigger_editor.tooltip")));
-                editorButton.setTooltipDelay(Duration.ofMillis(500));
+                editorButton.setTooltipDelay(500);
                 elements.add(editorButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -308,7 +306,7 @@ public class NotifOptionList extends DragReorderList {
                 if (!trigger.styleTarget.enabled) {
                     styleButton.setTooltip(Tooltip.create(localized(
                             "option", "trigger.style_target.add.tooltip")));
-                    styleButton.setTooltipDelay(Duration.ofMillis(500));
+                    styleButton.setTooltipDelay(500);
                 } else {
                     styleButton.active = false;
                 }
@@ -340,7 +338,7 @@ public class NotifOptionList extends DragReorderList {
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option", "trigger.style_target.tooltip")));
-                infoIcon.setTooltipDelay(Duration.ofMillis(500));
+                infoIcon.setTooltipDelay(500);
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
 
@@ -357,7 +355,7 @@ public class NotifOptionList extends DragReorderList {
                                     styleTarget.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -369,7 +367,7 @@ public class NotifOptionList extends DragReorderList {
                 stringField.setResponder((string) -> styleTarget.string = string.strip());
                 stringField.setTooltip(Tooltip.create(localized(
                         "option", "trigger.style_target.field.tooltip")));
-                stringField.setTooltipDelay(Duration.ofMillis(500));
+                stringField.setTooltipDelay(500);
                 elements.add(stringField);
                 movingX = x + width - list.tinyWidgetWidth;
 
@@ -431,7 +429,7 @@ public class NotifOptionList extends DragReorderList {
                                 .create(x, 0, buttonWidth, height, 
                                         localized("option", "notif.format.bold"), 
                                         (button, state) -> notif.textStyle.bold = state);
-                boldButton.setTooltipDelay(Duration.ofMillis(500));
+                boldButton.setTooltipDelay(500);
                 elements.add(boldButton);
 
                 CycleButton<TextStyle.FormatMode> italicButton = 
@@ -443,7 +441,7 @@ public class NotifOptionList extends DragReorderList {
                                 .create(x + width / 2 - buttonWidth / 2, 0, buttonWidth, height,
                                         localized("option", "notif.format.italic"),
                                         (button, state) -> notif.textStyle.italic = state);
-                italicButton.setTooltipDelay(Duration.ofMillis(500));
+                italicButton.setTooltipDelay(500);
                 elements.add(italicButton);
 
                 CycleButton<TextStyle.FormatMode> underlineButton = 
@@ -455,7 +453,7 @@ public class NotifOptionList extends DragReorderList {
                                 .create(x + width - buttonWidth, 0, buttonWidth, height,
                                         localized("option", "notif.format.underline"),
                                         (button, state) -> notif.textStyle.underlined = state);
-                underlineButton.setTooltipDelay(Duration.ofMillis(500));
+                underlineButton.setTooltipDelay(500);
                 elements.add(underlineButton);
             }
 
@@ -472,7 +470,7 @@ public class NotifOptionList extends DragReorderList {
                                 .create(x, 0, buttonWidth, height,
                                         localized("option", "notif.format.strikethrough"),
                                         (button, state) -> notif.textStyle.strikethrough = state);
-                strikethroughButton.setTooltipDelay(Duration.ofMillis(500));
+                strikethroughButton.setTooltipDelay(500);
                 elements.add(strikethroughButton);
 
                 CycleButton<TextStyle.FormatMode> obfuscateButton = 
@@ -484,7 +482,7 @@ public class NotifOptionList extends DragReorderList {
                                 .create(x + width - buttonWidth, 0, buttonWidth, height,
                                         localized("option", "notif.format.obfuscate"),
                                         (button, state) -> notif.textStyle.obfuscated = state);
-                obfuscateButton.setTooltipDelay(Duration.ofMillis(500));
+                obfuscateButton.setTooltipDelay(500);
                 elements.add(obfuscateButton);
             }
 
@@ -523,7 +521,7 @@ public class NotifOptionList extends DragReorderList {
                 if (showStatusButton) mainButtonWidth -= (statusButtonWidth + SPACE);
 
                 // Color GUI button
-                Button mainButton = Button.builder(text.withColor(supplier.get()),
+                Button mainButton = Button.builder(text.withStyle(Style.EMPTY.withColor(supplier.get())),
                                 (button) -> {
                                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                                     int cpWidth = HsvColorPicker.MIN_WIDTH;
@@ -548,12 +546,12 @@ public class NotifOptionList extends DragReorderList {
                 colorField.hexColorValidator().strict();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
-                    TextColor textColor = ColorUtil.parseColor(val);
+                    TextColor textColor = TextColor.parseColor(val);
                     if (textColor != null) {
                         int color = textColor.getValue();
                         consumer.accept(color);
                         // Update color of main button and field
-                        mainButton.setMessage(mainButton.getMessage().copy().withColor(color));
+                        mainButton.setMessage(mainButton.getMessage().copy().withStyle(Style.EMPTY.withColor(color)));
                         float[] hsv = new float[3];
                         Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
                                 FastColor.ARGB32.blue(color), hsv);

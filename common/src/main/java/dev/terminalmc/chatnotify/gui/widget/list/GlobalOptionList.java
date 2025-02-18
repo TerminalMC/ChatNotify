@@ -20,12 +20,11 @@ import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
-import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
+import net.minecraft.client.gui.screens.SoundOptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -40,9 +39,9 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * Contains global configuration options.
  */
 public class GlobalOptionList extends OptionList {
-    public GlobalOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public GlobalOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                             int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {});
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing, () -> {});
     }
 
     @Override
@@ -75,7 +74,7 @@ public class GlobalOptionList extends OptionList {
 
     private void openSoundConfig() {
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "sound"),
-                new SoundOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new SoundOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         () -> {}, Config.get().defaultSound)));
     }
     
@@ -217,7 +216,7 @@ public class GlobalOptionList extends OptionList {
                 colorField.hexColorValidator().strict();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
-                    TextColor textColor = ColorUtil.parseColor(val);
+                    TextColor textColor = TextColor.parseColor(val);
                     if (textColor != null) {
                         int color = textColor.getValue();
                         Config.get().defaultColor = color;

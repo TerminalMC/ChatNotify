@@ -25,7 +25,6 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.RightClickableButton;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
-import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -39,7 +38,6 @@ import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.time.Duration;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -56,9 +54,9 @@ public class MainOptionList extends DragReorderList {
     private @Nullable Pattern filterPattern = null;
     private OptionList.Entry.ActionButton addNotifEntry;
 
-    public MainOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public MainOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                           int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {}, 
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing, () -> {}, 
                 new HashMap<>(Map.of(Entry.NotifOptions.class, (source, dest) ->
                         Config.get().changeNotifPriority(++source, ++dest))));
         
@@ -104,14 +102,14 @@ public class MainOptionList extends DragReorderList {
                 }
             }
         }
-        clampScrollAmount();
+        setScrollAmount(getScrollAmount());
     }
     
     // Sub-screen opening
 
     private void openGlobalConfig() {
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "global"), 
-                new GlobalOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new GlobalOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         entrySpacing)));
     }
 
@@ -119,7 +117,7 @@ public class MainOptionList extends DragReorderList {
         Notification notif = Config.get().getNotifs().get(index);
         notif.editing = true;
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "notif"),
-                new NotifOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new NotifOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         entrySpacing, notif)));
     }
 
@@ -127,7 +125,7 @@ public class MainOptionList extends DragReorderList {
         notif.editing = true;
         Runnable onClose = () -> notif.editing = false;
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "trigger"),
-                new TriggerOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new TriggerOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         entrySpacing, onClose, trigger, notif.textStyle)));
     }
 
@@ -135,7 +133,7 @@ public class MainOptionList extends DragReorderList {
         notif.editing = true;
         Runnable onClose = () -> notif.editing = false;
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "key"),
-                new KeyOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new KeyOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         onClose, trigger)));
     }
 
@@ -143,7 +141,7 @@ public class MainOptionList extends DragReorderList {
         notif.editing = true;
         Runnable onClose = () -> notif.editing = false;
         mc.setScreen(new OptionScreen(mc.screen, localized("option", "sound"),
-                new SoundOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new SoundOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         onClose, notif.sound)));
     }
 
@@ -167,7 +165,7 @@ public class MainOptionList extends DragReorderList {
                         searchFieldWidth, height);
                 searchField.setMaxLength(64);
                 searchField.setHint(localized("option", "notif.triggers.search.hint")
-                        .withColor(TextField.TEXT_COLOR_HINT));
+                        .withStyle(Style.EMPTY.withColor(TextField.TEXT_COLOR_HINT)));
                 searchField.setValue(list.filterString);
                 searchField.setResponder((str) -> {
                     list.filterString = str;
@@ -190,7 +188,7 @@ public class MainOptionList extends DragReorderList {
                 int SPACING_NARROW = 2;
                 
                 @Nullable Trigger trigger = notif.triggers.size() == 1 
-                        ? notif.triggers.getFirst() : null;
+                        ? notif.triggers.get(0) : null;
                 boolean singleTrig = trigger != null;
                 boolean keyTrig = singleTrig && trigger.type == Trigger.Type.KEY;
                 
@@ -300,7 +298,7 @@ public class MainOptionList extends DragReorderList {
                                         trigger.type = type;
                                         list.init();
                                     });
-                    typeButton.setTooltipDelay(Duration.ofMillis(200));
+                    typeButton.setTooltipDelay((200));
                     elements.add(typeButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -314,7 +312,7 @@ public class MainOptionList extends DragReorderList {
                             .build();
                     keySelectButton.setTooltip(Tooltip.create(localized(
                             "option", "trigger.open.key_selector.tooltip")));
-                    keySelectButton.setTooltipDelay(Duration.ofMillis(200));
+                    keySelectButton.setTooltipDelay((200));
                     elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -331,7 +329,7 @@ public class MainOptionList extends DragReorderList {
                     triggerField.setValue(trigger.string);
                     triggerField.setTooltip(Tooltip.create(localized(
                             "option", "main.trigger.field.tooltip")));
-                    triggerField.setTooltipDelay(Duration.ofMillis(500));
+                    triggerField.setTooltipDelay(500);
                 } else {
                     triggerField = new FakeTextField(movingX, 0,
                             triggerFieldWidth, height, () -> list.openNotificationConfig(index));
@@ -350,7 +348,7 @@ public class MainOptionList extends DragReorderList {
                             .build();
                     editorButton.setTooltip(Tooltip.create(localized(
                             "option", "notif.open.trigger_editor.tooltip")));
-                    editorButton.setTooltipDelay(Duration.ofMillis(200));
+                    editorButton.setTooltipDelay((200));
                     elements.add(editorButton);
                     movingX += list.tinyWidgetWidth + SPACING_NARROW;
                 }
@@ -358,14 +356,14 @@ public class MainOptionList extends DragReorderList {
                 // Options button
 
                 ImageButton editButton = new ImageButton(movingX, 0,
-                        list.smallWidgetWidth, height, OPTION_SPRITES,
+                        list.smallWidgetWidth, height, 0, 0, 20, OPTIONS_ICON, 32, 64,
                         (button) -> {
                             list.openNotificationConfig(index);
                             list.init();
                         });
                 editButton.setTooltip(Tooltip.create(localized(
                         "option", "main.notif.options.tooltip")));
-                editButton.setTooltipDelay(Duration.ofMillis(200));
+                editButton.setTooltipDelay((200));
                 elements.add(editButton);
                 movingX += list.smallWidgetWidth + SPACING_NARROW;
                 
@@ -373,10 +371,10 @@ public class MainOptionList extends DragReorderList {
                 
                 RightClickableButton colorEditButton = new RightClickableButton(
                         movingX, 0, list.tinyWidgetWidth, height,
-                        Component.literal("\uD83C\uDF22").withColor(notif.textStyle.doColor 
+                        Component.literal("\uD83C\uDF22").withStyle(Style.EMPTY.withColor(notif.textStyle.doColor 
                                 ? notif.textStyle.color
                                 : 0xffffff
-                        ), (button) -> {
+                        )), (button) -> {
                             // Open color picker overlay widget
                             int cpHeight = HsvColorPicker.MIN_HEIGHT;
                             int cpWidth = HsvColorPicker.MIN_WIDTH;
@@ -400,13 +398,13 @@ public class MainOptionList extends DragReorderList {
                                 + (notif.textStyle.doColor ? "enabled" : "disabled"))
                         .append("\n")
                         .append(localized("option", "main.click_edit"))));
-                colorEditButton.setTooltipDelay(Duration.ofMillis(200));
+                colorEditButton.setTooltipDelay((200));
                 if (showColorField) {
                     TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
                     colorField.hexColorValidator().strict();
                     colorField.setMaxLength(7);
                     colorField.setResponder((val) -> {
-                        TextColor textColor = ColorUtil.parseColor(val);
+                        TextColor textColor = TextColor.parseColor(val);
                         if (textColor != null) {
                             int color = textColor.getValue();
                             notif.textStyle.color = color;
@@ -417,13 +415,13 @@ public class MainOptionList extends DragReorderList {
                             else colorField.setTextColor(color);
                             // Update status button color
                             colorEditButton.setMessage(
-                                    colorEditButton.getMessage().copy().withColor(color));
+                                    colorEditButton.getMessage().copy().withStyle(Style.EMPTY.withColor(color)));
                         }
                     });
                     colorField.setValue(TextColor.fromRgb(notif.textStyle.color).formatValue());
                     colorField.setTooltip(Tooltip.create(localized(
                             "option", "main.color.field.tooltip")));
-                    colorField.setTooltipDelay(Duration.ofMillis(500));
+                    colorField.setTooltipDelay(500);
                     elements.add(colorField);
                     movingX += colorFieldWidth;
                 }
@@ -441,7 +439,7 @@ public class MainOptionList extends DragReorderList {
                     soundField.setValue(notif.sound.getId());
                     soundField.setTooltip(Tooltip.create(localized(
                             "option", "main.sound.field.tooltip")));
-                    soundField.setTooltipDelay(Duration.ofMillis(500));
+                    soundField.setTooltipDelay(500);
                     elements.add(soundField);
                     movingX += soundFieldWidth;
                 }
@@ -463,7 +461,7 @@ public class MainOptionList extends DragReorderList {
                                 + (notif.sound.isEnabled() ? "enabled" : "disabled"))
                         .append("\n")
                         .append(localized("option", "main.click_edit"))));
-                soundEditButton.setTooltipDelay(Duration.ofMillis(200));
+                soundEditButton.setTooltipDelay((200));
                 elements.add(soundEditButton);
 
                 // On/off button
@@ -504,7 +502,7 @@ public class MainOptionList extends DragReorderList {
                 String plusNumFormat = " [+%d]";
                 Pattern plusNumPattern = Pattern.compile(" \\[\\+\\d+]");
 
-                if (notif.triggers.isEmpty() || notif.triggers.getFirst().string.isBlank()) {
+                if (notif.triggers.isEmpty() || notif.triggers.get(0).string.isBlank()) {
                     label = Component.literal("> ").withStyle(ChatFormatting.YELLOW).append(
                             localized("option", "main.notif.label.configure")
                                     .withStyle(ChatFormatting.WHITE)).append(" <");
@@ -528,11 +526,11 @@ public class MainOptionList extends DragReorderList {
                     // Not the most efficient approach, but simple is nice
                     while(font.width(compileLabel(strList)) > maxWidth) {
                         if (strList.size() == 1 || (strList.size() == 2 
-                                && plusNumPattern.matcher(strList.getLast()).matches())) {
+                                && plusNumPattern.matcher(strList.get(strList.size() - 1)).matches())) {
                             break;
                         }
-                        if (plusNumPattern.matcher(strList.removeLast()).matches()) {
-                            strList.removeLast();
+                        if (plusNumPattern.matcher(strList.remove(strList.size() - 1)).matches()) {
+                            strList.remove(strList.size() - 1);
                         }
                         strList.add(String.format(plusNumFormat, usedStrings.size() - strList.size()));
                     }
@@ -540,14 +538,14 @@ public class MainOptionList extends DragReorderList {
                     // Only one trigger (and possibly a number indicator)
                     // but if the first trigger is too long we trim it
                     while(font.width(compileLabel(strList)) > maxWidth) {
-                        String str = strList.getFirst();
+                        String str = strList.get(0);
                         if (str.length() < 3) break;
                         strList.set(0, str.substring(0, str.length() - 5) + " ...");
                     }
 
                     label = Component.literal(compileLabel(strList));
                     if (notif.textStyle.isEnabled()) {
-                        label.withColor(notif.textStyle.color);
+                        label.withStyle(Style.EMPTY.withColor(notif.textStyle.color));
                     }
                 }
                 return label;

@@ -23,7 +23,7 @@ import dev.terminalmc.chatnotify.config.Trigger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.LiteralContents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,8 +173,8 @@ public class StyleUtil {
         msg.getSiblings().clear();
 
         // Restyle contents
-        if (msg.getContents() instanceof PlainTextContents contents) {
-            if (debug) ChatNotify.LOG.warn("PlainTextContents");
+        if (msg.getContents() instanceof LiteralContents contents) {
+            if (debug) ChatNotify.LOG.warn("LiteralContents");
             String str = contents.text();
             if (index + str.length() >= start && index < end) {
                 // Target string overlaps with current substring, so restyle

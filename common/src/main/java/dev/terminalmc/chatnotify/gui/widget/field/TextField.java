@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.gui.widget.field;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Trigger;
-import dev.terminalmc.chatnotify.util.ColorUtil;
+import dev.terminalmc.chatnotify.mixin.accessor.EditBoxAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -28,6 +28,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -242,14 +243,33 @@ public class TextField extends EditBox {
         return true;
     }
 
+    public void moveCursorTo(int delta, boolean select) {
+        setCursorPosition(delta);
+        if (!select) {
+            setHighlightPos(getCursorPosition());
+        }
+
+        onValueChange(((EditBoxAccessor)this).getValue());
+    }
+
+    public void moveCursorToEnd(boolean select) {
+        this.moveCursorTo(((EditBoxAccessor)this).getValue().length(), select);
+    }
+
+    private void onValueChange(String newText) {
+        if (((EditBoxAccessor)this).getResponder() != null) {
+            ((EditBoxAccessor)this).getResponder().accept(newText);
+        }
+    }
+
     // Undo-redo history
 
     private void updateHistory(String str) {
         if (historyIndex == -1 || !history.get(historyIndex).equals(str)) {
             if (historyIndex < history.size() - 1) {
                 // Remove old history before writing new
-                for (int i = history.size() - 1; i > historyIndex; i--) {
-                    history.removeLast();
+                if (history.size() > historyIndex + 1) {
+                    history.subList(historyIndex + 1, history.size()).clear();
                 }
             }
             history.add(str);
@@ -309,7 +329,7 @@ public class TextField extends EditBox {
         class HexColor implements Validator {
             @Override
             public Optional<Component> validate(String str) {
-                if (ColorUtil.parseColor(str) != null) {
+                if (TextColor.parseColor(str) != null) {
                     return Optional.empty();
                 } else {
                     return Optional.of(localized("option", "field.error.color")

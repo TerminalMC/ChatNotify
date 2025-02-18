@@ -25,8 +25,6 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
-
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class KeyOptionList extends OptionList {
@@ -60,9 +58,9 @@ public class KeyOptionList extends OptionList {
     
     private final Trigger trigger;
 
-    public KeyOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public KeyOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                          int entryHeight, Runnable onClose, Trigger trigger) {
-        super(mc, width, height, y, entryWidth, entryHeight, 1, onClose);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, 1, onClose);
         this.trigger = trigger;
     }
 
@@ -112,7 +110,7 @@ public class KeyOptionList extends OptionList {
                 triggerField.setResponder((str) -> trigger.string = str.strip());
                 triggerField.setTooltip(Tooltip.create(localized(
                         "option", "trigger.field.tooltip")));
-                triggerField.setTooltipDelay(Duration.ofMillis(500));
+                triggerField.setTooltipDelay(500);
                 elements.add(triggerField);
             }
         }
