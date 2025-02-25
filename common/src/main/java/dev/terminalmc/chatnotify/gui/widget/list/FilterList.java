@@ -142,7 +142,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 addEntry(start, entry);
             }
         }
-        clampScrollAmount();
+        refreshScrollAmount();
     }
 
     @FunctionalInterface
