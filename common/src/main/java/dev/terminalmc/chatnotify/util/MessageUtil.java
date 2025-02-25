@@ -417,7 +417,7 @@ public class MessageUtil {
             Component displayMsg = notif.toastMsg.isBlank()
                     ? msg
                     : convertMsg(notif.toastMsg, matcher);
-            Minecraft.getInstance().getToasts().addToast(new NotificationToast(displayMsg));
+            Minecraft.getInstance().getToastManager().addToast(new NotificationToast(displayMsg));
         }
     }
 
