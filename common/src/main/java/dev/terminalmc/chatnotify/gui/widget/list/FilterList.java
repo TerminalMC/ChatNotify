@@ -147,7 +147,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
             }
         }
         tabNameUpdate.run();
-        clampScrollAmount();
+        refreshScrollAmount();
     }
 
     @FunctionalInterface
