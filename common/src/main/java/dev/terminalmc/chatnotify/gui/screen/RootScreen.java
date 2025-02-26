@@ -55,11 +55,11 @@ public class RootScreen extends OptionScreen {
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
                 new Tab(TabKey.NOTIFICATION.key, (screen) -> new FilterList<>(
-                        Minecraft.getInstance(), 0, 0, 0,
+                        Minecraft.getInstance(), 0, 0, 0, 0,
                         BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                         FilterList.Entry.NotifOptions.class,
                         (source, dest) -> Config.get().moveNotif(++source, ++dest),
-                        localized("option", "notif.list", "ℹ"),
+                        localized("option", "notif.list", "\u2139"),
                         localized("option", "notif.list.tooltip"),
                         null,
                         null,
@@ -73,15 +73,15 @@ public class RootScreen extends OptionScreen {
                         () -> Config.get().addNotif()
                 )),
                 new Tab(TabKey.CONTROL.key, (screen) ->
-                        new ControlList(Minecraft.getInstance(), 0, 0, 0,
+                        new ControlList(Minecraft.getInstance(), 0, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                         )),
                 new Tab(TabKey.DEFAULT.key, (screen) ->
-                        new DefaultList(Minecraft.getInstance(), 0, 0, 0,
+                        new DefaultList(Minecraft.getInstance(), 0, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                         )),
                 new Tab(TabKey.PREFIX.key, (screen) ->
-                        new PrefixList(Minecraft.getInstance(), 0, 0, 0,
+                        new PrefixList(Minecraft.getInstance(), 0, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                         ))
         );

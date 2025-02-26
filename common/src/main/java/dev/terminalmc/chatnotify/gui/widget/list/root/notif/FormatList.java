@@ -20,19 +20,14 @@ import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.*;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.*;
 import net.minecraft.util.FastColor;
 
 import java.awt.Color;
-import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -41,16 +36,16 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 public class FormatList extends OptionList {
     private final Notification notif;
 
-    public FormatList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public FormatList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                       int entryHeight, int entrySpacing, Notification notif) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
         this.notif = notif;
     }
 
     @Override
     protected void addEntries() {
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "notif.format.list", "ℹ"),
+                localized("option", "notif.format.list", "\u2139"),
                 Tooltip.create(localized("option", "notif.format.list.tooltip")), -1));
 
         addEntry(new Entry.ColorOptions(entryX, entryWidth, entryHeight, this,
@@ -83,7 +78,7 @@ public class FormatList extends OptionList {
                 int mainButtonWidth = width - colorFieldWidth - statusButtonWidth - SPACE * 2;
 
                 // Color GUI button
-                Button mainButton = Button.builder(text.withColor(supplier.get()),
+                Button mainButton = Button.builder(text.withStyle(Style.EMPTY.withColor(supplier.get())),
                                 (button) -> {
                                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                                     int cpWidth = HsvColorPicker.MIN_WIDTH;
@@ -105,12 +100,12 @@ public class FormatList extends OptionList {
                 colorField.hexColorValidator().strict();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
-                    TextColor textColor = ColorUtil.parseColor(val);
+                    TextColor textColor = TextColor.parseColor(val);
                     if (textColor != null) {
                         int color = textColor.getValue();
                         consumer.accept(color);
                         // Update color of main button and field
-                        mainButton.setMessage(mainButton.getMessage().copy().withColor(color));
+                        mainButton.setMessage(mainButton.getMessage().copy().withStyle(Style.EMPTY.withColor(color)));
                         float[] hsv = new float[3];
                         Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
                                 FastColor.ARGB32.blue(color), hsv);
@@ -153,7 +148,7 @@ public class FormatList extends OptionList {
                                 .create(x, 0, buttonWidth, height,
                                         localized("option", "notif.format.bold"),
                                         (button, state) -> notif.textStyle.bold = state);
-                boldButton.setTooltipDelay(Duration.ofMillis(500));
+                boldButton.setTooltipDelay(500);
                 elements.add(boldButton);
 
                 CycleButton<TextStyle.FormatMode> italicButton =
@@ -165,7 +160,7 @@ public class FormatList extends OptionList {
                                 .create(x + width / 2 - buttonWidth / 2, 0, buttonWidth, height,
                                         localized("option", "notif.format.italic"),
                                         (button, state) -> notif.textStyle.italic = state);
-                italicButton.setTooltipDelay(Duration.ofMillis(500));
+                italicButton.setTooltipDelay(500);
                 elements.add(italicButton);
 
                 CycleButton<TextStyle.FormatMode> underlineButton =
@@ -177,7 +172,7 @@ public class FormatList extends OptionList {
                                 .create(x + width - buttonWidth, 0, buttonWidth, height,
                                         localized("option", "notif.format.underline"),
                                         (button, state) -> notif.textStyle.underlined = state);
-                underlineButton.setTooltipDelay(Duration.ofMillis(500));
+                underlineButton.setTooltipDelay(500);
                 elements.add(underlineButton);
             }
 
@@ -194,7 +189,7 @@ public class FormatList extends OptionList {
                                 .create(x, 0, buttonWidth, height,
                                         localized("option", "notif.format.strikethrough"),
                                         (button, state) -> notif.textStyle.strikethrough = state);
-                strikethroughButton.setTooltipDelay(Duration.ofMillis(500));
+                strikethroughButton.setTooltipDelay(500);
                 elements.add(strikethroughButton);
 
                 CycleButton<TextStyle.FormatMode> obfuscateButton =
@@ -206,7 +201,7 @@ public class FormatList extends OptionList {
                                 .create(x + width - buttonWidth, 0, buttonWidth, height,
                                         localized("option", "notif.format.obfuscate"),
                                         (button, state) -> notif.textStyle.obfuscated = state);
-                obfuscateButton.setTooltipDelay(Duration.ofMillis(500));
+                obfuscateButton.setTooltipDelay(500);
                 elements.add(obfuscateButton);
             }
 

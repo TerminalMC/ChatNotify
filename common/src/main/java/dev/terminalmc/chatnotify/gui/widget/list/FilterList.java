@@ -28,23 +28,19 @@ import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
-import dev.terminalmc.chatnotify.util.ColorUtil;
 import dev.terminalmc.chatnotify.util.Functional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.time.Duration;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -67,7 +63,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
     private final EntrySupplier<E> entrySupplier;
     private final @Nullable TrailerSupplier<E> trailerSupplier;
 
-    public FilterList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public FilterList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                       int entryHeight, int entrySpacing,
                       Class<? extends Entry.ListEntry> entryClass,
                       BiFunction<Integer, Integer, Boolean> moveFunction,
@@ -80,7 +76,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                       @Nullable TrailerSupplier<E> trailerSupplier,
                       Runnable addRunnable
     ) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing,
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing,
                 new HashMap<>(Map.of(entryClass, moveFunction)));
         this.title = title;
         this.titleTooltip = titleTooltip;
@@ -142,7 +138,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 addEntry(start, entry);
             }
         }
-        clampScrollAmount();
+        setScrollAmount(getScrollAmount());
     }
 
     @FunctionalInterface
@@ -252,7 +248,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 elements.add(indicatorButton);
 
                 // Drag reorder button
-                Button dragButton = Button.builder(Component.literal("↑↓"),
+                Button dragButton = Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
                                     this.setDragging(true);
                                     list.startDragging(this, StyleTargetOptions.class,
@@ -277,7 +273,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                     trigger.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -292,7 +288,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             .build();
                     keySelectButton.setTooltip(Tooltip.create(localized(
                             "option", "notif.trigger.open.key_selector.tooltip")));
-                    keySelectButton.setTooltipDelay(Duration.ofMillis(500));
+                    keySelectButton.setTooltipDelay(500);
                     elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -318,7 +314,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         .build();
                 editorButton.setTooltip(Tooltip.create(localized(
                         "option", "notif.trigger.open.trigger_editor.tooltip")));
-                editorButton.setTooltipDelay(Duration.ofMillis(500));
+                editorButton.setTooltipDelay(500);
                 elements.add(editorButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -335,7 +331,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     if (!trigger.styleTarget.enabled) {
                         styleButton.setTooltip(Tooltip.create(localized(
                                 "option", "notif.trigger.style_target.add.tooltip")));
-                        styleButton.setTooltipDelay(Duration.ofMillis(500));
+                        styleButton.setTooltipDelay(500);
                     } else {
                         styleButton.active = false;
                     }
@@ -344,7 +340,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED),
+                                Component.literal("\u274C").withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     removeFunction.accept(index);
                                     list.init();
@@ -370,7 +366,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 TextField displayField = new TextField(x, 0, width, height);
                 displayField.setValue(trigger.string);
                 displayField.setTooltip(Tooltip.create(tooltip));
-                displayField.setTooltipDelay(Duration.ofMillis(500));
+                displayField.setTooltipDelay(500);
                 displayField.setEditable(false);
                 displayField.active = false;
                 elements.add(displayField);
@@ -394,11 +390,11 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Info icon
                 StringWidget infoIcon = new StringWidget(movingX, 0, list.tinyWidgetWidth, height,
-                        Component.literal("ℹ"), Minecraft.getInstance().font);
+                        Component.literal("\u2139"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option", "notif.trigger.style_target.tooltip")));
-                infoIcon.setTooltipDelay(Duration.ofMillis(500));
+                infoIcon.setTooltipDelay(500);
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
 
@@ -415,7 +411,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                     styleTarget.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -431,7 +427,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED),
+                                Component.literal("\u274C").withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     styleTarget.enabled = false;
                                     list.init();
@@ -462,7 +458,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 int movingX = x;
 
                 // Drag reorder button
-                elements.add(Button.builder(Component.literal("↑↓"),
+                elements.add(Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
                                     this.setDragging(true);
                                     list.startDragging(this, null, false);
@@ -484,7 +480,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                     message.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
 
@@ -496,7 +492,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                 int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
-                                int wY = list.getY();
+                                int wY = list.y0;
                                 list.screen.setOverlayWidget(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> message.string.matches(".+-.+")
@@ -523,7 +519,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                 int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
-                                int wY = list.getY();
+                                int wY = list.y0;
                                 list.screen.setOverlayWidget(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> message.string.matches(".+-.+")
@@ -561,7 +557,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 timeField.posIntValidator().strict();
                 timeField.setTooltip(Tooltip.create(localized(
                         "option", "notif.response.time.tooltip")));
-                timeField.setTooltipDelay(Duration.ofMillis(500));
+                timeField.setTooltipDelay(500);
                 timeField.setMaxLength(5);
                 timeField.setResponder((s) -> message.delayTicks = Integer.parseInt(s.strip()));
                 timeField.setValue(String.valueOf(message.delayTicks));
@@ -569,7 +565,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED),
+                                Component.literal("\u274C").withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     removeFunction.accept(index);
                                     list.init();
@@ -599,7 +595,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 int SPACING_NARROW = 2;
 
                 @Nullable Trigger trigger = notif.triggers.size() == 1
-                        ? notif.triggers.getFirst() : null;
+                        ? notif.triggers.get(0) : null;
                 boolean singleTrig = trigger != null;
                 boolean keyTrig = singleTrig && trigger.type == Trigger.Type.KEY;
 
@@ -684,7 +680,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     elements.add(indicatorButton);
 
                     // Drag reorder button (left-side extension)
-                    Button dragButton = Button.builder(Component.literal("↑↓"),
+                    Button dragButton = Button.builder(Component.literal("\u2191\u2193"),
                                     (button) -> {
                                         this.setDragging(true);
                                         list.startDragging(this, null, false);
@@ -710,7 +706,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                         trigger.type = type;
                                         list.init();
                                     });
-                    typeButton.setTooltipDelay(Duration.ofMillis(200));
+                    typeButton.setTooltipDelay(200);
                     elements.add(typeButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -730,7 +726,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             .build();
                     keySelectButton.setTooltip(Tooltip.create(localized(
                             "option", "notif.trigger.open.key_selector.tooltip")));
-                    keySelectButton.setTooltipDelay(Duration.ofMillis(200));
+                    keySelectButton.setTooltipDelay(200);
                     elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -770,7 +766,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             .build();
                     editorButton.setTooltip(Tooltip.create(localized(
                             "option", "notif.trigger.open.trigger_editor.tooltip")));
-                    editorButton.setTooltipDelay(Duration.ofMillis(200));
+                    editorButton.setTooltipDelay(200);
                     elements.add(editorButton);
                     movingX += list.tinyWidgetWidth + SPACING_NARROW;
                 }
@@ -778,11 +774,11 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 // Options button
 
                 ImageButton editButton = new ImageButton(movingX, 0,
-                        list.smallWidgetWidth, height, OPTION_SPRITES,
+                        list.smallWidgetWidth, height, 0, 0, 20, OPTIONS_ICON, 32, 64,
                         (button) -> mc.setScreen(new NotifScreen(mc.screen, notif)));
                 editButton.setTooltip(Tooltip.create(localized(
                         "option", "notif.open.options.tooltip")));
-                editButton.setTooltipDelay(Duration.ofMillis(200));
+                editButton.setTooltipDelay(200);
                 elements.add(editButton);
                 movingX += list.smallWidgetWidth + SPACING_NARROW;
 
@@ -790,10 +786,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 RightClickableButton colorEditButton = new RightClickableButton(
                         movingX, 0, list.tinyWidgetWidth, height,
-                        Component.literal("\uD83C\uDF22").withColor(notif.textStyle.doColor
-                                ? notif.textStyle.color
-                                : 0xffffff
-                        ), (button) -> {
+                        Component.literal("\uD83C\uDF22").withStyle(Style.EMPTY.withColor(
+                                notif.textStyle.doColor ? notif.textStyle.color : 0xffffff)), (button) -> {
                     // Open color picker overlay widget
                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                     int cpWidth = HsvColorPicker.MIN_WIDTH;
@@ -814,13 +808,13 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                 + (notif.textStyle.doColor ? "enabled" : "disabled"))
                         .append("\n")
                         .append(localized("option", "notif.click_edit"))));
-                colorEditButton.setTooltipDelay(Duration.ofMillis(200));
+                colorEditButton.setTooltipDelay(200);
                 if (showColorField) {
                     TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
                     colorField.hexColorValidator().strict();
                     colorField.setMaxLength(7);
                     colorField.setResponder((val) -> {
-                        TextColor textColor = ColorUtil.parseColor(val);
+                        TextColor textColor = TextColor.parseColor(val);
                         if (textColor != null) {
                             int color = textColor.getValue();
                             notif.textStyle.color = color;
@@ -832,13 +826,13 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             else colorField.setTextColor(color);
                             // Update status button color
                             colorEditButton.setMessage(
-                                    colorEditButton.getMessage().copy().withColor(color));
+                                    colorEditButton.getMessage().copy().withStyle(Style.EMPTY.withColor(color)));
                         }
                     });
                     colorField.setValue(TextColor.fromRgb(notif.textStyle.color).formatValue());
                     colorField.setTooltip(Tooltip.create(localized(
                             "option", "notif.color.field.tooltip")));
-                    colorField.setTooltipDelay(Duration.ofMillis(500));
+                    colorField.setTooltipDelay(500);
                     elements.add(colorField);
                     movingX += colorFieldWidth;
                 }
@@ -856,7 +850,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     soundField.setValue(notif.sound.getId());
                     soundField.setTooltip(Tooltip.create(localized(
                             "option", "notif.sound.field.tooltip")));
-                    soundField.setTooltipDelay(Duration.ofMillis(500));
+                    soundField.setTooltipDelay(500);
                     elements.add(soundField);
                     movingX += soundFieldWidth;
                 }
@@ -876,7 +870,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                 + (notif.sound.isEnabled() ? "enabled" : "disabled"))
                         .append("\n")
                         .append(localized("option", "notif.click_edit"))));
-                soundEditButton.setTooltipDelay(Duration.ofMillis(200));
+                soundEditButton.setTooltipDelay(200);
                 elements.add(soundEditButton);
 
                 // On/off button
@@ -897,8 +891,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     elements.add(new ConfirmButton(
                             x + width + SPACE, 0,
                             list.smallWidgetWidth, height,
-                            Component.literal("❌"),
-                            Component.literal("❌").withStyle(ChatFormatting.RED),
+                            Component.literal("\u274C"),
+                            Component.literal("\u274C").withStyle(ChatFormatting.RED),
                             (button) -> {
                                 if (Config.get().removeNotif(index)) {
                                     list.init();
@@ -917,7 +911,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 String plusNumFormat = " [+%d]";
                 Pattern plusNumPattern = Pattern.compile(" \\[\\+\\d+]");
 
-                if (notif.triggers.isEmpty() || notif.triggers.getFirst().string.isBlank()) {
+                if (notif.triggers.isEmpty() || notif.triggers.get(0).string.isBlank()) {
                     label = Component.literal("> ").withStyle(ChatFormatting.YELLOW).append(
                             localized("option", "notif.label.configure")
                                     .withStyle(ChatFormatting.WHITE)).append(" <");
@@ -941,11 +935,11 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     // Not the most efficient approach, but simple is nice
                     while(font.width(compileLabel(strList)) > maxWidth) {
                         if (strList.size() == 1 || (strList.size() == 2
-                                && plusNumPattern.matcher(strList.getLast()).matches())) {
+                                && plusNumPattern.matcher(strList.get(strList.size() - 1)).matches())) {
                             break;
                         }
-                        if (plusNumPattern.matcher(strList.removeLast()).matches()) {
-                            strList.removeLast();
+                        if (plusNumPattern.matcher(strList.remove(strList.size() - 1)).matches()) {
+                            strList.remove(strList.size() - 1);
                         }
                         strList.add(String.format(plusNumFormat,
                                 usedStrings.size() - strList.size()));
@@ -954,14 +948,14 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     // Only one trigger (and possibly a number indicator)
                     // but if the first trigger is too long we trim it
                     while(font.width(compileLabel(strList)) > maxWidth) {
-                        String str = strList.getFirst();
+                        String str = strList.get(0);
                         if (str.length() < 3) break;
                         strList.set(0, str.substring(0, str.length() - 5) + " ...");
                     }
 
                     label = Component.literal(compileLabel(strList));
                     if (notif.textStyle.isEnabled()) {
-                        label.withColor(notif.textStyle.color);
+                        label.withStyle(label.getStyle().withColor(notif.textStyle.color));
                     }
                 }
                 return label;

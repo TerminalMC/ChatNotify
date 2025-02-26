@@ -21,12 +21,11 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
+import net.minecraft.client.gui.screens.SoundOptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -39,15 +38,15 @@ import java.awt.*;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class DefaultList extends OptionList {
-    public DefaultList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public DefaultList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                        int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
     }
 
     @Override
     protected void addEntries() {
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "default.list", "ℹ"),
+                localized("option", "default.list", "\u2139"),
                 Tooltip.create(localized("option", "default.list.tooltip")), -1));
 
         addEntry(new Entry.DefaultColor(dynEntryX, dynEntryWidth, entryHeight, this));
@@ -96,7 +95,7 @@ public class DefaultList extends OptionList {
                 colorField.hexColorValidator().strict();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
-                    TextColor textColor = ColorUtil.parseColor(val);
+                    TextColor textColor = TextColor.parseColor(val);
                     if (textColor != null) {
                         int color = textColor.getValue();
                         Config.get().defaultColor = color;
@@ -123,7 +122,7 @@ public class DefaultList extends OptionList {
                             int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                             int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                             int wX = x + (width / 2) - (wWidth / 2);
-                            int wY = list.getY();
+                            int wY = list.y0;
                             list.screen.setOverlayWidget(new DropdownTextField(
                                     wX, wY, wWidth, wHeight, Component.empty(),
                                     Config.get().defaultSound::getId,

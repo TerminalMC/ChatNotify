@@ -59,16 +59,16 @@ public class KeySelectorList extends OptionList {
 
     private final Trigger trigger;
 
-    public KeySelectorList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public KeySelectorList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                            int entryHeight, Trigger trigger) {
-        super(mc, width, height, y, entryWidth, entryHeight, 1);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, 1);
         this.trigger = trigger;
     }
 
     @Override
     protected void addEntries() {
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "notif.trigger.selector.list", "ℹ"),
+                localized("option", "notif.trigger.selector.list", "\u2139"),
                 Tooltip.create(localized("option", "notif.trigger.selector.list.tooltip")), -1));
 
         addEntry(new Entry.TriggerOption(dynWideEntryX, dynWideEntryWidth, entryHeight, trigger));

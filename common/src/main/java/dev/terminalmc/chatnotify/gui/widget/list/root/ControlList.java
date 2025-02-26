@@ -26,9 +26,9 @@ import net.minecraft.network.chat.CommonComponents;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class ControlList extends OptionList {
-    public ControlList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public ControlList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                        int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class ControlList extends OptionList {
                 super();
 
                 elements.add(CycleButton.<Config.SenderDetectionMode>builder((status) -> localized(
-                        "option", "control.sender_detection_mode.status." + status.name()))
+                                "option", "control.sender_detection_mode.status." + status.name()))
                         .withValues(Config.SenderDetectionMode.values())
                         .withInitialValue(Config.get().senderDetectionMode)
                         .withTooltip((mode) -> Tooltip.create(localized(

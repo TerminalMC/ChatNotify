@@ -28,15 +28,15 @@ import net.minecraft.network.chat.Component;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class PrefixList extends OptionList {
-    public PrefixList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public PrefixList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                       int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
     }
 
     @Override
     protected void addEntries() {
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "prefix.list", "ℹ"),
+                localized("option", "prefix.list", "\u2139"),
                 Tooltip.create(localized("option", "prefix.list.tooltip")), -1));
 
         int max = Config.get().prefixes.size();
@@ -67,7 +67,7 @@ public class PrefixList extends OptionList {
                 elements.add(prefixField);
 
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED),
+                                Component.literal("\u274C").withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     Config.get().prefixes.remove(index);
                                     list.init();
