@@ -90,19 +90,19 @@ public class Notification implements Functional.StringSupplier {
      * Whether this instance allows use of inclusion triggers.
      */
     public boolean inclusionEnabled;
-    public static final boolean inclusionEnabledDefault = false;
+    public static final boolean inclusionEnabledDefault = true;
 
     /**
      * Whether this instance allows use of exclusion triggers.
      */
     public boolean exclusionEnabled;
-    public static final boolean exclusionEnabledDefault = false;
+    public static final boolean exclusionEnabledDefault = true;
 
     /**
      * Whether this instance allows use of response messages.
      */
     public boolean responseEnabled;
-    public static final boolean responseEnabledDefault = false;
+    public static final boolean responseEnabledDefault = true;
 
     /**
      * The {@link Sound} to play on activation.
