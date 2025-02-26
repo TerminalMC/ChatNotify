@@ -1,3 +1,4 @@
+<!--suppress HtmlDeprecatedAttribute, HtmlDeprecatedTag, XmlDeprecatedElement, HtmlRequiredAltAttribute -->
 <div align="center"><center>
 
 <img alt="Icon" width=100 src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/common/src/main/resources/assets/chatnotify/icon.png">
@@ -19,266 +20,172 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 
 ### Features
 
-- Easy access to all Minecraft sound effects, plus sounds from resourcepacks.
-- Customizable volume and pitch for notification sounds.
-- Text restyling (highlighting) with full RGB color and format control.
-- Complete control over notification triggers with optional regex support.
-- Automatic response messages with optional delay.
-- Fully custom options GUI for efficient configuration.
+- Custom triggers - never worry about missing a message again!
+- Choose notification sounds from the full range of built-in and resourcepack sound effects.
+- Adjust sound volume and pitch per-notification.
+- Customize message highlighting with a color picker and format controls.
+- Use regex patterns, inclusion and exclusion triggers for fine-grained control.
+- Add automatic response messages or trigger [CommandKeys](https://modrinth.com/mod/commandkeys) macros.
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_02.png" width="50%">
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_cropped.png" width="500px">
 
-### Overview
+### How it Works
+
+1. ChatNotify has a list of `Notifications`, each of which has one or more `Triggers`.
+2. When a new message arrives in chat, ChatNotify starts checking the triggers of each notification.
+3. If a trigger matches the chat message, the corresponding notification will be activated. By default;
+    1. The message will be edited to highlight the trigger that activated the notification.
+    2. A sound will be played.
+
+- You can create and customize your own notifications via the options screen, which can be opened via
+  [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on NeoForge.
 
 ### Setup
 
-<details open>
-<summary><b>How it Works</b></summary>
+When you open the options screen, you'll see a list of notifications. You can set the notification trigger, color and
+sound here.
 
-- ChatNotify has a list of `Notifications`, which you can view on the options screen.
-- Each notification has one or more `Triggers`, and options to control what happens when the notification is activated.
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/root/notifications.png" width="500px">
 
-1. When a new message arrives in chat, ChatNotify starts checking the triggers of each notification.
-2. If a trigger matches the chat message, that notification will be activated.
-3. When a notification is activated, two things will happen;
-    1. The message will be restyled, to highlight the trigger that activated the notification.
-    2. A sound will be played.
+#### Trigger types
 
-- You can create and customize your own notifications via the options screen, which can be opened using
-  [ModMenu](https://modrinth.com/mod/mOgUt4GM) on Fabric, or the mod list on NeoForge.
-- See below for basic guides on setting up your own custom notifications.
+To change the trigger type, click the `~` button to the left of the text field.
 
-<table style="width:100%;">
-  <tr>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_main_01.png" style="width:100%;"></td>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_trigger_01.png" style="width:100%;"></td>
-  </tr>
-  <tr>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_colorpicker_01.png" style="width:100%;"></td>
-    <td style="width:50%;"><img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_soundselector_01.png" style="width:100%;"></td>
-  </tr>
-</table>
-</details>
+- Normal
+    - This is what you probably want to use at first. Normal triggers aren't case-sensitive (so a trigger `hello` will
+      match messages containing `HELLO`), and they don't match partial words (so a trigger `rock` will match `rock!` but not
+      `rocket` or `rock932`).
+- Key
+    - In vanilla, each type of chat message has a different translation key (such as `chat.type.text` or
+      `chat.type.advancement.task`). You can use a key-type trigger to match all messages of that type.
+    - Note: Many servers remove keys from messages, which will prevent this type of key from working. To check if a
+      message has a key, use the trigger editor (see below).
+- Regex
+    - If you want more precise control, you can switch to this type and enter a regex pattern in the text field.
+    - Consider using the trigger editor (see below) and/or a tool such as [regex101](https://regex101.com) to help create
+      regex patterns.
 
-<details open>
-<summary><b>Level 0: "Just ping me when my name is mentioned"</b></summary>
+#### Trigger editor
 
-- ChatNotify automatically pings you when your name appears in chat - no setup is required.
-</details>
+Click the `✎` button to the right of the text field to open the trigger editor.
 
-<details>
-<summary><b>Level 1A (Normal): "Ping me when someone says hello"</b></summary>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/trigger/editor.png" width="500px">
 
-1. Access the options screen.
-2. Click the `+` button to add a new notification.
-3. Type your custom notification trigger (e.g. "hello") in the field on the left.
-4. To change the highlight color, click the `🌢` button.
-5. To change the notification sound, click the `🔊` button.
-    1. Select a common sound by clicking one of the buttons, or
-    2. Click the field at the top to search for other sounds.
-6. To disable highlighting or sound, right-click the `🌢` or `🔊` button.
-7. When you're finished, click `Done` to exit.
-</details>
+In the trigger editor, recent chat messages will be displayed in a list (most recent first). Use the `Filter` and
+`Restyle` buttons to preview the effect of your trigger.
 
-<details>
-<summary><b>Level 1B (Normal): "Also ping me when someone says hi"</b></summary>
+Click on a message to view the text and translation key (if any) so you can copy them.
 
-1. Access the options screen and find your notification from `Level 1A`.
-2. Click the square `'More Options'` button on the right of the trigger field.
-3. On the new screen, click the large `+` button below the existing trigger.
-4. Type your custom notification trigger (e.g. "hi") into the new field.
-5. Click `Done` to return to the main screen, then `Done` again to exit.
-</details>
+Additionally, some common keys are available for selection in the `Key Selector`.
 
-<details>
-<summary><b>Level 2A (Key): "Ping me when someone gets an advancement"</b></summary>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/trigger/selector.png" width="500px">
 
-1. Access the options screen and click the `+` button to add a new notification.
-2. Click the `~` button on the left twice, so it shows a key. A new `🔍` button will appear.
-3. Click the `🔍` button.
-4. On the new screen, click the `Any Advancement` button, then click `Done`.
-5. Change the color and sound if you want (as in `Level 1A`), then click `Done` to exit.
-- **Note**: Some servers remove keys from messages, which prevents this type of trigger from working.
-- To check whether a message has a key, follow `Level 3` and look at the `Key` field after clicking the message.
-- If the message does not have a key (or uses a generic key), you must use a normal (`~`) trigger instead.
-</details>
+#### Trigger List
 
-<details>
-<summary><b>Level 2B (Key): "Play a sound for every new message"</b></summary>
+If you want to add more triggers, go back to `Notifications` and click on the options button to the left of the
+color button. You'll now see a list of triggers, which you can edit as desired.
 
-1. Access the options screen and add a new notification (`+`).
-2. Click the `~` button on the left twice, so it shows a key. A new `🔍` button will appear.
-3. Click the `🔍` button.
-4. On the new screen, click the `Any Message` button, then click `Done`.
-5. Change the color and sound if you want (as in `Level 1A`), then click `Done` again.
-- **Note**: Because this notification will activate for every message, you probably want it to be last.
-- On the options screen, click and drag the button on the far left to change the notification order.
-</details>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/notif/triggers.png" width="500px">
 
-<details>
-<summary><b>Level 3 (Normal): "Ping me when a specific server message appears"</b></summary>
+#### Style target
 
-1. Join the server and wait for the message to appear in chat.
-2. Access the options screen and add a new notification (`+`).
-3. Click the `✎` button on the right of the trigger field to open the trigger editor.
-4. Chat messages will be displayed in a list, most recent first.
-5. Find your message, and click on it.
-6. The message text will be placed into the `Text` field.
-7. Use the message text to create a custom trigger in the top field.
-8. To test your trigger, toggle the `Filter` button.
-9. When the filter is on, only messages that match the trigger will be shown.
-10. Once you're satisfied, click `Done` to return to the options screen.
-</details>
+Sometimes for key-type and regex-type triggers you may want to highlight a different part of the message to what the
+trigger matches.
 
-<details>
-<summary><b>Level 4 (Regex): "I want more control"</b></summary>
+Adding a style target allows you to specify what part of the message should be highlighted. If the style target doesn't
+match the message, the trigger will be used as normal.
 
-1. If the message might contain special characters, follow `Level 3` to copy the message text.
-2. Optionally use a tool like [regex101](https://regex101.com) to help build a proper regex pattern for the message.
-3. Access the options screen and add a new notification (`+`).
-4. Click the `~` button on the left, so it shows `.*`.
-5. Enter your regex pattern into the trigger field.
+#### Format
 
-</details>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/notif/format.png" width="500px">
 
-### Other Options
+#### Sound
 
-#### Global Options
+All built-in and resourcepack sounds can be used (click on the text field). Additionally, some sounds are available for
+quick selection.
 
-To access, click the `Global Options` button from the options screen.
+The sound source controls which of Minecraft's volume control sliders will affect the notification sound, in addition
+to the volume control slider provided here.
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_global_01.png" width="50%">
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/notif/sound.png" width="500px">
 
-<details>
-<summary><b>Detection Mode</b></summary>
+#### Inclusion
 
-- Controls where and how incoming messages are intercepted.
-- Useful if you have client-side mods sending messages that you want to detect or ignore.
-- Default is `HUD (Tags)`.
-</details>
+Inclusion triggers do nothing by themselves, but if a trigger from the `Triggers` list matches a message, ChatNotify
+will check all the triggers in this list and only activate the notification if they all match.
 
-<details>
-<summary><b>Send Mode</b></summary>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/notif/inclusion.png" width="500px">
 
-- Controls where and how response messages are sent.
-- Useful if you want other client-side to detect or ignore response messages.
-- Default is `Packet`.
-</details>
+#### Exclusion
 
-<details>
-<summary><b>Activation Mode</b></summary>
+Exclusion triggers are the reverse of `Inclusion` triggers; before activating a notification, ChatNotify will check all
+the triggers in this list and only proceed with activation if none of them match the message.
 
-- Controls how many notifications can be triggered by a single message.
-- Preference only.
-- Default is `Single Sound`.
-</details>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/notif/exclusion.png" width="500px">
 
-<details>
-<summary><b>Restyle Mode</b></summary>
+#### Response
 
-- Controls how many triggers (or instances of triggers) will be restyled, per notification.
-- Preference only.
-- Default is `All Instances`.
-</details>
+Response messages will be sent in chat when the notification is activated.
 
-#### Notification Options
+Use with caution, as you can easily make a notification send a response which triggers the notification again in a loop,
+which will spam chat and then crash the game.
 
-To access, click the `'More Options'` button for the notification you want to edit.
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/notif/response.png" width="500px">
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_notification_01.png" width="50%">
+#### Custom Messages
 
-<details>
-<summary><b>Style Target</b></summary>
+These are special ways of showing notifications, as an alternative to the normal 'play a sound and highlight the
+message'.
 
-- This feature provides finer control over which part of a message is highlighted (restyled).
-- For example, if you have a trigger that matches messages starting with "\[Mod Team\]" for a group chat, but you want
-  to highlight what people say (which comes after a `:` character), you can specify `(?<=: ).*` as a regex style target.
-- To set a style target, access the `Notification Options` screen then press the small `+` button to the right
-  of the trigger field.
-- Consider using a tool such as [regex101](https://regex101.com) to help with creation of regex style targets.
-</details>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/notif/misc.png" width="500px">
 
-#### Advanced Options
+#### Controls
 
-To access, first go to the `Notification Options` screen, then click the `Advanced Options` button.
+These options apply to all notifications, and control various aspects of ChatNotify's behavior. You should not
+generally need to change them (you can if you want, of course), but the `Detect` and `Send Mode` options can be useful
+in certain cases of conflict with other mods.
 
-<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options_advanced_01.png" width="50%">
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/root/controls.png" width="500px">
 
-<details>
-<summary><b>Custom Messages</b></summary>
+#### Defaults
 
-- This feature allows you to send messages to yourself when a notification is activated. See below for the different
-  types.
+If you want new notifications to have a particular color or sound by default, you can set that here.
 
-- All custom messages support color and format codes using `$` instead of `§`. For more information on codes, refer to
-  [the Minecraft Wiki](https://minecraft.wiki/w/Formatting_codes).
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/root/defaults.png" width="500px">
 
-- If the notification has a regex trigger, you can access capturing groups from the match using `(1)`, `(2)` etc. in the
-  custom message. For example, if the trigger is `(\d+) stacks`, and you have a replacement message `(1)x64`, the message "23 stacks"
-  will be replaced by "23x64".
+#### Prefixes
 
-<details>
-<summary><b>Replacement Messages</b></summary>
+When ChatNotify is not using Chat Heads to detect the message sender, it will store your sent messages and compare them
+to incoming messages to determine which messages were sent by you. If you're on a server that modifies your messages,
+that system may not work properly, so prefixes can help.
 
-- This feature allows you to replace the triggering chat message with a custom message.
-- **Note**: If you switch this to `ON` and leave the field blank, the message will be blocked.
-    - If a message is blocked, any subsequent notifications cannot be activated, but previous ones that have already
-      activated may still play sounds or send response messages, so use this feature with caution.
-</details>
+If you're still being notified on every message that you send (because it contains your name) try installing
+[Chat Heads](https://modrinth.com/mod/chat-heads) and setting `Sender Detection Mode` to `Combined` in the `Controls`
+tab.
 
-<details>
-<summary><b>Status Bar Messages</b></summary>
+<img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/root/prefixes.png" width="500px">
 
-- This feature allows you to send a custom message to the status bar (above the hotbar).
-- **Note**: If you switch this to `ON` and leave the field blank, the entire message will be forwarded.
-</details>
-
-<details>
-<summary><b>Title Messages</b></summary>
-
-- This feature allows you to display a custom message as a title (large text in the middle of the screen).
-- **Note**: If you switch this to `ON` and leave the field blank, the entire message will be forwarded.
-</details>
-</details>
-
-<details>
-<summary><b>Exclusion Triggers</b></summary>
-
-- Exclusion triggers allow you to restrict the activation conditions of notifications.
-- For example, if you want a notification to activate a message contains "shark", but only if the message does not also
-  contain "fish", create a trigger for "shark" and an exclusion trigger for "fish".
-</details>
-
-<details>
-<summary><b>Response Messages</b></summary>
-
-- Response messages are sent in chat when a notification is activated.
-- Regex (`.*`) response messages can access capturing groups from a regex trigger using `(1)`, `(2)` etc., like custom
-  messages.
-- **Note**: Response messages allow you to do things like spamming chat and creating infinite loops of notifications
-  and responses, so you should exercise caution when using this feature.
-</details>
-
-#### GUI Tweaks
+### GUI Tweaks
 
 <details>
 <summary><b>Special Widgets</b></summary>
 
-- ChatNotify uses several custom GUI widgets to behave differently to normal Minecraft. Some are listed below.
+ChatNotify uses a range of custom GUI widgets which behave differently to normal Minecraft.
 
 1. Color (`🌢`) and sound (`🔊`) status buttons on the options screen support right-click to toggle status.
 2. Text fields have been modified to support double-clicking, triple-clicking or clicking and dragging to select text.
 3. Text fields have also been modified to support `CTRL+Z` to undo and `CTRL+Y` to redo edits. Note that edit history
-   will be erased whenever the GUI is 'reloaded', which often happens when you click on another widget.
-4. Fullscreen overlay widgets such as the color picker and drop-down text field support clicking outside to cancel.
+   will be erased whenever the GUI is refreshed, which often happens when you click on a different widget.
+4. Fullscreen overlay widgets such as the color picker and drop-down text field support clicking outside to cancel and
+   close.
 
 </details>
 
 <details>
 <summary><b>Chat Height Slider</b></summary>
 
-- ChatNotify modifies the chat height slider (in `Chat Settings`) to increase the maximum value to `500px`.
-- The set value is not affected, so your existing setting will stay the same unless you decide to change it.
+- ChatNotify modifies the chat height slider (in Minecraft's `Chat Settings`) to increase the maximum value to `500px`.
+- Your existing setting will stay the same unless you decide to change it.
 
 </details>
 
