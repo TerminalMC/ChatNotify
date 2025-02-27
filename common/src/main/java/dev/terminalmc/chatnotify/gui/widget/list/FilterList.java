@@ -305,17 +305,6 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     movingX += list.tinyWidgetWidth;
                 }
 
-                // Trigger field
-                TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
-                triggerField.withValidator(validator);
-                if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
-                triggerField.setMaxLength(240);
-                triggerField.setResponder((str) -> trigger.string = str.strip());
-                triggerField.setValue(trigger.string);
-                triggerField.setHint(localized("option", "notif.trigger.field.hint"));
-                elements.add(triggerField);
-                movingX += triggerFieldWidth;
-
                 // Trigger editor button
                 Button editorButton = Button.builder(Component.literal("✎"),
                                 (button) -> mc.setScreen(new TriggerScreen(
@@ -329,6 +318,17 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 editorButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(editorButton);
                 movingX += list.tinyWidgetWidth;
+
+                // Trigger field
+                TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
+                triggerField.withValidator(validator);
+                if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
+                triggerField.setMaxLength(240);
+                triggerField.setResponder((str) -> trigger.string = str.strip());
+                triggerField.setValue(trigger.string);
+                triggerField.setHint(localized("option", "notif.trigger.field.hint"));
+                elements.add(triggerField);
+                movingX += triggerFieldWidth;
 
                 if (canUseStyleTarget) {
                     // Style string add button
@@ -743,26 +743,6 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     movingX += list.tinyWidgetWidth;
                 }
 
-                // Trigger field
-                TextField triggerField;
-                if (singleTrig) {
-                    triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
-                    if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
-                    triggerField.withValidator(new TextField.Validator.UniqueTrigger(
-                            notif, trigger));
-                    triggerField.setMaxLength(240);
-                    triggerField.setResponder((str) -> trigger.string = str.strip());
-                    triggerField.setValue(trigger.string);
-                    triggerField.setHint(localized("option", "notif.trigger.field.hint"));
-                } else {
-                    triggerField = new FakeTextField(movingX, 0, triggerFieldWidth, height, () ->
-                            mc.setScreen(new NotifScreen(mc.screen, notif)));
-                    triggerField.setMaxLength(240);
-                    triggerField.setValue(createLabel(notif, triggerFieldWidth - 10).getString());
-                }
-                elements.add(triggerField);
-                movingX += triggerFieldWidth + (singleTrig ? 0 : SPACING_NARROW);
-
                 if (singleTrig) {
                     // Trigger editor button
                     Button editorButton = Button.builder(Component.literal("✎"),
@@ -782,6 +762,26 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     elements.add(editorButton);
                     movingX += list.tinyWidgetWidth + SPACING_NARROW;
                 }
+
+                // Trigger field
+                TextField triggerField;
+                if (singleTrig) {
+                    triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
+                    if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
+                    triggerField.withValidator(new TextField.Validator.UniqueTrigger(
+                            notif, trigger));
+                    triggerField.setMaxLength(240);
+                    triggerField.setResponder((str) -> trigger.string = str.strip());
+                    triggerField.setValue(trigger.string);
+                    triggerField.setHint(localized("option", "notif.trigger.field.hint"));
+                } else {
+                    triggerField = new FakeTextField(movingX, 0, triggerFieldWidth, height, () ->
+                            mc.setScreen(new NotifScreen(mc.screen, notif)));
+                    triggerField.setMaxLength(240);
+                    triggerField.setValue(createLabel(notif, triggerFieldWidth - 10).getString());
+                }
+                elements.add(triggerField);
+                movingX += triggerFieldWidth + (singleTrig ? 0 : SPACING_NARROW);
 
                 // Options button
 
