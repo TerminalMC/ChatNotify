@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list.root;
 
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import net.minecraft.ChatFormatting;
@@ -28,9 +29,9 @@ import net.minecraft.network.chat.Component;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class PrefixList extends OptionList {
-    public PrefixList(Minecraft mc, int width, int height, int y, int entryWidth,
-                      int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+    public PrefixList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                      int entryWidth, int entryHeight, int entrySpacing) {
+        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
     }
 
     @Override

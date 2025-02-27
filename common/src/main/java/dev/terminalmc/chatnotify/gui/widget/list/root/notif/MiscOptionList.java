@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.widget.list.root.notif;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import net.minecraft.ChatFormatting;
@@ -35,9 +36,9 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 public class MiscOptionList extends OptionList {
     private final Notification notif;
 
-    public MiscOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
-                          int entryHeight, int entrySpacing, Notification notif) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+    public MiscOptionList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                          int entryWidth, int entryHeight, int entrySpacing, Notification notif) {
+        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
         this.notif = notif;
     }
 

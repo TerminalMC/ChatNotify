@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
@@ -46,10 +47,10 @@ public abstract class DragReorderList extends OptionList {
     private @Nullable Class<? extends Entry> trailerClass;
     boolean hasTrailer;
 
-    public DragReorderList(Minecraft mc, int width, int height, int y, int entryWidth,
-                           int entryHeight, int entrySpacing,
+    public DragReorderList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                           int entryWidth, int entryHeight, int entrySpacing,
                            Map<Class<? extends Entry>, BiFunction<Integer,Integer,Boolean>> clsFunMap) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
         this.clsFunMap = clsFunMap;
     }
 

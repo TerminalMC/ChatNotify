@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list.root;
 
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -26,9 +27,9 @@ import net.minecraft.network.chat.CommonComponents;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class ControlList extends OptionList {
-    public ControlList(Minecraft mc, int width, int height, int y, int entryWidth,
-                       int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+    public ControlList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                       int entryWidth, int entryHeight, int entrySpacing) {
+        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
     }
 
     @Override
@@ -133,7 +134,7 @@ public class ControlList extends OptionList {
                 super();
 
                 elements.add(CycleButton.<Config.SenderDetectionMode>builder((status) -> localized(
-                        "option", "control.sender_detection_mode.status." + status.name()))
+                                "option", "control.sender_detection_mode.status." + status.name()))
                         .withValues(Config.SenderDetectionMode.values())
                         .withInitialValue(Config.get().senderDetectionMode)
                         .withTooltip((mode) -> Tooltip.create(localized(

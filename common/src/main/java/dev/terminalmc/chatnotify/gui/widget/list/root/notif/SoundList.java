@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.widget.list.root.notif;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Sound;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
@@ -112,9 +113,9 @@ public class SoundList extends OptionList {
     private final Sound sound;
     private @Nullable SoundInstance lastSound;
 
-    public SoundList(Minecraft mc, int width, int height, int y, int entryWidth,
-                     int entryHeight, Sound sound) {
-        super(mc, width, height, y, entryWidth, entryHeight, 1);
+    public SoundList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                     int entryWidth, int entryHeight, Sound sound) {
+        super(mc, screen, width, height, y, entryWidth, entryHeight, 1);
         this.sound = sound;
     }
 
@@ -217,7 +218,7 @@ public class SoundList extends OptionList {
                                     sound::getId, sound::setId,
                                     (widget) -> list.init(),
                                     Minecraft.getInstance().getSoundManager().getAvailableSounds()
-                                    .stream().map(ResourceLocation::toString).sorted().toList())
+                                            .stream().map(ResourceLocation::toString).sorted().toList())
                                     .withSoundDropType());
                         });
                 soundField.soundValidator();
@@ -255,7 +256,7 @@ public class SoundList extends OptionList {
                                 localized("option", "notif.sound.source"),
                                 (button, status) -> Config.get().soundSource = status));
 
-                elements.add(Button.builder(Component.literal("\uD83D\uDD0A"), (button) -> 
+                elements.add(Button.builder(Component.literal("\uD83D\uDD0A"), (button) ->
                                 Minecraft.getInstance().setScreen(new SoundOptionsScreen(
                                         list.screen, Minecraft.getInstance().options)))
                         .tooltip(Tooltip.create(localized(

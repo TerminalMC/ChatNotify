@@ -59,6 +59,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
     private @Nullable Pattern filterPattern = null;
     private OptionList.Entry.ActionButton addButtonEntry;
 
+    private final Runnable tabNameUpdate;
     private final Component title;
     private final Component titleTooltip;
     private final @Nullable Supplier<Boolean> statusSupplier;
@@ -67,10 +68,11 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
     private final EntrySupplier<E> entrySupplier;
     private final @Nullable TrailerSupplier<E> trailerSupplier;
 
-    public FilterList(Minecraft mc, int width, int height, int y, int entryWidth,
-                      int entryHeight, int entrySpacing,
+    public FilterList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                      int entryWidth, int entryHeight, int entrySpacing,
                       Class<? extends Entry.ListEntry> entryClass,
                       BiFunction<Integer, Integer, Boolean> moveFunction,
+                      Runnable tabNameUpdate,
                       Component title,
                       Component titleTooltip,
                       @Nullable Supplier<Boolean> statusSupplier,
@@ -80,8 +82,9 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                       @Nullable TrailerSupplier<E> trailerSupplier,
                       Runnable addRunnable
     ) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing,
+        super(mc,screen, width, height, y, entryWidth, entryHeight, entrySpacing,
                 new HashMap<>(Map.of(entryClass, moveFunction)));
+        this.tabNameUpdate = tabNameUpdate;
         this.title = title;
         this.titleTooltip = titleTooltip;
         this.statusSupplier = statusSupplier;
@@ -94,6 +97,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
                     addRunnable.run();
+                    tabNameUpdate.run();
                     filterString = "";
                     filterPattern = null;
                     init();
@@ -142,6 +146,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 addEntry(start, entry);
             }
         }
+        tabNameUpdate.run();
         clampScrollAmount();
     }
 
@@ -193,7 +198,10 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             .displayOnlyValue()
                             .withInitialValue(list.statusSupplier.get())
                             .create(movingX, 0, statusButtonWidth, height, Component.empty(),
-                                    (button, status) -> list.statusConsumer.accept(status)));
+                                    (button, status) -> {
+                                        list.statusConsumer.accept(status);
+                                        list.tabNameUpdate.run();
+                                    }));
                     movingX += statusButtonWidth + SPACE;
                 }
 

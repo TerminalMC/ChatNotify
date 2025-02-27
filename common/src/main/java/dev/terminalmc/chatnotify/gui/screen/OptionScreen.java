@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
+import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.gui.widget.HorizontalList;
 import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
@@ -32,7 +33,9 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -93,6 +96,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
     public static final int TAB_SPACING = 4;
 
 
+    protected final Map<String,Button> tabLookup = new HashMap<>();
     protected final HorizontalList<Button> tabs = new HorizontalList<>(
             TAB_LIST_MARGIN, TAB_LIST_Y, width - TAB_LIST_MARGIN * 2, TAB_LIST_HEIGHT,
             TAB_SPACING, true);
@@ -191,13 +195,19 @@ public abstract class OptionScreen extends OptionsSubScreen {
         int i = 0;
 
         for (Tab tab : tabList) {
+            if (tabLookup.containsKey(tab.key)) {
+                ChatNotify.LOG.error("Duplicate tab found with key '{}'!", tab.key);
+                continue;
+            }
             Component title = Component.translatable(tab.key);
-            tabs.addEntry(Button.builder(title, (button) -> {
-                tabs.entries().forEach((b) -> b.active = true);
-                button.active = false;
+            Button button = Button.builder(title, (b) -> {
+                tabs.entries().forEach((b2) -> b2.active = true);
+                b.active = false;
                 setList(tab.getList(this));
             }).size(Math.clamp(Minecraft.getInstance().font.width(title) + 8,
-                    MIN_TAB_WIDTH, MAX_TAB_WIDTH), TAB_HEIGHT).build());
+                    MIN_TAB_WIDTH, MAX_TAB_WIDTH), TAB_HEIGHT).build();
+            tabLookup.put(tab.key, button);
+            tabs.addEntry(button);
             if (defaultIndex == -1 && tab.key.equals(defaultKey)) defaultIndex = i;
             else i++;
         }
@@ -205,13 +215,20 @@ public abstract class OptionScreen extends OptionsSubScreen {
         if (defaultIndex == -1) defaultIndex = 0;
         tabs.getEntry(defaultIndex).active = false;
         this.list = tabList.get(defaultIndex).getList(this);
-        this.list.setScreen(this);
     }
 
     private void setList(@NotNull OptionList list) {
         this.list = list;
-        this.list.setScreen(this);
         init();
+    }
+
+    public void updateTabTitle(String key, Component title) {
+        Button button = tabLookup.get(key);
+        if (button != null) {
+            button.setMessage(title);
+            button.setWidth(Math.clamp(Minecraft.getInstance().font.width(title) + 8,
+                    MIN_TAB_WIDTH, MAX_TAB_WIDTH));
+        }
     }
 
     public static class Tab {

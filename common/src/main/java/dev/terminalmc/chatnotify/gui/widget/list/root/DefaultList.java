@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list.root;
 
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
@@ -39,9 +40,9 @@ import java.awt.*;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class DefaultList extends OptionList {
-    public DefaultList(Minecraft mc, int width, int height, int y, int entryWidth,
-                       int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+    public DefaultList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                       int entryWidth, int entryHeight, int entrySpacing) {
+        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
     }
 
     @Override
@@ -130,7 +131,7 @@ public class DefaultList extends OptionList {
                                     Config.get().defaultSound::setId,
                                     (widget) -> list.init(),
                                     Minecraft.getInstance().getSoundManager().getAvailableSounds()
-                                    .stream().map(ResourceLocation::toString).sorted().toList())
+                                            .stream().map(ResourceLocation::toString).sorted().toList())
                                     .withSoundDropType());
                         })
                         .pos(x, 0)

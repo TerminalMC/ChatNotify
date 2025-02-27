@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
 import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import net.minecraft.client.Minecraft;
@@ -59,9 +60,9 @@ public class KeySelectorList extends OptionList {
 
     private final Trigger trigger;
 
-    public KeySelectorList(Minecraft mc, int width, int height, int y, int entryWidth,
-                           int entryHeight, Trigger trigger) {
-        super(mc, width, height, y, entryWidth, entryHeight, 1);
+    public KeySelectorList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                           int entryWidth, int entryHeight, Trigger trigger) {
+        super(mc, screen, width, height, y, entryWidth, entryHeight, 1);
         this.trigger = trigger;
     }
 

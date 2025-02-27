@@ -19,6 +19,7 @@ package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.*;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
@@ -54,10 +55,10 @@ public class TriggerEditorList extends OptionList {
     private TextField keyDisplayField;
     private String displayKey = "";
 
-    public TriggerEditorList(Minecraft mc, int width, int height, int y, int entryWidth,
-                             int entryHeight, int entrySpacing, Trigger trigger,
-                             TextStyle textStyle) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+    public TriggerEditorList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+                             int entryWidth, int entryHeight, int entrySpacing,
+                             Trigger trigger, TextStyle textStyle) {
+        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
         this.trigger = trigger;
         this.textStyle = textStyle;
         this.recentChat = ChatNotify.unmodifiedChat.stream().toList().reversed();

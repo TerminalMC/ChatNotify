@@ -22,9 +22,12 @@ import dev.terminalmc.chatnotify.config.ResponseMessage;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.FilterList;
+import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.notif.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.List;
 
@@ -32,9 +35,8 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
- * Supports a series of
- * {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s for
- * configuration of a {@link Notification}.
+ * Supports a series of {@link OptionList}s for configuration of a
+ * {@link Notification}.
  *
  * <p><b>Note:</b> {@link Notification#editing} should be set to {@link true}
  * when opening this screen, and will be set to {@link false} when it is closed.
@@ -52,18 +54,20 @@ public class NotifScreen extends OptionScreen {
         this.notif = notif;
         notif.editing = true;
         addTabs(defaultKey);
+        updateTabTitles();
     }
 
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
                 new Tab(TabKey.TRIGGERS.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.TriggerOptions.class,
                             (source, dest) -> notif == Config.get().getUserNotif()
                                     ? notif.moveTrigger(source + 2, dest + 2)
                                     : notif.moveTrigger(source, dest),
+                            () -> cast(screen).updateTabTitle(TabKey.TRIGGERS),
                             localized("option", "notif.trigger.list", "ℹ"),
                             localized("option", "notif.trigger.list.tooltip"),
                             null,
@@ -82,7 +86,7 @@ public class NotifScreen extends OptionScreen {
                                             x, width, height, list, trigger, notif.textStyle, index,
                                             (i) -> notif.triggers.remove((int) i),
                                             new TextField.Validator.UniqueTrigger(
-                                                    () -> Config.get().getNotifs(), 
+                                                    () -> Config.get().getNotifs(),
                                                     (n) -> n.triggers, notif, trigger), true);
                                 }
                             },
@@ -94,21 +98,22 @@ public class NotifScreen extends OptionScreen {
                     );
                 }),
                 new Tab(TabKey.FORMAT.key, (screen) ->
-                        new FormatList(Minecraft.getInstance(), 0, 0, 0,
+                        new FormatList(Minecraft.getInstance(), screen, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                                 cast(screen).notif
                         )),
                 new Tab(TabKey.SOUND.key, (screen) ->
-                        new SoundList(Minecraft.getInstance(), 0, 0, 0,
+                        new SoundList(Minecraft.getInstance(), screen, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
                                 cast(screen).notif.sound
                         )),
                 new Tab(TabKey.INCLUSION.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.TriggerOptions.class,
                             notif::moveInclusionTrigger,
+                            () -> cast(screen).updateTabTitle(TabKey.INCLUSION),
                             localized("option", "notif.inclusion.list", "ℹ"),
                             localized("option", "notif.inclusion.list.tooltip"),
                             () -> notif.inclusionEnabled,
@@ -128,10 +133,11 @@ public class NotifScreen extends OptionScreen {
                 }),
                 new Tab(TabKey.EXCLUSION.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.TriggerOptions.class,
                             notif::moveExclusionTrigger,
+                            () -> cast(screen).updateTabTitle(TabKey.EXCLUSION),
                             localized("option", "notif.exclusion.list", "ℹ"),
                             localized("option", "notif.exclusion.list.tooltip"),
                             () -> notif.exclusionEnabled,
@@ -151,10 +157,11 @@ public class NotifScreen extends OptionScreen {
                 }),
                 new Tab(TabKey.RESPONSES.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.ResponseOptions.class,
                             notif::moveResponseMessage,
+                            () -> cast(screen).updateTabTitle(TabKey.RESPONSES),
                             localized("option", "notif.response.list", "ℹ"),
                             localized("option", "notif.response.list.tooltip"),
                             () -> notif.responseEnabled,
@@ -169,12 +176,49 @@ public class NotifScreen extends OptionScreen {
                     );
                 }),
                 new Tab(TabKey.MISC.key, (screen) ->
-                        new MiscOptionList(Minecraft.getInstance(), 0, 0, 0,
+                        new MiscOptionList(Minecraft.getInstance(), screen, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                                 cast(screen).notif
                         ))
         );
         super.setTabs(tabs, defaultKey);
+    }
+
+    public void updateTabTitles() {
+        for (TabKey tabKey : TabKey.values()) {
+            updateTabTitle(tabKey);
+        }
+    }
+
+    private void updateTabTitle(TabKey tabKey) {
+        MutableComponent title = Component.translatable(tabKey.key);
+        switch (tabKey) {
+            case TRIGGERS -> {
+                if (!notif.triggers.isEmpty()) {
+                    title.append(" ");
+                    title.append(localized("common", "count", notif.triggers.size()));
+                }
+            }
+            case INCLUSION -> {
+                if (notif.inclusionEnabled && !notif.inclusionTriggers.isEmpty()) {
+                    title.append(" ");
+                    title.append(localized("common", "count", notif.inclusionTriggers.size()));
+                }
+            }
+            case EXCLUSION -> {
+                if (notif.exclusionEnabled && !notif.exclusionTriggers.isEmpty()) {
+                    title.append(" ");
+                    title.append(localized("common", "count", notif.exclusionTriggers.size()));
+                }
+            }
+            case RESPONSES -> {
+                if (notif.responseEnabled && !notif.responseMessages.isEmpty()) {
+                    title.append(" ");
+                    title.append(localized("common", "count", notif.responseMessages.size()));
+                }
+            }
+        }
+        super.updateTabTitle(tabKey.key, title);
     }
 
     public enum TabKey {

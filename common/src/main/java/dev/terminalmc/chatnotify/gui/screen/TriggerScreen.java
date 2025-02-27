@@ -49,12 +49,12 @@ public class TriggerScreen extends OptionScreen {
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
                 new Tab(TabKey.TRIGGER_EDITOR.key, (screen) ->
-                        new TriggerEditorList(Minecraft.getInstance(), 0, 0, 0,
+                        new TriggerEditorList(Minecraft.getInstance(), screen, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                                 cast(screen).trigger, cast(screen).textStyle
                         )),
                 new Tab(TabKey.KEY_SELECTOR.key, (screen) ->
-                        new KeySelectorList(Minecraft.getInstance(), 0, 0, 0,
+                        new KeySelectorList(Minecraft.getInstance(), screen, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
                                 cast(screen).trigger
                         ))

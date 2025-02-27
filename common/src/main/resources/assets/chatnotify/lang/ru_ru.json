@@ -1,4 +1,5 @@
 {
+  "common.chatnotify.count": "(%s)",
   "common.chatnotify.new": "Новый",
   "common.chatnotify.old": "Старый",
   "common.chatnotify.search": "Поиск",

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1
+
+- Added a count indicator to filterable list tab names
+
 ## 2.4.0
 
 - Switched to tab-style options UI
