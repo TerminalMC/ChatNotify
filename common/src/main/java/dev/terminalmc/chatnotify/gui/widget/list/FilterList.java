@@ -585,76 +585,67 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
             ) {
                 super();
                 Minecraft mc = Minecraft.getInstance();
-
-                int SPACING_NARROW = 2;
-
+                
                 @Nullable Trigger trigger = notif.triggers.size() == 1
                         ? notif.triggers.getFirst() : null;
                 boolean singleTrig = trigger != null;
 
-                int baseFieldWidth = Minecraft.getInstance().font.width("#FFAAFF++"); // ~54
-                //noinspection UnnecessaryLocalVariable
-                int colorFieldWidth = baseFieldWidth;
-                int soundFieldWidth = baseFieldWidth;
-                int statusButtonWidth = Math.max(24, height);
+                int statusButtonWidth = 24;
+                int minFieldWidth = mc.font.width("#FFAAFF++"); // default 54
+                int soundFieldWidth = minFieldWidth;
+                int soundFieldWidthMax = mc.font.width("block.note_block.chime++"); // default 122
 
                 boolean showColorField = false;
                 boolean showColorFieldNominal = notif.textStyle.doColor;
                 boolean showSoundField = false;
                 boolean showSoundFieldNominal = notif.sound.isEnabled();
-
+                
                 int triggerWidth = width
-                        - SPACING_NARROW
-                        - list.smallWidgetWidth
-                        - SPACING_NARROW
-                        - list.tinyWidgetWidth
-                        - SPACING_NARROW
-                        - list.tinyWidgetWidth
-                        - SPACING_NARROW
-                        - statusButtonWidth;
-                // Must be updated if any calculation constants are changed
-                boolean canShowAllFields = triggerWidth >= 335;
-                if (canShowAllFields) {
-                    showColorField = showColorFieldNominal;
-                    showSoundField = true;
-                }
+                        - SPACE_SMALL
+                        - list.smallWidgetWidth // More options
+                        - SPACE_SMALL
+                        - list.tinyWidgetWidth // Color toggle
+                        - SPACE_SMALL
+                        - list.tinyWidgetWidth // Sound toggle
+                        - SPACE_SMALL
+                        - statusButtonWidth; // Status toggle
 
-                // Add a field if trigger will still have 200 space
-                if (triggerWidth >= (200 + baseFieldWidth)) {
-                    triggerWidth -= baseFieldWidth;
-                    // If color is enabled and sound is disabled, show color.
-                    // Otherwise, show sound
-                    if (showColorFieldNominal && !showSoundFieldNominal) {
-                        showColorField = true;
-                    } else {
+                // Other fields should not be shown if trigger would be less
+                int triggerWidthNominalMin = 220;
+                int excess = triggerWidth - triggerWidthNominalMin;
+                if (excess > minFieldWidth) {
+                    // Preference sound field
+                    if (showSoundFieldNominal) {
                         showSoundField = true;
+                        triggerWidth -= soundFieldWidth;
+                    }
+                }
+                excess = triggerWidth - triggerWidthNominalMin;
+                if (excess > minFieldWidth) {
+                    // Color field
+                    if (showColorFieldNominal) {
+                        showColorField = true;
+                        triggerWidth -= minFieldWidth;
                     }
                 }
 
                 // If sound field is enabled, split the trigger's excess over 
-                // 200 between trigger and sound
+                // threshold between trigger and sound
                 if (showSoundField) {
-                    int excess = triggerWidth - 200;
+                    excess = triggerWidth - triggerWidthNominalMin;
                     triggerWidth -= excess;
 
-                    // Up to 120, sound takes 70%
+                    // Up to 100, sound takes 70%
                     int soundBonus = (int)(excess * 0.7);
-                    // Above 120, sound takes 35% (return 50% of extra)
-                    int soundMargin = Math.max(0, soundFieldWidth + soundBonus - 120);
+                    // Above 100, sound takes 35% (return 50% of extra)
+                    int soundMargin = Math.max(0, soundFieldWidth + soundBonus - 100);
                     soundBonus -= (int)(soundMargin * 0.5);
-                    // Above 140, sound takes nothing (return 100% of extra)
-                    soundMargin = Math.max(0, soundFieldWidth + soundBonus - 140);
+                    // Above sound max, sound takes nothing (return 100% of extra)
+                    soundMargin = Math.max(0, soundFieldWidth + soundBonus - soundFieldWidthMax);
                     soundBonus -= soundMargin;
 
                     soundFieldWidth += soundBonus;
                     triggerWidth += (excess - soundBonus);
-
-                    // If trigger space is still at least 225 and color is 
-                    // enabled, add color
-                    if (triggerWidth >= 225 && (showColorFieldNominal || showColorField)) {
-                        triggerWidth -= colorFieldWidth;
-                        showColorField = true;
-                    }
                 }
 
                 int triggerFieldWidth = triggerWidth;
@@ -701,9 +692,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     typeButton.setTooltipDelay(Duration.ofMillis(200));
                     elements.add(typeButton);
                     movingX += list.tinyWidgetWidth;
-                }
 
-                if (singleTrig) {
                     // Trigger editor button
                     Button editorButton = Button.builder(Component.literal("✎"),
                                     (button) -> {
@@ -720,9 +709,9 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             "option", "notif.trigger.open.trigger_editor.tooltip")));
                     editorButton.setTooltipDelay(Duration.ofMillis(200));
                     elements.add(editorButton);
-                    movingX += list.tinyWidgetWidth + SPACING_NARROW;
+                    movingX += list.tinyWidgetWidth;
                 }
-
+                
                 // Trigger field
                 TextField triggerField;
                 if (singleTrig) {
@@ -741,7 +730,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     triggerField.setValue(createLabel(notif, triggerFieldWidth - 10).getString());
                 }
                 elements.add(triggerField);
-                movingX += triggerFieldWidth + (singleTrig ? 0 : SPACING_NARROW);
+                movingX += triggerFieldWidth + SPACE_SMALL;
 
                 // Options button
 
@@ -752,7 +741,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         "option", "notif.open.options.tooltip")));
                 editButton.setTooltipDelay(Duration.ofMillis(200));
                 elements.add(editButton);
-                movingX += list.smallWidgetWidth + SPACING_NARROW;
+                movingX += list.smallWidgetWidth + SPACE_SMALL;
 
                 // Color
 
@@ -784,7 +773,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         .append(localized("option", "notif.click_edit"))));
                 colorEditButton.setTooltipDelay(Duration.ofMillis(200));
                 if (showColorField) {
-                    TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
+                    TextField colorField = new TextField(movingX, 0, minFieldWidth, height);
                     colorField.hexColorValidator().strict();
                     colorField.setMaxLength(7);
                     colorField.setResponder((val) -> {
@@ -808,11 +797,11 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             "option", "notif.color.field.tooltip")));
                     colorField.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(colorField);
-                    movingX += colorFieldWidth;
+                    movingX += minFieldWidth;
                 }
                 colorEditButton.setPosition(movingX, 0);
                 elements.add(colorEditButton);
-                movingX += list.tinyWidgetWidth + SPACING_NARROW;
+                movingX += list.tinyWidgetWidth + SPACE_SMALL;
 
                 // Sound
 

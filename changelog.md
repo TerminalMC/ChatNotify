@@ -7,6 +7,7 @@
 - Moved trigger editor button to left side of field for consistency
 - Removed key selector button
 - Fixed default screen widgets being the wrong size
+- Improved option list dynamic width algorithm
 
 ## 2.4.0
 
