@@ -204,8 +204,6 @@ public class TriggerEditorList extends OptionList {
                 MultiLineTextField triggerField = new MultiLineTextField(movingX, 0,
                         triggerFieldWidth, height, localized("option", "notif.trigger.field.hint"));
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
-                triggerField.withValidator(new TextField.Validator.UniqueTrigger(
-                        () -> Config.get().getNotifs(), (n) -> n.triggers, null, trigger));
                 triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
                     if (list.children().size() > 4) {

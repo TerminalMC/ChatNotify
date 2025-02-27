@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.field;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.util.ColorUtil;
@@ -28,6 +29,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -35,8 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -93,32 +93,32 @@ public class TextField extends EditBox {
             this.validators.add(validator);
         }
     }
-    
+
     public TextField withValidator(@NotNull Validator validator) {
         this.validators.add(validator);
         return this;
     }
-    
+
     public TextField regexValidator() {
         this.validators.add(new Validator.Regex());
         return this;
     }
-    
+
     public TextField hexColorValidator() {
         this.validators.add(new Validator.HexColor());
         return this;
     }
-    
+
     public TextField soundValidator() {
         this.validators.add(new Validator.Sound());
         return this;
     }
-    
+
     public TextField posIntValidator() {
         this.validators.add(new Validator.PosInt());
         return this;
     }
-    
+
     public TextField strict() {
         this.lenient = false;
         return this;
@@ -374,55 +374,105 @@ public class TextField extends EditBox {
         }
 
         class UniqueTrigger implements Validator {
-            final Supplier<List<Notification>> notifSupplier;
-            final Function<Notification,List<Trigger>> triggerSupplier;
-            final @Nullable Notification notif;
+            final Notification notif;
             final Trigger trigger;
+            final Type type;
 
-            public UniqueTrigger(Supplier<List<Notification>> notifSupplier,
-                                 Function<Notification, List<Trigger>> triggerSupplier,
-                                 @Nullable Notification notif, Trigger trigger) {
-                this.notifSupplier = notifSupplier;
-                this.triggerSupplier = triggerSupplier;
+            private enum Type {
+                MAIN,
+                INCLUSION,
+                EXCLUSION
+            }
+
+            public UniqueTrigger(Notification notif, Trigger trigger) {
+                this(notif, trigger, Type.MAIN);
+            }
+
+            private UniqueTrigger(Notification notif, Trigger trigger, Type type) {
                 this.notif = notif;
                 this.trigger = trigger;
+                this.type = type;
+            }
+
+            public static UniqueTrigger inclusion(Notification notif, Trigger trigger) {
+                return new UniqueTrigger(notif, trigger, Type.INCLUSION);
+            }
+
+            public static UniqueTrigger exclusion(Notification notif, Trigger trigger) {
+                return new UniqueTrigger(notif, trigger, Type.EXCLUSION);
             }
 
             @Override
             public Optional<Component> validate(String str) {
                 if (str.isBlank()) return Optional.empty();
+                MutableComponent err = Component.empty().withStyle(ChatFormatting.RED);
+
+                boolean hasErr = checkTriggers(err, false, notif.triggers, str, "");
+                if (notif.inclusionEnabled) {
+                    hasErr = checkTriggers(err, hasErr, notif.inclusionTriggers, str, ".inclusion") || hasErr;
+                }
+                if (notif.exclusionEnabled) {
+                    hasErr = checkTriggers(err, hasErr, notif.exclusionTriggers, str, ".exclusion") || hasErr;
+                }
+
+                // Only check other notifications if inclusion/exclusion are
+                // not in use, too complex to check those.
+                if (
+                        type == Type.MAIN
+                                && (!notif.inclusionEnabled || notif.inclusionTriggers.isEmpty())
+                                && (!notif.exclusionEnabled || notif.exclusionTriggers.isEmpty())
+                ) {
+                    hasErr = checkOtherNotifs(err, hasErr, str);
+                }
+
+                return hasErr ? Optional.of(err) : Optional.empty();
+            }
+
+            private boolean checkOtherNotifs(MutableComponent err, boolean hasErr, String str) {
                 int i = 0;
-                for (Notification n : notifSupplier.get()) {
+                for (Notification n : Config.get().getNotifs()) {
                     i++; // 1-indexed for users
-                    if (n.enabled) {
+                    // Only check other notifications if inclusion/exclusion are
+                    // not in use, too complex to check those.
+                    if (
+                            n != notif
+                                    && n.enabled
+                                    && (!n.inclusionEnabled || n.inclusionTriggers.isEmpty())
+                                    && (!n.exclusionEnabled || n.exclusionTriggers.isEmpty())
+                    ) {
                         int j = 0;
-                        for (Trigger t : triggerSupplier.apply(n)) {
+                        for (Trigger t : n.triggers) {
                             j++;
-                            if (
-                                    !t.equals(trigger)
-                                            && t.string.equals(str)
-                                            && t.type.equals(trigger.type)
-                            ) {
-                                if (n.equals(notif)) {
-                                    return Optional.of(localized(
-                                            "ui", "field.error.trigger.duplicate.here",
-                                            Component.literal(String.valueOf(j))
-                                                    .withStyle(ChatFormatting.GOLD))
-                                            .withStyle(ChatFormatting.RED));
-                                } else {
-                                    return Optional.of(localized(
-                                            "ui","field.error.trigger.duplicate",
-                                            Component.literal(String.valueOf(j))
-                                                    .withStyle(ChatFormatting.GOLD),
-                                            Component.literal(String.valueOf(i))
-                                                    .withStyle(ChatFormatting.GOLD))
-                                            .withStyle(ChatFormatting.RED));
-                                }
+                            if (t.type == trigger.type && t.string.equals(str)) {
+                                if (hasErr) err.append("\n");
+                                err.append(localized(
+                                        "ui","field.error.trigger.duplicate",
+                                        Component.literal(String.valueOf(j))
+                                                .withStyle(ChatFormatting.GOLD),
+                                        Component.literal(String.valueOf(i))
+                                                .withStyle(ChatFormatting.GOLD)));
+                                return true;
                             }
                         }
                     }
                 }
-                return Optional.empty();
+                return false;
+            }
+
+            private boolean checkTriggers(MutableComponent err, boolean hasErr,
+                                          List<Trigger> triggers, String str, String errKey) {
+                int i = 0;
+                for (Trigger t : triggers) {
+                    i++; // 1-indexed for users
+                    if (!t.equals(trigger) && t.type == trigger.type && t.string.equals(str)) {
+                        if (hasErr) err.append("\n");
+                        err.append(localized("ui", "field.error.trigger.duplicate.here" + errKey,
+                                Component.literal(String.valueOf(i))
+                                        .withStyle(ChatFormatting.GOLD)));
+                        return true;
+                    }
+                }
+                return false;
             }
         }
     }

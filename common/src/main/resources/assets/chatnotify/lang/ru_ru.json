@@ -248,5 +248,7 @@
   "ui.chatnotify.field.error.pos_int": "Требуется положительное целое число",
   "ui.chatnotify.field.error.sound": "Нераспознанный звук. Может не работать в игре.",
   "ui.chatnotify.field.error.trigger.duplicate": "Дубликат триггера #%s в уведомлении #%s",
-  "ui.chatnotify.field.error.trigger.duplicate.here": "Дубликат триггера #%s"
+  "ui.chatnotify.field.error.trigger.duplicate.here": "Дубликат триггера #%s",
+  "ui.chatnotify.field.error.trigger.duplicate.here.exclusion": "Duplicate of exclusion trigger #%s",
+  "ui.chatnotify.field.error.trigger.duplicate.here.inclusion": "Duplicate of inclusion trigger #%s"
 }

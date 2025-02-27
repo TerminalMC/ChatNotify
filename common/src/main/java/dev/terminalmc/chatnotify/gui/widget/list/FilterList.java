@@ -749,7 +749,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
                     if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                     triggerField.withValidator(new TextField.Validator.UniqueTrigger(
-                            () -> Config.get().getNotifs(), (n) -> n.triggers, notif, trigger));
+                            notif, trigger));
                     triggerField.setMaxLength(240);
                     triggerField.setResponder((str) -> trigger.string = str.strip());
                     triggerField.setValue(trigger.string);

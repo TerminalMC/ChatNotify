@@ -86,8 +86,7 @@ public class NotifScreen extends OptionScreen {
                                             x, width, height, list, trigger, notif.textStyle, index,
                                             (i) -> notif.triggers.remove((int) i),
                                             new TextField.Validator.UniqueTrigger(
-                                                    () -> Config.get().getNotifs(),
-                                                    (n) -> n.triggers, notif, trigger), true);
+                                                    notif, trigger), true);
                                 }
                             },
                             (x, width, height, list, trigger) -> trigger.styleTarget.enabled
@@ -123,9 +122,7 @@ public class NotifScreen extends OptionScreen {
                                     new FilterList.Entry.TriggerOptions(
                                             x, width, height, list, trigger, notif.textStyle, index,
                                             (i) -> notif.inclusionTriggers.remove((int) i),
-                                            new TextField.Validator.UniqueTrigger(
-                                                    () -> List.of(notif),
-                                                    (n) -> n.inclusionTriggers,
+                                            TextField.Validator.UniqueTrigger.inclusion(
                                                     notif, trigger), false),
                             null,
                             () -> notif.inclusionTriggers.add(new Trigger())
@@ -147,9 +144,7 @@ public class NotifScreen extends OptionScreen {
                                     new FilterList.Entry.TriggerOptions(
                                             x, width, height, list, trigger, notif.textStyle, index,
                                             (i) -> notif.exclusionTriggers.remove((int) i),
-                                            new TextField.Validator.UniqueTrigger(
-                                                    () -> List.of(notif),
-                                                    (n) -> n.exclusionTriggers,
+                                            TextField.Validator.UniqueTrigger.exclusion(
                                                     notif, trigger), false),
                             null,
                             () -> notif.exclusionTriggers.add(new Trigger())

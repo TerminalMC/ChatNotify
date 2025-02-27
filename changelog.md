@@ -3,6 +3,7 @@
 ## 2.4.1
 
 - Added a count indicator to filterable list tab names
+- Improved trigger conflict detection
 
 ## 2.4.0
 
