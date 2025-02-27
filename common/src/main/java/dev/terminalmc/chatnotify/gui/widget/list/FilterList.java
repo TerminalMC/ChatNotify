@@ -244,10 +244,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
             ) {
                 super();
                 Minecraft mc = Minecraft.getInstance();
-                boolean keyTrigger = trigger.type == Trigger.Type.KEY;
                 int triggerFieldWidth = width - list.tinyWidgetWidth * 2;
                 if (canUseStyleTarget) triggerFieldWidth -= list.tinyWidgetWidth;
-                if (keyTrigger) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
 
                 // Index indicator
@@ -288,22 +286,6 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 typeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
-
-                if (keyTrigger) {
-                    // Key selection button
-                    Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"),
-                                    (button) -> mc.setScreen(new TriggerScreen(
-                                            mc.screen, trigger, textStyle, () -> {},
-                                            TriggerScreen.TabKey.KEY_SELECTOR.key)))
-                            .pos(movingX, 0)
-                            .size(list.tinyWidgetWidth, height)
-                            .build();
-                    keySelectButton.setTooltip(Tooltip.create(localized(
-                            "option", "notif.trigger.open.key_selector.tooltip")));
-                    keySelectButton.setTooltipDelay(Duration.ofMillis(500));
-                    elements.add(keySelectButton);
-                    movingX += list.tinyWidgetWidth;
-                }
 
                 // Trigger editor button
                 Button editorButton = Button.builder(Component.literal("✎"),
@@ -609,7 +591,6 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 @Nullable Trigger trigger = notif.triggers.size() == 1
                         ? notif.triggers.getFirst() : null;
                 boolean singleTrig = trigger != null;
-                boolean keyTrig = singleTrig && trigger.type == Trigger.Type.KEY;
 
                 int baseFieldWidth = Minecraft.getInstance().font.width("#FFAAFF++"); // ~54
                 //noinspection UnnecessaryLocalVariable
@@ -678,7 +659,6 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 int triggerFieldWidth = triggerWidth;
                 if (singleTrig) triggerFieldWidth -= (list.tinyWidgetWidth * 2);
-                if (keyTrig) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
 
                 if (index != 0) {
@@ -720,26 +700,6 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                     });
                     typeButton.setTooltipDelay(Duration.ofMillis(200));
                     elements.add(typeButton);
-                    movingX += list.tinyWidgetWidth;
-                }
-
-                if (keyTrig) {
-                    // Key selection button
-                    Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"),
-                                    (button) -> {
-                                        notif.editing = true;
-                                        mc.setScreen(new TriggerScreen(
-                                                mc.screen, trigger, notif.textStyle,
-                                                () -> notif.editing = false,
-                                                TriggerScreen.TabKey.KEY_SELECTOR.key));
-                                    })
-                            .pos(movingX, 0)
-                            .size(list.tinyWidgetWidth, height)
-                            .build();
-                    keySelectButton.setTooltip(Tooltip.create(localized(
-                            "option", "notif.trigger.open.key_selector.tooltip")));
-                    keySelectButton.setTooltipDelay(Duration.ofMillis(200));
-                    elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
                 }
 

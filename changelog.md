@@ -5,6 +5,7 @@
 - Added a count indicator to filterable list tab names
 - Improved trigger conflict detection
 - Moved trigger editor button to left side of field for consistency
+- Removed key selector button
 
 ## 2.4.0
 
