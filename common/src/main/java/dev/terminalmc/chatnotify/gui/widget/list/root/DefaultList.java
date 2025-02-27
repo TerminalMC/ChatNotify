@@ -51,8 +51,8 @@ public class DefaultList extends OptionList {
                 localized("option", "default.list", "ℹ"),
                 Tooltip.create(localized("option", "default.list.tooltip")), -1));
 
-        addEntry(new Entry.DefaultColor(dynEntryX, dynEntryWidth, entryHeight, this));
-        addEntry(new Entry.DefaultSound(dynEntryX, dynEntryWidth, entryHeight, this));
+        addEntry(new Entry.DefaultColor(entryX, entryWidth, entryHeight, this));
+        addEntry(new Entry.DefaultSound(entryX, entryWidth, entryHeight, this));
         addEntry(new OptionList.Entry.DoubleSlider(entryX, entryWidth, entryHeight, 0, 1, 2,
                 localized("option", "notif.sound.volume").getString(), null,
                 CommonComponents.OPTION_OFF.getString(), null,
@@ -62,7 +62,7 @@ public class DefaultList extends OptionList {
                 localized("option", "notif.sound.pitch").getString(), null, null, null,
                 () -> (double)Config.get().defaultSound.getPitch(),
                 (value) -> Config.get().defaultSound.setPitch(value.floatValue())));
-        addEntry(new Entry.SoundSource(dynEntryX, dynEntryWidth, entryHeight, this));
+        addEntry(new Entry.SoundSource(entryX, entryWidth, entryHeight, this));
     }
 
     // Custom entries

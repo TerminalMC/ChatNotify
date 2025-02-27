@@ -6,6 +6,7 @@
 - Improved trigger conflict detection
 - Moved trigger editor button to left side of field for consistency
 - Removed key selector button
+- Fixed default screen widgets being the wrong size
 
 ## 2.4.0
 
