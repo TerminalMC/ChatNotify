@@ -362,7 +362,7 @@ public class MessageUtil {
      */
     private static Component convertMsg(String msg, @Nullable Matcher matcher) {
         // Replace $ with section sign
-        msg = msg.replaceAll(Matcher.quoteReplacement("$"), "§");
+        msg = msg.replaceAll(Matcher.quoteReplacement("$"), "\u00A7");
         // Substitute capturing groups
         if (matcher != null && matcher.find(0)) {
             for (int i = 0; i <= matcher.groupCount(); i++) {

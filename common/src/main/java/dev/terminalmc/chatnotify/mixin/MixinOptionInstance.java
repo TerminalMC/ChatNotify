@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinOptionInstance {
     @Shadow
     @Final
-    public Component caption;
+    Component caption;
 
     @Shadow
     @Final
