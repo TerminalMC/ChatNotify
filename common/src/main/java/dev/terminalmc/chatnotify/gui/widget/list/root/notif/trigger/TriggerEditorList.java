@@ -24,6 +24,7 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.mixin.accessor.AbstractWidgetAccessor;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.MessageUtil;
 import dev.terminalmc.chatnotify.util.StyleUtil;
@@ -35,7 +36,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -55,13 +55,17 @@ public class TriggerEditorList extends OptionList {
     private TextField keyDisplayField;
     private String displayKey = "";
 
-    public TriggerEditorList(Minecraft mc, OptionScreen screen, int width, int height, int y,
+    public TriggerEditorList(Minecraft mc, OptionScreen screen, int width, int height, int top, int bottom,
                              int entryWidth, int entryHeight, int entrySpacing,
                              Trigger trigger, TextStyle textStyle) {
-        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, screen, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
         this.trigger = trigger;
         this.textStyle = textStyle;
-        this.recentChat = ChatNotify.unmodifiedChat.stream().toList().reversed();
+        List<Component> recentChatReversed = ChatNotify.unmodifiedChat.stream().toList();
+        this.recentChat = new ArrayList<>();
+        for (int i = recentChatReversed.size() - 1; i >= 0; i--) {
+            this.recentChat.add(recentChatReversed.get(i));
+        }
     }
 
     @Override
@@ -166,7 +170,7 @@ public class TriggerEditorList extends OptionList {
         });
 
         // If no message entries, add note
-        if (!(children().getLast() instanceof Entry.MessageEntry)) {
+        if (!(children().get(children().size() - 1) instanceof Entry.MessageEntry)) {
             addEntry(new OptionList.Entry.Text(dynWideEntryX, dynWideEntryWidth, entryHeight,
                     localized("option", "notif.trigger.editor.recent_messages.none"), null, -1));
         }
@@ -196,7 +200,7 @@ public class TriggerEditorList extends OptionList {
                                     trigger.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -229,7 +233,7 @@ public class TriggerEditorList extends OptionList {
                 if (!trigger.styleTarget.enabled) {
                     styleButton.setTooltip(Tooltip.create(localized(
                             "option", "notif.trigger.style_target.add.tooltip")));
-                    styleButton.setTooltipDelay(Duration.ofMillis(500));
+                    styleButton.setTooltipDelay(500);
                 } else {
                     styleButton.active = false;
                 }
@@ -246,11 +250,11 @@ public class TriggerEditorList extends OptionList {
 
                 // Info icon
                 StringWidget infoIcon = new StringWidget(movingX, 0, list.tinyWidgetWidth, height,
-                        Component.literal("ℹ"), Minecraft.getInstance().font);
+                        Component.literal("\u2139"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option", "notif.trigger.style_target.tooltip")));
-                infoIcon.setTooltipDelay(Duration.ofMillis(500));
+                infoIcon.setTooltipDelay(500);
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
 
@@ -267,7 +271,7 @@ public class TriggerEditorList extends OptionList {
                                     styleTarget.type = type;
                                     list.init();
                                 });
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -289,7 +293,7 @@ public class TriggerEditorList extends OptionList {
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED),
+                                Component.literal("\u274C").withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     styleTarget.enabled = false;
                                     list.init();
@@ -363,7 +367,7 @@ public class TriggerEditorList extends OptionList {
                 elements.add(labelButton);
 
                 widget.setWidth(fieldWidth);
-                widget.setHeight(height);
+                ((AbstractWidgetAccessor)widget).setHeight(height);
                 widget.setX(x + width - fieldWidth);
                 elements.add(widget);
             }
