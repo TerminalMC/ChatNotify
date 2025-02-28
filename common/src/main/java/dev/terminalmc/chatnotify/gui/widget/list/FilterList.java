@@ -82,7 +82,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                       @Nullable TrailerSupplier<E> trailerSupplier,
                       Runnable addRunnable
     ) {
-        super(mc,screen, width, height, y, entryWidth, entryHeight, entrySpacing,
+        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing,
                 new HashMap<>(Map.of(entryClass, moveFunction)));
         this.tabNameUpdate = tabNameUpdate;
         this.title = title;
