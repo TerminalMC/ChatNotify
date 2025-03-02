@@ -69,7 +69,7 @@ To change the trigger type, click the `~` button to the left of the text field.
 
 #### Trigger editor
 
-Click the `✎` button to the right of the text field to open the trigger editor.
+Click the `✎` button to the left of the text field to open the trigger editor.
 
 <img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/options/trigger/editor.png" width="500px">
 
