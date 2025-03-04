@@ -128,7 +128,7 @@ public class FormatUtil {
             // the list so that the string can be reconstructed using a loop.
             // PLACEHOLDER_PATTERN.split(string) cannot be used as that doesn't
             // split between consecutive occurrences of the pattern.
-            
+
             List<String> split = new ArrayList<>();
             Matcher m = PLACEHOLDER_PATTERN.matcher(string);
             int previousEnd = 0;
@@ -137,11 +137,14 @@ public class FormatUtil {
                 split.add(string.substring(previousEnd, m.start()));
                 previousEnd = m.end();
             }
-            
-            if (previousEnd < string.length()) {
+
+            //noinspection StatementWithEmptyBody
+            if (previousEnd == 0) {
+                // No matches, keep split empty
+            } else if (previousEnd < string.length()) {
                 // Add final plain text
                 split.add(string.substring(previousEnd));
-            } else if (previousEnd == string.length()) {
+            } else {
                 // String ends with placeholder, add padding
                 split.add("");
             }
@@ -151,7 +154,7 @@ public class FormatUtil {
                 ChatNotify.LOG.warn(string);
                 ChatNotify.LOG.warn("Size of split array: {}", split.size());
                 ChatNotify.LOG.warn("Size of args array: {}", contents.getArgs().length);
-                
+
                 ChatNotify.LOG.warn("Split array:");
                 StringBuilder sb = new StringBuilder("[");
                 int i = 0;
