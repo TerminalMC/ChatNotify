@@ -4,6 +4,7 @@
 
 - Fixed processing of messages with consecutive placeholders
 - Fixed a duplicate trigger detection bug
+- Improved performance of trigger preview
 
 ## 2.4.1
 

@@ -585,7 +585,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
             ) {
                 super();
                 Minecraft mc = Minecraft.getInstance();
-                
+
                 @Nullable Trigger trigger = notif.triggers.size() == 1
                         ? notif.triggers.getFirst() : null;
                 boolean singleTrig = trigger != null;
@@ -599,7 +599,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 boolean showColorFieldNominal = notif.textStyle.doColor;
                 boolean showSoundField = false;
                 boolean showSoundFieldNominal = notif.sound.isEnabled();
-                
+
                 int triggerWidth = width
                         - SPACE_SMALL
                         - list.smallWidgetWidth // More options
@@ -711,7 +711,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     elements.add(editorButton);
                     movingX += list.tinyWidgetWidth;
                 }
-                
+
                 // Trigger field
                 TextField triggerField;
                 if (singleTrig) {
@@ -882,28 +882,35 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 else {
                     Set<String> usedStrings = new TreeSet<>();
                     List<String> strList = new ArrayList<>();
-                    boolean first = true;
 
-                    // Compile all trigger strings, ignoring duplicates
+                    // Compile the first few triggers, ignoring duplicates
+                    int cap = 10;
+                    int i = 0;
                     for (Trigger trig : notif.triggers) {
                         String str = StringUtil.stripColor(trig.string);
                         if (!usedStrings.contains(str)) {
-                            strList.add(first ? str : separator + str);
+                            strList.add(i == 0 ? str : separator + str);
                             usedStrings.add(str);
                         }
-                        first = false;
+                        if (++i >= cap) break;
+                    }
+                    // If we have an excess of triggers, append the number
+                    if (notif.triggers.size() > cap) {
+                        strList.add(String.format(plusNumFormat, notif.triggers.size() - cap));
                     }
 
-                    // Delete trigger strings until label is small enough
-                    // Not the most efficient approach, but simple is nice
-                    while(font.width(compileLabel(strList)) > maxWidth) {
-                        if (strList.size() == 1 || (strList.size() == 2
-                                && plusNumPattern.matcher(strList.getLast()).matches())) {
-                            break;
-                        }
+                    // Trim label by deleting triggers from the end until it's
+                    // small enough. Not the most efficient, but we're capped.
+                    while(font.width(compileLabel(strList)) > maxWidth
+                            && (strList.size() > 2
+                            || (strList.size() == 2
+                            && plusNumPattern.matcher(strList.getLast()).matches()))
+                    ) {
+                        // Remove the number (if any) and the last trigger
                         if (plusNumPattern.matcher(strList.removeLast()).matches()) {
                             strList.removeLast();
                         }
+                        // Add the new number
                         strList.add(String.format(plusNumFormat,
                                 usedStrings.size() - strList.size()));
                     }
