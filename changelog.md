@@ -3,6 +3,7 @@
 ## 2.4.2
 
 - Fixed processing of messages with consecutive placeholders
+- Fixed a duplicate trigger detection bug
 
 ## 2.4.1
 

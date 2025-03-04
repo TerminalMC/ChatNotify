@@ -456,7 +456,7 @@ public class TextField extends EditBox {
                         }
                     }
                 }
-                return false;
+                return hasErr;
             }
 
             private boolean checkTriggers(MutableComponent err, boolean hasErr,
@@ -472,7 +472,7 @@ public class TextField extends EditBox {
                         return true;
                     }
                 }
-                return false;
+                return hasErr;
             }
         }
     }
