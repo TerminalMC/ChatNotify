@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.2
+
+- Fixed processing of messages with consecutive placeholders
+
 ## 2.4.1
 
 - Added a count indicator to filterable list tab names

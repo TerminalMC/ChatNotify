@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FormatUtil {
@@ -122,15 +123,27 @@ public class FormatUtil {
         }
 
         if (validFormat) {
-            // Split on placeholders to get an array of plain text elements
-            List<String> split = new ArrayList<>(List.of(PLACEHOLDER_PATTERN.split(string)));
-
-            // Pad the array if necessary for ease of iteration
-            if (split.isEmpty()) {
-                split.add(""); // Pad start
-                split.add(""); // Pad end
-            } else if (!string.endsWith(split.getLast())) {
-                split.add(""); // Pad end only (start is already padded)
+            // Split on placeholders to get a list of plain text elements, with
+            // one element before each placeholder and one element at the end of
+            // the list so that the string can be reconstructed using a loop.
+            // PLACEHOLDER_PATTERN.split(string) cannot be used as that doesn't
+            // split between consecutive occurrences of the pattern.
+            
+            List<String> split = new ArrayList<>();
+            Matcher m = PLACEHOLDER_PATTERN.matcher(string);
+            int previousEnd = 0;
+            while (m.find()) {
+                // Add preceding plain text, which will be blank if at start
+                split.add(string.substring(previousEnd, m.start()));
+                previousEnd = m.end();
+            }
+            
+            if (previousEnd < string.length()) {
+                // Add final plain text
+                split.add(string.substring(previousEnd));
+            } else if (previousEnd == string.length()) {
+                // String ends with placeholder, add padding
+                split.add("");
             }
 
             if (debug) {
@@ -138,9 +151,19 @@ public class FormatUtil {
                 ChatNotify.LOG.warn(string);
                 ChatNotify.LOG.warn("Size of split array: {}", split.size());
                 ChatNotify.LOG.warn("Size of args array: {}", contents.getArgs().length);
+                
+                ChatNotify.LOG.warn("Split array:");
+                StringBuilder sb = new StringBuilder("[");
+                int i = 0;
+                for (String s : split) {
+                    if (i++ != 0) sb.append(",");
+                    sb.append(s);
+                }
+                sb.append("]");
+                ChatNotify.LOG.warn(sb.toString());
             }
 
-            if (split.size() == 1) {
+            if (split.isEmpty()) {
                 // No placeholders, create component from literal string
                 text = Component.literal(string).withStyle(text.getStyle());
             } else {
