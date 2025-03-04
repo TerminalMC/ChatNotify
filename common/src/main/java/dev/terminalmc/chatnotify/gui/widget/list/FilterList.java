@@ -902,8 +902,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     // Trim label by deleting triggers from the end until it's
                     // small enough. Not the most efficient, but we're capped.
                     while(font.width(compileLabel(strList)) > maxWidth
-                            && (strList.size() > 2
-                            || (strList.size() == 2
+                            && (strList.size() != 1
+                            && !(strList.size() == 2
                             && plusNumPattern.matcher(strList.getLast()).matches()))
                     ) {
                         // Remove the number (if any) and the last trigger
