@@ -98,8 +98,8 @@ public class MultiLineTextField extends MultiLineEditBox {
     @Override
     public void setValueListener(@NotNull Consumer<String> responder) {
         super.setValueListener((str) -> {
+            updateHistory(str);
             if (validate(str) || lenient) {
-                updateHistory(str);
                 responder.accept(str);
             }
         });

@@ -133,8 +133,8 @@ public class TextField extends EditBox {
     @Override
     public void setResponder(@NotNull Consumer<String> responder) {
         super.setResponder((str) -> {
+            updateHistory(str);
             if (validate(str) || lenient) {
-                updateHistory(str);
                 responder.accept(str);
             }
         });
