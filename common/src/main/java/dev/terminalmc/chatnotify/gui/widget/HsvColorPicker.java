@@ -16,9 +16,15 @@
 
 package dev.terminalmc.chatnotify.gui.widget;
 
-import com.mojang.blaze3d.platform.GlConst;
+import com.mojang.blaze3d.buffers.BufferType;
+import com.mojang.blaze3d.buffers.BufferUsage;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.*;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.ColorUtil;
@@ -27,7 +33,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -37,6 +43,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -103,6 +111,10 @@ public class HsvColorPicker extends OverlayWidget {
     private int oldColor;
 
     private boolean updateFromCursor;
+
+    private int bufferSize;
+    private GpuBuffer widgetBuffer;
+    private RenderSystem.AutoStorageIndexBuffer widgetIndices;
 
     public HsvColorPicker(int x, int y, int width, int height,
                           Supplier<Integer> source, Consumer<Integer> dest,
@@ -390,6 +402,7 @@ public class HsvColorPicker extends OverlayWidget {
     @Override
     protected void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         drawQuads(graphics);
+        renderQuads();
         graphics.drawString(Minecraft.getInstance().font, newColorLabel,
                 newCFieldTextX, newCFieldTextY, 0xFFFFFF);
         graphics.drawString(Minecraft.getInstance().font, oldColorLabel,
@@ -400,181 +413,231 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     private void drawQuads(GuiGraphics graphics) {
-        // Setup
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
-        RenderSystem.depthFunc(GlConst.GL_ALWAYS);
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        BufferBuilder builder = Tesselator.getInstance().begin(
-                VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        widgetIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+        bufferSize = DefaultVertexFormat.POSITION_COLOR.getVertexSize() * 88;
+        ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(bufferSize);
 
-        int x = getX();
-        int y = getY();
+        try {
+            // Setup
+            BufferBuilder builder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS,
+                    DefaultVertexFormat.POSITION_COLOR);
 
-        // Screen shadow
-        builder.addVertex(0, 0, 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
-        builder.addVertex(0, graphics.guiHeight(), 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
-        builder.addVertex(graphics.guiWidth(), graphics.guiHeight(), 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
-        builder.addVertex(graphics.guiWidth(), 0, 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+            int x = getX();
+            int y = getY();
 
-        // Main box border
-        builder.addVertex(x, y, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x, y+height, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+width, y+height, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+width, y, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            // Screen shadow
+            builder.addVertex(0, 0, 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+            builder.addVertex(0, graphics.guiHeight(), 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+            builder.addVertex(graphics.guiWidth(), graphics.guiHeight(), 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+            builder.addVertex(graphics.guiWidth(), 0, 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
 
-        // Main box background
-        builder.addVertex(x+BORDER, y+BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+BORDER, y+height-BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+width-BORDER, y+height-BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+width-BORDER, y+BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            // Main box border
+            builder.addVertex(x, y, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x, y + height, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + width, y + height, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + width, y, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
-        // HSV picker box
-        builder.addVertex(x+BORDER, y+BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+BORDER, y+height-BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+BORDER+ hsvPickerBoxWidth, y+height-BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+BORDER+ hsvPickerBoxWidth, y+BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            // Main box background
+            builder.addVertex(x + BORDER, y + BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + BORDER, y + height - BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + width - BORDER, y + height - BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + width - BORDER, y + BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
 
-        // Saturation/value field outline
-        builder.addVertex(x+svFieldX-OUTLINE, y+svFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+svFieldX-OUTLINE, y+svFieldY+svFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth+OUTLINE, y+svFieldY+svFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth+OUTLINE, y+svFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            // HSV picker box
+            builder.addVertex(x + BORDER, y + BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + BORDER, y + height - BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + BORDER + hsvPickerBoxWidth, y + height - BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + BORDER + hsvPickerBoxWidth, y + BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
-        // White, solid
-        builder.addVertex(x+svFieldX, y+svFieldY, 0F).setColor(255, 255, 255, 255);
-        builder.addVertex(x+svFieldX, y+svFieldY+svFieldHeight, 0F).setColor(255, 255, 255, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY+svFieldHeight, 0F).setColor(255, 255, 255, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY, 0F).setColor(255, 255, 255, 255);
+            // Saturation/value field outline
+            builder.addVertex(x + svFieldX - OUTLINE, y + svFieldY - OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + svFieldX - OUTLINE, y + svFieldY + svFieldHeight + OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth + OUTLINE, y + svFieldY + svFieldHeight + OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth + OUTLINE, y + svFieldY - OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
 
-        // Hue, transparent left to solid right
-        Color hue = Color.getHSBColor(getHFromCursor(), 1, 1);
-        int hueR = hue.getRed();
-        int hueG = hue.getGreen();
-        int hueB = hue.getBlue();
-        builder.addVertex(x+svFieldX, y+svFieldY, 0F).setColor(hueR, hueG, hueB, 0);
-        builder.addVertex(x+svFieldX, y+svFieldY+svFieldHeight, 0F).setColor(hueR, hueG, hueB, 0);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY+svFieldHeight, 0F).setColor(hueR, hueG, hueB, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY, 0F).setColor(hueR, hueG, hueB, 255);
+            // White, solid
+            builder.addVertex(x + svFieldX, y + svFieldY, 0F).setColor(255, 255, 255, 255);
+            builder.addVertex(x + svFieldX, y + svFieldY + svFieldHeight, 0F).setColor(255, 255, 255, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY + svFieldHeight, 0F).setColor(255, 255, 255, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY, 0F).setColor(255, 255, 255, 255);
 
-        // Black, transparent top to solid bottom
-        builder.addVertex(x+svFieldX, y+svFieldY, 0F).setColor(0, 0, 0, 0);
-        builder.addVertex(x+svFieldX, y+svFieldY+svFieldHeight, 0F).setColor(0, 0, 0, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY+svFieldHeight, 0F).setColor(0, 0, 0, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY, 0F).setColor(0, 0, 0, 0);
+            // Hue, transparent left to solid right
+            Color hue = Color.getHSBColor(getHFromCursor(), 1, 1);
+            int hueR = hue.getRed();
+            int hueG = hue.getGreen();
+            int hueB = hue.getBlue();
+            builder.addVertex(x + svFieldX, y + svFieldY, 0F).setColor(hueR, hueG, hueB, 0);
+            builder.addVertex(x + svFieldX, y + svFieldY + svFieldHeight, 0F).setColor(hueR, hueG, hueB, 0);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY + svFieldHeight, 0F).setColor(hueR, hueG, hueB, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY, 0F).setColor(hueR, hueG, hueB, 255);
 
-        // Saturation/value cursor horizontal
-        int limitSvCursorY = Math.min(svCursorY, svFieldY+svFieldHeight-CURSOR); // Keep within outline
-        builder.addVertex(x+svFieldX, y+limitSvCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+svFieldX, y+limitSvCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+limitSvCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+limitSvCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            // Black, transparent top to solid bottom
+            builder.addVertex(x + svFieldX, y + svFieldY, 0F).setColor(0, 0, 0, 0);
+            builder.addVertex(x + svFieldX, y + svFieldY + svFieldHeight, 0F).setColor(0, 0, 0, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY + svFieldHeight, 0F).setColor(0, 0, 0, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY, 0F).setColor(0, 0, 0, 0);
 
-        // Saturation/value cursor vertical
-        int limitSvCursorX = Math.min(svCursorX, svFieldX+svFieldWidth-CURSOR); // Keep within outline
-        builder.addVertex(x+limitSvCursorX, y+svFieldY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+limitSvCursorX, y+svFieldY+svFieldHeight, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+limitSvCursorX+CURSOR, y+svFieldY+svFieldHeight, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+limitSvCursorX+CURSOR, y+svFieldY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            // Saturation/value cursor horizontal
+            int limitSvCursorY = Math.min(svCursorY, svFieldY + svFieldHeight - CURSOR); // Keep within outline
+            builder.addVertex(x + svFieldX, y + limitSvCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + svFieldX, y + limitSvCursorY + CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + limitSvCursorY + CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + svFieldX + svFieldWidth, y + limitSvCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
-        // Hue field outline
-        builder.addVertex(x+hFieldX-OUTLINE, y+hFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+hFieldX-OUTLINE, y+hFieldY+hFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth+OUTLINE, y+hFieldY+hFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth+OUTLINE, y+hFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            // Saturation/value cursor vertical
+            int limitSvCursorX = Math.min(svCursorX, svFieldX + svFieldWidth - CURSOR); // Keep within outline
+            builder.addVertex(x + limitSvCursorX, y + svFieldY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + limitSvCursorX, y + svFieldY + svFieldHeight, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + limitSvCursorX + CURSOR, y + svFieldY + svFieldHeight, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + limitSvCursorX + CURSOR, y + svFieldY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
-        // Red to yellow
-        int secStart = hFieldY;
-        int secEnd = secStart + hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(255, 0, 0, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(255, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(255, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(255, 0, 0, 255);
+            // Hue field outline
+            builder.addVertex(x + hFieldX - OUTLINE, y + hFieldY - OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + hFieldX - OUTLINE, y + hFieldY + hFieldHeight + OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth + OUTLINE, y + hFieldY + hFieldHeight + OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth + OUTLINE, y + hFieldY - OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
 
-        // Yellow to green
-        secStart = secEnd;
-        secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(255, 255, 0, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(0, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(0, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(255, 255, 0, 255);
+            // Red to yellow
+            int secStart = hFieldY;
+            int secEnd = secStart + hSecSize;
+            builder.addVertex(x + hFieldX, y + secStart, 0F).setColor(255, 0, 0, 255);
+            builder.addVertex(x + hFieldX, y + secEnd, 0F).setColor(255, 255, 0, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F).setColor(255, 255, 0, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F).setColor(255, 0, 0, 255);
 
-        // Green to cyan
-        secStart = secEnd;
-        secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(0, 255, 0, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(0, 255, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(0, 255, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(0, 255, 0, 255);
+            // Yellow to green
+            secStart = secEnd;
+            secEnd += hSecSize;
+            builder.addVertex(x + hFieldX, y + secStart, 0F).setColor(255, 255, 0, 255);
+            builder.addVertex(x + hFieldX, y + secEnd, 0F).setColor(0, 255, 0, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F).setColor(0, 255, 0, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F).setColor(255, 255, 0, 255);
 
-        // Cyan to blue
-        secStart = secEnd;
-        secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(0, 255, 255, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(0, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(0, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(0, 255, 255, 255);
+            // Green to cyan
+            secStart = secEnd;
+            secEnd += hSecSize;
+            builder.addVertex(x + hFieldX, y + secStart, 0F).setColor(0, 255, 0, 255);
+            builder.addVertex(x + hFieldX, y + secEnd, 0F).setColor(0, 255, 255, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F).setColor(0, 255, 255, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F).setColor(0, 255, 0, 255);
 
-        // Blue to magenta
-        secStart = secEnd;
-        secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(0, 0, 255, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(255, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(255, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(0, 0, 255, 255);
+            // Cyan to blue
+            secStart = secEnd;
+            secEnd += hSecSize;
+            builder.addVertex(x + hFieldX, y + secStart, 0F).setColor(0, 255, 255, 255);
+            builder.addVertex(x + hFieldX, y + secEnd, 0F).setColor(0, 0, 255, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F).setColor(0, 0, 255, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F).setColor(0, 255, 255, 255);
 
-        // Magenta to red
-        secStart = secEnd;
-        secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(255, 0, 255, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(255, 0, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(255, 0, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(255, 0, 255, 255);
+            // Blue to magenta
+            secStart = secEnd;
+            secEnd += hSecSize;
+            builder.addVertex(x + hFieldX, y + secStart, 0F).setColor(0, 0, 255, 255);
+            builder.addVertex(x + hFieldX, y + secEnd, 0F).setColor(255, 0, 255, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F).setColor(255, 0, 255, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F).setColor(0, 0, 255, 255);
 
-        // Hue Cursor (horizontal only)
-        int limitHCursorY = Math.min(hCursorY, hFieldY+hFieldHeight-CURSOR); // Keep within outline
-        builder.addVertex(x+hFieldX, y+limitHCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+hFieldX, y+limitHCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+limitHCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+limitHCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            // Magenta to red
+            secStart = secEnd;
+            secEnd += hSecSize;
+            builder.addVertex(x + hFieldX, y + secStart, 0F).setColor(255, 0, 255, 255);
+            builder.addVertex(x + hFieldX, y + secEnd, 0F).setColor(255, 0, 0, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F).setColor(255, 0, 0, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F).setColor(255, 0, 255, 255);
 
-        // New color field outline
-        builder.addVertex(x+newCFieldX-OUTLINE, y+newCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+newCFieldX-OUTLINE, y+newCFieldY+newCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth+OUTLINE, y+newCFieldY+newCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth+OUTLINE, y+newCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            // Hue Cursor (horizontal only)
+            int limitHCursorY = Math.min(hCursorY, hFieldY + hFieldHeight - CURSOR); // Keep within outline
+            builder.addVertex(x + hFieldX, y + limitHCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + hFieldX, y + limitHCursorY + CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + limitHCursorY + CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + hFieldX + hFieldWidth, y + limitHCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
-        // New color
-        int color = Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]);
-        int colorR = ARGB.red(color);
-        int colorG = ARGB.green(color);
-        int colorB = ARGB.blue(color);
-        builder.addVertex(x+newCFieldX, y+newCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+newCFieldX, y+newCFieldY+newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth, y+newCFieldY+newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth, y+newCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
+            // New color field outline
+            builder.addVertex(x + newCFieldX - OUTLINE, y + newCFieldY - OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + newCFieldX - OUTLINE, y + newCFieldY + newCFieldHeight + OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + newCFieldX + newCFieldWidth + OUTLINE, y + newCFieldY + newCFieldHeight + OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + newCFieldX + newCFieldWidth + OUTLINE, y + newCFieldY - OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
-        // Old color field outline
-        builder.addVertex(x+oldCFieldX-OUTLINE, y+oldCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+oldCFieldX-OUTLINE, y+oldCFieldY+oldCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth+OUTLINE, y+oldCFieldY+oldCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth+OUTLINE, y+oldCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            // New color
+            int color = Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]);
+            int colorR = ARGB.red(color);
+            int colorG = ARGB.green(color);
+            int colorB = ARGB.blue(color);
+            builder.addVertex(x + newCFieldX, y + newCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
+            builder.addVertex(x + newCFieldX, y + newCFieldY + newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
+            builder.addVertex(x + newCFieldX + newCFieldWidth, y + newCFieldY + newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
+            builder.addVertex(x + newCFieldX + newCFieldWidth, y + newCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
 
-        // Old color
-        colorR = ARGB.red(oldColor);
-        colorG = ARGB.green(oldColor);
-        colorB = ARGB.blue(oldColor);
-        builder.addVertex(x+oldCFieldX, y+oldCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+oldCFieldX, y+oldCFieldY+oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth, y+oldCFieldY+oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth, y+oldCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
+            // Old color field outline
+            builder.addVertex(x + oldCFieldX - OUTLINE, y + oldCFieldY - OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + oldCFieldX - OUTLINE, y + oldCFieldY + oldCFieldHeight + OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + oldCFieldX + oldCFieldWidth + OUTLINE, y + oldCFieldY + oldCFieldHeight + OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+            builder.addVertex(x + oldCFieldX + oldCFieldWidth + OUTLINE, y + oldCFieldY - OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
-        // Draw
-        BufferUploader.drawWithShader(builder.buildOrThrow());
+            // Old color
+            colorR = ARGB.red(oldColor);
+            colorG = ARGB.green(oldColor);
+            colorB = ARGB.blue(oldColor);
+            builder.addVertex(x + oldCFieldX, y + oldCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
+            builder.addVertex(x + oldCFieldX, y + oldCFieldY + oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
+            builder.addVertex(x + oldCFieldX + oldCFieldWidth, y + oldCFieldY + oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
+            builder.addVertex(x + oldCFieldX + oldCFieldWidth, y + oldCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
 
-        // Cleanup
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.depthFunc(GlConst.GL_LEQUAL);
+            // Draw
+            MeshData meshData = builder.buildOrThrow();
+
+            try {
+                widgetBuffer = RenderSystem.getDevice().createBuffer(() -> "Color picker buffer",
+                        BufferType.VERTICES, BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
+            } catch (Throwable t1) {
+                try {
+                    meshData.close();
+                } catch (Throwable t2) {
+                    t1.addSuppressed(t2);
+                }
+                throw t1;
+            }
+            meshData.close();
+
+        } catch (Throwable t3) {
+            try {
+                byteBufferBuilder.close();
+            } catch (Throwable t4) {
+                t3.addSuppressed(t4);
+            }
+            throw t3;
+        }
+        byteBufferBuilder.close();
+    }
+
+    public void renderQuads() {
+        RenderPipeline renderPipeline = RenderPipelines.GUI_OVERLAY;
+        RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
+        RenderTarget renderTarget = Minecraft.getInstance().getMainRenderTarget();
+        GpuTexture colorTexture = renderTarget.getColorTexture();
+        GpuTexture depthTexture = renderTarget.getDepthTexture();
+        GpuBuffer gpuBuffer = widgetIndices.getBuffer(bufferSize);
+        @SuppressWarnings("DataFlowIssue")
+        RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
+                colorTexture, OptionalInt.empty(), depthTexture, OptionalDouble.empty());
+
+        try {
+            renderPass.setPipeline(renderPipeline);
+            renderPass.setUniform("LineWidth", 4.0F);
+            renderPass.setVertexBuffer(0, widgetBuffer);
+            renderPass.setIndexBuffer(gpuBuffer, widgetIndices.type());
+            renderPass.drawIndexed(0, bufferSize);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            renderPass.setUniform("LineWidth", 2.0F);
+            renderPass.drawIndexed(0, bufferSize);
+        } catch (Throwable t1) {
+            try {
+                renderPass.close();
+            } catch (Throwable t2) {
+                t1.addSuppressed(t2);
+            }
+            throw t1;
+        }
+        renderPass.close();
     }
 }
