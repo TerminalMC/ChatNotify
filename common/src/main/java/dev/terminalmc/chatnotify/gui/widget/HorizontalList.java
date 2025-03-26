@@ -16,7 +16,6 @@
 
 package dev.terminalmc.chatnotify.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -223,10 +222,8 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the partially-translucent background texture.
      */
     protected void renderListBackground(GuiGraphics graphics) {
-        RenderSystem.enableBlend();
         graphics.blit(RenderType::guiTextured, MENU_LIST_BACKGROUND, getX(), getY(), 0, 0,
                 getWidth(), getHeight(), 32, 32);
-        RenderSystem.disableBlend();
     }
 
     /**
@@ -273,12 +270,10 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                     / getMaxScroll()
                     + getX());
 
-            RenderSystem.enableBlend();
             graphics.blitSprite(RenderType::guiTextured, SCROLLER_BACKGROUND_SPRITE,
                     getX(), y, getWidth(), SCROLLBAR_HEIGHT);
             graphics.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE,
                     scrollerPos, y, scrollerWidth, SCROLLBAR_HEIGHT);
-            RenderSystem.disableBlend();
         }
     }
 
@@ -293,7 +288,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the list separator textures.
      */
     protected void renderSeparators(GuiGraphics guiGraphics) {
-        RenderSystem.enableBlend();
         guiGraphics.blit(RenderType::guiTextured, LEFT_SEPARATOR,
                 getX() - 2, getY() - 1, 0.0F, 0.0F, 2, getHeight() + 2, 2, 32);
         guiGraphics.blit(RenderType::guiTextured, RIGHT_SEPARATOR,
@@ -302,7 +296,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 getX() - 1, getY() - 2, 0.0F, 0.0F, getWidth() + 2, 2, 32, 2);
         guiGraphics.blit(RenderType::guiTextured, Screen.FOOTER_SEPARATOR,
                 getX() - 1, getBottom(), 0.0F, 0.0F, getWidth() + 2, 2, 32, 2);
-        RenderSystem.disableBlend();
     }
 
     // Focus and visibility
