@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.3
+
+- Fixed screen send mode not recapturing cursor
+
 ## 2.4.2
 
 - Fixed processing of messages with consecutive placeholders

@@ -128,7 +128,7 @@ public class ChatNotify {
                         cs.handleChatInput(msg, false);
                     }
                 }
-                mc.screen = oldScreen;
+                mc.setScreen(oldScreen);
             }
             case PACKET -> {
                 for (String msg : messages) {
