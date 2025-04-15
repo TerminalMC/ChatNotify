@@ -367,6 +367,8 @@ public class MessageUtil {
 
         // Substitute capturing groups
         if (matcher != null && matcher.find(0)) {
+            // Convert message into a format suitable for recursive processing
+            msg = FormatUtil.convertToStyledLiteral(msg.copy());
 
             // Record indexes where groups should be placed,
             // and make Components for each group.
@@ -402,7 +404,6 @@ public class MessageUtil {
                 MutableComponent newMsg = Component.empty();
                 int startIndex = 0;
                 for (int[] replacement : indexesToReplaceWithGroups) {
-                    System.out.println(newMsg);
                     newMsg.append(Component.literal(
                             msgString.substring(startIndex, replacement[0])));
                     newMsg.append(replacementComponents.get(replacement[1]));

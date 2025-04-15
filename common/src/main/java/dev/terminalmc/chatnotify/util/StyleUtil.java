@@ -228,8 +228,8 @@ public class StyleUtil {
     /**
      * Recursive traversal algorithm to get a substring of a message with its original style.
      *
-     * <p><b>Note:</b> Like {@link #recursiveRestyle(MutableComponent, TextStyle, int, int, int)} unable to process format codes or translatable
-     * components, but it differs in that {@link FormatUtil#convertToStyledLiteral} is used within method, so does not need to be done prior to
+     * <p><b>Note:</b> Unable to process format codes or translatable
+     * components, use {@link FormatUtil#convertToStyledLiteral} prior to
      * invoking this method.</p>
      *
      * @param msg the message to get a substring of.
@@ -242,8 +242,6 @@ public class StyleUtil {
                                                    int start, int end, int index) {
         if (debug) ChatNotify.LOG.warn("keepStyleForSubstring('{}', {}, {}, {})",
                 msg.getString(), start, end, index);
-
-        msg = FormatUtil.convertToStyledLiteral(msg);
 
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(msg.getSiblings());
