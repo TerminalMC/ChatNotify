@@ -280,7 +280,7 @@ public class MessageUtil {
 
                 // If replacement enabled, process
                 if (notif.replacementMsgEnabled) {
-                    msg = convertMsg(notif.replacementMsg, subsMatcher);
+                    msg = convertMsg(notif.replacementMsg, subsMatcher, msg);
                     String str = msg.getString();
                     cleanStr = FormatUtil.stripCodes(str);
                     cleanOwnedStr = cleanStr;
@@ -356,21 +356,64 @@ public class MessageUtil {
 
     /**
      * Converts a custom message string into a {@link Component} for sending.
-     * @param msg the custom message string.
+     * @param msgString the custom message string.
      * @param matcher a regex matcher for capturing group substitution.
+     * @param msg the original message.
      * @return the message, converted and with all substitutions done.
      */
-    private static Component convertMsg(String msg, @Nullable Matcher matcher) {
+    private static Component convertMsg(String msgString, @Nullable Matcher matcher, Component msg) {
         // Replace $ with section sign
-        msg = msg.replaceAll(Matcher.quoteReplacement("$"), "§");
+        msgString = msgString.replaceAll(Matcher.quoteReplacement("$"), "§");
+
         // Substitute capturing groups
         if (matcher != null && matcher.find(0)) {
-            for (int i = 0; i <= matcher.groupCount(); i++) {
-                String replacement = matcher.group(i) == null ? "" : matcher.group(i);
-                msg = msg.replaceAll("\\(" + i + "\\)", replacement);
+
+            // Record indexes where groups should be placed,
+            // and make Components for each group.
+            ArrayList<int[]> indexesToReplaceWithGroups = new ArrayList<>();
+            HashMap<Integer, Component> replacementComponents = new HashMap<>();
+            for (int groupNum = 0; groupNum <= matcher.groupCount(); groupNum++) {
+                String targetString = "(" + groupNum + ")";
+                if (!msgString.contains(targetString)) continue;
+
+                // Record indexes to replace with group
+                int index = msgString.indexOf(targetString);
+                while (index >= 0) {
+                    indexesToReplaceWithGroups.add(new int[]{index, groupNum });
+                    index = msgString.indexOf(targetString, index + targetString.length());
+                }
+
+                Component replacement;
+                if (matcher.group(groupNum) == null) {
+                    replacement = Component.empty();
+                } else {
+                    int start = matcher.start(groupNum);
+                    int end = matcher.end(groupNum);
+                    replacement = StyleUtil.substringKeepStyle(msg, start, end);
+                }
+                replacementComponents.put(groupNum, replacement);
+            }
+
+            // Sort replacements by order that they appear in the text
+            indexesToReplaceWithGroups.sort(Comparator.comparingInt(obj -> obj[0]));
+
+            // Build the new msg, placing in the group Components where appropriate.
+            if (!indexesToReplaceWithGroups.isEmpty()) {
+                MutableComponent newMsg = Component.empty();
+                int startIndex = 0;
+                for (int[] replacement : indexesToReplaceWithGroups) {
+                    System.out.println(newMsg);
+                    newMsg.append(Component.literal(
+                            msgString.substring(startIndex, replacement[0])));
+                    newMsg.append(replacementComponents.get(replacement[1]));
+                    startIndex = replacement[0] + ("(" + replacement[1] + ")").length();
+                }
+                newMsg.append(Component.literal(
+                        msgString.substring(startIndex)));
+                return newMsg;
             }
         }
-        return Component.literal(msg);
+        return Component.literal(msgString);
     }
 
     /**
@@ -384,7 +427,7 @@ public class MessageUtil {
         if (notif.statusBarMsgEnabled) {
             Component displayMsg = notif.statusBarMsg.isBlank()
                     ? msg
-                    : convertMsg(notif.statusBarMsg, matcher);
+                    : convertMsg(notif.statusBarMsg, matcher, msg);
             Minecraft.getInstance().gui.setOverlayMessage(displayMsg, false);
         }
     }
@@ -400,7 +443,7 @@ public class MessageUtil {
         if (notif.titleMsgEnabled) {
             Component displayMsg = notif.titleMsg.isBlank()
                     ? msg
-                    : convertMsg(notif.titleMsg, matcher);
+                    : convertMsg(notif.titleMsg, matcher, msg);
             Minecraft.getInstance().gui.setTitle(displayMsg);
         }
     }
@@ -416,7 +459,7 @@ public class MessageUtil {
         if (notif.toastMsgEnabled) {
             Component displayMsg = notif.toastMsg.isBlank()
                     ? msg
-                    : convertMsg(notif.toastMsg, matcher);
+                    : convertMsg(notif.toastMsg, matcher, msg);
             Minecraft.getInstance().getToasts().addToast(new NotificationToast(displayMsg));
         }
     }
