@@ -214,6 +214,73 @@ public class StyleUtil {
     }
 
     /**
+     * Uses a recursive traversal algorithm to get a substring of a message
+     * with its original style.
+     * @param msg the message to get a substring of.
+     * @param start the starting index of the string to restyle.
+     * @param end the index after the end of the string to restyle.
+     * @return a substring of the message, with all of its original style.
+     */
+    public static Component substringKeepStyle(Component msg, int start, int end) {
+        return recursiveKeepStyle(msg.copy(), start, end, 0);
+    }
+
+    /**
+     * Recursive traversal algorithm to get a substring of a message with its original style.
+     *
+     * <p><b>Note:</b> Unable to process format codes or translatable
+     * components, use {@link FormatUtil#convertToStyledLiteral} prior to
+     * invoking this method.</p>
+     *
+     * @param msg the message to get a substring of.
+     * @param start the root string index of the first character in the target substring.
+     * @param end the root string index of the last character in the target substring, plus one.
+     * @param index the index of the start of {@code msg} in the root string.
+     * @return a substring of the message, with all of its original style.
+     */
+    public static MutableComponent recursiveKeepStyle(MutableComponent msg,
+                                                   int start, int end, int index) {
+        if (debug) ChatNotify.LOG.warn("keepStyleForSubstring('{}', {}, {}, {})",
+                msg.getString(), start, end, index);
+
+        // Detach siblings
+        List<Component> oldSiblings = new ArrayList<>(msg.getSiblings());
+        msg.getSiblings().clear();
+
+        // Add contents with original style.
+        if (msg.getContents() instanceof PlainTextContents contents) {
+            if (debug) ChatNotify.LOG.warn("PlainTextContents");
+            String str = contents.text();
+            if (index + str.length() >= start && index < end) {
+                // Target string overlaps with current substring,
+                // so add the included section with its original style
+                Style oldStyle = msg.getStyle();
+                msg = Component.empty().withStyle(oldStyle);
+
+                int localStart = Math.max(0, start - index);
+                int localEnd = Math.min(str.length(), end - index);
+
+                str = str.substring(localStart, localEnd);
+                msg.append(Component.literal(str));
+            }
+            index += str.length();
+        }
+
+        // Recurse for original siblings and re-attach
+        List<Component> siblings = msg.getSiblings();
+        for (Component sibling : oldSiblings) {
+            String str = sibling.getString();
+            if (index + str.length() >= start && index < end) {
+                siblings.add(recursiveKeepStyle(sibling.copy(), start, end, index));
+            }
+
+            index += str.length();
+        }
+
+        return msg;
+    }
+
+    /**
      * For each enabled field of the specified {@link TextStyle}, overrides the
      * corresponding {@link Style} field.
      * @param style the {@link Style} to apply to.
