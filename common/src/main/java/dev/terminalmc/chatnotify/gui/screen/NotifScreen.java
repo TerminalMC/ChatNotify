@@ -61,14 +61,14 @@ public class NotifScreen extends OptionScreen {
         List<Tab> tabs = List.of(
                 new Tab(TabKey.TRIGGERS.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.TriggerOptions.class,
                             (source, dest) -> notif == Config.get().getUserNotif()
                                     ? notif.moveTrigger(source + 2, dest + 2)
                                     : notif.moveTrigger(source, dest),
                             () -> cast(screen).updateTabTitle(TabKey.TRIGGERS),
-                            localized("option", "notif.trigger.list", "ℹ"),
+                            localized("option", "notif.trigger.list", "\u2139"),
                             localized("option", "notif.trigger.list.tooltip"),
                             null,
                             null,
@@ -97,23 +97,23 @@ public class NotifScreen extends OptionScreen {
                     );
                 }),
                 new Tab(TabKey.FORMAT.key, (screen) ->
-                        new FormatList(Minecraft.getInstance(), screen, 0, 0, 0,
+                        new FormatList(Minecraft.getInstance(), screen, 0, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                                 cast(screen).notif
                         )),
                 new Tab(TabKey.SOUND.key, (screen) ->
-                        new SoundList(Minecraft.getInstance(), screen, 0, 0, 0,
+                        new SoundList(Minecraft.getInstance(), screen, 0, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
                                 cast(screen).notif.sound
                         )),
                 new Tab(TabKey.INCLUSION.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.TriggerOptions.class,
                             notif::moveInclusionTrigger,
                             () -> cast(screen).updateTabTitle(TabKey.INCLUSION),
-                            localized("option", "notif.inclusion.list", "ℹ"),
+                            localized("option", "notif.inclusion.list", "\u2139"),
                             localized("option", "notif.inclusion.list.tooltip"),
                             () -> notif.inclusionEnabled,
                             (status) -> notif.inclusionEnabled = status,
@@ -130,12 +130,12 @@ public class NotifScreen extends OptionScreen {
                 }),
                 new Tab(TabKey.EXCLUSION.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.TriggerOptions.class,
                             notif::moveExclusionTrigger,
                             () -> cast(screen).updateTabTitle(TabKey.EXCLUSION),
-                            localized("option", "notif.exclusion.list", "ℹ"),
+                            localized("option", "notif.exclusion.list", "\u2139"),
                             localized("option", "notif.exclusion.list.tooltip"),
                             () -> notif.exclusionEnabled,
                             (status) -> notif.exclusionEnabled = status,
@@ -152,12 +152,12 @@ public class NotifScreen extends OptionScreen {
                 }),
                 new Tab(TabKey.RESPONSES.key, (screen) -> {
                     Notification notif = cast(screen).notif;
-                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0,
+                    return new FilterList<>(Minecraft.getInstance(), screen, 0, 0, 0, 0,
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.ResponseOptions.class,
                             notif::moveResponseMessage,
                             () -> cast(screen).updateTabTitle(TabKey.RESPONSES),
-                            localized("option", "notif.response.list", "ℹ"),
+                            localized("option", "notif.response.list", "\u2139"),
                             localized("option", "notif.response.list.tooltip"),
                             () -> notif.responseEnabled,
                             (status) -> notif.responseEnabled = status,
@@ -171,7 +171,7 @@ public class NotifScreen extends OptionScreen {
                     );
                 }),
                 new Tab(TabKey.MISC.key, (screen) ->
-                        new MiscOptionList(Minecraft.getInstance(), screen, 0, 0, 0,
+                        new MiscOptionList(Minecraft.getInstance(), screen, 0, 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                                 cast(screen).notif
                         ))

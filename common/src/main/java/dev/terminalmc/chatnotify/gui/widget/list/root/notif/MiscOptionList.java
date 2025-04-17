@@ -36,9 +36,9 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 public class MiscOptionList extends OptionList {
     private final Notification notif;
 
-    public MiscOptionList(Minecraft mc, OptionScreen screen, int width, int height, int y,
-                          int entryWidth, int entryHeight, int entrySpacing, Notification notif) {
-        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
+    public MiscOptionList(Minecraft mc, OptionScreen screen, int width, int height, int top, int bottom, int entryWidth,
+                          int entryHeight, int entrySpacing, Notification notif) {
+        super(mc, screen, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
         this.notif = notif;
     }
 
@@ -51,7 +51,7 @@ public class MiscOptionList extends OptionList {
         addEntry(new Entry.Controls(entryX, entryWidth, entryHeight, notif));
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "notif.misc.msg", "ℹ"),
+                localized("option", "notif.misc.msg", "\u2139"),
                 Tooltip.create(localized("option", "notif.misc.msg.tooltip.format_codes")
                         .append("\n\n")
                         .append(localized("option", "notif.misc.msg.tooltip.regex_groups"))), -1));
