@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.4
+
+- Added support for retaining style of captured regex groups in replacement messages (ceidways)
+
 ## 2.4.3
 
 - Fixed screen send mode not recapturing cursor
