@@ -138,11 +138,11 @@ public class StyleUtil {
 
     /**
      * Uses a recursive traversal algorithm to apply the specified style to 
-     * only the specified part of the message.
+     * only the specified substring of the message.
      * @param msg the message to restyle.
      * @param style the {@link TextStyle} to apply.
-     * @param start the starting index of the string to restyle.
-     * @param end the index after the end of the string to restyle.
+     * @param start the index of the first character in the substring.
+     * @param end the index after the last character in the substring.
      * @return the restyled message.
      */
     private static Component restyleLeaves(Component msg, TextStyle style, int start, int end) {
@@ -158,8 +158,10 @@ public class StyleUtil {
      *
      * @param msg the message to restyle.
      * @param style the style to apply.
-     * @param start the root string index of the first character in the target substring.
-     * @param end the root string index of the last character in the target substring, plus one.
+     * @param start the root string index of the first character in the
+     *              substring.
+     * @param end the root string index after the last character in the
+     *            substring.
      * @param index the index of the start of {@code msg} in the root string.
      * @return the message, restyled if applicable.
      */
@@ -177,7 +179,7 @@ public class StyleUtil {
             if (debug) ChatNotify.LOG.warn("PlainTextContents");
             String str = contents.text();
             if (index + str.length() >= start && index < end) {
-                // Target string overlaps with current substring, so restyle
+                // Target substring overlaps with current substring, so restyle
                 // by splitting into 3 components; before, target, and after
                 Style oldStyle = msg.getStyle();
                 msg = Component.empty().withStyle(oldStyle);
@@ -203,6 +205,7 @@ public class StyleUtil {
         for (Component sibling : oldSiblings) {
             String str = sibling.getString();
             if (index + str.length() >= start && index < end) {
+                // Sibling overlaps with target substring, recurse
                 siblings.add(recursiveRestyle(sibling.copy(), style, start, end, index));
             } else {
                 siblings.add(sibling);
@@ -217,30 +220,33 @@ public class StyleUtil {
      * Uses a recursive traversal algorithm to get a substring of a message
      * with its original style.
      * @param msg the message to get a substring of.
-     * @param start the starting index of the string to restyle.
-     * @param end the index after the end of the string to restyle.
+     * @param start the index of the first character in the substring.
+     * @param end the index after the last character in the substring.
      * @return a substring of the message, with all of its original style.
      */
-    public static Component substringKeepStyle(Component msg, int start, int end) {
-        return recursiveKeepStyle(msg.copy(), start, end, 0);
+    public static Component styledSubstring(Component msg, int start, int end) {
+        return recursiveStyledSubstring(msg.copy(), start, end, 0);
     }
 
     /**
-     * Recursive traversal algorithm to get a substring of a message with its original style.
+     * Recursive traversal algorithm to get a substring of a message with its
+     * original style.
      *
      * <p><b>Note:</b> Unable to process format codes or translatable
      * components, use {@link FormatUtil#convertToStyledLiteral} prior to
      * invoking this method.</p>
      *
      * @param msg the message to get a substring of.
-     * @param start the root string index of the first character in the target substring.
-     * @param end the root string index of the last character in the target substring, plus one.
+     * @param start the root string index of the first character in the
+     *              substring.
+     * @param end the root string index after the last character in the
+     *            substring.
      * @param index the index of the start of {@code msg} in the root string.
      * @return a substring of the message, with all of its original style.
      */
-    public static MutableComponent recursiveKeepStyle(MutableComponent msg,
-                                                   int start, int end, int index) {
-        if (debug) ChatNotify.LOG.warn("keepStyleForSubstring('{}', {}, {}, {})",
+    private static MutableComponent recursiveStyledSubstring(MutableComponent msg,
+                                                             int start, int end, int index) {
+        if (debug) ChatNotify.LOG.warn("recursiveStyledSubstring('{}', {}, {}, {})",
                 msg.getString(), start, end, index);
 
         // Detach siblings
@@ -252,7 +258,7 @@ public class StyleUtil {
             if (debug) ChatNotify.LOG.warn("PlainTextContents");
             String str = contents.text();
             if (index + str.length() >= start && index < end) {
-                // Target string overlaps with current substring,
+                // Target substring overlaps with current substring,
                 // so add the included section with its original style
                 Style oldStyle = msg.getStyle();
                 msg = Component.empty().withStyle(oldStyle);
@@ -271,9 +277,9 @@ public class StyleUtil {
         for (Component sibling : oldSiblings) {
             String str = sibling.getString();
             if (index + str.length() >= start && index < end) {
-                siblings.add(recursiveKeepStyle(sibling.copy(), start, end, index));
+                // Sibling overlaps with target substring, recurse
+                siblings.add(recursiveStyledSubstring(sibling.copy(), start, end, index));
             }
-
             index += str.length();
         }
 

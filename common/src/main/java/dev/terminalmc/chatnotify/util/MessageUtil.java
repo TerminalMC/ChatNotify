@@ -370,18 +370,19 @@ public class MessageUtil {
             // Convert message into a format suitable for recursive processing
             msg = FormatUtil.convertToStyledLiteral(msg.copy());
 
-            // Record indexes where groups should be placed,
-            // and make Components for each group.
-            ArrayList<int[]> indexesToReplaceWithGroups = new ArrayList<>();
-            HashMap<Integer, Component> replacementComponents = new HashMap<>();
+            // Record indices where groups should be placed, and get the
+            // replacement substring for each group.
+            ArrayList<int[]> groupReplacementIndices = new ArrayList<>();
+            HashMap<Integer,Component> groupReplacementMap = new HashMap<>();
             for (int groupNum = 0; groupNum <= matcher.groupCount(); groupNum++) {
                 String targetString = "(" + groupNum + ")";
                 if (!msgString.contains(targetString)) continue;
 
-                // Record indexes to replace with group
+                // Work through the message, collecting indices to replace with
+                // the captured group
                 int index = msgString.indexOf(targetString);
                 while (index >= 0) {
-                    indexesToReplaceWithGroups.add(new int[]{index, groupNum });
+                    groupReplacementIndices.add(new int[]{index, groupNum});
                     index = msgString.indexOf(targetString, index + targetString.length());
                 }
 
@@ -391,22 +392,22 @@ public class MessageUtil {
                 } else {
                     int start = matcher.start(groupNum);
                     int end = matcher.end(groupNum);
-                    replacement = StyleUtil.substringKeepStyle(msg, start, end);
+                    replacement = StyleUtil.styledSubstring(msg, start, end);
                 }
-                replacementComponents.put(groupNum, replacement);
+                groupReplacementMap.put(groupNum, replacement);
             }
 
-            // Sort replacements by order that they appear in the text
-            indexesToReplaceWithGroups.sort(Comparator.comparingInt(obj -> obj[0]));
+            // Sort replacements by order that they appear in the custom message
+            groupReplacementIndices.sort(Comparator.comparingInt(obj -> obj[0]));
 
-            // Build the new msg, placing in the group Components where appropriate.
-            if (!indexesToReplaceWithGroups.isEmpty()) {
+            // Build the new message, placing in the group components
+            if (!groupReplacementIndices.isEmpty()) {
                 MutableComponent newMsg = Component.empty();
                 int startIndex = 0;
-                for (int[] replacement : indexesToReplaceWithGroups) {
+                for (int[] replacement : groupReplacementIndices) {
                     newMsg.append(Component.literal(
                             msgString.substring(startIndex, replacement[0])));
-                    newMsg.append(replacementComponents.get(replacement[1]));
+                    newMsg.append(groupReplacementMap.get(replacement[1]));
                     startIndex = replacement[0] + ("(" + replacement[1] + ")").length();
                 }
                 newMsg.append(Component.literal(
