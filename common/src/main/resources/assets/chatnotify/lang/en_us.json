@@ -115,7 +115,7 @@
   "option.chatnotify.notif.misc.msg.tooltip.blank_hide": "Leave blank to hide the original message.",
   "option.chatnotify.notif.misc.msg.tooltip.blank_original": "Leave blank to display the original message.",
   "option.chatnotify.notif.misc.msg.tooltip.format_codes": "Use $4, $n etc. (format codes) to customize message style.",
-  "option.chatnotify.notif.misc.msg.tooltip.regex_groups": "Use (1), (2) etc. to access capturing groups from a regex trigger.",
+  "option.chatnotify.notif.misc.msg.tooltip.regex_groups": "Use (1), (2) etc. to access capturing groups from a regex trigger. Use $(1) to ignore the style of the captured text.",
   "option.chatnotify.notif.misc.reset": "Broken Everything?",
   "option.chatnotify.notif.misc.reset.button": "Reset Configuration",
   "option.chatnotify.notif.misc.reset.confirm": "Are you sure you want to delete all notifications and reset all settings?",

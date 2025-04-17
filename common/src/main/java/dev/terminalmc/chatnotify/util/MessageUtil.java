@@ -367,6 +367,13 @@ public class MessageUtil {
 
         // Substitute capturing groups
         if (matcher != null && matcher.find(0)) {
+            // Capturing groups preceded by a $ (now §) sign should not retain
+            // their original style, so we substitute them in first
+            for (int i = 0; i <= matcher.groupCount(); i++) {
+                String replacement = matcher.group(i) == null ? "" : matcher.group(i);
+                msgString = msgString.replaceAll("§\\(" + i + "\\)", replacement);
+            }
+            
             // Convert message into a format suitable for recursive processing
             msg = FormatUtil.convertToStyledLiteral(msg.copy());
 
