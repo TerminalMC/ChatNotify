@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.platform;
+package dev.terminalmc.chatnotify.mixin.accessor;
 
-import dev.terminalmc.chatnotify.platform.services.IPlatformInfo;
-import net.neoforged.fml.loading.FMLPaths;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.nio.file.Path;
+@Mixin(AbstractSelectionList.class)
+public interface AbstractSelectionListAccessor {
+    @Accessor("x0")
+    int getX0();
 
-public class NeoForgePlatformInfo implements IPlatformInfo {
-    @Override
-    public Path getConfigDir() {
-        return FMLPaths.CONFIGDIR.get();
-    }
+    @Accessor("x1")
+    int getX1();
+
+    @Accessor("y0")
+    int getY0();
+
+    @Accessor("y1")
+    int getY1();
 }
