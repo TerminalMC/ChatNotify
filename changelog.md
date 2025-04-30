@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.5
+
+- Added custom message support for typing in chat without sending, and copying to clipboard
+
 ## 2.4.4
 
 - Added support for retaining style of captured regex groups in replacement messages (ceidways)

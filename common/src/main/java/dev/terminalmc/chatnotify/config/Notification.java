@@ -149,6 +149,22 @@ public class Notification implements Functional.StringSupplier {
     public static final boolean toastMsgEnabledDefault = false;
 
     /**
+     * Typed chat message.
+     */
+    public String typedMsg;
+    public static final String typedMsgDefault = "";
+    public boolean typedMsgEnabled;
+    public static final boolean typedMsgEnabledDefault = false;
+
+    /**
+     * Clipboard copy message.
+     */
+    public String clipboardMsg;
+    public static final String clipboardMsgDefault = "";
+    public boolean clipboardMsgEnabled;
+    public static final boolean clipboardMsgEnabledDefault = false;
+
+    /**
      * The list of {@link Trigger}s which can activate this instance.
      */
     public final List<Trigger> triggers;
@@ -200,6 +216,10 @@ public class Notification implements Functional.StringSupplier {
             boolean titleMsgEnabled,
             String toastMsg,
             boolean toastMsgEnabled,
+            String typedMsg,
+            boolean typedMsgEnabled,
+            String clipboardMsg,
+            boolean clipboardMsgEnabled,
             List<Trigger> triggers,
             List<Trigger> inclusionTriggers,
             List<Trigger> exclusionTriggers,
@@ -220,6 +240,10 @@ public class Notification implements Functional.StringSupplier {
         this.titleMsgEnabled = titleMsgEnabled;
         this.toastMsg = toastMsg;
         this.toastMsgEnabled = toastMsgEnabled;
+        this.typedMsg = typedMsg;
+        this.typedMsgEnabled = typedMsgEnabled;
+        this.clipboardMsg = clipboardMsg;
+        this.clipboardMsgEnabled = clipboardMsgEnabled;
         this.triggers = triggers;
         this.inclusionTriggers = inclusionTriggers;
         this.exclusionTriggers = exclusionTriggers;
@@ -247,6 +271,10 @@ public class Notification implements Functional.StringSupplier {
                 titleMsgEnabledDefault,
                 toastMsgDefault,
                 toastMsgEnabledDefault,
+                typedMsgDefault,
+                typedMsgEnabledDefault,
+                clipboardMsgDefault,
+                clipboardMsgEnabledDefault,
                 new ArrayList<>(List.of(
                         new Trigger("Profile name"),
                         new Trigger("Display name")
@@ -278,6 +306,10 @@ public class Notification implements Functional.StringSupplier {
                 titleMsgEnabledDefault,
                 toastMsgDefault,
                 toastMsgEnabledDefault,
+                typedMsgDefault,
+                typedMsgEnabledDefault,
+                clipboardMsgDefault,
+                clipboardMsgEnabledDefault,
                 new ArrayList<>(List.of(
                         new Trigger("")
                 )),
@@ -469,6 +501,18 @@ public class Notification implements Functional.StringSupplier {
             boolean toastMsgEnabled = JsonUtil.getOrDefault(obj, "toastMsgEnabled",
                     toastMsgEnabledDefault, silent);
 
+            String typedMsg = JsonUtil.getOrDefault(obj, "typedMsg",
+                    typedMsgDefault, silent);
+
+            boolean typedMsgEnabled = JsonUtil.getOrDefault(obj, "typedMsgEnabled",
+                    typedMsgEnabledDefault, silent);
+
+            String clipboardMsg = JsonUtil.getOrDefault(obj, "clipboardMsg",
+                    clipboardMsgDefault, silent);
+
+            boolean clipboardMsgEnabled = JsonUtil.getOrDefault(obj, "clipboardMsgEnabled",
+                    clipboardMsgEnabledDefault, silent);
+
             List<Trigger> triggers = JsonUtil.getOrDefault(ctx, obj, "triggers",
                     Trigger.class, triggersDefault.get(), silent);
 
@@ -504,6 +548,10 @@ public class Notification implements Functional.StringSupplier {
                     titleMsgEnabled,
                     toastMsg,
                     toastMsgEnabled,
+                    typedMsg,
+                    typedMsgEnabled,
+                    clipboardMsg,
+                    clipboardMsgEnabled,
                     triggers,
                     inclusionTriggers,
                     exclusionTriggers,

@@ -87,6 +87,22 @@ public class MiscOptionList extends OptionList {
                         .append(localized("option", "notif.misc.msg.toast.tooltip"))
                         .append("\n\n")
                         .append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
+        addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
+                () -> notif.typedMsg, (str) -> notif.typedMsg = str,
+                () -> notif.typedMsgEnabled, (val) -> notif.typedMsgEnabled = val,
+                localized("option", "notif.misc.msg.typed"),
+                localized("option", "notif.misc.msg.typed").append(".\n")
+                        .append(localized("option", "notif.misc.msg.typed.tooltip"))
+                        .append("\n\n")
+                        .append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
+        addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
+                () -> notif.clipboardMsg, (str) -> notif.clipboardMsg = str,
+                () -> notif.clipboardMsgEnabled, (val) -> notif.clipboardMsgEnabled = val,
+                localized("option", "notif.misc.msg.clipboard"),
+                localized("option", "notif.misc.msg.clipboard").append(".\n")
+                        .append(localized("option", "notif.misc.msg.clipboard.tooltip"))
+                        .append("\n\n")
+                        .append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "notif.misc.reset"), null, -1));

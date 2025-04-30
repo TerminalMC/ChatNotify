@@ -22,6 +22,7 @@ import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
 import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.toast.NotificationToast;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -277,6 +278,8 @@ public class MessageUtil {
                 showStatusBarMsg(notif, msg, subsMatcher);
                 showTitleMsg(notif, msg, subsMatcher);
                 showToastMsg(notif, msg, subsMatcher);
+                typeTypedMsg(notif, msg, subsMatcher);
+                copyClipboardMsg(notif, msg, subsMatcher);
 
                 // If replacement enabled, process
                 if (notif.replacementMsgEnabled) {
@@ -470,6 +473,38 @@ public class MessageUtil {
                     ? msg
                     : convertMsg(notif.toastMsg, matcher, msg);
             Minecraft.getInstance().getToasts().addToast(new NotificationToast(displayMsg));
+        }
+    }
+
+    /**
+     * Types the typed message for the {@link Notification}, if enabled.
+     * @param notif the {@link Notification}.
+     * @param msg the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
+     *                was used, {@code null} otherwise.
+     */
+    private static void typeTypedMsg(Notification notif, Component msg, Matcher matcher) {
+        if (notif.typedMsgEnabled && Minecraft.getInstance().screen == null) {
+            Component displayMsg = notif.typedMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.typedMsg, matcher, msg);
+            Minecraft.getInstance().setScreen(new ChatScreen(displayMsg.getString()));
+        }
+    }
+
+    /**
+     * Copies the clipboard message for the {@link Notification}, if enabled.
+     * @param notif the {@link Notification}.
+     * @param msg the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
+     *                was used, {@code null} otherwise.
+     */
+    private static void copyClipboardMsg(Notification notif, Component msg, Matcher matcher) {
+        if (notif.clipboardMsgEnabled) {
+            Component displayMsg = notif.clipboardMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.clipboardMsg, matcher, msg);
+            Minecraft.getInstance().keyboardHandler.setClipboard(displayMsg.getString());
         }
     }
 
