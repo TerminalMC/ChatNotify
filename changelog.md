@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.6
+
+- Updated Russian translation (rfin0)
+
 ## 2.4.5
 
 - Added custom message support for typing in chat without sending, and copying to clipboard
