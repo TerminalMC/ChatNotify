@@ -26,7 +26,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -222,7 +222,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the partially-translucent background texture.
      */
     protected void renderListBackground(GuiGraphics graphics) {
-        graphics.blit(RenderType::guiTextured, MENU_LIST_BACKGROUND, getX(), getY(), 0, 0,
+        graphics.blit(RenderPipelines.GUI_TEXTURED, MENU_LIST_BACKGROUND, getX(), getY(), 0, 0,
                 getWidth(), getHeight(), 32, 32);
     }
 
@@ -270,9 +270,9 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                     / getMaxScroll()
                     + getX());
 
-            graphics.blitSprite(RenderType::guiTextured, SCROLLER_BACKGROUND_SPRITE,
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_BACKGROUND_SPRITE,
                     getX(), y, getWidth(), SCROLLBAR_HEIGHT);
-            graphics.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE,
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_SPRITE,
                     scrollerPos, y, scrollerWidth, SCROLLBAR_HEIGHT);
         }
     }
@@ -288,13 +288,13 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the list separator textures.
      */
     protected void renderSeparators(GuiGraphics guiGraphics) {
-        guiGraphics.blit(RenderType::guiTextured, LEFT_SEPARATOR,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, LEFT_SEPARATOR,
                 getX() - 2, getY() - 1, 0.0F, 0.0F, 2, getHeight() + 2, 2, 32);
-        guiGraphics.blit(RenderType::guiTextured, RIGHT_SEPARATOR,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, RIGHT_SEPARATOR,
                 getRight(), getY() - 1, 0.0F, 0.0F, 2, getHeight() + 2, 2, 32);
-        guiGraphics.blit(RenderType::guiTextured, Screen.HEADER_SEPARATOR,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Screen.HEADER_SEPARATOR,
                 getX() - 1, getY() - 2, 0.0F, 0.0F, getWidth() + 2, 2, 32, 2);
-        guiGraphics.blit(RenderType::guiTextured, Screen.FOOTER_SEPARATOR,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Screen.FOOTER_SEPARATOR,
                 getX() - 1, getBottom(), 0.0F, 0.0F, getWidth() + 2, 2, 32, 2);
     }
 

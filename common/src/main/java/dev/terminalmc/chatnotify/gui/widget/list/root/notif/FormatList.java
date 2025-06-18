@@ -116,7 +116,7 @@ public class FormatList extends OptionList {
                         float[] hsv = new float[3];
                         Color.RGBtoHSB(ARGB.red(color), ARGB.green(color),
                                 ARGB.blue(color), hsv);
-                        if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFF);
+                        if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFFFF);
                         else colorField.setTextColor(color);
                     }
                 });

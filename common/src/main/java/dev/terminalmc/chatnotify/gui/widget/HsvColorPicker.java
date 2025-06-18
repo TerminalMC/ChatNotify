@@ -16,15 +16,14 @@
 
 package dev.terminalmc.chatnotify.gui.widget;
 
-import com.mojang.blaze3d.buffers.BufferType;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.ColorUtil;
@@ -33,6 +32,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.DynamicUniforms;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -40,6 +40,10 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.awt.Color;
 import java.util.Optional;
@@ -260,7 +264,7 @@ public class HsvColorPicker extends OverlayWidget {
                 updateHCursor();
                 updateSvCursor();
             }
-            if (hsv[2] < 0.1) hexField.setTextColor(0xFFFFFF); // Keep text visible
+            if (hsv[2] < 0.1) hexField.setTextColor(0xFFFFFFFF); // Keep text visible
             else hexField.setTextColor(color);
         }
     }
@@ -588,7 +592,7 @@ public class HsvColorPicker extends OverlayWidget {
 
             try {
                 widgetBuffer = RenderSystem.getDevice().createBuffer(() -> "Color picker buffer",
-                        BufferType.VERTICES, BufferUsage.STATIC_WRITE, meshData.vertexBuffer());
+                        32, meshData.vertexBuffer());
             } catch (Throwable t1) {
                 try {
                     meshData.close();
@@ -611,25 +615,40 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     public void renderQuads() {
-        RenderPipeline renderPipeline = RenderPipelines.GUI_OVERLAY;
-        RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
+        Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+        RenderPipeline renderPipeline = RenderPipelines.LINES;
         RenderTarget renderTarget = Minecraft.getInstance().getMainRenderTarget();
-        GpuTexture colorTexture = renderTarget.getColorTexture();
-        GpuTexture depthTexture = renderTarget.getDepthTexture();
+        GpuTextureView colorTexture = renderTarget.getColorTextureView();
+        GpuTextureView depthTexture = renderTarget.getColorTextureView();
         GpuBuffer gpuBuffer = widgetIndices.getBuffer(bufferSize);
+        GpuBufferSlice[] gpuBufferSlices = RenderSystem.getDynamicUniforms().writeTransforms(
+                new DynamicUniforms.Transform(
+                        new Matrix4f(matrix4fStack),
+                        new Vector4f(0.0F, 0.0F, 0.0F, 1.0F),
+                        new Vector3f(),
+                        new Matrix4f(),
+                        4.0F
+                ),
+                new DynamicUniforms.Transform(
+                        new Matrix4f(matrix4fStack),
+                        new Vector4f(1.0F, 1.0F, 1.0F, 1.0F),
+                        new Vector3f(),
+                        new Matrix4f(),
+                        2.0F
+                )
+        );
         @SuppressWarnings("DataFlowIssue")
         RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-                colorTexture, OptionalInt.empty(), depthTexture, OptionalDouble.empty());
+                () -> "color picker", colorTexture, OptionalInt.empty(), depthTexture, OptionalDouble.empty());
 
         try {
             renderPass.setPipeline(renderPipeline);
-            renderPass.setUniform("LineWidth", 4.0F);
             renderPass.setVertexBuffer(0, widgetBuffer);
             renderPass.setIndexBuffer(gpuBuffer, widgetIndices.type());
-            renderPass.drawIndexed(0, bufferSize);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            renderPass.setUniform("LineWidth", 2.0F);
-            renderPass.drawIndexed(0, bufferSize);
+            renderPass.setUniform("DynamicTransforms", gpuBufferSlices[0]);
+            renderPass.drawIndexed(0, 0, bufferSize, 1);
+            renderPass.setUniform("DynamicTransforms", gpuBufferSlices[1]);
+            renderPass.drawIndexed(0, 0, bufferSize, 1);
         } catch (Throwable t1) {
             try {
                 renderPass.close();

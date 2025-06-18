@@ -785,7 +785,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             Color.RGBtoHSB(ARGB.red(color),
                                     ARGB.green(color),
                                     ARGB.blue(color), hsv);
-                            if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFF);
+                            if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFFFF);
                             else colorField.setTextColor(color);
                             // Update status button color
                             colorEditButton.setMessage(

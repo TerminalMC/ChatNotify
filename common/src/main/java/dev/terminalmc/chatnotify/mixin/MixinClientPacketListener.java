@@ -20,6 +20,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
@@ -30,7 +31,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /*
  * If an incoming message is the return of a message sent by the user,
@@ -114,8 +114,8 @@ public class MixinClientPacketListener {
         chatNotify$storeCommand(command);
     }
 
-    @Inject(method = "sendUnsignedCommand", at = @At("HEAD"))
-    public void getUnsignedCommand(String command, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "sendUnattendedCommand", at = @At("HEAD"))
+    public void getUnsignedCommand(String command, Screen screen, CallbackInfo ci) {
         chatNotify$storeCommand(command);
     }
 
