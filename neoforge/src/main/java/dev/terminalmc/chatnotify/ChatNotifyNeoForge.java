@@ -29,17 +29,22 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 @Mod(value = ChatNotify.MOD_ID, dist = Dist.CLIENT)
 public class ChatNotifyNeoForge {
     public ChatNotifyNeoForge() {
+        // Register config screen
         ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
                 () -> (minecraft, parent) -> new RootScreen(parent));
 
+        // Initialize client
         ChatNotify.init();
     }
 
     @EventBusSubscriber(modid = ChatNotify.MOD_ID, value = Dist.CLIENT)
     static class ClientEventHandler {
+        /**
+         * Registers client after-tick event.
+         */
         @SubscribeEvent
         public static void clientTickEvent(ClientTickEvent.Post event) {
-            ChatNotify.onEndTick(Minecraft.getInstance());
+            ChatNotify.afterClientTick(Minecraft.getInstance());
         }
     }
 }

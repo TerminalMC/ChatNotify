@@ -14,16 +14,34 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.platform;
-
-import dev.terminalmc.chatnotify.platform.services.IPlatformInfo;
-import net.fabricmc.loader.api.FabricLoader;
+package dev.terminalmc.chatnotify.platform.services;
 
 import java.nio.file.Path;
 
-public class FabricPlatformInfo implements IPlatformInfo {
-    @Override
-    public Path getConfigDir() {
-        return FabricLoader.getInstance().getConfigDir();
-    }
+public interface IPlatformServices {
+
+    /**
+     * @return the name of the current platform.
+     */
+    String getPlatformName();
+
+    /**
+     * @return the game directory of the instance.
+     */
+    Path getGameDir();
+
+    /**
+     * @return the configuration directory of the instance.
+     */
+    Path getConfigDir();
+
+    /**
+     * @return {@code true} if in a development environment.
+     */
+    boolean isDevEnv();
+
+    /**
+     * @return {@code true} if the mod is loaded, false otherwise.
+     */
+    boolean isModLoaded(String modId);
 }

@@ -16,21 +16,35 @@
 
 package dev.terminalmc.chatnotify.platform;
 
-import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.platform.services.IPlatformServices;
+import net.fabricmc.loader.api.FabricLoader;
 
-import java.util.ServiceLoader;
+import java.nio.file.Path;
 
-public class Services {
+public class FabricServices implements IPlatformServices {
 
-    public static final IPlatformServices PLATFORM = load(IPlatformServices.class);
+    @Override
+    public String getPlatformName() {
+        return "Fabric";
+    }
 
-    public static <T> T load(Class<T> clazz) {
-        final T loadedService = ServiceLoader.load(clazz)
-                .findFirst()
-                .orElseThrow(() -> new NullPointerException(
-                        "Failed to load service for " + clazz.getName()));
-        ChatNotify.LOG.debug("Loaded {} for service {}", loadedService, clazz);
-        return loadedService;
+    @Override
+    public Path getGameDir() {
+        return FabricLoader.getInstance().getGameDir();
+    }
+
+    @Override
+    public Path getConfigDir() {
+        return FabricLoader.getInstance().getConfigDir();
+    }
+
+    @Override
+    public boolean isDevEnv() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
+    }
+
+    @Override
+    public boolean isModLoaded(String modId) {
+        return FabricLoader.getInstance().isModLoaded(modId);
     }
 }

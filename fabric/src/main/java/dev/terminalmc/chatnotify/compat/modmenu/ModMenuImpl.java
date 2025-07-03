@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.platform;
+package dev.terminalmc.chatnotify.compat.modmenu;
 
-import dev.terminalmc.chatnotify.platform.services.IPlatformInfo;
-import net.neoforged.fml.loading.FMLPaths;
+import com.terraformersmc.modmenu.api.ConfigScreenFactory;
+import com.terraformersmc.modmenu.api.ModMenuApi;
+import dev.terminalmc.chatnotify.gui.screen.RootScreen;
 
-import java.nio.file.Path;
-
-public class NeoForgePlatformInfo implements IPlatformInfo {
+public class ModMenuImpl implements ModMenuApi {
     @Override
-    public Path getConfigDir() {
-        return FMLPaths.CONFIGDIR.get();
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        return RootScreen::new;
     }
 }

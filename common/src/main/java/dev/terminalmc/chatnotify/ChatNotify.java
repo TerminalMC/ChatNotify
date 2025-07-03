@@ -41,7 +41,7 @@ public class ChatNotify {
     public static boolean hasResetConfig = false;
 
     /**
-     * Stores messages recently sent by the client, for comparison with incoming 
+     * Stores messages recently sent by the client, for comparison with incoming
      * messages to determine sender identity.
      */
     public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
@@ -77,7 +77,7 @@ public class ChatNotify {
         }
     }
 
-    public static void onEndTick(Minecraft mc) {
+    public static void afterClientTick(Minecraft mc) {
         tickResponseMessages(mc);
 
         // Config reset warning toast

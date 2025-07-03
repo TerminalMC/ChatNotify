@@ -16,21 +16,37 @@
 
 package dev.terminalmc.chatnotify.platform;
 
-import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.platform.services.IPlatformServices;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.LoadingModList;
 
-import java.util.ServiceLoader;
+import java.nio.file.Path;
 
-public class Services {
+public class NeoForgeServices implements IPlatformServices {
 
-    public static final IPlatformServices PLATFORM = load(IPlatformServices.class);
+    @Override
+    public String getPlatformName() {
+        return "NeoForge";
+    }
 
-    public static <T> T load(Class<T> clazz) {
-        final T loadedService = ServiceLoader.load(clazz)
-                .findFirst()
-                .orElseThrow(() -> new NullPointerException(
-                        "Failed to load service for " + clazz.getName()));
-        ChatNotify.LOG.debug("Loaded {} for service {}", loadedService, clazz);
-        return loadedService;
+    @Override
+    public Path getGameDir() {
+        return FMLPaths.GAMEDIR.get();
+    }
+
+    @Override
+    public Path getConfigDir() {
+        return FMLPaths.CONFIGDIR.get();
+    }
+
+    @Override
+    public boolean isDevEnv() {
+        return !FMLLoader.isProduction();
+    }
+
+    @Override
+    public boolean isModLoaded(String modId) {
+        return LoadingModList.get().getModFileById(modId) != null;
     }
 }

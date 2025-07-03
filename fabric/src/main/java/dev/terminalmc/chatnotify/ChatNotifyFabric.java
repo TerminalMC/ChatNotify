@@ -22,7 +22,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 public class ChatNotifyFabric implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        ClientTickEvents.END_CLIENT_TICK.register(ChatNotify::onEndTick);
+        // Register client after-tick event
+        ClientTickEvents.END_CLIENT_TICK.register(ChatNotify::afterClientTick);
+
+        // Initialize client
         ChatNotify.init();
     }
 }
