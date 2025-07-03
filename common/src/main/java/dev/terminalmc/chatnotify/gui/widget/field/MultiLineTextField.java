@@ -37,13 +37,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * A custom {@link MultiLineEditBox} which supports double-clicking to select
- * words and triple-clicking to select all (with
- * {@link MultilineTextFieldAccessor}), resizing (with
- * {@link MultiLineEditBoxAccessor}), and content validation with warning text
- * color and tooltip (with {@link MultiLineEditBoxMixin}).
+ * A custom {@link MultiLineEditBox} which supports double-clicking to select words and
+ * triple-clicking to select all (with {@link MultilineTextFieldAccessor}), resizing (with
+ * {@link MultiLineEditBoxAccessor}), and content validation with warning text color and tooltip
+ * (with {@link MultiLineEditBoxMixin}).
  */
 public class MultiLineTextField extends MultiLineEditBox {
+
     public static final long CLICK_CHAIN_TIME = 250L;
     public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
     public static final int TEXT_COLOR_ERROR = 0xFF5555;
@@ -65,18 +65,41 @@ public class MultiLineTextField extends MultiLineEditBox {
     private int chainedClicks;
 
     public MultiLineTextField(int x, int y, int width, int height) {
-        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
-                Component.empty(), null);
+        this(
+                Minecraft.getInstance().font,
+                x,
+                y,
+                width,
+                height,
+                Component.empty(),
+                Component.empty(),
+                null
+        );
     }
 
     public MultiLineTextField(int x, int y, int width, int height, Component placeholder) {
-        this(Minecraft.getInstance().font, x, y, width, height, placeholder,
-                Component.empty(), null);
+        this(
+                Minecraft.getInstance().font,
+                x,
+                y,
+                width,
+                height,
+                placeholder,
+                Component.empty(),
+                null
+        );
     }
 
-    public MultiLineTextField(Font font, int x, int y, int width, int height,
-                              Component placeholder, Component message,
-                              @Nullable TextField.Validator validator) {
+    public MultiLineTextField(
+            Font font,
+            int x,
+            int y,
+            int width,
+            int height,
+            Component placeholder,
+            Component message,
+            @Nullable TextField.Validator validator
+    ) {
         super(font, x, y, width, height, placeholder, message);
         if (validator != null) {
             this.validators.add(validator);
@@ -144,8 +167,8 @@ public class MultiLineTextField extends MultiLineEditBox {
     @Override
     public void setWidth(int width) {
         super.setWidth(width);
-        ((MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this)
-                .getTextField()).setWidth(width);
+        ((MultilineTextFieldAccessor) ((MultiLineEditBoxAccessor) this).getTextField()).setWidth(
+                width);
     }
 
     // Chained clicks
@@ -156,17 +179,21 @@ public class MultiLineTextField extends MultiLineEditBox {
             // Double-click to select all
             long time = Util.getMillis();
             if (lastClickTime + CLICK_CHAIN_TIME > time) {
-                MultilineTextField field = ((MultiLineEditBoxAccessor)this).getTextField();
-                MultilineTextFieldAccessor fieldAcc = (MultilineTextFieldAccessor)field;
+                MultilineTextField field = ((MultiLineEditBoxAccessor) this).getTextField();
+                MultilineTextFieldAccessor fieldAcc = (MultilineTextFieldAccessor) field;
                 switch (++chainedClicks) {
                     case 1 -> {
                         // double-click: select word
-                        field.seekCursor(Whence.ABSOLUTE,
-                                ((StringViewAccessor)(Object)field.getNextWord()).getBeginIndex());
+                        field.seekCursor(
+                                Whence.ABSOLUTE,
+                                ((StringViewAccessor) (Object) field.getNextWord()).getBeginIndex()
+                        );
                         int pos = fieldAcc.getCursor();
                         //noinspection DataFlowIssue
-                        field.seekCursor(Whence.ABSOLUTE,
-                                ((StringViewAccessor)(Object)field.getPreviousWord()).getBeginIndex());
+                        field.seekCursor(
+                                Whence.ABSOLUTE,
+                                ((StringViewAccessor) (Object) field.getPreviousWord()).getBeginIndex()
+                        );
                         fieldAcc.setSelectCursor(pos);
                     }
                     case 2, 3 -> {
@@ -211,8 +238,7 @@ public class MultiLineTextField extends MultiLineEditBox {
             if (TextField.isUndo(keyCode)) {
                 undo();
                 return true;
-            }
-            else if (TextField.isRedo(keyCode)) {
+            } else if (TextField.isRedo(keyCode)) {
                 redo();
                 return true;
             }

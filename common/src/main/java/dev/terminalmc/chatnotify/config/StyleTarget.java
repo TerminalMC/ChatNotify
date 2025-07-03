@@ -28,20 +28,19 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class StyleTarget {
+
     public static final int VERSION = 2;
     public final int version = VERSION;
 
     /**
-     * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
-     * {@code null} if {@link StyleTarget#type} is not {@link Type#REGEX} or 
-     * the string could not be compiled.
+     * A regex {@link Pattern} compiled from {@link Trigger#string}, or {@code null} if
+     * {@link StyleTarget#type} is not {@link Type#REGEX} or the string could not be compiled.
      */
     public transient @Nullable Pattern pattern;
 
     /**
-     * A list of integers parsed from {@link StyleTarget#string}, or an empty
-     * list if {@link StyleTarget#type} is not {@link Type#CAPTURING} or the
-     * string could not be parsed.
+     * A list of integers parsed from {@link StyleTarget#string}, or an empty list if
+     * {@link StyleTarget#type} is not {@link Type#CAPTURING} or the string could not be parsed.
      */
     public transient final List<Integer> groupIndexes = new ArrayList<>();
 
@@ -63,6 +62,7 @@ public class StyleTarget {
      * Controls how {@link Trigger#string} is interpreted.
      */
     public Type type;
+
     public enum Type {
         /**
          * Case-ignorant substring matching.
@@ -88,32 +88,20 @@ public class StyleTarget {
      * Creates a default instance.
      */
     public StyleTarget() {
-        this(
-                enabledDefault,
-                stringDefault,
-                Type.values()[0]
-        );
+        this(enabledDefault, stringDefault, Type.values()[0]);
     }
 
     /**
      * Creates a default instance, enabled, with the specified value.
      */
     public StyleTarget(@NotNull String string) {
-        this(
-                true,
-                string,
-                Type.values()[0]
-        );
+        this(true, string, Type.values()[0]);
     }
 
     /**
      * Not validated.
      */
-    StyleTarget(
-            boolean enabled,
-            @NotNull String string,
-            Type type
-    ) {
+    StyleTarget(boolean enabled, @NotNull String string, Type type) {
         this.enabled = enabled;
         this.string = string;
         this.type = type;
@@ -153,26 +141,40 @@ public class StyleTarget {
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<StyleTarget> {
+
         @Override
-        public StyleTarget deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
+        public StyleTarget deserialize(
+                JsonElement json,
+                java.lang.reflect.Type typeOfT,
+                JsonDeserializationContext ctx
+        ) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
-                    enabledDefault, silent);
+            boolean enabled = JsonUtil.getOrDefault(
+                    obj,
+                    "enabled",
+                    enabledDefault,
+                    silent
+            );
 
-            String string = JsonUtil.getOrDefault(obj, "string",
-                    stringDefault, silent);
+            String string = JsonUtil.getOrDefault(
+                    obj,
+                    "string",
+                    stringDefault,
+                    silent
+            );
 
-            Type type = JsonUtil.getOrDefault(obj, "type",
-                    Type.class, Type.values()[0], silent);
+            Type type = JsonUtil.getOrDefault(
+                    obj,
+                    "type",
+                    Type.class,
+                    Type.values()[0],
+                    silent
+            );
 
-            return new StyleTarget(
-                    enabled,
-                    string,
-                    type
-            ).validate();
+            return new StyleTarget(enabled, string, type).validate();
         }
     }
 }

@@ -29,13 +29,13 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class Trigger implements Functional.StringSupplier {
+
     public static final int VERSION = 4;
     public final int version = VERSION;
 
     /**
-     * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
-     * {@code null} if {@link Trigger#type} is not {@link Type#REGEX} or the 
-     * string could not be compiled.
+     * A regex {@link Pattern} compiled from {@link Trigger#string}, or {@code null} if
+     * {@link Trigger#type} is not {@link Type#REGEX} or the string could not be compiled.
      */
     public transient @Nullable Pattern pattern;
 
@@ -63,6 +63,7 @@ public class Trigger implements Functional.StringSupplier {
      * Controls how {@link Trigger#string} is interpreted.
      */
     public Type type;
+
     public enum Type {
         /**
          * Case-ignorant word-boundary matching.
@@ -95,23 +96,13 @@ public class Trigger implements Functional.StringSupplier {
      * Creates a default instance with the specified value.
      */
     public Trigger(@NotNull String string) {
-        this(
-                enabledDefault,
-                string,
-                styleTargetDefault.get(),
-                Type.values()[0]
-        );
+        this(enabledDefault, string, styleTargetDefault.get(), Type.values()[0]);
     }
 
     /**
      * Not validated.
      */
-    Trigger(
-            boolean enabled,
-            @NotNull String string,
-            StyleTarget styleTarget,
-            Type type
-    ) {
+    Trigger(boolean enabled, @NotNull String string, StyleTarget styleTarget, Type type) {
         this.enabled = enabled;
         this.string = string;
         this.styleTarget = styleTarget;
@@ -138,51 +129,86 @@ public class Trigger implements Functional.StringSupplier {
      * Validates this instance. To be called after editing and before saving.
      */
     Trigger validate() {
-        if (type == Type.KEY) string = string.toLowerCase(Locale.ROOT);
+        if (type == Type.KEY)
+            string = string.toLowerCase(Locale.ROOT);
         styleTarget.validate();
-        if (styleTarget.string.isBlank()) styleTarget.enabled = false;
+        if (styleTarget.string.isBlank())
+            styleTarget.enabled = false;
         return this;
     }
 
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Trigger> {
+
         @Override
-        public Trigger deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
+        public Trigger deserialize(
+                JsonElement json,
+                java.lang.reflect.Type typeOfT,
+                JsonDeserializationContext ctx
+        ) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
-                    enabledDefault, silent);
+            boolean enabled = JsonUtil.getOrDefault(
+                    obj,
+                    "enabled",
+                    enabledDefault,
+                    silent
+            );
 
-            String string = JsonUtil.getOrDefault(obj, "string",
-                    stringDefault, silent);
+            String string = JsonUtil.getOrDefault(
+                    obj,
+                    "string",
+                    stringDefault,
+                    silent
+            );
 
             StyleTarget styleTarget;
             if (version < 4) { // 2025-01-19
-                String styleString = JsonUtil.getOrDefault(obj, "styleString",
-                        stringDefault, silent);
+                String styleString = JsonUtil.getOrDefault(
+                        obj,
+                        "styleString",
+                        stringDefault,
+                        true
+                );
                 styleTarget = new StyleTarget(styleString);
             } else {
-                styleTarget = JsonUtil.getOrDefault(ctx, obj, "styleTarget",
-                        StyleTarget.class, styleTargetDefault.get(), silent);
+                styleTarget = JsonUtil.getOrDefault(
+                        ctx,
+                        obj,
+                        "styleTarget",
+                        StyleTarget.class,
+                        styleTargetDefault.get(),
+                        silent
+                );
             }
 
-            Type type = JsonUtil.getOrDefault(obj, "type",
-                    Type.class, Type.values()[0], silent);
+            Type type = JsonUtil.getOrDefault(
+                    obj,
+                    "type",
+                    Type.class,
+                    Type.values()[0],
+                    silent
+            );
             if (version < 3) { // 2024-08-25
-                boolean isKey = JsonUtil.getOrDefault(obj, "isKey", false, silent);
-                boolean isRegex = JsonUtil.getOrDefault(obj, "isRegex", false, silent);
+                boolean isKey = JsonUtil.getOrDefault(
+                        obj,
+                        "isKey",
+                        false,
+                        true
+                );
+                boolean isRegex = JsonUtil.getOrDefault(
+                        obj,
+                        "isRegex",
+                        false,
+                        true
+                );
                 type = isKey ? Type.KEY : (isRegex ? Type.REGEX : Type.NORMAL);
             }
 
-            return new Trigger(
-                    enabled,
-                    string,
-                    styleTarget,
-                    type
-            ).validate();
+            return new Trigger(enabled, string, styleTarget, type).validate();
         }
     }
 }

@@ -36,7 +36,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -44,6 +44,7 @@ import java.util.function.Supplier;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class HsvColorPicker extends OverlayWidget {
+
     public static final int GUI_SHADOW_ALPHA = 160;
     public static final int GUI_LIGHT = 160;
     public static final int GUI_DARK = 44;
@@ -105,9 +106,15 @@ public class HsvColorPicker extends OverlayWidget {
 
     private boolean updateFromCursor;
 
-    public HsvColorPicker(int x, int y, int width, int height,
-                          Supplier<Integer> source, Consumer<Integer> dest,
-                          Consumer<OverlayWidget> close) {
+    public HsvColorPicker(
+            int x,
+            int y,
+            int width,
+            int height,
+            Supplier<Integer> source,
+            Consumer<Integer> dest,
+            Consumer<OverlayWidget> close
+    ) {
         super(x, y, width, height, true, Component.empty(), close);
         this.source = source;
         this.dest = dest;
@@ -116,8 +123,7 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     /**
-     * Builds or rebuilds the widget based on its positional and dimensional
-     * fields.
+     * Builds or rebuilds the widget based on its positional and dimensional fields.
      */
     protected void init() {
         Minecraft mc = Minecraft.getInstance();
@@ -149,12 +155,20 @@ public class HsvColorPicker extends OverlayWidget {
         int hexFieldY = BORDER;
         int hexFieldWidth = interiorWidth - hsvPickerBoxWidth;
 
-        hexField = new TextField(getX() + hexFieldX, getY() + hexFieldY,
-                hexFieldWidth, hexFieldHeight);
+        hexField = new TextField(
+                getX() + hexFieldX,
+                getY() + hexFieldY,
+                hexFieldWidth,
+                hexFieldHeight
+        );
         hexField.strict().hexColorValidator();
         hexField.setMaxLength(7);
         hexField.setResponder(this::updateColorFromHexField);
-        hexField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]))).callFormatValue());
+        hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(Color.HSBtoRGB(
+                hsv[0],
+                hsv[1],
+                hsv[2]
+        ))).callFormatValue());
 
         // Cancel and confirm buttons
         int cancelButtonWidth = interiorWidth - hsvPickerBoxWidth - (hsvPickerBoxWidth / 2);
@@ -170,17 +184,22 @@ public class HsvColorPicker extends OverlayWidget {
         int confirmButtonWidth = interiorWidth - hsvPickerBoxWidth - cancelButtonWidth;
         int confirmButtonX = BORDER + hsvPickerBoxWidth + cancelButtonWidth;
 
-        confirmButton = Button.builder(CommonComponents.GUI_OK, (button) -> {
-                    dest.accept(Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]));
-                    onClose();
-                })
+        confirmButton = Button.builder(
+                        CommonComponents.GUI_OK, (button) -> {
+                            dest.accept(Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]));
+                            onClose();
+                        }
+                )
                 .pos(getX() + confirmButtonX, getY() + buttonY)
                 .size(confirmButtonWidth, buttonHeight)
                 .build();
 
         // New and old color display boxes
-        int cFieldTextWidth = Math.min(Math.max(font.width(newColorLabel), font.width(oldColorLabel)),
-                interiorWidth - hsvPickerBoxWidth - minColorBoxWidth);
+        int cFieldTextWidth =
+                Math.min(
+                        Math.max(font.width(newColorLabel), font.width(oldColorLabel)),
+                        interiorWidth - hsvPickerBoxWidth - minColorBoxWidth
+                );
         int combinedCFieldHeight = interiorHeight - hexFieldHeight - buttonHeight - (OUTLINE * 4);
 
         newCFieldWidth = hexFieldWidth - cFieldTextWidth - (OUTLINE * 2);
@@ -224,18 +243,22 @@ public class HsvColorPicker extends OverlayWidget {
 
     public void updateColorFromSource() {
         int color = source.get();
-        Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color), hsv);
+        Color.RGBtoHSB(
+                FastColor.ARGB32.red(color),
+                FastColor.ARGB32.green(color),
+                FastColor.ARGB32.blue(color),
+                hsv
+        );
         oldColor = color;
         if (hexField != null) {
-            hexField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(color)).callFormatValue());
+            hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(color)).callFormatValue());
         }
     }
 
     private void updateHexField() {
         updateFromCursor = true;
         int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
-        hexField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(color)).callFormatValue());
+        hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(color)).callFormatValue());
         updateFromCursor = false;
     }
 
@@ -244,38 +267,44 @@ public class HsvColorPicker extends OverlayWidget {
         if (textColor != null) {
             int color = textColor.getValue();
             if (!updateFromCursor) {
-                Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
-                        FastColor.ARGB32.blue(color), hsv);
+                Color.RGBtoHSB(
+                        FastColor.ARGB32.red(color),
+                        FastColor.ARGB32.green(color),
+                        FastColor.ARGB32.blue(color),
+                        hsv
+                );
                 updateHCursor();
                 updateSvCursor();
             }
-            if (hsv[2] < 0.1) hexField.setTextColor(0xFFFFFF); // Keep text visible
-            else hexField.setTextColor(color);
+            if (hsv[2] < 0.1)
+                hexField.setTextColor(0xFFFFFF); // Keep text visible
+            else
+                hexField.setTextColor(color);
         }
     }
 
     private void updateHCursor() {
-        hCursorY = hFieldY + (int)(hsv[0] * hFieldHeight);
+        hCursorY = hFieldY + (int) (hsv[0] * hFieldHeight);
     }
 
     private void updateSvCursor() {
-        svCursorX = svFieldX + (int)(hsv[1] * svFieldWidth);
-        svCursorY = svFieldY + (int)((1.0F - hsv[2]) * svFieldHeight);
+        svCursorX = svFieldX + (int) (hsv[1] * svFieldWidth);
+        svCursorY = svFieldY + (int) ((1.0F - hsv[2]) * svFieldHeight);
     }
 
     private void updateHFromCursor(double cursorY) {
-        hsv[0] = (float)cursorY / (float)hFieldHeight;
+        hsv[0] = (float) cursorY / (float) hFieldHeight;
         updateHexField();
     }
 
     private void updateSvFromCursor(double cursorX, double cursorY) {
-        hsv[1] = (float)cursorX / (float)svFieldWidth;
-        hsv[2] = 1.0F - (float)cursorY / (float)svFieldHeight;
+        hsv[1] = (float) cursorX / (float) svFieldWidth;
+        hsv[2] = 1.0F - (float) cursorY / (float) svFieldHeight;
         updateHexField();
     }
 
     private float getHFromCursor() {
-        return ((float)hCursorY - hFieldY) / (float)hFieldHeight;
+        return ((float) hCursorY - hFieldY) / (float) hFieldHeight;
     }
 
     @Override
@@ -315,21 +344,33 @@ public class HsvColorPicker extends OverlayWidget {
             // Other elements can only use left clicks
             if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                 // Hue field
-                Optional<double[]> hFieldCursor = mouseOnElement(mouseX, mouseY,
-                        getX() + hFieldX, getY() + hFieldY, hFieldWidth, hFieldHeight);
+                Optional<double[]> hFieldCursor = mouseOnElement(
+                        mouseX,
+                        mouseY,
+                        getX() + hFieldX,
+                        getY() + hFieldY,
+                        hFieldWidth,
+                        hFieldHeight
+                );
                 if (hFieldCursor.isPresent()) {
                     hasClickedOnH = true;
-                    hCursorY = (int)hFieldCursor.get()[1] + hFieldY;
+                    hCursorY = (int) hFieldCursor.get()[1] + hFieldY;
                     updateHFromCursor(hFieldCursor.get()[1]);
                     return true;
                 }
                 // Saturation/value field
-                Optional<double[]> svFieldCursor = mouseOnElement(mouseX, mouseY,
-                        getX() + svFieldX, getY() + svFieldY, svFieldWidth, svFieldHeight);
+                Optional<double[]> svFieldCursor = mouseOnElement(
+                        mouseX,
+                        mouseY,
+                        getX() + svFieldX,
+                        getY() + svFieldY,
+                        svFieldWidth,
+                        svFieldHeight
+                );
                 if (svFieldCursor.isPresent()) {
                     hasClickedOnSv = true;
-                    svCursorX = (int)svFieldCursor.get()[0] + svFieldX;
-                    svCursorY = (int)svFieldCursor.get()[1] + svFieldY;
+                    svCursorX = (int) svFieldCursor.get()[0] + svFieldX;
+                    svCursorY = (int) svFieldCursor.get()[1] + svFieldY;
                     updateSvFromCursor(svFieldCursor.get()[0], svFieldCursor.get()[1]);
                     return true;
                 }
@@ -349,39 +390,63 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(
+            double mouseX,
+            double mouseY,
+            int button,
+            double deltaX,
+            double deltaY
+    ) {
         if (hasClickedOnH) {
             double cursorY = mouseY - getY();
-            if (cursorY < hFieldY) cursorY = hFieldY;
-            else if (cursorY > hFieldY + hFieldHeight) cursorY = hFieldY + hFieldHeight;
+            if (cursorY < hFieldY)
+                cursorY = hFieldY;
+            else if (cursorY > hFieldY + hFieldHeight)
+                cursorY = hFieldY + hFieldHeight;
             updateHFromCursor(cursorY - hFieldY);
-            hCursorY = (int)cursorY;
+            hCursorY = (int) cursorY;
             return true;
         } else if (hasClickedOnSv) {
             double cursorX = mouseX - getX();
             double cursorY = mouseY - getY();
-            if (cursorX < svFieldX) cursorX = svFieldX;
-            else if (cursorX > svFieldX + svFieldWidth) cursorX = svFieldX + svFieldWidth;
-            if (cursorY < svFieldY) cursorY = svFieldY;
-            else if (cursorY > svFieldY + svFieldHeight) cursorY = svFieldY + svFieldHeight;
+            if (cursorX < svFieldX)
+                cursorX = svFieldX;
+            else if (cursorX > svFieldX + svFieldWidth)
+                cursorX = svFieldX + svFieldWidth;
+            if (cursorY < svFieldY)
+                cursorY = svFieldY;
+            else if (cursorY > svFieldY + svFieldHeight)
+                cursorY = svFieldY + svFieldHeight;
             updateSvFromCursor(cursorX - svFieldX, cursorY - svFieldY);
-            svCursorX = (int)cursorX;
-            svCursorY = (int)cursorY;
+            svCursorX = (int) cursorX;
+            svCursorY = (int) cursorY;
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     private boolean mouseOnWidget(AbstractWidget widget, double mouseX, double mouseY) {
-        Optional<double[]> mouseOnWidget = mouseOnElement(mouseX, mouseY,
-                widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight());
+        Optional<double[]> mouseOnWidget = mouseOnElement(
+                mouseX,
+                mouseY,
+                widget.getX(),
+                widget.getY(),
+                widget.getWidth(),
+                widget.getHeight()
+        );
         return mouseOnWidget.isPresent();
     }
 
-    private Optional<double[]> mouseOnElement(double mouseX, double mouseY, int elementX,
-                                              int elementY, int elementWidth, int elementHeight) {
-        if ((elementX <= mouseX && mouseX < elementX + elementWidth)
-                && (elementY <= mouseY && mouseY < elementY + elementHeight)) {
+    private Optional<double[]> mouseOnElement(
+            double mouseX,
+            double mouseY,
+            int elementX,
+            int elementY,
+            int elementWidth,
+            int elementHeight
+    ) {
+        if ((elementX <= mouseX && mouseX < elementX + elementWidth) && (elementY <= mouseY
+                && mouseY < elementY + elementHeight)) {
             return Optional.of(new double[]{mouseX - elementX, mouseY - elementY});
         } else {
             return Optional.empty();
@@ -389,12 +454,27 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    protected void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(
+            @NotNull GuiGraphics graphics,
+            int mouseX,
+            int mouseY,
+            float delta
+    ) {
         drawQuads(graphics);
-        graphics.drawString(Minecraft.getInstance().font, newColorLabel,
-                newCFieldTextX, newCFieldTextY, 0xFFFFFF);
-        graphics.drawString(Minecraft.getInstance().font, oldColorLabel,
-                oldCFieldTextX, oldCFieldTextY, 0xFFFFFF);
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                newColorLabel,
+                newCFieldTextX,
+                newCFieldTextY,
+                0xFFFFFF
+        );
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                oldColorLabel,
+                oldCFieldTextX,
+                oldCFieldTextY,
+                0xFFFFFF
+        );
         hexField.renderWidget(graphics, mouseX, mouseY, delta);
         cancelButton.render(graphics, mouseX, mouseY, delta);
         confirmButton.render(graphics, mouseX, mouseY, delta);
@@ -406,169 +486,276 @@ public class HsvColorPicker extends OverlayWidget {
         RenderSystem.depthFunc(GlConst.GL_ALWAYS);
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
-        BufferBuilder builder = Tesselator.getInstance().begin(
-                VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder builder = Tesselator.getInstance()
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         int x = getX();
         int y = getY();
 
         // Screen shadow
-        builder.addVertex(0, 0, 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
-        builder.addVertex(0, graphics.guiHeight(), 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
-        builder.addVertex(graphics.guiWidth(), graphics.guiHeight(), 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
-        builder.addVertex(graphics.guiWidth(), 0, 0F).setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+        builder.addVertex(0, 0, 0F)
+                .setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+        builder.addVertex(0, graphics.guiHeight(), 0F)
+                .setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+        builder.addVertex(graphics.guiWidth(), graphics.guiHeight(), 0F)
+                .setColor(0, 0, 0, GUI_SHADOW_ALPHA);
+        builder.addVertex(graphics.guiWidth(), 0, 0F)
+                .setColor(0, 0, 0, GUI_SHADOW_ALPHA);
 
         // Main box border
-        builder.addVertex(x, y, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x, y+height, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+width, y+height, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+width, y, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x, y, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x, y + height, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + width, y + height, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + width, y, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // Main box background
-        builder.addVertex(x+BORDER, y+BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+BORDER, y+height-BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+width-BORDER, y+height-BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+width-BORDER, y+BORDER, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + BORDER, y + BORDER, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + BORDER, y + height - BORDER, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + width - BORDER, y + height - BORDER, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + width - BORDER, y + BORDER, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
 
         // HSV picker box
-        builder.addVertex(x+BORDER, y+BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+BORDER, y+height-BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+BORDER+ hsvPickerBoxWidth, y+height-BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+BORDER+ hsvPickerBoxWidth, y+BORDER, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + BORDER, y + BORDER, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + BORDER, y + height - BORDER, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + BORDER + hsvPickerBoxWidth, y + height - BORDER, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + BORDER + hsvPickerBoxWidth, y + BORDER, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // Saturation/value field outline
-        builder.addVertex(x+svFieldX-OUTLINE, y+svFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+svFieldX-OUTLINE, y+svFieldY+svFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth+OUTLINE, y+svFieldY+svFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth+OUTLINE, y+svFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + svFieldX - OUTLINE, y + svFieldY - OUTLINE, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + svFieldX - OUTLINE, y + svFieldY + svFieldHeight + OUTLINE, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(
+                        x + svFieldX + svFieldWidth + OUTLINE,
+                        y + svFieldY + svFieldHeight + OUTLINE,
+                        0F
+                )
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth + OUTLINE, y + svFieldY - OUTLINE, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
 
         // White, solid
-        builder.addVertex(x+svFieldX, y+svFieldY, 0F).setColor(255, 255, 255, 255);
-        builder.addVertex(x+svFieldX, y+svFieldY+svFieldHeight, 0F).setColor(255, 255, 255, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY+svFieldHeight, 0F).setColor(255, 255, 255, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY, 0F).setColor(255, 255, 255, 255);
+        builder.addVertex(x + svFieldX, y + svFieldY, 0F)
+                .setColor(255, 255, 255, 255);
+        builder.addVertex(x + svFieldX, y + svFieldY + svFieldHeight, 0F)
+                .setColor(255, 255, 255, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY + svFieldHeight, 0F)
+                .setColor(255, 255, 255, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY, 0F)
+                .setColor(255, 255, 255, 255);
 
         // Hue, transparent left to solid right
         Color hue = Color.getHSBColor(getHFromCursor(), 1, 1);
         int hueR = hue.getRed();
         int hueG = hue.getGreen();
         int hueB = hue.getBlue();
-        builder.addVertex(x+svFieldX, y+svFieldY, 0F).setColor(hueR, hueG, hueB, 0);
-        builder.addVertex(x+svFieldX, y+svFieldY+svFieldHeight, 0F).setColor(hueR, hueG, hueB, 0);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY+svFieldHeight, 0F).setColor(hueR, hueG, hueB, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY, 0F).setColor(hueR, hueG, hueB, 255);
+        builder.addVertex(x + svFieldX, y + svFieldY, 0F)
+                .setColor(hueR, hueG, hueB, 0);
+        builder.addVertex(x + svFieldX, y + svFieldY + svFieldHeight, 0F)
+                .setColor(hueR, hueG, hueB, 0);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY + svFieldHeight, 0F)
+                .setColor(hueR, hueG, hueB, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY, 0F)
+                .setColor(hueR, hueG, hueB, 255);
 
         // Black, transparent top to solid bottom
-        builder.addVertex(x+svFieldX, y+svFieldY, 0F).setColor(0, 0, 0, 0);
-        builder.addVertex(x+svFieldX, y+svFieldY+svFieldHeight, 0F).setColor(0, 0, 0, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY+svFieldHeight, 0F).setColor(0, 0, 0, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+svFieldY, 0F).setColor(0, 0, 0, 0);
+        builder.addVertex(x + svFieldX, y + svFieldY, 0F)
+                .setColor(0, 0, 0, 0);
+        builder.addVertex(x + svFieldX, y + svFieldY + svFieldHeight, 0F)
+                .setColor(0, 0, 0, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY + svFieldHeight, 0F)
+                .setColor(0, 0, 0, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + svFieldY, 0F)
+                .setColor(0, 0, 0, 0);
 
         // Saturation/value cursor horizontal
-        int limitSvCursorY = Math.min(svCursorY, svFieldY+svFieldHeight-CURSOR); // Keep within outline
-        builder.addVertex(x+svFieldX, y+limitSvCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+svFieldX, y+limitSvCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+limitSvCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+svFieldX+svFieldWidth, y+limitSvCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        int limitSvCursorY =
+                Math.min(svCursorY, svFieldY + svFieldHeight - CURSOR); // Keep within outline
+        builder.addVertex(x + svFieldX, y + limitSvCursorY, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + svFieldX, y + limitSvCursorY + CURSOR, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + limitSvCursorY + CURSOR, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + svFieldX + svFieldWidth, y + limitSvCursorY, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // Saturation/value cursor vertical
-        int limitSvCursorX = Math.min(svCursorX, svFieldX+svFieldWidth-CURSOR); // Keep within outline
-        builder.addVertex(x+limitSvCursorX, y+svFieldY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+limitSvCursorX, y+svFieldY+svFieldHeight, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+limitSvCursorX+CURSOR, y+svFieldY+svFieldHeight, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+limitSvCursorX+CURSOR, y+svFieldY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        int limitSvCursorX =
+                Math.min(svCursorX, svFieldX + svFieldWidth - CURSOR); // Keep within outline
+        builder.addVertex(x + limitSvCursorX, y + svFieldY, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + limitSvCursorX, y + svFieldY + svFieldHeight, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + limitSvCursorX + CURSOR, y + svFieldY + svFieldHeight, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + limitSvCursorX + CURSOR, y + svFieldY, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // Hue field outline
-        builder.addVertex(x+hFieldX-OUTLINE, y+hFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+hFieldX-OUTLINE, y+hFieldY+hFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth+OUTLINE, y+hFieldY+hFieldHeight+OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth+OUTLINE, y+hFieldY-OUTLINE, 0F).setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + hFieldX - OUTLINE, y + hFieldY - OUTLINE, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + hFieldX - OUTLINE, y + hFieldY + hFieldHeight + OUTLINE, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(
+                        x + hFieldX + hFieldWidth + OUTLINE,
+                        y + hFieldY + hFieldHeight + OUTLINE,
+                        0F
+                )
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth + OUTLINE, y + hFieldY - OUTLINE, 0F)
+                .setColor(GUI_DARK, GUI_DARK, GUI_DARK, 255);
 
         // Red to yellow
         int secStart = hFieldY;
         int secEnd = secStart + hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(255, 0, 0, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(255, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(255, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(255, 0, 0, 255);
+        builder.addVertex(x + hFieldX, y + secStart, 0F)
+                .setColor(255, 0, 0, 255);
+        builder.addVertex(x + hFieldX, y + secEnd, 0F)
+                .setColor(255, 255, 0, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F)
+                .setColor(255, 255, 0, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F)
+                .setColor(255, 0, 0, 255);
 
         // Yellow to green
         secStart = secEnd;
         secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(255, 255, 0, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(0, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(0, 255, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(255, 255, 0, 255);
+        builder.addVertex(x + hFieldX, y + secStart, 0F)
+                .setColor(255, 255, 0, 255);
+        builder.addVertex(x + hFieldX, y + secEnd, 0F)
+                .setColor(0, 255, 0, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F)
+                .setColor(0, 255, 0, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F)
+                .setColor(255, 255, 0, 255);
 
         // Green to cyan
         secStart = secEnd;
         secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(0, 255, 0, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(0, 255, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(0, 255, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(0, 255, 0, 255);
+        builder.addVertex(x + hFieldX, y + secStart, 0F)
+                .setColor(0, 255, 0, 255);
+        builder.addVertex(x + hFieldX, y + secEnd, 0F)
+                .setColor(0, 255, 255, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F)
+                .setColor(0, 255, 255, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F)
+                .setColor(0, 255, 0, 255);
 
         // Cyan to blue
         secStart = secEnd;
         secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(0, 255, 255, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(0, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(0, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(0, 255, 255, 255);
+        builder.addVertex(x + hFieldX, y + secStart, 0F)
+                .setColor(0, 255, 255, 255);
+        builder.addVertex(x + hFieldX, y + secEnd, 0F)
+                .setColor(0, 0, 255, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F)
+                .setColor(0, 0, 255, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F)
+                .setColor(0, 255, 255, 255);
 
         // Blue to magenta
         secStart = secEnd;
         secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(0, 0, 255, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(255, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(255, 0, 255, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(0, 0, 255, 255);
+        builder.addVertex(x + hFieldX, y + secStart, 0F)
+                .setColor(0, 0, 255, 255);
+        builder.addVertex(x + hFieldX, y + secEnd, 0F)
+                .setColor(255, 0, 255, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F)
+                .setColor(255, 0, 255, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F)
+                .setColor(0, 0, 255, 255);
 
         // Magenta to red
         secStart = secEnd;
         secEnd += hSecSize;
-        builder.addVertex(x+hFieldX, y+secStart, 0F).setColor(255, 0, 255, 255);
-        builder.addVertex(x+hFieldX, y+secEnd, 0F).setColor(255, 0, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secEnd, 0F).setColor(255, 0, 0, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+secStart, 0F).setColor(255, 0, 255, 255);
+        builder.addVertex(x + hFieldX, y + secStart, 0F)
+                .setColor(255, 0, 255, 255);
+        builder.addVertex(x + hFieldX, y + secEnd, 0F)
+                .setColor(255, 0, 0, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secEnd, 0F)
+                .setColor(255, 0, 0, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + secStart, 0F)
+                .setColor(255, 0, 255, 255);
 
         // Hue Cursor (horizontal only)
-        int limitHCursorY = Math.min(hCursorY, hFieldY+hFieldHeight-CURSOR); // Keep within outline
-        builder.addVertex(x+hFieldX, y+limitHCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+hFieldX, y+limitHCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+limitHCursorY+CURSOR, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+hFieldX+hFieldWidth, y+limitHCursorY, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        int limitHCursorY =
+                Math.min(hCursorY, hFieldY + hFieldHeight - CURSOR); // Keep within outline
+        builder.addVertex(x + hFieldX, y + limitHCursorY, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + hFieldX, y + limitHCursorY + CURSOR, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + limitHCursorY + CURSOR, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + hFieldX + hFieldWidth, y + limitHCursorY, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // New color field outline
-        builder.addVertex(x+newCFieldX-OUTLINE, y+newCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+newCFieldX-OUTLINE, y+newCFieldY+newCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth+OUTLINE, y+newCFieldY+newCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth+OUTLINE, y+newCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + newCFieldX - OUTLINE, y + newCFieldY - OUTLINE, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + newCFieldX - OUTLINE, y + newCFieldY + newCFieldHeight + OUTLINE, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(
+                        x + newCFieldX + newCFieldWidth + OUTLINE,
+                        y + newCFieldY + newCFieldHeight + OUTLINE,
+                        0F
+                )
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + newCFieldX + newCFieldWidth + OUTLINE, y + newCFieldY - OUTLINE, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // New color
         int color = Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]);
         int colorR = FastColor.ARGB32.red(color);
         int colorG = FastColor.ARGB32.green(color);
         int colorB = FastColor.ARGB32.blue(color);
-        builder.addVertex(x+newCFieldX, y+newCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+newCFieldX, y+newCFieldY+newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth, y+newCFieldY+newCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+newCFieldX+newCFieldWidth, y+newCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + newCFieldX, y + newCFieldY, 0F)
+                .setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + newCFieldX, y + newCFieldY + newCFieldHeight, 0F)
+                .setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + newCFieldX + newCFieldWidth, y + newCFieldY + newCFieldHeight, 0F)
+                .setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + newCFieldX + newCFieldWidth, y + newCFieldY, 0F)
+                .setColor(colorR, colorG, colorB, 255);
 
         // Old color field outline
-        builder.addVertex(x+oldCFieldX-OUTLINE, y+oldCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+oldCFieldX-OUTLINE, y+oldCFieldY+oldCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth+OUTLINE, y+oldCFieldY+oldCFieldHeight+OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth+OUTLINE, y+oldCFieldY-OUTLINE, 0F).setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + oldCFieldX - OUTLINE, y + oldCFieldY - OUTLINE, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + oldCFieldX - OUTLINE, y + oldCFieldY + oldCFieldHeight + OUTLINE, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(
+                        x + oldCFieldX + oldCFieldWidth + OUTLINE,
+                        y + oldCFieldY + oldCFieldHeight + OUTLINE,
+                        0F
+                )
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
+        builder.addVertex(x + oldCFieldX + oldCFieldWidth + OUTLINE, y + oldCFieldY - OUTLINE, 0F)
+                .setColor(GUI_LIGHT, GUI_LIGHT, GUI_LIGHT, 255);
 
         // Old color
         colorR = FastColor.ARGB32.red(oldColor);
         colorG = FastColor.ARGB32.green(oldColor);
         colorB = FastColor.ARGB32.blue(oldColor);
-        builder.addVertex(x+oldCFieldX, y+oldCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+oldCFieldX, y+oldCFieldY+oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth, y+oldCFieldY+oldCFieldHeight, 0F).setColor(colorR, colorG, colorB, 255);
-        builder.addVertex(x+oldCFieldX+oldCFieldWidth, y+oldCFieldY, 0F).setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + oldCFieldX, y + oldCFieldY, 0F)
+                .setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + oldCFieldX, y + oldCFieldY + oldCFieldHeight, 0F)
+                .setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + oldCFieldX + oldCFieldWidth, y + oldCFieldY + oldCFieldHeight, 0F)
+                .setColor(colorR, colorG, colorB, 255);
+        builder.addVertex(x + oldCFieldX + oldCFieldWidth, y + oldCFieldY, 0F)
+                .setColor(colorR, colorG, colorB, 255);
 
         // Draw
         BufferUploader.drawWithShader(builder.buildOrThrow());

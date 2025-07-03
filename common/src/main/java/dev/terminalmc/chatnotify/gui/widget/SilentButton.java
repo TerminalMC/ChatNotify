@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
  * A {@link Button} that does not play a sound when pressed.
  */
 public class SilentButton extends Button {
+
     public SilentButton(int x, int y, int width, int height, Component message, OnPress onPress) {
         super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
     }

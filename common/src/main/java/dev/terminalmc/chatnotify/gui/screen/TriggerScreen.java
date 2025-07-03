@@ -28,17 +28,22 @@ import java.util.List;
 import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
- * Supports two {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s;
- * one to allow enhanced editing of a {@link Trigger}, and another to allow
- * selection of translation keys.
+ * Supports two {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s; one to allow enhanced
+ * editing of a {@link Trigger}, and another to allow selection of translation keys.
  */
 public class TriggerScreen extends OptionScreen {
+
     private final Trigger trigger;
     private final TextStyle textStyle;
     private final Runnable onClose;
 
-    public TriggerScreen(Screen lastScreen, Trigger trigger, TextStyle textStyle,
-                         Runnable onClose, String defaultKey) {
+    public TriggerScreen(
+            Screen lastScreen,
+            Trigger trigger,
+            TextStyle textStyle,
+            Runnable onClose,
+            String defaultKey
+    ) {
         super(lastScreen);
         this.trigger = trigger;
         this.textStyle = textStyle;
@@ -48,16 +53,34 @@ public class TriggerScreen extends OptionScreen {
 
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
-                new Tab(TabKey.TRIGGER_EDITOR.key, (screen) ->
-                        new TriggerEditorList(Minecraft.getInstance(), screen, 0, 0, 0,
-                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                                cast(screen).trigger, cast(screen).textStyle
-                        )),
-                new Tab(TabKey.KEY_SELECTOR.key, (screen) ->
-                        new KeySelectorList(Minecraft.getInstance(), screen, 0, 0, 0,
-                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
+                new Tab(
+                        TabKey.TRIGGER_EDITOR.key,
+                        (screen) -> new TriggerEditorList(
+                                Minecraft.getInstance(),
+                                screen,
+                                0,
+                                0,
+                                0,
+                                BASE_LIST_ENTRY_WIDTH,
+                                LIST_ENTRY_HEIGHT,
+                                LIST_ENTRY_SPACING,
+                                cast(screen).trigger,
+                                cast(screen).textStyle
+                        )
+                ),
+                new Tab(
+                        TabKey.KEY_SELECTOR.key,
+                        (screen) -> new KeySelectorList(
+                                Minecraft.getInstance(),
+                                screen,
+                                0,
+                                0,
+                                0,
+                                BASE_LIST_ENTRY_WIDTH,
+                                LIST_ENTRY_HEIGHT,
                                 cast(screen).trigger
-                        ))
+                        )
+                )
         );
         super.setTabs(tabs, defaultKey);
     }
@@ -67,15 +90,19 @@ public class TriggerScreen extends OptionScreen {
         KEY_SELECTOR(translationKey("option", "notif.trigger.selector"));
 
         public final String key;
+
         TabKey(String key) {
             this.key = key;
         }
     }
 
     private static TriggerScreen cast(OptionScreen screen) {
-        if (!(screen instanceof TriggerScreen s)) throw new IllegalArgumentException(
-                String.format("Option list supplier for class %s cannot use screen type %s",
-                        TriggerScreen.class.getName(), screen.getClass().getName()));
+        if (!(screen instanceof TriggerScreen s))
+            throw new IllegalArgumentException(String.format(
+                    "Option list supplier for class %s cannot use screen type %s",
+                    TriggerScreen.class.getName(),
+                    screen.getClass().getName()
+            ));
         return s;
     }
 

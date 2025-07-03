@@ -17,8 +17,8 @@
 package dev.terminalmc.chatnotify.gui.widget.field;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
 import dev.terminalmc.chatnotify.gui.widget.ExpandingList;
+import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -36,16 +36,17 @@ import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * An overlay-capable single-line text field with confirmation and cancellation
- * buttons, and a responsive tab-navigable dropdown list of suggestion strings.
+ * An overlay-capable single-line text field with confirmation and cancellation buttons, and a
+ * responsive tab-navigable dropdown list of suggestion strings.
  */
 public class DropdownTextField extends OverlayWidget {
+
     public static final int MIN_WIDTH = 80;
     public static final int MIN_HEIGHT = 40;
     public static final int MAX_WIDTH = 500;
@@ -64,9 +65,17 @@ public class DropdownTextField extends OverlayWidget {
     private boolean suppressUpdate;
     private @Nullable String oldVal = null;
 
-    public DropdownTextField(int x, int y, int width, int height, Component msg,
-                             Supplier<String> source, Consumer<String> dest,
-                             Consumer<OverlayWidget> close, Collection<String> dropdownValues) {
+    public DropdownTextField(
+            int x,
+            int y,
+            int width,
+            int height,
+            Component msg,
+            Supplier<String> source,
+            Consumer<String> dest,
+            Consumer<OverlayWidget> close,
+            Collection<String> dropdownValues
+    ) {
         super(x, y, width, height, false, msg, close);
         this.source = source;
         this.dest = dest;
@@ -86,23 +95,33 @@ public class DropdownTextField extends OverlayWidget {
         int buttonWidth = 20;
         int textFieldWidth = width - (2 * widgetHeight);
 
-        cancelButton = Button.builder(Component.literal("❌").withStyle(ChatFormatting.RED),
-                        (button) -> onClose())
+        cancelButton = Button.builder(
+                        Component.literal("❌").withStyle(ChatFormatting.RED),
+                        (button) -> onClose()
+                )
                 .pos(x + width - (buttonWidth * 2), y)
                 .size(buttonWidth, widgetHeight)
                 .build();
-        confirmButton = Button.builder(Component.literal("✔").withStyle(ChatFormatting.GREEN),
+        confirmButton = Button.builder(
+                        Component.literal("✔").withStyle(ChatFormatting.GREEN),
                         (button) -> {
                             dest.accept(textField.getValue());
                             onClose();
-                        })
+                        }
+                )
                 .pos(x + width - buttonWidth, y)
                 .size(buttonWidth, widgetHeight)
                 .build();
         textField = new TextField(x, y, textFieldWidth, widgetHeight);
-        dropdown = new ExpandingList(x, y + widgetHeight + verticalSpace,
-                width, height - widgetHeight - verticalSpace,
-                mc.font.lineHeight, mc.font.lineHeight, 2);
+        dropdown = new ExpandingList(
+                x,
+                y + widgetHeight + verticalSpace,
+                width,
+                height - widgetHeight - verticalSpace,
+                mc.font.lineHeight,
+                mc.font.lineHeight,
+                2
+        );
 
         textField.setMaxLength(240);
         textField.setResponder(this::valueResponder);
@@ -135,9 +154,15 @@ public class DropdownTextField extends OverlayWidget {
     // Regular widget stuff
 
     private DropdownWidget createDefaultDropWidget(String str) {
-        return new DropdownWidget(textField.getX(), textField.getY() + textField.getHeight(),
-                textField.getWidth(), Minecraft.getInstance().font.lineHeight + 2,
-                Component.literal(str), Minecraft.getInstance().font, this::tabComplete);
+        return new DropdownWidget(
+                textField.getX(),
+                textField.getY() + textField.getHeight(),
+                textField.getWidth(),
+                Minecraft.getInstance().font.lineHeight + 2,
+                Component.literal(str),
+                Minecraft.getInstance().font,
+                this::tabComplete
+        );
     }
 
     public DropdownTextField withSoundDropType() {
@@ -147,9 +172,15 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     private SoundDropdownWidget createSoundDropWidget(String str) {
-        return new SoundDropdownWidget(textField.getX(), textField.getY() + textField.getHeight(),
-                textField.getWidth(), Minecraft.getInstance().font.lineHeight + 2,
-                Component.literal(str), Minecraft.getInstance().font, this::tabComplete);
+        return new SoundDropdownWidget(
+                textField.getX(),
+                textField.getY() + textField.getHeight(),
+                textField.getWidth(),
+                Minecraft.getInstance().font.lineHeight + 2,
+                Component.literal(str),
+                Minecraft.getInstance().font,
+                this::tabComplete
+        );
     }
 
     private void tabComplete(String str) {
@@ -200,13 +231,15 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     private void tabUp() {
-        if (--dropdown.highlightIndex < 0) dropdown.highlightIndex = dropdown.size() - 1;
+        if (--dropdown.highlightIndex < 0)
+            dropdown.highlightIndex = dropdown.size() - 1;
         dropdown.ensureVisible(dropdown.highlightIndex);
         this.tabComplete(dropdown.get(dropdown.highlightIndex).getMessage().getString());
     }
 
     private void tabDown() {
-        if (++dropdown.highlightIndex >= dropdown.size()) dropdown.highlightIndex = 0;
+        if (++dropdown.highlightIndex >= dropdown.size())
+            dropdown.highlightIndex = 0;
         dropdown.ensureVisible(dropdown.highlightIndex);
         this.tabComplete(dropdown.get(dropdown.highlightIndex).getMessage().getString());
     }
@@ -247,7 +280,13 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(
+            double mouseX,
+            double mouseY,
+            int button,
+            double deltaX,
+            double deltaY
+    ) {
         if (textField.isFocused() && mouseOnWidget(textField, mouseX, mouseY)) {
             return textField.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         } else {
@@ -270,7 +309,12 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    protected void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(
+            @NotNull GuiGraphics graphics,
+            int mouseX,
+            int mouseY,
+            float delta
+    ) {
         textField.renderWidget(graphics, mouseX, mouseY, delta);
         cancelButton.render(graphics, mouseX, mouseY, delta);
         confirmButton.render(graphics, mouseX, mouseY, delta);
@@ -291,21 +335,35 @@ public class DropdownTextField extends OverlayWidget {
     // Suggestion dropdown list element
 
     public static class DropdownWidget extends StringWidget {
+
         private final Consumer<String> dest;
 
-        private DropdownWidget(int x, int y, int width, int height, Component msg,
-                               Font font, Consumer<String> dest) {
+        private DropdownWidget(
+                int x,
+                int y,
+                int width,
+                int height,
+                Component msg,
+                Font font,
+                Consumer<String> dest
+        ) {
             super(x, y, width, height, msg, font);
             this.active = true;
             this.dest = dest;
         }
 
-        public static DropdownWidget create(int x, int y, int width, int height, Component msg,
-                                            Font font, Consumer<String> dest) {
+        public static DropdownWidget create(
+                int x,
+                int y,
+                int width,
+                int height,
+                Component msg,
+                Font font,
+                Consumer<String> dest
+        ) {
             return new DropdownWidget(x, y, width, height, msg, font, dest);
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public void onClick(double mouseX, double mouseY) {
             dest.accept(getMessage().getString());
@@ -313,26 +371,51 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     public static class SoundDropdownWidget extends DropdownWidget {
+
         private static @Nullable SoundInstance lastSound;
 
-        private SoundDropdownWidget(int x, int y, int width, int height, Component msg,
-                                    Font font, Consumer<String> dest) {
+        private SoundDropdownWidget(
+                int x,
+                int y,
+                int width,
+                int height,
+                Component msg,
+                Font font,
+                Consumer<String> dest
+        ) {
             super(x, y, width, height, msg, font, dest);
         }
 
-        public static SoundDropdownWidget create(int x, int y, int width, int height, Component msg,
-                                                 Font font, Consumer<String> dest) {
+        public static SoundDropdownWidget create(
+                int x,
+                int y,
+                int width,
+                int height,
+                Component msg,
+                Font font,
+                Consumer<String> dest
+        ) {
             return new SoundDropdownWidget(x, y, width, height, msg, font, dest);
         }
 
         @Override
         public void playDownSound(@NotNull SoundManager soundManager) {
-            if (lastSound != null) soundManager.stop(lastSound);
+            if (lastSound != null)
+                soundManager.stop(lastSound);
             lastSound = new SimpleSoundInstance(
                     ResourceLocation.parse(getMessage().getString()),
-                    SoundSource.MASTER, 1.0F, 1.0F,
-                    SoundInstance.createUnseededRandom(), false, 0,
-                    SoundInstance.Attenuation.NONE, 0, 0, 0, true);
+                    SoundSource.MASTER,
+                    1.0F,
+                    1.0F,
+                    SoundInstance.createUnseededRandom(),
+                    false,
+                    0,
+                    SoundInstance.Attenuation.NONE,
+                    0,
+                    0,
+                    0,
+                    true
+            );
             soundManager.play(lastSound);
         }
     }

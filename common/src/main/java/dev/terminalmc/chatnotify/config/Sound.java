@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 public class Sound {
+
     public static final int VERSION = 1;
     public final int version = VERSION;
 
@@ -62,13 +63,9 @@ public class Sound {
     /**
      * Not validated.
      */
-    Sound(
-            boolean enabled,
-            String id,
-            float volume,
-            float pitch
-    ) {
-        if (!validId(id)) throw new IllegalArgumentException("Specified id is not a valid sound.");
+    Sound(boolean enabled, String id, float volume, float pitch) {
+        if (!validId(id))
+            throw new IllegalArgumentException("Specified id is not a valid sound.");
         this.enabled = enabled;
         this.id = id;
         this.volume = volume;
@@ -91,9 +88,9 @@ public class Sound {
 
     /**
      * Enables or disables this instance.
-     *
-     * <p>{@link Sound#volume} is {@code 0} and {@code enabled} is true, sets 
-     * {@link Sound#volume} to {@code 1}.</p>
+     * <p>
+     * {@link Sound#volume} is {@code 0} and {@code enabled} is true, sets {@link Sound#volume} to
+     * {@code 1}.
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -110,8 +107,8 @@ public class Sound {
     }
 
     /**
-     * Sets the sound {@link ResourceLocation} string to the specified value
-     * if it represents a valid {@link ResourceLocation}.
+     * Sets the sound {@link ResourceLocation} string to the specified value if it represents a
+     * valid {@link ResourceLocation}.
      */
     public void setId(String id) {
         if (validId(id)) {
@@ -132,22 +129,23 @@ public class Sound {
 
     /**
      * Sets the sound volume.
-     *
-     * <p>If {@code volume} is {@code 0}, sets {@link Sound#enabled} to 
-     * {@code false}.</p>
-     *
-     * <p>If {@code volume} is not {@code 0} and {@link Sound#enabled} is 
-     * {@code false}, sets {@link Sound#enabled} to {@code true}.</p>
+     * <p>
+     * If {@code volume} is {@code 0}, sets {@link Sound#enabled} to {@code false}.
+     * <p>
+     * If {@code volume} is not {@code 0} and {@link Sound#enabled} is {@code false}, sets
+     * {@link Sound#enabled} to {@code true}.
      *
      * @throws IllegalArgumentException if {@code volume} is out of range
-     * ({@code volume < 0 || volume > 1}).
+     *                                  ({@code volume < 0 || volume > 1}).
      */
     public void setVolume(float volume) {
-        if (volume < 0 || volume > 1) throw new IllegalArgumentException(
-                "Value out of range. Expected 0-1, got " + volume);
+        if (volume < 0 || volume > 1)
+            throw new IllegalArgumentException("Value out of range. Expected 0-1, got " + volume);
         this.volume = volume;
-        if (volume == 0) this.enabled = false;
-        else if (!this.enabled) this.enabled = true;
+        if (volume == 0)
+            this.enabled = false;
+        else if (!this.enabled)
+            this.enabled = true;
     }
 
     public float getPitch() {
@@ -156,12 +154,13 @@ public class Sound {
 
     /**
      * Sets the sound pitch.
+     *
      * @throws IllegalArgumentException if {@code pitch} out of range
-     * ({@code pitch < 0.5 || pitch > 2}).
+     *                                  ({@code pitch < 0.5 || pitch > 2}).
      */
     public void setPitch(float pitch) {
-        if (pitch < 0.5 || pitch > 2) throw new IllegalArgumentException(
-                "Value out of range. Expected 0.5-2, got " + pitch);
+        if (pitch < 0.5 || pitch > 2)
+            throw new IllegalArgumentException("Value out of range. Expected 0.5-2, got " + pitch);
         this.pitch = pitch;
     }
 
@@ -171,14 +170,15 @@ public class Sound {
      * Validates this instance. To be called after editing and before saving.
      */
     Sound validate() {
-        if (volume < 0 || volume > 1) volume = volumeDefault;
-        if (pitch < 0.5 || pitch > 2) pitch = pitchDefault;
+        if (volume < 0 || volume > 1)
+            volume = volumeDefault;
+        if (pitch < 0.5 || pitch > 2)
+            pitch = pitchDefault;
         return this;
     }
 
     /**
-     * @return {@code true} if {@code id} represents a valid
-     * {@link ResourceLocation}.
+     * @return {@code true} if {@code id} represents a valid {@link ResourceLocation}.
      */
     public static boolean validId(String id) {
         return ResourceLocation.tryParse(id) != null;
@@ -187,30 +187,46 @@ public class Sound {
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Sound> {
+
         @Override
-        public Sound deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
+        public Sound deserialize(
+                JsonElement json,
+                java.lang.reflect.Type typeOfT,
+                JsonDeserializationContext ctx
+        ) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
-                    enabledDefault, silent);
+            boolean enabled = JsonUtil.getOrDefault(
+                    obj,
+                    "enabled",
+                    enabledDefault,
+                    silent
+            );
 
-            String id = JsonUtil.getOrDefault(obj, "id",
-                    idDefault, silent);
+            String id = JsonUtil.getOrDefault(
+                    obj,
+                    "id",
+                    idDefault,
+                    silent
+            );
 
-            float volume = JsonUtil.getOrDefault(obj, "volume",
-                    volumeDefault, silent);
+            float volume = JsonUtil.getOrDefault(
+                    obj,
+                    "volume",
+                    volumeDefault,
+                    silent
+            );
 
-            float pitch = JsonUtil.getOrDefault(obj, "pitch",
-                    pitchDefault, silent);
+            float pitch = JsonUtil.getOrDefault(
+                    obj,
+                    "pitch",
+                    pitchDefault,
+                    silent
+            );
 
-            return new Sound(
-                    enabled,
-                    id,
-                    volume,
-                    pitch
-            ).validate();
+            return new Sound(enabled, id, volume, pitch).validate();
         }
     }
 }

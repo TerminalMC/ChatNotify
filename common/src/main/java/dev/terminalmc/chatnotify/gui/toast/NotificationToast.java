@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class NotificationToast implements Toast {
+
     private static final ResourceLocation BACKGROUND_SPRITE =
             ResourceLocation.withDefaultNamespace("toast/advancement");
     private static final int DISPLAY_TIME = 5000;
@@ -47,8 +48,11 @@ public class NotificationToast implements Toast {
     }
 
     @Override
-    public @NotNull Visibility render(@NotNull GuiGraphics graphics,
-                                      @NotNull ToastComponent component, long elapsedTime) {
+    public @NotNull Visibility render(
+            @NotNull GuiGraphics graphics,
+            @NotNull ToastComponent component,
+            long elapsedTime
+    ) {
         Font font = component.getMinecraft().font;
         if (messageLines.size() <= 1) {
             // Message fits in a single line, render a single sprite
@@ -73,44 +77,84 @@ public class NotificationToast implements Toast {
             }
 
             // Bottom border
-            renderBackgroundRow(graphics, width, HEIGHT - bottomSpriteHeight,
-                    height - bottomSpriteHeight, bottomSpriteHeight);
+            renderBackgroundRow(
+                    graphics,
+                    width,
+                    HEIGHT - bottomSpriteHeight,
+                    height - bottomSpriteHeight,
+                    bottomSpriteHeight
+            );
         }
 
         if (messageLines.size() == 1) {
             // Single line, center vertically
-            graphics.drawString(font, messageLines.getFirst(),
-                    X_MARGIN, Y_MARGIN + lineHeight / 2, -1, false);
+            graphics.drawString(
+                    font,
+                    messageLines.getFirst(),
+                    X_MARGIN,
+                    Y_MARGIN + lineHeight / 2,
+                    -1,
+                    false
+            );
         } else {
             // Multiple lines, justify to top margin
             for (int j = 0; j < messageLines.size(); j++) {
-                graphics.drawString(font, messageLines.get(j),
-                        X_MARGIN, Y_MARGIN + lineHeight * j, -1, false);
+                graphics.drawString(
+                        font,
+                        messageLines.get(j),
+                        X_MARGIN,
+                        Y_MARGIN + lineHeight * j,
+                        -1,
+                        false
+                );
             }
         }
 
         return elapsedTime < DISPLAY_TIME * component.getNotificationDisplayTimeMultiplier()
-                ? Visibility.SHOW : Visibility.HIDE;
+                ? Visibility.SHOW
+                : Visibility.HIDE;
     }
 
-    private void renderBackgroundRow(GuiGraphics graphics, int width, int vOffset,
-                                     int y, int vHeight) {
+    private void renderBackgroundRow(
+            GuiGraphics graphics,
+            int width,
+            int vOffset,
+            int y,
+            int vHeight
+    ) {
         int uWidth = vOffset == 0 ? 20 : 5;
         int uRemainder = Math.min(60, width - uWidth);
 
         // Left border
-        graphics.blitSprite(BACKGROUND_SPRITE, WIDTH, HEIGHT, 0, vOffset,
-                0, y, uWidth, vHeight);
+        graphics.blitSprite(BACKGROUND_SPRITE, WIDTH, HEIGHT, 0, vOffset, 0, y, uWidth, vHeight);
 
         // Middle background
         int offset = 64;
         for (int x = uWidth; x < width - uRemainder; x += offset) {
-            graphics.blitSprite(BACKGROUND_SPRITE, WIDTH, HEIGHT, HEIGHT, vOffset,
-                    x, y, Math.min(offset, width - x - uRemainder), vHeight);
+            graphics.blitSprite(
+                    BACKGROUND_SPRITE,
+                    WIDTH,
+                    HEIGHT,
+                    HEIGHT,
+                    vOffset,
+                    x,
+                    y,
+                    Math.min(offset, width - x - uRemainder),
+                    vHeight
+            );
         }
 
         // Right border
-        graphics.blitSprite(BACKGROUND_SPRITE, WIDTH, HEIGHT, WIDTH - uRemainder, vOffset,
-                width - uRemainder, y, uRemainder, vHeight);
+        graphics.blitSprite(
+                BACKGROUND_SPRITE,
+                WIDTH,
+                HEIGHT,
+                WIDTH - uRemainder,
+                vOffset,
+                width - uRemainder,
+                y,
+                uRemainder,
+                vHeight
+        );
     }
 }

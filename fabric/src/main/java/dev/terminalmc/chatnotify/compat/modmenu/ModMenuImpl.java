@@ -21,6 +21,7 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 import dev.terminalmc.chatnotify.gui.screen.RootScreen;
 
 public class ModMenuImpl implements ModMenuApi {
+
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
         return RootScreen::new;

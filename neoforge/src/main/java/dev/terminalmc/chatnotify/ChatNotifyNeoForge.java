@@ -26,19 +26,30 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-@Mod(value = ChatNotify.MOD_ID, dist = Dist.CLIENT)
+@Mod(
+        value = ChatNotify.MOD_ID,
+        dist = Dist.CLIENT
+)
 public class ChatNotifyNeoForge {
+
     public ChatNotifyNeoForge() {
         // Register config screen
-        ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
-                () -> (minecraft, parent) -> new RootScreen(parent));
+        ModLoadingContext.get()
+                .registerExtensionPoint(
+                        IConfigScreenFactory.class,
+                        () -> (minecraft, parent) -> new RootScreen(parent)
+                );
 
         // Initialize client
         ChatNotify.init();
     }
 
-    @EventBusSubscriber(modid = ChatNotify.MOD_ID, value = Dist.CLIENT)
+    @EventBusSubscriber(
+            modid = ChatNotify.MOD_ID,
+            value = Dist.CLIENT
+    )
     static class ClientEventHandler {
+
         /**
          * Registers client after-tick event.
          */

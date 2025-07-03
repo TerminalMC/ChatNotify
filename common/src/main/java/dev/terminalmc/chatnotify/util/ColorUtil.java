@@ -21,17 +21,19 @@ import net.minecraft.network.chat.TextColor;
 import java.util.Optional;
 
 public class ColorUtil {
+
     /**
      * Converts a hex color string into a {@link TextColor}.
-     * @param str a full-length RGB hex string with leading #
-     *                 (7 chars total).
-     * @return the resulting {@link TextColor} if the string is a valid color,
-     * {@code null} otherwise.
+     *
+     * @param str a full-length RGB hex string with leading # (7 chars total).
+     * @return the resulting {@link TextColor} if the string is a valid color, {@code null}
+     * otherwise.
      */
     public static TextColor parseColor(String str) {
         if (str.startsWith("#") && str.length() == 7) {
             Optional<TextColor> result = TextColor.parseColor(str).result();
-            if (result.isPresent()) return result.get();
+            if (result.isPresent())
+                return result.get();
         }
         return null;
     }

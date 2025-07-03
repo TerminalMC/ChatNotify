@@ -44,12 +44,13 @@ import java.util.regex.PatternSyntaxException;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /**
- * A custom {@link EditBox} which supports click-dragging to select text,
- * double-clicking to select words, triple-clicking to select all, and content
- * validation with warning text color and tooltip.
+ * A custom {@link EditBox} which supports click-dragging to select text, double-clicking to select
+ * words, triple-clicking to select all, and content validation with warning text color and
+ * tooltip.
  */
 @SuppressWarnings("UnusedReturnValue")
 public class TextField extends EditBox {
+
     public static final long CLICK_CHAIN_TIME = 250L;
     public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
     public static final int TEXT_COLOR_ERROR = 0xFF5555;
@@ -85,8 +86,15 @@ public class TextField extends EditBox {
         this(Minecraft.getInstance().font, x, y, width, height, Component.empty(), validator);
     }
 
-    public TextField(Font font, int x, int y, int width, int height, Component msg,
-                     @Nullable Validator validator) {
+    public TextField(
+            Font font,
+            int x,
+            int y,
+            int width,
+            int height,
+            Component msg,
+            @Nullable Validator validator
+    ) {
         super(font, x, y, width, height, msg);
         this.font = font;
         if (validator != null) {
@@ -189,7 +197,7 @@ public class TextField extends EditBox {
                         // double-click: select word
                         int pos = getCursorPosition();
                         int start = pos;
-                        // If next char is space or previous char is not space, 
+                        // If next char is space or previous char is not space,
                         // go backwards to the start of the word.
                         if (pos < 0) {
                             start = 0;
@@ -229,20 +237,32 @@ public class TextField extends EditBox {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (button != 0) return false;
+    public boolean mouseDragged(
+            double mouseX,
+            double mouseY,
+            int button,
+            double dragX,
+            double dragY
+    ) {
+        if (button != 0)
+            return false;
         String str = getValue();
 
         if (mouseX < dragOriginX) { // Dragging left
             String subLeft = str.substring(0, dragOriginPos);
-            int offsetChars = font.plainSubstrByWidth(subLeft,
-                    Mth.floor(dragOriginX - mouseX), true).length();
+            int offsetChars = font.plainSubstrByWidth(
+                    subLeft,
+                    Mth.floor(dragOriginX - mouseX),
+                    true
+            ).length();
             moveCursorTo(dragOriginPos - offsetChars, true);
-        }
-        else { // Dragging right
+        } else { // Dragging right
             String subRight = str.substring(dragOriginPos);
-            int offsetChars = font.plainSubstrByWidth(subRight,
-                    Mth.floor(mouseX - dragOriginX), false).length();
+            int offsetChars = font.plainSubstrByWidth(
+                    subRight,
+                    Mth.floor(mouseX - dragOriginX),
+                    false
+            ).length();
             moveCursorTo(dragOriginPos + offsetChars, true);
         }
 
@@ -270,8 +290,7 @@ public class TextField extends EditBox {
             if (isUndo(keyCode)) {
                 undo();
                 return true;
-            }
-            else if (isRedo(keyCode)) {
+            } else if (isRedo(keyCode)) {
                 redo();
                 return true;
             }
@@ -296,11 +315,13 @@ public class TextField extends EditBox {
 
     @FunctionalInterface
     public interface Validator {
+
         Optional<Component> validate(String str);
 
         // Implementations
 
         class Regex implements Validator {
+
             @Override
             public Optional<Component> validate(String str) {
                 try {
@@ -314,48 +335,60 @@ public class TextField extends EditBox {
         }
 
         class HexColor implements Validator {
+
             @Override
             public Optional<Component> validate(String str) {
                 if (ColorUtil.parseColor(str) != null) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("ui", "field.error.color")
-                            .withStyle(ChatFormatting.RED));
+                    return Optional.of(localized(
+                            "ui",
+                            "field.error.color"
+                    ).withStyle(ChatFormatting.RED));
                 }
             }
         }
 
         class Sound implements Validator {
+
             private final Set<String> sounds = new HashSet<>(Minecraft.getInstance()
-                    .getSoundManager().getAvailableSounds().stream()
-                    .map(ResourceLocation::toString).toList());
+                    .getSoundManager()
+                    .getAvailableSounds()
+                    .stream()
+                    .map(ResourceLocation::toString)
+                    .toList());
 
             @Override
             public Optional<Component> validate(String str) {
-                if (sounds.contains(str)
-                        || (!str.contains(":") && sounds.contains(("minecraft:" + str)))) {
+                if (sounds.contains(str) || (!str.contains(":") && sounds.contains(("minecraft:"
+                        + str)))) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("ui", "field.error.sound")
-                            .withStyle(ChatFormatting.RED));
+                    return Optional.of(localized(
+                            "ui",
+                            "field.error.sound"
+                    ).withStyle(ChatFormatting.RED));
                 }
             }
         }
 
         class PosInt implements Validator {
+
             @Override
             public Optional<Component> validate(String str) {
                 try {
-                    if (Integer.parseInt(str) < 0) throw new NumberFormatException();
+                    if (Integer.parseInt(str) < 0)
+                        throw new NumberFormatException();
                     return Optional.empty();
                 } catch (NumberFormatException ignored) {
-                    return Optional.of(localized("ui", "field.error.pos_int")
-                            .withStyle(ChatFormatting.RED));
+                    return Optional.of(localized("ui", "field.error.pos_int").withStyle(
+                            ChatFormatting.RED));
                 }
             }
         }
 
         class InputKey implements Validator {
+
             List<String> keys;
 
             public InputKey(List<String> keys) {
@@ -367,13 +400,14 @@ public class TextField extends EditBox {
                 if (keys.contains(str)) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("ui", "field.error.input_key")
-                            .withStyle(ChatFormatting.RED));
+                    return Optional.of(localized("ui", "field.error.input_key").withStyle(
+                            ChatFormatting.RED));
                 }
             }
         }
 
         class UniqueTrigger implements Validator {
+
             final Notification notif;
             final Trigger trigger;
             final Type type;
@@ -404,24 +438,25 @@ public class TextField extends EditBox {
 
             @Override
             public Optional<Component> validate(String str) {
-                if (str.isBlank()) return Optional.empty();
+                if (str.isBlank())
+                    return Optional.empty();
                 MutableComponent err = Component.empty().withStyle(ChatFormatting.RED);
 
                 boolean hasErr = checkTriggers(err, false, notif.triggers, str, "");
                 if (notif.inclusionEnabled) {
-                    hasErr = checkTriggers(err, hasErr, notif.inclusionTriggers, str, ".inclusion") || hasErr;
+                    hasErr = checkTriggers(err, hasErr, notif.inclusionTriggers, str, ".inclusion")
+                            || hasErr;
                 }
                 if (notif.exclusionEnabled) {
-                    hasErr = checkTriggers(err, hasErr, notif.exclusionTriggers, str, ".exclusion") || hasErr;
+                    hasErr = checkTriggers(err, hasErr, notif.exclusionTriggers, str, ".exclusion")
+                            || hasErr;
                 }
 
                 // Only check other notifications if inclusion/exclusion are
                 // not in use, too complex to check those.
-                if (
-                        type == Type.MAIN
-                                && (!notif.inclusionEnabled || notif.inclusionTriggers.isEmpty())
-                                && (!notif.exclusionEnabled || notif.exclusionTriggers.isEmpty())
-                ) {
+                if (type == Type.MAIN && (!notif.inclusionEnabled
+                        || notif.inclusionTriggers.isEmpty()) && (!notif.exclusionEnabled
+                        || notif.exclusionTriggers.isEmpty())) {
                     hasErr = checkOtherNotifs(err, hasErr, str);
                 }
 
@@ -434,23 +469,23 @@ public class TextField extends EditBox {
                     i++; // 1-indexed for users
                     // Only check other notifications if inclusion/exclusion are
                     // not in use, too complex to check those.
-                    if (
-                            n != notif
-                                    && n.enabled
-                                    && (!n.inclusionEnabled || n.inclusionTriggers.isEmpty())
-                                    && (!n.exclusionEnabled || n.exclusionTriggers.isEmpty())
-                    ) {
+                    if (n != notif && n.enabled
+                            && (!n.inclusionEnabled || n.inclusionTriggers.isEmpty())
+                            && (!n.exclusionEnabled || n.exclusionTriggers.isEmpty())) {
                         int j = 0;
                         for (Trigger t : n.triggers) {
                             j++;
                             if (t.type == trigger.type && t.string.equals(str)) {
-                                if (hasErr) err.append("\n");
+                                if (hasErr)
+                                    err.append("\n");
                                 err.append(localized(
-                                        "ui","field.error.trigger.duplicate",
+                                        "ui",
+                                        "field.error.trigger.duplicate",
                                         Component.literal(String.valueOf(j))
                                                 .withStyle(ChatFormatting.GOLD),
                                         Component.literal(String.valueOf(i))
-                                                .withStyle(ChatFormatting.GOLD)));
+                                                .withStyle(ChatFormatting.GOLD)
+                                ));
                                 return true;
                             }
                         }
@@ -459,16 +494,24 @@ public class TextField extends EditBox {
                 return hasErr;
             }
 
-            private boolean checkTriggers(MutableComponent err, boolean hasErr,
-                                          List<Trigger> triggers, String str, String errKey) {
+            private boolean checkTriggers(
+                    MutableComponent err,
+                    boolean hasErr,
+                    List<Trigger> triggers,
+                    String str,
+                    String errKey
+            ) {
                 int i = 0;
                 for (Trigger t : triggers) {
                     i++; // 1-indexed for users
                     if (!t.equals(trigger) && t.type == trigger.type && t.string.equals(str)) {
-                        if (hasErr) err.append("\n");
-                        err.append(localized("ui", "field.error.trigger.duplicate.here" + errKey,
-                                Component.literal(String.valueOf(i))
-                                        .withStyle(ChatFormatting.GOLD)));
+                        if (hasErr)
+                            err.append("\n");
+                        err.append(localized(
+                                "ui",
+                                "field.error.trigger.duplicate.here" + errKey,
+                                Component.literal(String.valueOf(i)).withStyle(ChatFormatting.GOLD)
+                        ));
                         return true;
                     }
                 }
@@ -494,16 +537,14 @@ public class TextField extends EditBox {
     }
 
     /**
-     * Adjusts {@link PatternSyntaxException} description messages for correct
-     * display in tooltips.
-     *
-     * <p>Messages are intended for display using monospaced fonts, so the
-     * cursor indicating the error position will usually be in the wrong place
-     * when displayed using the Minecraft font. This method simply moves the
-     * cursor to a new position as close as possible to the correct one.</p>
-     *
-     * <p>Also, messages contain carriage-return characters which don't play
-     * well with Minecraft so this method removes them.</p>
+     * Adjusts {@link PatternSyntaxException} description messages for correct display in tooltips.
+     * <p>
+     * Messages are intended for display using monospaced fonts, so the cursor indicating the error
+     * position will usually be in the wrong place when displayed using the Minecraft font. This
+     * method simply moves the cursor to a new position as close as possible to the correct one.
+     * <p>
+     * Also, messages contain carriage-return characters which don't play well with Minecraft so
+     * this method removes them.
      */
     public static String fixRegexMessage(String str) {
         // Remove carriage returns

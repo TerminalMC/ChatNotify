@@ -30,19 +30,23 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class ChatNotify {
+
     public static final String MOD_ID = "chatnotify";
     public static final String MOD_NAME = "ChatNotify";
     public static final ModLogger LOG = new ModLogger(MOD_NAME);
     public static boolean hasResetConfig = false;
 
     /**
-     * Stores messages recently sent by the client, for comparison with incoming
-     * messages to determine sender identity.
+     * Stores messages recently sent by the client, for comparison with incoming messages to
+     * determine sender identity.
      */
     public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
 
@@ -64,7 +68,8 @@ public class ChatNotify {
         // Compile regex triggers
         for (Notification notif : config.getNotifs()) {
             for (Trigger trig : notif.triggers) {
-                if (trig.type == Trigger.Type.REGEX) trig.tryCompilePattern();
+                if (trig.type == Trigger.Type.REGEX)
+                    trig.tryCompilePattern();
                 if (trig.styleTarget.type == StyleTarget.Type.REGEX) {
                     trig.styleTarget.tryCompilePattern();
                 } else if (trig.styleTarget.type == StyleTarget.Type.CAPTURING) {
@@ -72,7 +77,8 @@ public class ChatNotify {
                 }
             }
             for (Trigger trig : notif.exclusionTriggers) {
-                if (trig.type == Trigger.Type.REGEX) trig.tryCompilePattern();
+                if (trig.type == Trigger.Type.REGEX)
+                    trig.tryCompilePattern();
             }
         }
     }
@@ -83,9 +89,16 @@ public class ChatNotify {
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;
-            mc.getToasts().addToast(new SystemToast(new SystemToast.SystemToastId(15000L),
-                    localized("toast", "reset.title"), localized("toast", "reset.message",
-                    Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD))));
+            mc.getToasts().addToast(new SystemToast(
+                    new SystemToast.SystemToastId(15000L),
+                    localized("toast", "reset.title"),
+                    localized(
+                            "toast",
+                            "reset.message",
+                            Component.literal(Config.UNREADABLE_FILE_NAME)
+                                    .withStyle(ChatFormatting.GOLD)
+                    )
+            ));
         }
     }
 
@@ -114,7 +127,8 @@ public class ChatNotify {
     }
 
     private static void sendMessages(List<String> messages, ClientPacketListener connection) {
-        if (messages.isEmpty()) return;
+        if (messages.isEmpty())
+            return;
         Minecraft mc = Minecraft.getInstance();
         switch (Config.get().sendMode) {
             case SCREEN -> {

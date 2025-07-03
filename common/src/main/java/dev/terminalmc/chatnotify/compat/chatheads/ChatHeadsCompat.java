@@ -25,27 +25,32 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ChatHeadsUtil {
+public class ChatHeadsCompat {
+
     /**
      * Gets the most recently saved message ownership data from ChatHeads.
-     *
-     * <p>Both pair elements will be {@code null} if there was no data.</p>
+     * <p>
+     * Both pair elements will be {@code null} if there was no data.
      */
     static @NotNull Pair<@Nullable PlayerInfo, @Nullable Integer> getPlayerInfo() {
         if (ChatHeads.lastSenderData == HeadData.EMPTY) {
             return new Pair<>(null, null);
         } else {
-            return new Pair<>(ChatHeads.lastSenderData.playerInfo(),
-                    ChatHeads.lastSenderData.codePointIndex());
+            return new Pair<>(
+                    ChatHeads.lastSenderData.playerInfo(),
+                    ChatHeads.lastSenderData.codePointIndex()
+            );
         }
     }
 
     /**
      * Tells ChatHeads to update its saved message ownership data.
      */
-    static void handleAddedMessage(Component message,
-                                   @Nullable ChatType.Bound bound,
-                                   @Nullable PlayerInfo playerInfo) {
+    static void handleAddedMessage(
+            Component message,
+            @Nullable ChatType.Bound bound,
+            @Nullable PlayerInfo playerInfo
+    ) {
         ChatHeads.handleAddedMessage(message, bound, playerInfo);
     }
 }

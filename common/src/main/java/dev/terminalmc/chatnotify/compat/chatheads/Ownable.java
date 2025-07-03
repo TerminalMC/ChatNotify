@@ -19,5 +19,6 @@ package dev.terminalmc.chatnotify.compat.chatheads;
 import net.minecraft.client.multiplayer.PlayerInfo;
 
 public interface Ownable {
+
     PlayerInfo chatheads$getOwner();
 }

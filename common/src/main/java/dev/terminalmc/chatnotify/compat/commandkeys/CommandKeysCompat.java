@@ -20,22 +20,25 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 
-public class CommandKeysUtil {
+public class CommandKeysCompat {
+
     public static final String DUAL_KEY_PATTERN_STRING = "^[a-z0-9.]+-[a-z0-9.]++$";
 
     /**
-     * Parses the specified string into two {@link InputConstants.Key}
-     * instances, and passes them to CommandKeys' keypress handler.
+     * Parses the specified string into two {@link InputConstants.Key} instances, and passes them to
+     * CommandKeys' keypress handler.
      */
     static void send(String str) {
-        if (!str.matches(DUAL_KEY_PATTERN_STRING)) return;
+        if (!str.matches(DUAL_KEY_PATTERN_STRING))
+            return;
         String[] splitStr = str.split("-");
         String limitKeyStr = splitStr[0];
         String KeyStr = splitStr[1];
 
         InputConstants.Key limitKey = KeyAccessor.getNameMap().get(limitKeyStr);
         InputConstants.Key key = KeyAccessor.getNameMap().get(KeyStr);
-        if (key == null || limitKey == null) return;
+        if (key == null || limitKey == null)
+            return;
 
         KeybindUtil.handleKeys(key, limitKey);
     }

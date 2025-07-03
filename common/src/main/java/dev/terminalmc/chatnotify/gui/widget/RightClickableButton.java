@@ -24,16 +24,24 @@ import org.lwjgl.glfw.GLFW;
 
 /**
  * A {@link Button} that accepts right as well as left clicks.
- *
- * <p><b>Note:</b> If contained within a parent element such as a 
- * {@link net.minecraft.client.gui.components.ContainerObjectSelectionList},
- * the parent element must also be modified to accept right clicks.</p>
+ * <p>
+ * <b>Note:</b> If contained within a parent element such as a
+ * {@link net.minecraft.client.gui.components.ContainerObjectSelectionList}, the parent element must
+ * also be modified to accept right clicks.
  */
 public class RightClickableButton extends Button {
+
     protected final OnPress onRightPress;
 
-    public RightClickableButton(int x, int y, int width, int height, Component msg,
-                                OnPress onPress, OnPress onRightPress) {
+    public RightClickableButton(
+            int x,
+            int y,
+            int width,
+            int height,
+            Component msg,
+            OnPress onPress,
+            OnPress onRightPress
+    ) {
         super(x, y, width, height, msg, onPress, DEFAULT_NARRATION);
         this.onRightPress = onRightPress;
     }
@@ -44,8 +52,10 @@ public class RightClickableButton extends Button {
 
     @Override
     public void onClick(double mouseX, double mouseY) {
-        if (GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(),
-                InputConstants.MOUSE_BUTTON_RIGHT) == 1) {
+        if (GLFW.glfwGetMouseButton(
+                Minecraft.getInstance().getWindow().getWindow(),
+                InputConstants.MOUSE_BUTTON_RIGHT
+        ) == 1) {
             onRightPress();
         } else {
             onPress();

@@ -18,7 +18,8 @@ package dev.terminalmc.chatnotify.gui.widget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import org.jetbrains.annotations.NotNull;
@@ -26,17 +27,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * A {@link ContainerObjectSelectionList} which dynamically adjusts its height
- * between zero and a specified maximum based on the number of entries
- * contained.
- *
- * <p>Each {@link Entry} has a single {@link AbstractWidget}, rather than the
- * normal list of widgets.</p>
- *
- * <p>Supports highlighting of a single {@link Entry}, specified by
- * {@link ExpandingList#highlightIndex}.</p>
+ * A {@link ContainerObjectSelectionList} which dynamically adjusts its height between zero and a
+ * specified maximum based on the number of entries contained.
+ * <p>
+ * Each {@link Entry} has a single {@link AbstractWidget}, rather than the normal list of widgets.
+ * <p>
+ * Supports highlighting of a single {@link Entry}, specified by
+ * {@link ExpandingList#highlightIndex}.
  */
 public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.Entry> {
+
     public static final int HIGHLIGHT_COLOR = 0x96787878;
     public static final int SCROLLBAR_WIDTH = 6;
     public static final int VERTICAL_BUFFER = 6;
@@ -49,17 +49,23 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     public int highlightIndex = -1;
 
     /**
-     * @param x the x position of the list widget.
-     * @param y the y position of the list widget.
-     * @param width the full width of the list widget.
-     * @param maxHeight the maximum allowable height of the list widget.
-     * @param itemHeight the space to allocate for each list entry.
+     * @param x           the x position of the list widget.
+     * @param y           the y position of the list widget.
+     * @param width       the full width of the list widget.
+     * @param maxHeight   the maximum allowable height of the list widget.
+     * @param itemHeight  the space to allocate for each list entry.
      * @param entryHeight the actual height of each list entry.
-     * @param xMargin the space between the side of each entry and the edge of
-     *                the list widget.
+     * @param xMargin     the space between the side of each entry and the edge of the list widget.
      */
-    public ExpandingList(int x, int y, int width, int maxHeight, int itemHeight,
-                         int entryHeight, int xMargin) {
+    public ExpandingList(
+            int x,
+            int y,
+            int width,
+            int maxHeight,
+            int itemHeight,
+            int entryHeight,
+            int xMargin
+    ) {
         super(Minecraft.getInstance(), width, 0, y, itemHeight);
         super.setX(x);
         this.maxHeight = maxHeight;
@@ -69,8 +75,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     }
 
     /**
-     * Scrolls the list as required to make the {@link Entry} at {@code index}
-     * visible.
+     * Scrolls the list as required to make the {@link Entry} at {@code index} visible.
      */
     public void ensureVisible(int index) {
         ensureVisible(getEntry(index));
@@ -92,8 +97,8 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     }
 
     /**
-     * Clears the list and adds a new entry for each element of {@code widgets},
-     * adjusting the list height accordingly.
+     * Clears the list and adds a new entry for each element of {@code widgets}, adjusting the list
+     * height accordingly.
      */
     @SuppressWarnings("unused")
     public void replaceWidgets(Iterable<AbstractWidget> widgets) {
@@ -111,8 +116,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     }
 
     /**
-     * Adds a new {@link Entry} for {@code widget}, adjusting the list height
-     * accordingly.
+     * Adds a new {@link Entry} for {@code widget}, adjusting the list height accordingly.
      */
     public void addWidget(AbstractWidget widget) {
         addEntry(new Entry(entryX, entryWidth, entryHeight, widget));
@@ -120,12 +124,26 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     }
 
     @Override
-    protected void renderItem(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta,
-                              int index, int x, int y, int width, int height) {
+    protected void renderItem(
+            @NotNull GuiGraphics graphics,
+            int mouseX,
+            int mouseY,
+            float delta,
+            int index,
+            int x,
+            int y,
+            int width,
+            int height
+    ) {
         if (index == highlightIndex) {
             AbstractWidget widget = getEntry(index).widget;
-            graphics.fill(widget.getX(), widget.getY(), widget.getX() + widget.getWidth(),
-                    widget.getY() + widget.getHeight(), HIGHLIGHT_COLOR);
+            graphics.fill(
+                    widget.getX(),
+                    widget.getY(),
+                    widget.getX() + widget.getWidth(),
+                    widget.getY() + widget.getHeight(),
+                    HIGHLIGHT_COLOR
+            );
         }
         super.renderItem(graphics, mouseX, mouseY, delta, index, x, y, width, height);
     }
@@ -141,11 +159,11 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     }
 
     public static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
+
         private final AbstractWidget widget;
 
         /**
-         * Automatically repositions and resizes {@code widget} using the
-         * provided values.
+         * Automatically repositions and resizes {@code widget} using the provided values.
          */
         public Entry(int x, int width, int height, AbstractWidget widget) {
             widget.setX(x);
@@ -170,9 +188,18 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
         }
 
         @Override
-        public void render(@NotNull GuiGraphics graphics, int index, int y, int x,
-                           int entryWidth, int entryHeight, int mouseX, int mouseY,
-                           boolean hovered, float delta) {
+        public void render(
+                @NotNull GuiGraphics graphics,
+                int index,
+                int y,
+                int x,
+                int entryWidth,
+                int entryHeight,
+                int mouseX,
+                int mouseY,
+                boolean hovered,
+                float delta
+        ) {
             widget.setY(y);
             widget.render(graphics, mouseX, mouseY, delta);
         }

@@ -25,6 +25,7 @@ import net.minecraft.network.chat.TextColor;
 import java.lang.reflect.Type;
 
 public class TextStyle {
+
     public static final int VERSION = 2;
     public final int version = VERSION;
 
@@ -102,12 +103,12 @@ public class TextStyle {
     }
 
     public boolean isEnabled() {
-        return doColor ||
-                bold != FormatMode.DISABLED ||
-                italic != FormatMode.DISABLED ||
-                underlined != FormatMode.DISABLED ||
-                strikethrough != FormatMode.DISABLED ||
-                obfuscated != FormatMode.DISABLED;
+        return doColor
+                || bold != FormatMode.DISABLED
+                || italic != FormatMode.DISABLED
+                || underlined != FormatMode.DISABLED
+                || strikethrough != FormatMode.DISABLED
+                || obfuscated != FormatMode.DISABLED;
     }
 
     public Style getStyle() {
@@ -131,39 +132,75 @@ public class TextStyle {
      * Validates this instance. To be called after editing and before saving.
      */
     TextStyle validate() {
-        if (color < 0 || color > 0xFFFFFF) color = colorDefault;
+        if (color < 0 || color > 0xFFFFFF)
+            color = colorDefault;
         return this;
     }
 
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<TextStyle> {
+
         @Override
-        public TextStyle deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
+        public TextStyle deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            boolean doColor = JsonUtil.getOrDefault(obj, "doColor",
-                    doColorDefault, silent);
+            boolean doColor = JsonUtil.getOrDefault(
+                    obj,
+                    "doColor",
+                    doColorDefault,
+                    silent
+            );
 
-            int color = JsonUtil.getOrDefault(obj, "color",
-                    colorDefault, silent);
+            int color = JsonUtil.getOrDefault(
+                    obj,
+                    "color",
+                    colorDefault,
+                    silent
+            );
 
-            FormatMode bold = JsonUtil.getOrDefault(obj, "bold",
-                    FormatMode.class, FormatMode.values()[0], silent);
+            FormatMode bold = JsonUtil.getOrDefault(
+                    obj,
+                    "bold",
+                    FormatMode.class,
+                    FormatMode.values()[0],
+                    silent
+            );
 
-            FormatMode italic = JsonUtil.getOrDefault(obj, "italic",
-                    FormatMode.class, FormatMode.values()[0], silent);
+            FormatMode italic = JsonUtil.getOrDefault(
+                    obj,
+                    "italic",
+                    FormatMode.class,
+                    FormatMode.values()[0],
+                    silent
+            );
 
-            FormatMode underlined = JsonUtil.getOrDefault(obj, "underlined",
-                    FormatMode.class, FormatMode.values()[0], silent);
+            FormatMode underlined = JsonUtil.getOrDefault(
+                    obj,
+                    "underlined",
+                    FormatMode.class,
+                    FormatMode.values()[0],
+                    silent
+            );
 
-            FormatMode strikethrough = JsonUtil.getOrDefault(obj, "strikethrough",
-                    FormatMode.class, FormatMode.values()[0], silent);
+            FormatMode strikethrough = JsonUtil.getOrDefault(
+                    obj,
+                    "strikethrough",
+                    FormatMode.class,
+                    FormatMode.values()[0],
+                    silent
+            );
 
-            FormatMode obfuscated = JsonUtil.getOrDefault(obj, "obfuscated",
-                    FormatMode.class, FormatMode.values()[0], silent);
+            FormatMode obfuscated = JsonUtil.getOrDefault(
+                    obj,
+                    "obfuscated",
+                    FormatMode.class,
+                    FormatMode.values()[0],
+                    silent
+            );
 
             return new TextStyle(
                     doColor,

@@ -31,12 +31,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StyleUtil {
+
     private static boolean debug = false;
 
-    public static Component restyle(Component msg, String cleanStr, Trigger trig, Matcher matcher,
-                                    TextStyle textStyle, boolean restyleAllInstances) {
+    public static Component restyle(
+            Component msg,
+            String cleanStr,
+            Trigger trig,
+            Matcher matcher,
+            TextStyle textStyle,
+            boolean restyleAllInstances
+    ) {
         debug = Config.get().debugMode == Config.DebugMode.ALL;
-        if (!textStyle.isEnabled()) return msg;
+        if (!textStyle.isEnabled())
+            return msg;
         try {
             // Convert message into a format suitable for recursive processing
             msg = FormatUtil.convertToStyledLiteral(msg.copy());
@@ -51,7 +59,7 @@ public class StyleUtil {
             // Restyle, using style string if possible
             boolean restyled = false;
             if (trig.styleTarget.enabled && !trig.styleTarget.string.isBlank()) {
-                switch(trig.styleTarget.type) {
+                switch (trig.styleTarget.type) {
                     case NORMAL -> {
                         Matcher m = styleSearch(cleanStr, trig.styleTarget.string);
                         if (m.find()) {
@@ -77,8 +85,12 @@ public class StyleUtil {
                             for (int i = 1; i <= matcher.groupCount(); i++) {
                                 if (trig.styleTarget.groupIndexes.contains(i)) {
                                     restyled = true;
-                                    msg = restyleLeaves(msg, textStyle,
-                                            matcher.start(i), matcher.end(i));
+                                    msg = restyleLeaves(
+                                            msg,
+                                            textStyle,
+                                            matcher.start(i),
+                                            matcher.end(i)
+                                    );
                                 }
                             }
                         }
@@ -88,16 +100,22 @@ public class StyleUtil {
             // If style string not usable, attempt to restyle trigger
             if (!restyled) {
                 if (debug) {
-                    ChatNotify.LOG.warn("Style target '{}' (type {})",
-                            trig.styleTarget.string, trig.styleTarget.type);
+                    ChatNotify.LOG.warn(
+                            "Style target '{}' (type {})",
+                            trig.styleTarget.string,
+                            trig.styleTarget.type
+                    );
                     ChatNotify.LOG.warn("Defaulting to trigger restyle");
                 }
-                switch(trig.type) {
+                switch (trig.type) {
                     case NORMAL -> {
                         do {
-                            msg = restyleLeaves(msg, textStyle,
+                            msg = restyleLeaves(
+                                    msg,
+                                    textStyle,
                                     matcher.start() + matcher.group(1).length(),
-                                    matcher.end() - matcher.group(2).length());
+                                    matcher.end() - matcher.group(2).length()
+                            );
                         } while (restyleAllInstances && matcher.find());
                     }
                     case REGEX -> {
@@ -109,14 +127,15 @@ public class StyleUtil {
                 }
             }
         } catch (IllegalArgumentException e) {
-            if (debug) ChatNotify.LOG.warn("Restyle error", e);
+            if (debug)
+                ChatNotify.LOG.warn("Restyle error", e);
         }
         return msg;
     }
 
     /**
-     * Performs a case-insensitive substring search for the string within the 
-     * message.
+     * Performs a case-insensitive substring search for the string within the message.
+     *
      * @param msg the message to search.
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.
@@ -126,9 +145,9 @@ public class StyleUtil {
     }
 
     /**
-     * Overwrites the existing root style of the message with the specified
-     * style.
-     * @param msg the message to restyle.
+     * Overwrites the existing root style of the message with the specified style.
+     *
+     * @param msg   the message to restyle.
      * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
@@ -137,12 +156,13 @@ public class StyleUtil {
     }
 
     /**
-     * Uses a recursive traversal algorithm to apply the specified style to 
-     * only the specified substring of the message.
-     * @param msg the message to restyle.
+     * Uses a recursive traversal algorithm to apply the specified style to only the specified
+     * substring of the message.
+     *
+     * @param msg   the message to restyle.
      * @param style the {@link TextStyle} to apply.
      * @param start the index of the first character in the substring.
-     * @param end the index after the last character in the substring.
+     * @param end   the index after the last character in the substring.
      * @return the restyled message.
      */
     private static Component restyleLeaves(Component msg, TextStyle style, int start, int end) {
@@ -151,24 +171,32 @@ public class StyleUtil {
 
     /**
      * Recursive traversal restyling algorithm.
+     * <p>
+     * <b>Note:</b> Unable to process format codes or translatable components, use
+     * {@link FormatUtil#convertToStyledLiteral} prior to invoking this method.
      *
-     * <p><b>Note:</b> Unable to process format codes or translatable 
-     * components, use {@link FormatUtil#convertToStyledLiteral} prior to 
-     * invoking this method.</p>
-     *
-     * @param msg the message to restyle.
+     * @param msg   the message to restyle.
      * @param style the style to apply.
-     * @param start the root string index of the first character in the
-     *              substring.
-     * @param end the root string index after the last character in the
-     *            substring.
+     * @param start the root string index of the first character in the substring.
+     * @param end   the root string index after the last character in the substring.
      * @param index the index of the start of {@code msg} in the root string.
      * @return the message, restyled if applicable.
      */
-    private static MutableComponent recursiveRestyle(MutableComponent msg, TextStyle style,
-                                                     int start, int end, int index) {
-        if (debug) ChatNotify.LOG.warn("recursiveRestyle('{}', {}, {}, {})",
-                msg.getString(), start, end, index);
+    private static MutableComponent recursiveRestyle(
+            MutableComponent msg,
+            TextStyle style,
+            int start,
+            int end,
+            int index
+    ) {
+        if (debug)
+            ChatNotify.LOG.warn(
+                    "recursiveRestyle('{}', {}, {}, {})",
+                    msg.getString(),
+                    start,
+                    end,
+                    index
+            );
 
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(msg.getSiblings());
@@ -176,7 +204,8 @@ public class StyleUtil {
 
         // Restyle contents
         if (msg.getContents() instanceof PlainTextContents contents) {
-            if (debug) ChatNotify.LOG.warn("PlainTextContents");
+            if (debug)
+                ChatNotify.LOG.warn("PlainTextContents");
             String str = contents.text();
             if (index + str.length() >= start && index < end) {
                 // Target substring overlaps with current substring, so restyle
@@ -188,14 +217,16 @@ public class StyleUtil {
                 int localEnd = Math.min(str.length(), end - index);
 
                 String part1 = str.substring(0, localStart);
-                if (!part1.isEmpty()) msg.append(Component.literal(part1));
+                if (!part1.isEmpty())
+                    msg.append(Component.literal(part1));
 
                 String part2 = str.substring(localStart, localEnd);
-                if (!part2.isEmpty()) msg.append(
-                        Component.literal(part2).withStyle(style.getStyle()));
+                if (!part2.isEmpty())
+                    msg.append(Component.literal(part2).withStyle(style.getStyle()));
 
                 String part3 = str.substring(localEnd);
-                if (!part3.isEmpty()) msg.append(Component.literal(part3));
+                if (!part3.isEmpty())
+                    msg.append(Component.literal(part3));
             }
             index += str.length();
         }
@@ -217,11 +248,12 @@ public class StyleUtil {
     }
 
     /**
-     * Uses a recursive traversal algorithm to get a substring of a message
-     * with its original style.
-     * @param msg the message to get a substring of.
+     * Uses a recursive traversal algorithm to get a substring of a message with its original
+     * style.
+     *
+     * @param msg   the message to get a substring of.
      * @param start the index of the first character in the substring.
-     * @param end the index after the last character in the substring.
+     * @param end   the index after the last character in the substring.
      * @return a substring of the message, with all of its original style.
      */
     public static Component styledSubstring(Component msg, int start, int end) {
@@ -229,25 +261,31 @@ public class StyleUtil {
     }
 
     /**
-     * Recursive traversal algorithm to get a substring of a message with its
-     * original style.
+     * Recursive traversal algorithm to get a substring of a message with its original style.
+     * <p>
+     * <b>Note:</b> Unable to process format codes or translatable components, use
+     * {@link FormatUtil#convertToStyledLiteral} prior to invoking this method.
      *
-     * <p><b>Note:</b> Unable to process format codes or translatable
-     * components, use {@link FormatUtil#convertToStyledLiteral} prior to
-     * invoking this method.</p>
-     *
-     * @param msg the message to get a substring of.
-     * @param start the root string index of the first character in the
-     *              substring.
-     * @param end the root string index after the last character in the
-     *            substring.
+     * @param msg   the message to get a substring of.
+     * @param start the root string index of the first character in the substring.
+     * @param end   the root string index after the last character in the substring.
      * @param index the index of the start of {@code msg} in the root string.
      * @return a substring of the message, with all of its original style.
      */
-    private static MutableComponent recursiveStyledSubstring(MutableComponent msg,
-                                                             int start, int end, int index) {
-        if (debug) ChatNotify.LOG.warn("recursiveStyledSubstring('{}', {}, {}, {})",
-                msg.getString(), start, end, index);
+    private static MutableComponent recursiveStyledSubstring(
+            MutableComponent msg,
+            int start,
+            int end,
+            int index
+    ) {
+        if (debug)
+            ChatNotify.LOG.warn(
+                    "recursiveStyledSubstring('{}', {}, {}, {})",
+                    msg.getString(),
+                    start,
+                    end,
+                    index
+            );
 
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(msg.getSiblings());
@@ -255,7 +293,8 @@ public class StyleUtil {
 
         // Add contents with original style.
         if (msg.getContents() instanceof PlainTextContents contents) {
-            if (debug) ChatNotify.LOG.warn("PlainTextContents");
+            if (debug)
+                ChatNotify.LOG.warn("PlainTextContents");
             String str = contents.text();
             if (index + str.length() >= start && index < end) {
                 // Target substring overlaps with current substring,
@@ -287,24 +326,38 @@ public class StyleUtil {
     }
 
     /**
-     * For each enabled field of the specified {@link TextStyle}, overrides the
-     * corresponding {@link Style} field.
-     * @param style the {@link Style} to apply to.
+     * For each enabled field of the specified {@link TextStyle}, overrides the corresponding
+     * {@link Style} field.
+     *
+     * @param style     the {@link Style} to apply to.
      * @param textStyle the {@link TextStyle} to apply.
      * @return the {@link Style}, with the {@link TextStyle} applied.
      */
     private static Style applyStyle(Style style, TextStyle textStyle) {
         if (!textStyle.bold.equals(TextStyle.FormatMode.DISABLED))
-            style = style.withBold(textStyle.bold.equals(TextStyle.FormatMode.ON));
+            style = style.withBold(
+                    textStyle.bold.equals(TextStyle.FormatMode.ON)
+            );
         if (!textStyle.italic.equals(TextStyle.FormatMode.DISABLED))
-            style = style.withItalic(textStyle.italic.equals(TextStyle.FormatMode.ON));
+            style = style.withItalic(
+                    textStyle.italic.equals(TextStyle.FormatMode.ON)
+            );
         if (!textStyle.underlined.equals(TextStyle.FormatMode.DISABLED))
-            style = style.withUnderlined(textStyle.underlined.equals(TextStyle.FormatMode.ON));
+            style = style.withUnderlined(
+                    textStyle.underlined.equals(TextStyle.FormatMode.ON)
+            );
         if (!textStyle.strikethrough.equals(TextStyle.FormatMode.DISABLED))
-            style = style.withStrikethrough(textStyle.strikethrough.equals(TextStyle.FormatMode.ON));
+            style = style.withStrikethrough(
+                    textStyle.strikethrough.equals(TextStyle.FormatMode.ON)
+            );
         if (!textStyle.obfuscated.equals(TextStyle.FormatMode.DISABLED))
-            style = style.withObfuscated(textStyle.obfuscated.equals(TextStyle.FormatMode.ON));
-        if (textStyle.doColor) style = style.withColor(textStyle.getTextColor());
+            style = style.withObfuscated(
+                    textStyle.obfuscated.equals(TextStyle.FormatMode.ON)
+            );
+        if (textStyle.doColor)
+            style = style.withColor(
+                    textStyle.getTextColor()
+            );
         return style;
     }
 }

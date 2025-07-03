@@ -24,6 +24,7 @@ import java.util.Map;
 
 @Mixin(InputConstants.Key.class)
 public interface KeyAccessor {
+
     @Accessor("NAME_MAP")
     static Map<String, InputConstants.Key> getNameMap() {
         throw new AssertionError();

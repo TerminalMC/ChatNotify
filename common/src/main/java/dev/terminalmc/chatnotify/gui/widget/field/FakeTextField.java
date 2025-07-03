@@ -17,17 +17,19 @@
 package dev.terminalmc.chatnotify.gui.widget.field;
 
 /**
- * A {@link TextField} which renders like a normal editable field, but when
- * clicked, runs a custom {@link Runnable} instead of becoming selected.
+ * A {@link TextField} which renders like a normal editable field, but when clicked, runs a custom
+ * {@link Runnable} instead of becoming selected.
  */
 public class FakeTextField extends TextField {
+
     private final Runnable onClick;
 
     public FakeTextField(int x, int y, int width, int height, Runnable onClick) {
         super(x, y, width, height);
         this.onClick = onClick;
         this.active = false;
-        this.setResponder((str) -> {});
+        this.setResponder((str) -> {
+        });
         this.setTextColor(TEXT_COLOR_PREVIEW);
     }
 
@@ -35,10 +37,11 @@ public class FakeTextField extends TextField {
     public boolean clicked(double mouseX, double mouseY) {
         // Skip the 'active' requirement
         return (visible
-                && mouseX >= (double)getX()
-                && mouseY >= (double)getY()
-                && mouseX < (double)(getX() + getWidth())
-                && mouseY < (double)(getY() + getHeight()));
+                && mouseX >= (double) getX()
+                && mouseY >= (double) getY()
+                && mouseX < (double) (getX() + getWidth())
+                && mouseY < (double) (getY()
+                + getHeight()));
     }
 
     @Override

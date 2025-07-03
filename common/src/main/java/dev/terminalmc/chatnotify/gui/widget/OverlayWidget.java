@@ -27,27 +27,35 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 /**
- * An {@link OverlayWidget} is designed for display on a {@link OptionScreen},
- * on top of any other GUI elements.
+ * An {@link OverlayWidget} is designed for display on a {@link OptionScreen}, on top of any other
+ * GUI elements.
  */
 public abstract class OverlayWidget extends AbstractWidget {
+
     private Consumer<OverlayWidget> close;
     public final boolean fixedSize;
     public final double nominalWidthRatio;
     public final double nominalHeightRatio;
 
-    public OverlayWidget(int x, int y, int width, int height, boolean fixedSize,
-                         Component msg, Consumer<OverlayWidget> close) {
+    public OverlayWidget(
+            int x,
+            int y,
+            int width,
+            int height,
+            boolean fixedSize,
+            Component msg,
+            Consumer<OverlayWidget> close
+    ) {
         super(x, y, width, height, msg);
         checkWidth(width);
         checkHeight(height);
         this.close = close;
         Window window = Minecraft.getInstance().getWindow();
         this.fixedSize = fixedSize;
-        this.nominalWidthRatio = width / (double)window.getGuiScaledWidth();
-        this.nominalHeightRatio = height / (double)window.getGuiScaledHeight();
+        this.nominalWidthRatio = width / (double) window.getGuiScaledWidth();
+        this.nominalHeightRatio = height / (double) window.getGuiScaledHeight();
     }
-    
+
     public void addOnClose(Consumer<OverlayWidget> close) {
         Consumer<OverlayWidget> close2 = this.close;
         this.close = (widget) -> {
@@ -62,12 +70,11 @@ public abstract class OverlayWidget extends AbstractWidget {
     }
 
     /**
-     * Creates (or re-creates) all sub-widgets and adjusts their sizes and
-     * positions based on the current positional and dimensional values of the
-     * {@link OverlayWidget}.
-     *
-     * <p>To be called on initial build and whenever the position or dimensions
-     * of the {@link OverlayWidget} are changed.</p>
+     * Creates (or re-creates) all sub-widgets and adjusts their sizes and positions based on the
+     * current positional and dimensional values of the {@link OverlayWidget}.
+     * <p>
+     * To be called on initial build and whenever the position or dimensions of the
+     * {@link OverlayWidget} are changed.
      */
     protected abstract void init();
 
@@ -89,15 +96,21 @@ public abstract class OverlayWidget extends AbstractWidget {
      */
 
     public int getNominalWidth(int screenWidth) {
-        if (fixedSize) return width;
-        return Math.min(Math.max(getMinWidth(), (int)(screenWidth * nominalWidthRatio)),
-                getMaxWidth());
+        if (fixedSize)
+            return width;
+        return Math.min(
+                Math.max(getMinWidth(), (int) (screenWidth * nominalWidthRatio)),
+                getMaxWidth()
+        );
     }
 
     public int getNominalHeight(int screenHeight) {
-        if (fixedSize) return height;
-        return Math.min(Math.max(getMinHeight(), (int)(screenHeight * nominalHeightRatio)),
-                getMaxHeight());
+        if (fixedSize)
+            return height;
+        return Math.min(
+                Math.max(getMinHeight(), (int) (screenHeight * nominalHeightRatio)),
+                getMaxHeight()
+        );
     }
 
     // Re-init on reposition or resize to maintain sub-widget position and size
@@ -130,8 +143,7 @@ public abstract class OverlayWidget extends AbstractWidget {
     }
 
     /**
-     * @throws IllegalArgumentException if {@code width} or {@code height} is
-     * out of range.
+     * @throws IllegalArgumentException if {@code width} or {@code height} is out of range.
      * @see OverlayWidget#checkWidth
      * @see OverlayWidget#checkHeight
      */
@@ -165,25 +177,28 @@ public abstract class OverlayWidget extends AbstractWidget {
     /**
      * @return {@code width}, if it is valid.
      * @throws IllegalArgumentException if {@code width} is less than
-     * {@link OverlayWidget#getMinWidth}
+     *                                  {@link OverlayWidget#getMinWidth}
      */
     protected int checkWidth(int width) {
-        if (width < getMinWidth()) throw new IllegalArgumentException(
-                "Width cannot be less than " + getMinWidth() + ", got " + width);
+        if (width < getMinWidth())
+            throw new IllegalArgumentException(
+                    "Width cannot be less than " + getMinWidth() + ", got " + width);
         return width;
     }
 
     /**
      * @return {@code height}, if it is valid.
      * @throws IllegalArgumentException if {@code height} is less than
-     * {@link OverlayWidget#getMinHeight}
+     *                                  {@link OverlayWidget#getMinHeight}
      */
     protected int checkHeight(int height) {
-        if (height < getMinHeight()) throw new IllegalArgumentException(
-                "Height cannot be less than " + getMinHeight() + ", got " + height);
+        if (height < getMinHeight())
+            throw new IllegalArgumentException(
+                    "Height cannot be less than " + getMinHeight() + ", got " + height);
         return height;
     }
 
     @Override
-    protected void updateWidgetNarration(@NotNull NarrationElementOutput narration) {}
+    protected void updateWidgetNarration(@NotNull NarrationElementOutput narration) {
+    }
 }

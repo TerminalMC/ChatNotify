@@ -20,42 +20,40 @@ import com.google.gson.*;
 import dev.terminalmc.chatnotify.util.Functional;
 import dev.terminalmc.chatnotify.util.JsonUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
  * Consists of:
- *
- * <p>A range of controls (boolean or enum) defining behavior.</p>
- *
- * <p>A {@link Sound} instance, defining the sound to be played on activation,
- * with volume and pitch controls.</p>
- *
- * <p>A {@link TextStyle} instance, defining how the triggering message should 
- * be restyled.</p>
- *
- * <p>A series of custom message strings, to be optionally displayed to the user
- * in various different ways on activation.</p>
- *
- * <p>A list of {@link Trigger} instances, to be checked against incoming 
- * messages to determine whether the {@link Notification} should be activated.
- * </p>
- *
- * <p>A list of inclusion {@link Trigger} instances which, if not matched,
- * prevent activation.</p>
- *
- * <p>A list of exclusion {@link Trigger} instances which, if matched, prevent
- * activation.</p>
- *
- * <p>A list of {@link ResponseMessage} instances, to be sent on activation.</p>
+ * <p>
+ * A range of controls (boolean or enum) defining behavior.
+ * <p>
+ * A {@link Sound} instance, defining the sound to be played on activation, with volume and pitch
+ * controls.
+ * <p>
+ * A {@link TextStyle} instance, defining how the triggering message should be restyled.
+ * <p>
+ * A series of custom message strings, to be optionally displayed to the user in various different
+ * ways on activation.
+ * <p>
+ * A list of {@link Trigger} instances, to be checked against incoming messages to determine whether
+ * the {@link Notification} should be activated.
+ * <p>
+ * A list of inclusion {@link Trigger} instances which, if not matched, prevent activation.
+ * <p>
+ * A list of exclusion {@link Trigger} instances which, if matched, prevent activation.</p>
+ * <p>
+ * A list of {@link ResponseMessage} instances, to be sent on activation.
  */
 public class Notification implements Functional.StringSupplier {
+
     public static final int VERSION = 7;
     public final int version = VERSION;
 
     /**
-     * A status flag to indicate that this instance is being edited, and should 
-     * not be activated irrespective of {@link Notification#enabled}.
+     * A status flag to indicate that this instance is being edited, and should not be activated
+     * irrespective of {@link Notification#enabled}.
      */
     public transient boolean editing = false;
 
@@ -63,23 +61,22 @@ public class Notification implements Functional.StringSupplier {
 
     /**
      * Whether this instance is set by the user to be eligible for activation.
-     *
-     * <p>Necessary but not sufficient condition; never activate if this is 
-     * {@code false}, but it being {@code true} does not mean that this instance
-     * can be safely activated. Instead, check {@link Notification#canActivate}.
-     * </p>
+     * <p>
+     * Necessary but not sufficient condition; never activate if this is {@code false}, but it being
+     * {@code true} does not mean that this instance can be safely activated. Instead, check
+     * {@link Notification#canActivate}.
      */
     public boolean enabled;
     public static final boolean enabledDefault = true;
 
     /**
-     * Controls whether this instance is eligible for activation on user-sent 
-     * messages.
-     *
-     * <p>{@link CheckOwnMode#DEFER} means that {@link Config#checkOwnMessages}
-     * should be used instead.</p>
+     * Controls whether this instance is eligible for activation on user-sent messages.
+     * <p>
+     * {@link CheckOwnMode#DEFER} means that {@link Config#checkOwnMessages} should be used
+     * instead.
      */
     public CheckOwnMode checkOwnMode;
+
     public enum CheckOwnMode {
         DEFER,
         ON,
@@ -171,22 +168,21 @@ public class Notification implements Functional.StringSupplier {
     public static final Supplier<List<Trigger>> triggersDefault = ArrayList::new;
 
     /**
-     * The list of {@link Trigger}s which are required for activation of this 
-     * instance.
-     *
-     * <p><b>Note:</b> For simplicity, this list uses the same {@link Trigger}
-     * class as {@link Notification#triggers}. However, instances in this list
-     * will never use the {@link Trigger#styleTarget} capability.</p>
+     * The list of {@link Trigger}s which are required for activation of this instance.
+     * <p>
+     * <b>Note:</b> For simplicity, this list uses the same {@link Trigger}
+     * class as {@link Notification#triggers}. However, instances in this list will never use the
+     * {@link Trigger#styleTarget} capability.
      */
     public final List<Trigger> inclusionTriggers;
     public static final Supplier<List<Trigger>> inclusionTriggersDefault = ArrayList::new;
 
     /**
      * The list of {@link Trigger}s which prevent activation of this instance.
-     *
-     * <p><b>Note:</b> For simplicity, this list uses the same {@link Trigger}
-     * class as {@link Notification#triggers}. However, instances in this list
-     * will never use the {@link Trigger#styleTarget} capability.</p>
+     * <p>
+     * <b>Note:</b> For simplicity, this list uses the same {@link Trigger}
+     * class as {@link Notification#triggers}. However, instances in this list will never use the
+     * {@link Trigger#styleTarget} capability.
      */
     public final List<Trigger> exclusionTriggers;
     public static final Supplier<List<Trigger>> exclusionTriggersDefault = ArrayList::new;
@@ -251,8 +247,8 @@ public class Notification implements Functional.StringSupplier {
     }
 
     /**
-     * Creates a new {@link Notification} for the user's name, with two default 
-     * placeholder {@link Trigger}s.
+     * Creates a new {@link Notification} for the user's name, with two default placeholder
+     * {@link Trigger}s.
      */
     static Notification createUser() {
         return new Notification(
@@ -275,10 +271,7 @@ public class Notification implements Functional.StringSupplier {
                 typedMsgEnabledDefault,
                 clipboardMsgDefault,
                 clipboardMsgEnabledDefault,
-                new ArrayList<>(List.of(
-                        new Trigger("Profile name"),
-                        new Trigger("Display name")
-                )),
+                new ArrayList<>(List.of(new Trigger("Profile name"), new Trigger("Display name"))),
                 inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
                 responseMessagesDefault.get()
@@ -286,8 +279,7 @@ public class Notification implements Functional.StringSupplier {
     }
 
     /**
-     * Creates a new generic {@link Notification}, with a single blank 
-     * {@link Trigger}.
+     * Creates a new generic {@link Notification}, with a single blank {@link Trigger}.
      */
     static Notification createBlank(Sound sound, TextStyle textStyle) {
         return new Notification(
@@ -310,9 +302,7 @@ public class Notification implements Functional.StringSupplier {
                 typedMsgEnabledDefault,
                 clipboardMsgDefault,
                 clipboardMsgEnabledDefault,
-                new ArrayList<>(List.of(
-                        new Trigger("")
-                )),
+                new ArrayList<>(List.of(new Trigger(""))),
                 inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
                 responseMessagesDefault.get()
@@ -320,13 +310,13 @@ public class Notification implements Functional.StringSupplier {
     }
 
     /**
-     * @return {@code true} if this instance is eligible for activation (on a
-     * message sent by the user if {@code ownMsg} is {@code true}).
+     * @return {@code true} if this instance is eligible for activation (on a message sent by the
+     * user if {@code ownMsg} is {@code true}).
      */
     public boolean canActivate(boolean ownMsg) {
         if (enabled && !editing) {
             if (ownMsg) {
-                return switch(checkOwnMode) {
+                return switch (checkOwnMode) {
                     case DEFER -> Config.get().checkOwnMessages;
                     case ON -> true;
                     case OFF -> false;
@@ -342,10 +332,10 @@ public class Notification implements Functional.StringSupplier {
     // List reordering
 
     /**
-     * Moves the {@link Trigger} at the source index to the destination index 
-     * in the list.
+     * Moves the {@link Trigger} at the source index to the destination index in the list.
+     *
      * @param sourceIndex the index of the element to move.
-     * @param destIndex the desired final index of the element.
+     * @param destIndex   the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
     public boolean moveTrigger(int sourceIndex, int destIndex) {
@@ -357,10 +347,11 @@ public class Notification implements Functional.StringSupplier {
     }
 
     /**
-     * Moves the inclusion {@link Trigger} at the source index to the
-     * destination index in the list.
+     * Moves the inclusion {@link Trigger} at the source index to the destination index in the
+     * list.
+     *
      * @param sourceIndex the index of the element to move.
-     * @param destIndex the desired final index of the element.
+     * @param destIndex   the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
     public boolean moveInclusionTrigger(int sourceIndex, int destIndex) {
@@ -372,10 +363,11 @@ public class Notification implements Functional.StringSupplier {
     }
 
     /**
-     * Moves the exclusion {@link Trigger} at the source index to the
-     * destination index in the list.
+     * Moves the exclusion {@link Trigger} at the source index to the destination index in the
+     * list.
+     *
      * @param sourceIndex the index of the element to move.
-     * @param destIndex the desired final index of the element.
+     * @param destIndex   the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
     public boolean moveExclusionTrigger(int sourceIndex, int destIndex) {
@@ -387,10 +379,10 @@ public class Notification implements Functional.StringSupplier {
     }
 
     /**
-     * Moves the {@link ResponseMessage} at the source index to the destination
-     * index in the list.
+     * Moves the {@link ResponseMessage} at the source index to the destination index in the list.
+     *
      * @param sourceIndex the index of the element to move.
-     * @param destIndex the desired final index of the element.
+     * @param destIndex   the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
     public boolean moveResponseMessage(int sourceIndex, int destIndex) {
@@ -403,8 +395,8 @@ public class Notification implements Functional.StringSupplier {
 
     /**
      * Options UI utility.
-     * @return a string formed by concatenating all {@link Trigger} strings
-     * together.
+     *
+     * @return a string formed by concatenating all {@link Trigger} strings together.
      */
     @Override
     public String getString() {
@@ -450,80 +442,190 @@ public class Notification implements Functional.StringSupplier {
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Notification> {
+
         @Override
-        public Notification deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
+        public Notification deserialize(
+                JsonElement json,
+                java.lang.reflect.Type typeOfT,
+                JsonDeserializationContext ctx
+        ) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
-                    enabledDefault, silent);
+            boolean enabled = JsonUtil.getOrDefault(
+                    obj,
+                    "enabled",
+                    enabledDefault,
+                    silent
+            );
 
-            boolean inclusionEnabled = JsonUtil.getOrDefault(obj, "inclusionEnabled",
-                    inclusionEnabledDefault, silent);
+            boolean inclusionEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "inclusionEnabled",
+                    inclusionEnabledDefault,
+                    silent
+            );
 
-            boolean exclusionEnabled = JsonUtil.getOrDefault(obj, "exclusionEnabled",
-                    exclusionEnabledDefault, silent);
+            boolean exclusionEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "exclusionEnabled",
+                    exclusionEnabledDefault,
+                    silent
+            );
 
-            CheckOwnMode checkOwnMode = JsonUtil.getOrDefault(obj, "checkOwnMode",
-                    CheckOwnMode.class, CheckOwnMode.values()[0], silent);
+            CheckOwnMode checkOwnMode = JsonUtil.getOrDefault(
+                    obj,
+                    "checkOwnMode",
+                    CheckOwnMode.class,
+                    CheckOwnMode.values()[0],
+                    silent
+            );
 
-            boolean responseEnabled = JsonUtil.getOrDefault(obj, "responseEnabled",
-                    responseEnabledDefault, silent);
+            boolean responseEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "responseEnabled",
+                    responseEnabledDefault,
+                    silent
+            );
 
-            Sound sound = JsonUtil.getOrDefault(ctx, obj, "sound",
-                    Sound.class, soundDefault.get(), silent);
+            Sound sound = JsonUtil.getOrDefault(
+                    ctx,
+                    obj,
+                    "sound",
+                    Sound.class,
+                    soundDefault.get(),
+                    silent
+            );
 
-            TextStyle textStyle = JsonUtil.getOrDefault(ctx, obj, "textStyle",
-                    TextStyle.class, textStyleDefault.get(), silent);
+            TextStyle textStyle = JsonUtil.getOrDefault(
+                    ctx,
+                    obj,
+                    "textStyle",
+                    TextStyle.class,
+                    textStyleDefault.get(),
+                    silent
+            );
 
-            String replacementMsg = JsonUtil.getOrDefault(obj, "replacementMsg",
-                    replacementMsgDefault, silent);
+            String replacementMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "replacementMsg",
+                    replacementMsgDefault,
+                    silent
+            );
 
-            boolean replacementMsgEnabled = JsonUtil.getOrDefault(obj, "replacementMsgEnabled",
-                    replacementMsgEnabledDefault, silent);
+            boolean replacementMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "replacementMsgEnabled",
+                    replacementMsgEnabledDefault,
+                    silent
+            );
 
-            String statusBarMsg = JsonUtil.getOrDefault(obj, "statusBarMsg",
-                    statusBarMsgDefault, silent);
+            String statusBarMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "statusBarMsg",
+                    statusBarMsgDefault,
+                    silent
+            );
 
-            boolean statusBarMsgEnabled = JsonUtil.getOrDefault(obj, "statusBarMsgEnabled",
-                    statusBarMsgEnabledDefault, silent);
+            boolean statusBarMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "statusBarMsgEnabled",
+                    statusBarMsgEnabledDefault,
+                    silent
+            );
 
-            String titleMsg = JsonUtil.getOrDefault(obj, "titleMsg",
-                    titleMsgDefault, silent);
+            String titleMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "titleMsg",
+                    titleMsgDefault,
+                    silent
+            );
 
-            boolean titleMsgEnabled = JsonUtil.getOrDefault(obj, "titleMsgEnabled",
-                    titleMsgEnabledDefault, silent);
+            boolean titleMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "titleMsgEnabled",
+                    titleMsgEnabledDefault,
+                    silent
+            );
 
-            String toastMsg = JsonUtil.getOrDefault(obj, "toastMsg",
-                    toastMsgDefault, silent);
+            String toastMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "toastMsg",
+                    toastMsgDefault,
+                    silent
+            );
 
-            boolean toastMsgEnabled = JsonUtil.getOrDefault(obj, "toastMsgEnabled",
-                    toastMsgEnabledDefault, silent);
+            boolean toastMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "toastMsgEnabled",
+                    toastMsgEnabledDefault,
+                    silent
+            );
 
-            String typedMsg = JsonUtil.getOrDefault(obj, "typedMsg",
-                    typedMsgDefault, silent);
+            String typedMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "typedMsg",
+                    typedMsgDefault,
+                    silent
+            );
 
-            boolean typedMsgEnabled = JsonUtil.getOrDefault(obj, "typedMsgEnabled",
-                    typedMsgEnabledDefault, silent);
+            boolean typedMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "typedMsgEnabled",
+                    typedMsgEnabledDefault,
+                    silent
+            );
 
-            String clipboardMsg = JsonUtil.getOrDefault(obj, "clipboardMsg",
-                    clipboardMsgDefault, silent);
+            String clipboardMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "clipboardMsg",
+                    clipboardMsgDefault,
+                    silent
+            );
 
-            boolean clipboardMsgEnabled = JsonUtil.getOrDefault(obj, "clipboardMsgEnabled",
-                    clipboardMsgEnabledDefault, silent);
+            boolean clipboardMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "clipboardMsgEnabled",
+                    clipboardMsgEnabledDefault,
+                    silent
+            );
 
-            List<Trigger> triggers = JsonUtil.getOrDefault(ctx, obj, "triggers",
-                    Trigger.class, triggersDefault.get(), silent);
+            List<Trigger> triggers = JsonUtil.getOrDefault(
+                    ctx,
+                    obj,
+                    "triggers",
+                    Trigger.class,
+                    triggersDefault.get(),
+                    silent
+            );
 
-            List<Trigger> inclusionTriggers = JsonUtil.getOrDefault(ctx, obj, "inclusionTriggers",
-                    Trigger.class, inclusionTriggersDefault.get(), silent);
+            List<Trigger> inclusionTriggers = JsonUtil.getOrDefault(
+                    ctx,
+                    obj,
+                    "inclusionTriggers",
+                    Trigger.class,
+                    inclusionTriggersDefault.get(),
+                    silent
+            );
 
-            List<Trigger> exclusionTriggers = JsonUtil.getOrDefault(ctx, obj, "exclusionTriggers",
-                    Trigger.class, exclusionTriggersDefault.get(), silent);
+            List<Trigger> exclusionTriggers = JsonUtil.getOrDefault(
+                    ctx,
+                    obj,
+                    "exclusionTriggers",
+                    Trigger.class,
+                    exclusionTriggersDefault.get(),
+                    silent
+            );
 
-            List<ResponseMessage> responseMessages = JsonUtil.getOrDefault(ctx, obj, "responseMessages",
-                    ResponseMessage.class, responseMessagesDefault.get(), silent);
+            List<ResponseMessage> responseMessages = JsonUtil.getOrDefault(
+                    ctx,
+                    obj,
+                    "responseMessages",
+                    ResponseMessage.class,
+                    responseMessagesDefault.get(),
+                    silent
+            );
             if (version <= 3) {
                 int totalDelay = 0;
                 for (ResponseMessage resMsg : responseMessages) {

@@ -19,19 +19,26 @@ package dev.terminalmc.chatnotify.util;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
-import dev.terminalmc.chatnotify.config.*;
+import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.config.Notification;
+import dev.terminalmc.chatnotify.config.ResponseMessage;
+import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.toast.NotificationToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,24 +46,27 @@ import static dev.terminalmc.chatnotify.ChatNotify.recentMessages;
 import static dev.terminalmc.chatnotify.config.Config.SenderDetectionMode.COMBINED;
 
 public class MessageUtil {
+
     private static boolean debug = false;
     private static boolean ownMsg = false;
 
     /**
      * Initiates the message processing algorithm.
+     *
      * @param msg The original message.
-     * @return A modified copy of the message, or the original if no modifying
-     * was required.
+     * @return A modified copy of the message, or the original if no modifying was required.
      */
     public static @Nullable Component processMessage(Component msg) {
         debug = Config.get().debugMode.equals(Config.DebugMode.ALL);
         ownMsg = false;
 
         String str = msg.getString();
-        if (str.isBlank()) return msg; // Ignore blank messages
+        if (str.isBlank())
+            return msg; // Ignore blank messages
 
         // Save message for trigger editor
-        if (ChatNotify.unmodifiedChat.size() > 30) ChatNotify.unmodifiedChat.poll();
+        if (ChatNotify.unmodifiedChat.size() > 30)
+            ChatNotify.unmodifiedChat.poll();
         ChatNotify.unmodifiedChat.add(msg);
 
         if (debug) {
@@ -93,45 +103,47 @@ public class MessageUtil {
     }
 
     /**
-     * Determines whether a message was sent by the user and modifies it if
-     * necessary to prevent unwanted notifications.
+     * Determines whether a message was sent by the user and modifies it if necessary to prevent
+     * unwanted notifications.
+     * <p>
+     * If the global option {@link Config#senderDetectionMode} is set to
+     * {@link Config.SenderDetectionMode#COMBINED} and the ChatHeads mod is available, it will be
+     * queried to determine the message owner.
+     * <p>
+     * Otherwise, the message will be compared to recently sent messages and checked for triggers of
+     * the username notification to determine whether it was sent by the mod user.
+     * <p>
+     * If the message is positively identified, it is set to {@code null} if the global option
+     * {@link Config#checkOwnMessages} is false, else the part of the prefix that matched a trigger
+     * is removed to prevent it being detected by trigger search.
      *
-     * <p>If the global option {@link Config#senderDetectionMode} is set to 
-     * {@link Config.SenderDetectionMode#COMBINED} and the ChatHeads mod is
-     * available, it will be queried to determine the message owner.</p>
-     *
-     * <p>Otherwise, the message will be compared to recently sent messages 
-     * and checked for triggers of the username notification to determine
-     * whether it was sent by the mod user.</p>
-     *
-     * <p>If the message is positively identified, it is set to {@code null} if
-     * the global option {@link Config#checkOwnMessages} is false, else the part
-     * of the prefix that matched a trigger is removed to prevent it being 
-     * detected by trigger search.</p>
      * @param cleanStr the clean (no format codes) string to check.
-     * @return the string, a modified copy, or {@code null} depending on the
-     * result of the check.
+     * @return the string, a modified copy, or {@code null} depending on the result of the check.
      */
     private static String checkOwner(String cleanStr) {
         boolean checkSuccessful = false;
         String cleanOwnedStr = cleanStr;
         if (Config.get().senderDetectionMode == COMBINED) {
             // Ask chat heads who the message owner is
-            Pair<PlayerInfo,Integer> info = ChatHeadsWrapper.getPlayerInfo();
+            Pair<PlayerInfo, Integer> info = ChatHeadsWrapper.getPlayerInfo();
             if (info != null) { // null indicates ChatHeads failure
                 checkSuccessful = true;
-                if (debug) ChatNotify.LOG.warn("Owner check using ChatHeads");
+                if (debug)
+                    ChatNotify.LOG.warn("Owner check using ChatHeads");
                 if (info.getFirst() != null && Minecraft.getInstance().player != null) {
                     UUID id = info.getFirst().getProfile().getId();
                     if (id.equals(Minecraft.getInstance().player.getUUID())) {
-                        if (debug) ChatNotify.LOG.warn("Matched user's UUID");
+                        if (debug)
+                            ChatNotify.LOG.warn("Matched user's UUID");
                         for (Trigger t : Config.get().getUserNotif().triggers) {
                             Matcher matcher = normalSearch(cleanStr, t.string);
                             if (matcher.find()) {
-                                if (debug) ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
+                                if (debug)
+                                    ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
                                 // Modify message according to config
-                                cleanOwnedStr = cleanStr.substring(0, matcher.start())
-                                        + cleanStr.substring(matcher.end());
+                                cleanOwnedStr =
+                                        cleanStr.substring(0, matcher.start()) + cleanStr.substring(
+                                                matcher.end());
                                 break;
                             }
                         }
@@ -141,77 +153,94 @@ public class MessageUtil {
         }
         // Default to sent-message-match heuristic
         if (!checkSuccessful) {
-            if (debug) ChatNotify.LOG.warn("Owner check using heuristic");
+            if (debug)
+                ChatNotify.LOG.warn("Owner check using heuristic");
             // Check for a matching stored message
             for (int i = 0; i < recentMessages.size(); i++) {
                 // Find last occurrence of recent message
                 // Case-insensitive to allow for servers with all-caps prevention
-                Matcher recentMatcher = Pattern.compile("(?iU)" +
-                        Pattern.quote(recentMessages.get(i).getSecond())).matcher(cleanStr);
+                Matcher recentMatcher =
+                        Pattern.compile("(?iU)" + Pattern.quote(recentMessages.get(i).getSecond()))
+                                .matcher(cleanStr);
                 int recentStart = -1;
-                while(recentMatcher.find()) {
+                while (recentMatcher.find()) {
                     recentStart = recentMatcher.start();
                 }
                 if (recentStart != -1) {
-                    if (debug) ChatNotify.LOG.warn("Matched recent message '{}' at index {}",
-                            recentMessages.get(i).getSecond(), recentStart);
+                    if (debug)
+                        ChatNotify.LOG.warn(
+                                "Matched recent message '{}' at index {}",
+                                recentMessages.get(i).getSecond(),
+                                recentStart
+                        );
                     // Matched against a stored message, check for a username trigger
                     String prefix = cleanStr.substring(0, recentStart);
                     for (Trigger t : Config.get().getUserNotif().triggers) {
                         Matcher triggerMatcher = normalSearch(prefix, t.string);
                         if (triggerMatcher.find()) {
-                            if (debug) ChatNotify.LOG.warn("Matched trigger '{}' at index {}",
-                                    t.string, triggerMatcher.start());
+                            if (debug)
+                                ChatNotify.LOG.warn(
+                                        "Matched trigger '{}' at index {}",
+                                        t.string,
+                                        triggerMatcher.start()
+                                );
                             recentMessages.remove(i); // Remove stored message
                             // Modify message according to config
-                            cleanOwnedStr =
-                                    cleanStr.substring(0, triggerMatcher.start()
-                                            + triggerMatcher.group(1).length())
-                                            + cleanStr.substring(triggerMatcher.end()
-                                            - triggerMatcher.group(2).length());
+                            cleanOwnedStr = cleanStr.substring(
+                                    0,
+                                    triggerMatcher.start() + triggerMatcher.group(1).length()
+                            ) + cleanStr.substring(
+                                    triggerMatcher.end() - triggerMatcher.group(2).length());
                             break;
                         }
                     }
                 }
             }
         }
-        if (debug) ChatNotify.LOG.warn("Owner-checked string: '{}'", cleanOwnedStr);
+        if (debug)
+            ChatNotify.LOG.warn("Owner-checked string: '{}'", cleanOwnedStr);
         return cleanOwnedStr;
     }
 
     /**
-     * For each trigger of each enabled notification, checks whether the
-     * trigger matches the message.
+     * For each trigger of each enabled notification, checks whether the trigger matches the
+     * message.
+     * <p>
+     * When a trigger matches, checks the exclusion triggers of the notification to determine
+     * whether to activate the notification.
+     * <p>
+     * If the notification should be activated, completes the relevant notification actions.
+     * <p>
+     * <b>Note:</b> For performance and simplicity reasons, this method only allows one
+     * notification
+     * to be triggered by a given message.
      *
-     * <p>When a trigger matches, checks the exclusion triggers of the
-     * notification to determine whether to activate the notification.</p>
-     *
-     * <p>If the notification should be activated, completes the relevant
-     * notification actions.</p>
-     *
-     * <p><b>Note:</b> For performance and simplicity reasons, this method only
-     * allows one notification to be triggered by a given message.</p>
-     * @param msg the message.
-     * @param cleanStr the message string, with all format codes removed.
+     * @param msg           the message.
+     * @param cleanStr      the message string, with all format codes removed.
      * @param cleanOwnedStr cleanStr, with the sender removed if applicable.
-     * @return a re-styled copy of the message, or the original message if
-     * restyling was not possible.
+     * @return a re-styled copy of the message, or the original message if restyling was not
+     * possible.
      */
-    private static @Nullable Component tryNotify(Component msg, String cleanStr,
-                                                 String cleanOwnedStr) {
+    private static @Nullable Component tryNotify(
+            Component msg,
+            String cleanStr,
+            String cleanOwnedStr
+    ) {
         boolean restyleAll = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
         boolean anyActivated = false;
         boolean anySoundPlayed = false;
 
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
-            if (!notif.canActivate(ownMsg)) continue;
+            if (!notif.canActivate(ownMsg))
+                continue;
 
             // Trigger search
             for (Trigger trig : notif.triggers) {
-                if (trig.string.isBlank()) continue;
+                if (trig.string.isBlank())
+                    continue;
                 Matcher matcher = null;
-                boolean hit = switch(trig.type) {
+                boolean hit = switch (trig.type) {
                     case NORMAL -> {
                         if (normalSearch(cleanOwnedStr, trig.string).find()) {
                             matcher = normalSearch(cleanStr, trig.string);
@@ -220,43 +249,53 @@ public class MessageUtil {
                         yield false;
                     }
                     case REGEX -> {
-                        if (trig.pattern == null) yield false;
+                        if (trig.pattern == null)
+                            yield false;
                         matcher = trig.pattern.matcher(cleanStr);
                         yield matcher.find();
                     }
                     case KEY -> keySearch(msg, trig.string);
                 };
-                if (!hit) continue;
+                if (!hit)
+                    continue;
 
                 // Inclusion search
                 boolean inMiss = false;
                 if (notif.inclusionEnabled) {
                     for (Trigger inTrig : notif.inclusionTriggers) {
-                        if (trig.string.isBlank()) continue;
-                        inMiss = (!switch(inTrig.type) {
+                        if (trig.string.isBlank())
+                            continue;
+                        inMiss = (!switch (inTrig.type) {
                             case NORMAL -> normalSearch(cleanOwnedStr, inTrig.string).find();
-                            case REGEX -> inTrig.pattern == null || inTrig.pattern.matcher(cleanStr).find();
+                            case REGEX -> inTrig.pattern == null
+                                    || inTrig.pattern.matcher(cleanStr).find();
                             case KEY -> keySearch(msg, inTrig.string);
                         });
-                        if (inMiss) break;
+                        if (inMiss)
+                            break;
                     }
                 }
-                if (inMiss) continue;
+                if (inMiss)
+                    continue;
 
                 // Exclusion search
                 boolean exHit = false;
                 if (notif.exclusionEnabled) {
                     for (Trigger exTrig : notif.exclusionTriggers) {
-                        if (trig.string.isBlank()) continue;
-                        exHit = switch(exTrig.type) {
+                        if (trig.string.isBlank())
+                            continue;
+                        exHit = switch (exTrig.type) {
                             case NORMAL -> normalSearch(cleanOwnedStr, exTrig.string).find();
-                            case REGEX -> exTrig.pattern != null && exTrig.pattern.matcher(cleanStr).find();
+                            case REGEX -> exTrig.pattern != null
+                                    && exTrig.pattern.matcher(cleanStr).find();
                             case KEY -> keySearch(msg, exTrig.string);
                         };
-                        if (exHit) break;
+                        if (exHit)
+                            break;
                     }
                 }
-                if (exHit) continue;
+                if (exHit)
+                    continue;
 
                 // Activate notification
                 anyActivated = true;
@@ -289,23 +328,25 @@ public class MessageUtil {
                     cleanOwnedStr = cleanStr;
 
                     // No other notifications can activate on a blank message
-                    if (str.isBlank()) return null;
+                    if (str.isBlank())
+                        return null;
                 }
 
                 break;
             }
             // If only activating single, return early
-            if (anyActivated && Config.get().notifMode.equals(Config.NotifMode.SINGLE)) return msg;
+            if (anyActivated && Config.get().notifMode.equals(Config.NotifMode.SINGLE))
+                return msg;
         }
         return msg;
     }
 
     /**
      * Checks whether the key matches the message;
+     *
      * @param msg the message to search.
      * @param key the key (or partial key) to search for.
-     * @return {@code true} if the key matches the message, {@code false}
-     * otherwise.
+     * @return {@code true} if the key matches the message, {@code false} otherwise.
      */
     public static boolean keySearch(Component msg, String key) {
         if (key.equals(".")) {
@@ -317,8 +358,8 @@ public class MessageUtil {
     }
 
     /**
-     * Performs a case-insensitive word-boundary search for the string within 
-     * the message.
+     * Performs a case-insensitive word-boundary search for the string within the message.
+     *
      * @param msg the message to search.
      * @param str the string to search for.
      * @return the {@link Matcher} for the search.
@@ -328,9 +369,9 @@ public class MessageUtil {
         U flag for full Unicode comparison, performance using randomly-generated
         100-character msg and 10-character str is approx 1.18 microseconds
         per check without flag, 1.31 microseconds with.
-        
-        The word-boundary regex \b is a zero-width assertion that matches if 
-        there is \w on one side, and either there is \W on the other or the 
+
+        The word-boundary regex \b is a zero-width assertion that matches if
+        there is \w on one side, and either there is \W on the other or the
         position is beginning or end of string. Thus, it cannot be used here as
         it will fail to match for a trigger starting or ending in \W.
          */
@@ -340,6 +381,7 @@ public class MessageUtil {
 
     /**
      * Plays the sound of the specified {@link Notification}, if enabled.
+     *
      * @param notif the {@link Notification}.
      */
     private static boolean playSound(Notification notif) {
@@ -347,10 +389,19 @@ public class MessageUtil {
             ResourceLocation location = notif.sound.getResourceLocation();
             if (location != null) {
                 Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(
-                        notif.sound.getResourceLocation(), Config.get().soundSource,
-                        notif.sound.getVolume(), notif.sound.getPitch(),
-                        SoundInstance.createUnseededRandom(), false, 0,
-                        SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+                        notif.sound.getResourceLocation(),
+                        Config.get().soundSource,
+                        notif.sound.getVolume(),
+                        notif.sound.getPitch(),
+                        SoundInstance.createUnseededRandom(),
+                        false,
+                        0,
+                        SoundInstance.Attenuation.NONE,
+                        0,
+                        0,
+                        0,
+                        true
+                ));
                 return true;
             }
         }
@@ -359,12 +410,17 @@ public class MessageUtil {
 
     /**
      * Converts a custom message string into a {@link Component} for sending.
+     *
      * @param msgString the custom message string.
-     * @param matcher a regex matcher for capturing group substitution.
-     * @param msg the original message.
+     * @param matcher   a regex matcher for capturing group substitution.
+     * @param msg       the original message.
      * @return the message, converted and with all substitutions done.
      */
-    private static Component convertMsg(String msgString, @Nullable Matcher matcher, Component msg) {
+    private static Component convertMsg(
+            String msgString,
+            @Nullable Matcher matcher,
+            Component msg
+    ) {
         // Replace $ with section sign
         msgString = msgString.replaceAll(Matcher.quoteReplacement("$"), "§");
 
@@ -376,17 +432,18 @@ public class MessageUtil {
                 String replacement = matcher.group(i) == null ? "" : matcher.group(i);
                 msgString = msgString.replaceAll("§\\(" + i + "\\)", replacement);
             }
-            
+
             // Convert message into a format suitable for recursive processing
             msg = FormatUtil.convertToStyledLiteral(msg.copy());
 
             // Record indices where groups should be placed, and get the
             // replacement substring for each group.
             ArrayList<int[]> groupReplacementIndices = new ArrayList<>();
-            HashMap<Integer,Component> groupReplacementMap = new HashMap<>();
+            HashMap<Integer, Component> groupReplacementMap = new HashMap<>();
             for (int groupNum = 0; groupNum <= matcher.groupCount(); groupNum++) {
                 String targetString = "(" + groupNum + ")";
-                if (!msgString.contains(targetString)) continue;
+                if (!msgString.contains(targetString))
+                    continue;
 
                 // Work through the message, collecting indices to replace with
                 // the captured group
@@ -415,13 +472,14 @@ public class MessageUtil {
                 MutableComponent newMsg = Component.empty();
                 int startIndex = 0;
                 for (int[] replacement : groupReplacementIndices) {
-                    newMsg.append(Component.literal(
-                            msgString.substring(startIndex, replacement[0])));
+                    newMsg.append(Component.literal(msgString.substring(
+                            startIndex,
+                            replacement[0]
+                    )));
                     newMsg.append(groupReplacementMap.get(replacement[1]));
                     startIndex = replacement[0] + ("(" + replacement[1] + ")").length();
                 }
-                newMsg.append(Component.literal(
-                        msgString.substring(startIndex)));
+                newMsg.append(Component.literal(msgString.substring(startIndex)));
                 return newMsg;
             }
         }
@@ -430,10 +488,11 @@ public class MessageUtil {
 
     /**
      * Displays the status bar message for the {@link Notification}, if enabled.
-     * @param notif the {@link Notification}.
-     * @param msg the original message.
-     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
-     *                was used, {@code null} otherwise.
+     *
+     * @param notif   the {@link Notification}.
+     * @param msg     the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger was used, {@code null}
+     *                otherwise.
      */
     private static void showStatusBarMsg(Notification notif, Component msg, Matcher matcher) {
         if (notif.statusBarMsgEnabled) {
@@ -446,58 +505,59 @@ public class MessageUtil {
 
     /**
      * Displays the title message for the {@link Notification}, if enabled.
-     * @param notif the {@link Notification}.
-     * @param msg the original message.
-     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
-     *                was used, {@code null} otherwise.
+     *
+     * @param notif   the {@link Notification}.
+     * @param msg     the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger was used, {@code null}
+     *                otherwise.
      */
     private static void showTitleMsg(Notification notif, Component msg, Matcher matcher) {
         if (notif.titleMsgEnabled) {
-            Component displayMsg = notif.titleMsg.isBlank()
-                    ? msg
-                    : convertMsg(notif.titleMsg, matcher, msg);
+            Component displayMsg =
+                    notif.titleMsg.isBlank() ? msg : convertMsg(notif.titleMsg, matcher, msg);
             Minecraft.getInstance().gui.setTitle(displayMsg);
         }
     }
 
     /**
      * Displays the toast message for the {@link Notification}, if enabled.
-     * @param notif the {@link Notification}.
-     * @param msg the original message.
-     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
-     *                was used, {@code null} otherwise.
+     *
+     * @param notif   the {@link Notification}.
+     * @param msg     the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger was used, {@code null}
+     *                otherwise.
      */
     private static void showToastMsg(Notification notif, Component msg, Matcher matcher) {
         if (notif.toastMsgEnabled) {
-            Component displayMsg = notif.toastMsg.isBlank()
-                    ? msg
-                    : convertMsg(notif.toastMsg, matcher, msg);
+            Component displayMsg =
+                    notif.toastMsg.isBlank() ? msg : convertMsg(notif.toastMsg, matcher, msg);
             Minecraft.getInstance().getToasts().addToast(new NotificationToast(displayMsg));
         }
     }
 
     /**
      * Types the typed message for the {@link Notification}, if enabled.
-     * @param notif the {@link Notification}.
-     * @param msg the original message.
-     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
-     *                was used, {@code null} otherwise.
+     *
+     * @param notif   the {@link Notification}.
+     * @param msg     the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger was used, {@code null}
+     *                otherwise.
      */
     private static void typeTypedMsg(Notification notif, Component msg, Matcher matcher) {
         if (notif.typedMsgEnabled && Minecraft.getInstance().screen == null) {
-            Component displayMsg = notif.typedMsg.isBlank()
-                    ? msg
-                    : convertMsg(notif.typedMsg, matcher, msg);
+            Component displayMsg =
+                    notif.typedMsg.isBlank() ? msg : convertMsg(notif.typedMsg, matcher, msg);
             Minecraft.getInstance().setScreen(new ChatScreen(displayMsg.getString()));
         }
     }
 
     /**
      * Copies the clipboard message for the {@link Notification}, if enabled.
-     * @param notif the {@link Notification}.
-     * @param msg the original message.
-     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
-     *                was used, {@code null} otherwise.
+     *
+     * @param notif   the {@link Notification}.
+     * @param msg     the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger was used, {@code null}
+     *                otherwise.
      */
     private static void copyClipboardMsg(Notification notif, Component msg, Matcher matcher) {
         if (notif.clipboardMsgEnabled) {
@@ -509,8 +569,9 @@ public class MessageUtil {
     }
 
     /**
-     * Sends all response messages of the specified notification, if the
-     * relevant control is enabled.
+     * Sends all response messages of the specified notification, if the relevant control is
+     * enabled.
+     *
      * @param notif the Notification.
      */
     private static void sendResponses(Notification notif, @Nullable Matcher matcher) {
@@ -518,12 +579,13 @@ public class MessageUtil {
             int totalDelay = 0;
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
-                if (msg.type.equals(ResponseMessage.Type.REGEX)
-                        && matcher != null && matcher.find(0)) {
+                if (msg.type.equals(ResponseMessage.Type.REGEX) && matcher != null
+                        && matcher.find(0)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {
                         String replacement = matcher.group(i) == null ? "" : matcher.group(i);
-                        msg.sendingString = msg.sendingString.replaceAll("\\(" + i + "\\)", replacement);
+                        msg.sendingString =
+                                msg.sendingString.replaceAll("\\(" + i + "\\)", replacement);
                     }
                 }
                 totalDelay += msg.delayTicks;

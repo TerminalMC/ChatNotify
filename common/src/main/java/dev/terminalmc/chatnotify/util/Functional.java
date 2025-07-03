@@ -17,8 +17,10 @@
 package dev.terminalmc.chatnotify.util;
 
 public class Functional {
+
     @FunctionalInterface
     public interface StringSupplier {
+
         String getString();
     }
 }

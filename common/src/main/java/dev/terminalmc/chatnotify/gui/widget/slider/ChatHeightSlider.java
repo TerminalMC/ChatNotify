@@ -33,8 +33,7 @@ public enum ChatHeightSlider implements SliderableValueSet<Double> {
 
     @Override
     public @NotNull Optional<Double> validateValue(@NotNull Double d) {
-        return d >= 0.0 && d <= maxChatHeight ?
-                Optional.of(d) : Optional.empty();
+        return d >= 0.0 && d <= maxChatHeight ? Optional.of(d) : Optional.empty();
     }
 
     @Override
@@ -49,8 +48,10 @@ public enum ChatHeightSlider implements SliderableValueSet<Double> {
 
     @Override
     public @NotNull Codec<Double> codec() {
-        return Codec.either(Codec.doubleRange(0, maxChatHeight),
-                Codec.BOOL).xmap(either -> either.map(value -> value,
-                value -> value ? 1.0 : 0.0), Either::left);
+        return Codec.either(Codec.doubleRange(0, maxChatHeight), Codec.BOOL)
+                .xmap(
+                        either -> either.map(value -> value, value -> value ? 1.0 : 0.0),
+                        Either::left
+                );
     }
 }

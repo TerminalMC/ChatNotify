@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.mixin;
 
 import com.mojang.datafixers.util.Pair;
+import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import net.minecraft.client.Minecraft;
@@ -24,7 +25,6 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import dev.terminalmc.chatnotify.ChatNotify;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -66,14 +66,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (if any) is cut from the message.
  */
 
-@Mixin(value = ClientPacketListener.class, priority = 792)
+@Mixin(
+        value = ClientPacketListener.class,
+        priority = 792
+)
 public class ClientPacketListenerMixin {
+
     /**
      * Update profileName.
      */
-    @Inject(method = "handleLogin", at = @At("TAIL"))
+    @Inject(
+            method = "handleLogin",
+            at = @At("TAIL")
+    )
     public void getProfileName(ClientboundLoginPacket packet, CallbackInfo ci) {
-        if (Minecraft.getInstance().player == null) return;
+        if (Minecraft.getInstance().player == null)
+            return;
         String name = FormatUtil.stripCodes(Minecraft.getInstance().player.getName().getString());
         Config.get().setProfileName(name);
         Config.get().setDisplayName(name);
@@ -81,40 +89,54 @@ public class ClientPacketListenerMixin {
 
     /**
      * Update displayName.
-     *
-     * <p>This is a proactive-update approach. A possible reactive-update
-     * approach would be to use the following access on each message check.
-     *
-     * <p>{@code String displayname = minecraft.getConnection().getPlayerInfo(
+     * <p>
+     * This is a proactive-update approach. A possible reactive-update approach would be to use the
+     * following access on each message check.
+     * <p>
+     * {@code String displayname = minecraft.getConnection().getPlayerInfo(
      * minecraft.player.getUUID()).getProfile().getName();}
      */
-    @Inject(method = "applyPlayerInfoUpdate", at = @At("TAIL"))
-    private void getDisplayName(ClientboundPlayerInfoUpdatePacket.Action action,
-                                ClientboundPlayerInfoUpdatePacket.Entry entry,
-                                PlayerInfo playerInfo, CallbackInfo ci) {
-        if (Minecraft.getInstance().player == null) return;
-        if (
-                action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)
-                        && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())
-                        && entry.displayName() != null
-        ) {
+    @Inject(
+            method = "applyPlayerInfoUpdate",
+            at = @At("TAIL")
+    )
+    private void getDisplayName(
+            ClientboundPlayerInfoUpdatePacket.Action action,
+            ClientboundPlayerInfoUpdatePacket.Entry entry,
+            PlayerInfo playerInfo,
+            CallbackInfo ci
+    ) {
+        if (Minecraft.getInstance().player == null)
+            return;
+        if (action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)
+                && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())
+                && entry.displayName() != null) {
             Config.get().setDisplayName(FormatUtil.stripCodes(entry.displayName().getString()));
         }
     }
 
     // Outgoing chat message and command storage
 
-    @Inject(method = "sendChat", at = @At("HEAD"))
+    @Inject(
+            method = "sendChat",
+            at = @At("HEAD")
+    )
     public void getMessage(String message, CallbackInfo ci) {
         chatNotify$storeMessage(message);
     }
 
-    @Inject(method = "sendCommand", at = @At("HEAD"))
+    @Inject(
+            method = "sendCommand",
+            at = @At("HEAD")
+    )
     public void getCommand(String command, CallbackInfo ci) {
         chatNotify$storeCommand(command);
     }
 
-    @Inject(method = "sendUnsignedCommand", at = @At("HEAD"))
+    @Inject(
+            method = "sendUnsignedCommand",
+            at = @At("HEAD")
+    )
     public void getUnsignedCommand(String command, CallbackInfoReturnable<Boolean> cir) {
         chatNotify$storeCommand(command);
     }
@@ -134,7 +156,9 @@ public class ClientPacketListenerMixin {
             }
         }
         ChatNotify.recentMessages.add(Pair.of(
-                time + 5000000000L, plainMsg.isEmpty() ? message : plainMsg));
+                time + 5000000000L,
+                plainMsg.isEmpty() ? message : plainMsg
+        ));
     }
 
     @Unique

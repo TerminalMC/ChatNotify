@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ResponseMessage implements Functional.StringSupplier {
+
     public static final int VERSION = 2;
     public final int version = VERSION;
 
@@ -60,14 +61,14 @@ public class ResponseMessage implements Functional.StringSupplier {
      * Controls how {@link ResponseMessage#string} is processed.
      */
     public Type type;
+
     public enum Type {
         /**
          * No additional processing.
          */
         NORMAL("~"),
         /**
-         * Replace regex group indicators with groups from the activating
-         * {@link Trigger}.
+         * Replace regex group indicators with groups from the activating {@link Trigger}.
          */
         REGEX(".*"),
         /**
@@ -95,12 +96,7 @@ public class ResponseMessage implements Functional.StringSupplier {
     /**
      * Not validated.
      */
-    ResponseMessage(
-            boolean enabled,
-            String string,
-            Type type,
-            int delayTicks
-    ) {
+    ResponseMessage(boolean enabled, String string, Type type, int delayTicks) {
         this.enabled = enabled;
         this.string = string;
         this.type = type;
@@ -118,37 +114,55 @@ public class ResponseMessage implements Functional.StringSupplier {
      * Validates this instance. To be called after editing and before saving.
      */
     ResponseMessage validate() {
-        if (delayTicks < 0) delayTicks = delayTicksDefault;
+        if (delayTicks < 0)
+            delayTicks = delayTicksDefault;
         return this;
     }
 
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<ResponseMessage> {
+
         @Override
-        public ResponseMessage deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
+        public ResponseMessage deserialize(
+                JsonElement json,
+                java.lang.reflect.Type typeOfT,
+                JsonDeserializationContext ctx
+        ) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
-                    enabledDefault, silent);
+            boolean enabled = JsonUtil.getOrDefault(
+                    obj,
+                    "enabled",
+                    enabledDefault,
+                    silent
+            );
 
-            String string = JsonUtil.getOrDefault(obj, "string",
-                    stringDefault, silent);
+            String string = JsonUtil.getOrDefault(
+                    obj,
+                    "string",
+                    stringDefault,
+                    silent
+            );
 
-            int delayTicks = JsonUtil.getOrDefault(obj, "delayTicks",
-                    delayTicksDefault, silent);
+            int delayTicks = JsonUtil.getOrDefault(
+                    obj,
+                    "delayTicks",
+                    delayTicksDefault,
+                    silent
+            );
 
-            Type type = JsonUtil.getOrDefault(obj, "type",
-                    Type.class, Type.values()[0], silent);
+            Type type = JsonUtil.getOrDefault(
+                    obj,
+                    "type",
+                    Type.class,
+                    Type.values()[0],
+                    silent
+            );
 
-            return new ResponseMessage(
-                    enabled,
-                    string,
-                    type,
-                    delayTicks
-            ).validate();
+            return new ResponseMessage(enabled, string, type, delayTicks).validate();
         }
     }
 }

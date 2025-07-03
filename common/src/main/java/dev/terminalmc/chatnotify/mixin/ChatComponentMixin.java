@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 /**
- * Minecraft handles different message packet types in different ways. The
- * mc1.20.1 call stacks look roughly like this:
+ * Minecraft handles different message packet types in different ways. The mc1.20.1 call stacks look
+ * roughly like this:
  *
  * <p>{@link ClientPacketListener#handleDisguisedChat}
  * <p>-> {@link ChatListener#handleDisguisedChatMessage}
@@ -50,32 +50,40 @@ import org.spongepowered.asm.mixin.Unique;
  * <p>-> {@link ChatListener#handlePlayerChatMessage}
  * <p>-> {@link ChatListener#showMessageToPlayer}
  * <p>-> {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
- *
- * <p>{@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
- * logs the message and adds it to the message queues, and is the earliest
- * merge point.
+ * <p>
+ * {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)} logs the message and
+ * adds it to the message queues, and is the earliest merge point.
  */
 @SuppressWarnings("JavadocReference")
-@Mixin(value = ChatComponent.class, priority = 792)
+@Mixin(
+        value = ChatComponent.class,
+        priority = 792
+)
 public class ChatComponentMixin {
 
     @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V")
-    private void replaceMessage(Component message, MessageSignature headerSignature,
-                                GuiMessageTag tag, Operation<Void> original) {
+    private void replaceMessage(
+            Component message,
+            MessageSignature headerSignature,
+            GuiMessageTag tag,
+            Operation<Void> original
+    ) {
         message = chatNotify$replaceMessage(message, tag);
-        if (message != null) original.call(message, headerSignature, tag);
+        if (message != null)
+            original.call(message, headerSignature, tag);
     }
 
     @Unique
-    private static @Nullable Component chatNotify$replaceMessage(Component message, GuiMessageTag tag) {
+    private static @Nullable Component chatNotify$replaceMessage(
+            Component message,
+            GuiMessageTag tag
+    ) {
         if (switch (Config.get().detectionMode) {
-            case HUD_KNOWN_TAGS -> (
-                    tag == null
-                            || tag.equals(GuiMessageTag.system())
-                            || tag.equals(GuiMessageTag.systemSinglePlayer())
-                            || tag.equals(GuiMessageTag.chatNotSecure())
-                            || tag.equals(GuiMessageTag.chatError())
-            );
+            case HUD_KNOWN_TAGS -> (tag == null
+                    || tag.equals(GuiMessageTag.system())
+                    || tag.equals(GuiMessageTag.systemSinglePlayer())
+                    || tag.equals(GuiMessageTag.chatNotSecure())
+                    || tag.equals(GuiMessageTag.chatError()));
             case HUD -> true;
             case PACKET -> false;
         }) {

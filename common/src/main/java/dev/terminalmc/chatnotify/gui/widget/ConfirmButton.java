@@ -24,12 +24,20 @@ import org.jetbrains.annotations.NotNull;
  * A {@link Button} that must be pressed twice to complete an action.
  */
 public class ConfirmButton extends Button {
+
     private Component message;
     private Component confirmMessage;
     private boolean hasBeenPressed;
 
-    public ConfirmButton(int x, int y, int width, int height, Component message,
-                         Component confirmMessage, OnPress onPress) {
+    public ConfirmButton(
+            int x,
+            int y,
+            int width,
+            int height,
+            Component message,
+            Component confirmMessage,
+            OnPress onPress
+    ) {
         super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
         this.message = message;
         this.confirmMessage = confirmMessage;
@@ -43,13 +51,15 @@ public class ConfirmButton extends Button {
     @Override
     public void setMessage(@NotNull Component message) {
         this.message = message;
-        if (!hasBeenPressed) super.setMessage(message);
+        if (!hasBeenPressed)
+            super.setMessage(message);
     }
-    
+
     @SuppressWarnings("unused")
     public void setConfirmMessage(@NotNull Component confirmMessage) {
         this.confirmMessage = confirmMessage;
-        if (hasBeenPressed) super.setMessage(confirmMessage);
+        if (hasBeenPressed)
+            super.setMessage(confirmMessage);
     }
 
     @Override

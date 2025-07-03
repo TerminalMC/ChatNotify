@@ -32,35 +32,44 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.time.Instant;
 
 /**
- * Refer to {@link ChatComponentMixin} for an overview of Minecraft's message
- * handling call stacks.
- *
- * <p>ChatHeads' injection points are too late for these capture methods, so
- * if they are being used, {@link ChatHeadsWrapper#handleAddedMessage} must
- * be called manually.</p>
+ * Refer to {@link ChatComponentMixin} for an overview of Minecraft's message handling call stacks.
+ * <p>
+ * ChatHeads' injection points are too late for these capture methods, so if they are being used,
+ * {@link ChatHeadsWrapper#handleAddedMessage} must be called manually.
  */
-@Mixin(value = ChatListener.class, priority = 792)
+@Mixin(
+        value = ChatListener.class,
+        priority = 792
+)
 public class ChatListenerMixin {
 
     @WrapMethod(method = "handleDisguisedChatMessage")
-    private void wrapHandleDisguisedChatMessage(Component message, ChatType.Bound boundChatType,
-                                                Operation<Void> original) {
+    private void wrapHandleDisguisedChatMessage(
+            Component message,
+            ChatType.Bound boundChatType,
+            Operation<Void> original
+    ) {
         if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(message, boundChatType, null);
             message = MessageUtil.processMessage(message);
-            if (message != null) original.call(message, boundChatType);
+            if (message != null)
+                original.call(message, boundChatType);
         } else {
             original.call(message, boundChatType);
         }
     }
 
     @WrapMethod(method = "handleSystemMessage")
-    private void wrapHandleSystemMessage(Component message, boolean isOverlay,
-                                         Operation<Void> original) {
+    private void wrapHandleSystemMessage(
+            Component message,
+            boolean isOverlay,
+            Operation<Void> original
+    ) {
         if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(message, null, null);
             message = MessageUtil.processMessage(message);
-            if (message != null) original.call(message, isOverlay);
+            if (message != null)
+                original.call(message, isOverlay);
         } else {
             original.call(message, isOverlay);
         }
@@ -68,19 +77,41 @@ public class ChatListenerMixin {
 
     // Unable to use handlePlayerChatMessage as that takes a PlayerChatMessage
     @WrapMethod(method = "showMessageToPlayer")
-    private boolean wrapShowMessageToPlayer(ChatType.Bound bound,
-                                            PlayerChatMessage playerChatMessage, Component message,
-                                            GameProfile gameProfile, boolean onlyShowSecureChat,
-                                            Instant timestamp, Operation<Boolean> original) {
+    private boolean wrapShowMessageToPlayer(
+            ChatType.Bound bound,
+            PlayerChatMessage playerChatMessage,
+            Component message,
+            GameProfile gameProfile,
+            boolean onlyShowSecureChat,
+            Instant timestamp,
+            Operation<Boolean> original
+    ) {
         if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
-            ChatHeadsWrapper.handleAddedMessage(message, bound, ((Ownable)message).chatheads$getOwner());
+            ChatHeadsWrapper.handleAddedMessage(
+                    message,
+                    bound,
+                    ((Ownable) message).chatheads$getOwner()
+            );
             message = MessageUtil.processMessage(message);
-            if (message != null) return original.call(bound, playerChatMessage, message,
-                    gameProfile, onlyShowSecureChat, timestamp);
+            if (message != null)
+                return original.call(
+                        bound,
+                        playerChatMessage,
+                        message,
+                        gameProfile,
+                        onlyShowSecureChat,
+                        timestamp
+                );
             return false;
         } else {
-            return original.call(bound, playerChatMessage, message, gameProfile,
-                    onlyShowSecureChat, timestamp);
+            return original.call(
+                    bound,
+                    playerChatMessage,
+                    message,
+                    gameProfile,
+                    onlyShowSecureChat,
+                    timestamp
+            );
         }
     }
 }

@@ -35,13 +35,12 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
- * Supports a series of
- * {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s for mod
+ * Supports a series of {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s for mod
  * configuration, and one to display the list of
- * {@link dev.terminalmc.chatnotify.config.Notification}s with widgets for
- * superficial configuration.
- *
- * <p><b>Note:</b> Configuration is saved only when this screen is closed.</p>
+ * {@link dev.terminalmc.chatnotify.config.Notification}s with widgets for superficial
+ * configuration.
+ * <p>
+ * <b>Note:</b> Configuration is saved only when this screen is closed.
  */
 public class RootScreen extends OptionScreen {
 
@@ -57,37 +56,84 @@ public class RootScreen extends OptionScreen {
 
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
-                new Tab(TabKey.NOTIFICATION.key, (screen) -> new FilterList<>(
-                        Minecraft.getInstance(), screen, 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                        FilterList.Entry.NotifOptions.class,
-                        (source, dest) -> Config.get().moveNotif(++source, ++dest),
-                        () -> updateTabTitle(TabKey.NOTIFICATION),
-                        localized("option", "notif.list", "ℹ"),
-                        localized("option", "notif.list.tooltip"),
-                        null,
-                        null,
-                        () -> Config.get().getNotifs(),
-                        (x, width, height, list, notif, index) -> index == 0
-                                ? new FilterList.Entry.NotifOptions.Locked(
-                                x, width, height, list, notif)
-                                : new FilterList.Entry.NotifOptions(
-                                x, width, height, list, notif, index),
-                        null,
-                        () -> Config.get().addNotif()
-                )),
-                new Tab(TabKey.CONTROL.key, (screen) ->
-                        new ControlList(Minecraft.getInstance(), screen, 0, 0, 0,
-                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
-                        )),
-                new Tab(TabKey.DEFAULT.key, (screen) ->
-                        new DefaultList(Minecraft.getInstance(), screen, 0, 0, 0,
-                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
-                        )),
-                new Tab(TabKey.PREFIX.key, (screen) ->
-                        new PrefixList(Minecraft.getInstance(), screen, 0, 0, 0,
-                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
-                        ))
+                new Tab(
+                        TabKey.NOTIFICATION.key,
+                        (screen) -> new FilterList<>(
+                                Minecraft.getInstance(),
+                                screen,
+                                0,
+                                0,
+                                0,
+                                BASE_LIST_ENTRY_WIDTH,
+                                LIST_ENTRY_HEIGHT,
+                                LIST_ENTRY_SPACING,
+                                FilterList.Entry.NotifOptions.class,
+                                (source, dest) -> Config.get().moveNotif(++source, ++dest),
+                                () -> updateTabTitle(TabKey.NOTIFICATION),
+                                localized("option", "notif.list", "ℹ"),
+                                localized("option", "notif.list.tooltip"),
+                                null,
+                                null,
+                                () -> Config.get().getNotifs(),
+                                (x, width, height, list, notif, index) -> index == 0
+                                        ? new FilterList.Entry.NotifOptions.Locked(
+                                        x,
+                                        width,
+                                        height,
+                                        list,
+                                        notif
+                                )
+                                        : new FilterList.Entry.NotifOptions(
+                                                x,
+                                                width,
+                                                height,
+                                                list,
+                                                notif,
+                                                index
+                                        ),
+                                null,
+                                () -> Config.get().addNotif()
+                        )
+                ),
+                new Tab(
+                        TabKey.CONTROL.key,
+                        (screen) -> new ControlList(
+                                Minecraft.getInstance(),
+                                screen,
+                                0,
+                                0,
+                                0,
+                                BASE_LIST_ENTRY_WIDTH,
+                                LIST_ENTRY_HEIGHT,
+                                LIST_ENTRY_SPACING
+                        )
+                ),
+                new Tab(
+                        TabKey.DEFAULT.key,
+                        (screen) -> new DefaultList(
+                                Minecraft.getInstance(),
+                                screen,
+                                0,
+                                0,
+                                0,
+                                BASE_LIST_ENTRY_WIDTH,
+                                LIST_ENTRY_HEIGHT,
+                                LIST_ENTRY_SPACING
+                        )
+                ),
+                new Tab(
+                        TabKey.PREFIX.key,
+                        (screen) -> new PrefixList(
+                                Minecraft.getInstance(),
+                                screen,
+                                0,
+                                0,
+                                0,
+                                BASE_LIST_ENTRY_WIDTH,
+                                LIST_ENTRY_HEIGHT,
+                                LIST_ENTRY_SPACING
+                        )
+                )
         );
         super.setTabs(tabs, defaultKey);
     }
@@ -119,6 +165,7 @@ public class RootScreen extends OptionScreen {
         PREFIX(translationKey("option", "prefix"));
 
         public final String key;
+
         TabKey(String key) {
             this.key = key;
         }
@@ -137,7 +184,8 @@ public class RootScreen extends OptionScreen {
         );
 
         // Cancel button
-        addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL,
+        addRenderableWidget(Button.builder(
+                        CommonComponents.GUI_CANCEL,
                         (button) -> Minecraft.getInstance().setScreen(new ConfirmScreen(
                                 (confirm) -> {
                                     if (confirm) {
@@ -149,15 +197,15 @@ public class RootScreen extends OptionScreen {
                                     }
                                 },
                                 localized("option", "root.exit_without_saving"),
-                                localized("option", "root.exit_without_saving.confirm"))))
+                                localized("option", "root.exit_without_saving.confirm")
+                        ))
+                )
                 .pos(x1, y)
                 .size(w, h)
                 .build());
 
         // Done button
-        addRenderableWidget(Button.builder(
-                        CommonComponents.GUI_DONE,
-                        (button) -> onClose())
+        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
                 .pos(x2, y)
                 .size(w, h)
                 .build());

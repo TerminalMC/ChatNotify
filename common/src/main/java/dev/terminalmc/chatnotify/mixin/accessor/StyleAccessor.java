@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Style.class)
 public interface StyleAccessor {
+
     @Invoker("<init>")
     static Style callNew(
             @Nullable TextColor color,

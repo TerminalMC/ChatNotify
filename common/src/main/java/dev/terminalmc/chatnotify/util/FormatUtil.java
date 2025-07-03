@@ -36,15 +36,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FormatUtil {
+
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("\\u00A7.?");
-    private static final String PLACEHOLDER_PATTERN_STRING
-            = "%(\\d+\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
+    private static final String PLACEHOLDER_PATTERN_STRING =
+            "%(\\d+\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(PLACEHOLDER_PATTERN_STRING);
 
     /**
-     * {@link net.minecraft.util.StringUtil#stripColor} only strips valid
-     * format codes, but invalid codes are also hidden from view so we remove
-     * them as well.
+     * {@link net.minecraft.util.StringUtil#stripColor} only strips valid format codes, but invalid
+     * codes are also hidden from view so we remove them as well.
      */
     public static String stripCodes(String str) {
         return COLOR_CODE_PATTERN.matcher(str).replaceAll("");
@@ -52,8 +52,8 @@ public class FormatUtil {
 
     /**
      * Recursively converts any {@link TranslatableContents} elements of the
-     * {@link MutableComponent} tree to {@link PlainTextContents} elements,
-     * and in the process converts any format codes to {@link Style}s.
+     * {@link MutableComponent} tree to {@link PlainTextContents} elements, and in the process
+     * converts any format codes to {@link Style}s.
      */
     public static MutableComponent convertToStyledLiteral(MutableComponent text)
             throws IllegalArgumentException {
@@ -74,15 +74,15 @@ public class FormatUtil {
     }
 
     /**
-     * Converts the contents of the {@link MutableComponent} from
-     * {@link TranslatableContents} to {@link PlainTextContents}.
-     *
-     * <p><b>Note:</b> Does not recurse, only affects root. Caller must recurse
-     * if required.</p>
+     * Converts the contents of the {@link MutableComponent} from {@link TranslatableContents} to
+     * {@link PlainTextContents}.
+     * <p>
+     * <b>Note:</b> Does not recurse, only affects root. Caller must recurse if required.
      */
     private static MutableComponent convertToLiteral(MutableComponent text)
             throws IllegalArgumentException {
-        if (!(text.getContents() instanceof TranslatableContents contents)) return text;
+        if (!(text.getContents() instanceof TranslatableContents contents))
+            return text;
 
         boolean debug = Config.get().debugMode.equals(Config.DebugMode.ALL);
 
@@ -103,9 +103,8 @@ public class FormatUtil {
         @Nullable String fallback = contents.getFallback();
 
         // This is the unformatted string to be shown to the user
-        String string = fallback == null
-                ? lang.getOrDefault(key)
-                : lang.getOrDefault(key, fallback);
+        String string =
+                fallback == null ? lang.getOrDefault(key) : lang.getOrDefault(key, fallback);
 
         // Minecraft will not attempt to process the placeholders if the string
         // format is invalid, so we check that here
@@ -160,7 +159,8 @@ public class FormatUtil {
                 StringBuilder sb = new StringBuilder("[");
                 int i = 0;
                 for (String s : split) {
-                    if (i++ != 0) sb.append(",");
+                    if (i++ != 0)
+                        sb.append(",");
                     sb.append(s);
                 }
                 sb.append("]");
@@ -226,17 +226,19 @@ public class FormatUtil {
     }
 
     /**
-     * Converts any format codes in the literal contents of the
-     * {@link MutableComponent} to {@link Style}s.
-     *
-     * <p><b>Note:</b> does not recurse, only affects root.</p>
+     * Converts any format codes in the literal contents of the {@link MutableComponent} to
+     * {@link Style}s.
+     * <p>
+     * <b>Note:</b> does not recurse, only affects root.
      */
     private static MutableComponent convertCodesToStyles(MutableComponent text) {
-        if (!(text.getContents() instanceof PlainTextContents contents)) return text;
+        if (!(text.getContents() instanceof PlainTextContents contents))
+            return text;
 
         // Check whether conversion is required
         String str = contents.text();
-        if (!str.contains("§")) return text;
+        if (!str.contains("§"))
+            return text;
 
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(text.getSiblings());
@@ -258,14 +260,15 @@ public class FormatUtil {
                     char next = chars[++i]; // Skip to next char
                     switch (next) { // Process code
                         case 'r' -> codes.clear();
-                        case '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'
-                                -> codes.color = ChatFormatting.getByCode(next);
+                        case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
+                             'e', 'f' -> codes.color = ChatFormatting.getByCode(next);
                         case 'k' -> codes.obfuscated = true;
                         case 'l' -> codes.bold = true;
                         case 'm' -> codes.strikethrough = true;
                         case 'n' -> codes.underline = true;
                         case 'o' -> codes.italic = true;
-                        default -> {} // Ignore invalid codes
+                        default -> {
+                        } // Ignore invalid codes
                     }
                 }
             } else { // Not section sign
@@ -283,6 +286,7 @@ public class FormatUtil {
     }
 
     private static class FormatCodes {
+
         @Nullable ChatFormatting color = null;
         boolean bold = false;
         boolean italic = false;
