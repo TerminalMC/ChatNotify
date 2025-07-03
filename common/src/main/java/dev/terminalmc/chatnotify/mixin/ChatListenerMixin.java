@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.time.Instant;
 
 /**
- * Refer to {@link MixinChatComponent} for an overview of Minecraft's message
+ * Refer to {@link ChatComponentMixin} for an overview of Minecraft's message
  * handling call stacks.
  *
  * <p>ChatHeads' injection points are too late for these capture methods, so
@@ -40,7 +40,7 @@ import java.time.Instant;
  * be called manually.</p>
  */
 @Mixin(value = ChatListener.class, priority = 792)
-public class MixinChatListener {
+public class ChatListenerMixin {
 
     @WrapMethod(method = "handleDisguisedChatMessage")
     private void wrapHandleDisguisedChatMessage(Component message, ChatType.Bound boundChatType,

@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Boosts the chat height slider.
  */
 @Mixin(OptionInstance.class)
-public class MixinOptionInstance {
+public class OptionInstanceMixin {
     @Shadow
     @Final
-    public Component caption;
+    Component caption;
 
     @Shadow
     @Final

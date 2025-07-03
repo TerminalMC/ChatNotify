@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.At;
  * is normally hardcoded as ARGB 0xFFE0E0E0.
  */
 @Mixin(MultiLineEditBox.class)
-public class MixinMultiLineEditBox{
+public class MultiLineEditBoxMixin {
     @ModifyExpressionValue(
             method = "renderContents",
             at = @At(

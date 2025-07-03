@@ -16,7 +16,7 @@
 
 package dev.terminalmc.chatnotify.gui.widget.field;
 
-import dev.terminalmc.chatnotify.mixin.MixinMultiLineEditBox;
+import dev.terminalmc.chatnotify.mixin.MultiLineEditBoxMixin;
 import dev.terminalmc.chatnotify.mixin.accessor.MultiLineEditBoxAccessor;
 import dev.terminalmc.chatnotify.mixin.accessor.MultilineTextFieldAccessor;
 import dev.terminalmc.chatnotify.mixin.accessor.StringViewAccessor;
@@ -38,10 +38,10 @@ import java.util.function.Consumer;
 
 /**
  * A custom {@link MultiLineEditBox} which supports double-clicking to select
- * words and triple-clicking to select all (with 
+ * words and triple-clicking to select all (with
  * {@link MultilineTextFieldAccessor}), resizing (with
- * {@link MultiLineEditBoxAccessor}), and content validation with warning text 
- * color and tooltip (with {@link MixinMultiLineEditBox}).
+ * {@link MultiLineEditBoxAccessor}), and content validation with warning text
+ * color and tooltip (with {@link MultiLineEditBoxMixin}).
  */
 public class MultiLineTextField extends MultiLineEditBox {
     public static final long CLICK_CHAIN_TIME = 250L;

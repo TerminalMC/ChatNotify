@@ -67,7 +67,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 
 @Mixin(value = ClientPacketListener.class, priority = 792)
-public class MixinClientPacketListener {
+public class ClientPacketListenerMixin {
     /**
      * Update profileName.
      */

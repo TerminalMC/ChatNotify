@@ -7,11 +7,11 @@
   "mixins": [
   ],
   "client": [
-    "MixinChatComponent",
-    "MixinChatListener",
-    "MixinClientPacketListener",
-    "MixinMultiLineEditBox",
-    "MixinOptionInstance",
+    "ChatComponentMixin",
+    "ChatListenerMixin",
+    "ClientPacketListenerMixin",
+    "MultiLineEditBoxMixin",
+    "OptionInstanceMixin",
     "accessor.KeyAccessor",
     "accessor.MultiLineEditBoxAccessor",
     "accessor.MultilineTextFieldAccessor",

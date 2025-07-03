@@ -52,12 +52,12 @@ import org.spongepowered.asm.mixin.Unique;
  * <p>-> {@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
  *
  * <p>{@link ChatComponent#addMessage(Component, MessageSignature, GuiMessageTag)}
- * logs the message and adds it to the message queues, and is the earliest 
+ * logs the message and adds it to the message queues, and is the earliest
  * merge point.
  */
 @SuppressWarnings("JavadocReference")
 @Mixin(value = ChatComponent.class, priority = 792)
-public class MixinChatComponent {
+public class ChatComponentMixin {
 
     @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V")
     private void replaceMessage(Component message, MessageSignature headerSignature,
