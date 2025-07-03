@@ -16,7 +16,9 @@
     "accessor.MultiLineEditBoxAccessor",
     "accessor.MultilineTextFieldAccessor",
     "accessor.ScreenAccessor",
-    "accessor.StringViewAccessor"
+    "accessor.StringViewAccessor",
+    "accessor.StyleAccessor",
+    "accessor.TextColorAccessor"
   ],
   "server": [
   ],

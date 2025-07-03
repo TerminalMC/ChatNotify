@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.util;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.mixin.accessor.StyleAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -41,8 +42,8 @@ public class FormatUtil {
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(PLACEHOLDER_PATTERN_STRING);
 
     /**
-     * {@link net.minecraft.util.StringUtil#stripColor} only strips valid 
-     * format codes, but invalid codes are also hidden from view so we remove 
+     * {@link net.minecraft.util.StringUtil#stripColor} only strips valid
+     * format codes, but invalid codes are also hidden from view so we remove
      * them as well.
      */
     public static String stripCodes(String str) {
@@ -50,8 +51,8 @@ public class FormatUtil {
     }
 
     /**
-     * Recursively converts any {@link TranslatableContents} elements of the 
-     * {@link MutableComponent} tree to {@link PlainTextContents} elements, 
+     * Recursively converts any {@link TranslatableContents} elements of the
+     * {@link MutableComponent} tree to {@link PlainTextContents} elements,
      * and in the process converts any format codes to {@link Style}s.
      */
     public static MutableComponent convertToStyledLiteral(MutableComponent text)
@@ -73,7 +74,7 @@ public class FormatUtil {
     }
 
     /**
-     * Converts the contents of the {@link MutableComponent} from 
+     * Converts the contents of the {@link MutableComponent} from
      * {@link TranslatableContents} to {@link PlainTextContents}.
      *
      * <p><b>Note:</b> Does not recurse, only affects root. Caller must recurse
@@ -176,7 +177,7 @@ public class FormatUtil {
                 Object[] args = contents.getArgs();
                 int numPlaceholders = split.size() - 1;
 
-                // Create an empty component, and add each literal element and 
+                // Create an empty component, and add each literal element and
                 // each arg as siblings in sequence
                 text = Component.empty().withStyle(text.getStyle());
                 List<Component> siblings = text.getSiblings();
@@ -225,7 +226,7 @@ public class FormatUtil {
     }
 
     /**
-     * Converts any format codes in the literal contents of the 
+     * Converts any format codes in the literal contents of the
      * {@link MutableComponent} to {@link Style}s.
      *
      * <p><b>Note:</b> does not recurse, only affects root.</p>
@@ -290,7 +291,7 @@ public class FormatUtil {
         boolean obfuscated = false;
 
         Style createStyle() {
-            return new Style(
+            return StyleAccessor.callNew(
                     color == null ? null : TextColor.fromLegacyFormat(color),
                     bold ? true : null,
                     italic ? true : null,

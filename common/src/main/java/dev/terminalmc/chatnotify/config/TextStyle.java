@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.mixin.accessor.StyleAccessor;
 import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -110,7 +111,7 @@ public class TextStyle {
     }
 
     public Style getStyle() {
-        return new Style(
+        return StyleAccessor.callNew(
                 doColor ? TextColor.fromRgb(color) : null,
                 bold != FormatMode.DISABLED ? bold == FormatMode.ON : null,
                 italic != FormatMode.DISABLED ? italic == FormatMode.ON : null,

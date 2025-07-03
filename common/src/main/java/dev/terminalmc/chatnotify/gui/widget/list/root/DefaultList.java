@@ -22,6 +22,7 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -111,7 +112,7 @@ public class DefaultList extends OptionList {
                         else colorField.setTextColor(color);
                     }
                 });
-                colorField.setValue(TextColor.fromRgb(Config.get().defaultColor).formatValue());
+                colorField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(Config.get().defaultColor)).callFormatValue());
                 elements.add(colorField);
             }
         }

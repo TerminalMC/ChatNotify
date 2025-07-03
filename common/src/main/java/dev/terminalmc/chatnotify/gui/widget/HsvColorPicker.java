@@ -21,6 +21,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -153,7 +154,7 @@ public class HsvColorPicker extends OverlayWidget {
         hexField.strict().hexColorValidator();
         hexField.setMaxLength(7);
         hexField.setResponder(this::updateColorFromHexField);
-        hexField.setValue(TextColor.fromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2])).formatValue());
+        hexField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]))).callFormatValue());
 
         // Cancel and confirm buttons
         int cancelButtonWidth = interiorWidth - hsvPickerBoxWidth - (hsvPickerBoxWidth / 2);
@@ -227,14 +228,14 @@ public class HsvColorPicker extends OverlayWidget {
                 FastColor.ARGB32.blue(color), hsv);
         oldColor = color;
         if (hexField != null) {
-            hexField.setValue(TextColor.fromRgb(color).formatValue());
+            hexField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(color)).callFormatValue());
         }
     }
 
     private void updateHexField() {
         updateFromCursor = true;
         int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
-        hexField.setValue(TextColor.fromRgb(color).formatValue());
+        hexField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(color)).callFormatValue());
         updateFromCursor = false;
     }
 

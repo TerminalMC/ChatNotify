@@ -28,6 +28,7 @@ import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
+import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import dev.terminalmc.chatnotify.util.Functional;
 import net.minecraft.ChatFormatting;
@@ -629,7 +630,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     }
                 }
 
-                // If sound field is enabled, split the trigger's excess over 
+                // If sound field is enabled, split the trigger's excess over
                 // threshold between trigger and sound
                 if (showSoundField) {
                     excess = triggerWidth - triggerWidthNominalMin;
@@ -792,7 +793,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                     colorEditButton.getMessage().copy().withColor(color));
                         }
                     });
-                    colorField.setValue(TextColor.fromRgb(notif.textStyle.color).formatValue());
+                    colorField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(notif.textStyle.color)).callFormatValue());
                     colorField.setTooltip(Tooltip.create(localized(
                             "option", "notif.color.field.tooltip")));
                     colorField.setTooltipDelay(Duration.ofMillis(500));

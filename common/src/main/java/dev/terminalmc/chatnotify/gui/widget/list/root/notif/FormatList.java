@@ -21,6 +21,7 @@ import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -120,7 +121,7 @@ public class FormatList extends OptionList {
                         else colorField.setTextColor(color);
                     }
                 });
-                colorField.setValue(TextColor.fromRgb(supplier.get()).formatValue());
+                colorField.setValue(((TextColorAccessor)(Object)TextColor.fromRgb(supplier.get())).callFormatValue());
                 elements.add(colorField);
 
                 // Status button
