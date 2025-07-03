@@ -198,7 +198,8 @@ public class HsvColorPicker extends OverlayWidget {
         int confirmButtonX = BORDER + hsvPickerBoxWidth + cancelButtonWidth;
 
         confirmButton = Button.builder(
-                        CommonComponents.GUI_OK, (button) -> {
+                        CommonComponents.GUI_DONE,
+                        (button) -> {
                             dest.accept(Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]));
                             onClose();
                         }
