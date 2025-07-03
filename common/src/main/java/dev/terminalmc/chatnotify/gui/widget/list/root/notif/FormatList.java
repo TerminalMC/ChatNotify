@@ -162,7 +162,7 @@ public class FormatList extends OptionList {
                             colorField.setTextColor(color);
                     }
                 });
-                colorField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(supplier.get())).callFormatValue());
+                colorField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(supplier.get())).chatnotify$formatValue());
                 elements.add(colorField);
 
                 // Status button

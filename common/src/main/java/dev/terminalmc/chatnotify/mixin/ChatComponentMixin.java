@@ -68,13 +68,13 @@ public class ChatComponentMixin {
             GuiMessageTag tag,
             Operation<Void> original
     ) {
-        message = chatNotify$replaceMessage(message, tag);
+        message = chatnotify$replaceMessage(message, tag);
         if (message != null)
             original.call(message, headerSignature, tag);
     }
 
     @Unique
-    private static @Nullable Component chatNotify$replaceMessage(
+    private static @Nullable Component chatnotify$replaceMessage(
             Component message,
             GuiMessageTag tag
     ) {

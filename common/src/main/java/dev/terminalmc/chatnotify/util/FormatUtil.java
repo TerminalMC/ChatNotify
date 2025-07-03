@@ -295,7 +295,7 @@ public class FormatUtil {
         boolean obfuscated = false;
 
         Style createStyle() {
-            return StyleAccessor.callNew(
+            return StyleAccessor.chatnotify$new(
                     color == null ? null : TextColor.fromLegacyFormat(color),
                     bold ? true : null,
                     italic ? true : null,

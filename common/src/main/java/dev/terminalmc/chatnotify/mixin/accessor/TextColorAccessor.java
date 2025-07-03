@@ -24,5 +24,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface TextColorAccessor {
 
     @Invoker("formatValue")
-    String callFormatValue();
+    String chatnotify$formatValue();
 }

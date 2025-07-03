@@ -122,7 +122,7 @@ public class ClientPacketListenerMixin {
             at = @At("HEAD")
     )
     public void getMessage(String message, CallbackInfo ci) {
-        chatNotify$storeMessage(message);
+        chatnotify$storeMessage(message);
     }
 
     @Inject(
@@ -130,7 +130,7 @@ public class ClientPacketListenerMixin {
             at = @At("HEAD")
     )
     public void getCommand(String command, CallbackInfo ci) {
-        chatNotify$storeCommand(command);
+        chatnotify$storeCommand(command);
     }
 
     @Inject(
@@ -138,13 +138,13 @@ public class ClientPacketListenerMixin {
             at = @At("HEAD")
     )
     public void getUnsignedCommand(String command, CallbackInfoReturnable<Boolean> cir) {
-        chatNotify$storeCommand(command);
+        chatnotify$storeCommand(command);
     }
 
     @Unique
-    private void chatNotify$storeMessage(String message) {
+    private void chatnotify$storeMessage(String message) {
         long time = System.nanoTime();
-        chatNotify$removeOldMessages(time);
+        chatnotify$removeOldMessages(time);
 
         String plainMsg = "";
 
@@ -162,9 +162,9 @@ public class ClientPacketListenerMixin {
     }
 
     @Unique
-    private void chatNotify$storeCommand(String command) {
+    private void chatnotify$storeCommand(String command) {
         long time = System.currentTimeMillis();
-        chatNotify$removeOldMessages(time);
+        chatnotify$removeOldMessages(time);
 
         // The command '/' is removed before this point, so add it back before
         // checking against prefixes.
@@ -183,7 +183,7 @@ public class ClientPacketListenerMixin {
     }
 
     @Unique
-    private void chatNotify$removeOldMessages(long time) { // no see
+    private void chatnotify$removeOldMessages(long time) { // no see
         ChatNotify.recentMessages.removeIf(pair -> pair.getFirst() < time);
     }
 }

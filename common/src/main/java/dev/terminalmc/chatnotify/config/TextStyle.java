@@ -112,7 +112,7 @@ public class TextStyle {
     }
 
     public Style getStyle() {
-        return StyleAccessor.callNew(
+        return StyleAccessor.chatnotify$new(
                 doColor ? TextColor.fromRgb(color) : null,
                 bold != FormatMode.DISABLED ? bold == FormatMode.ON : null,
                 italic != FormatMode.DISABLED ? italic == FormatMode.ON : null,

@@ -24,16 +24,16 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(MultilineTextField.class)
 public interface MultilineTextFieldAccessor {
 
-    @Accessor
-    int getCursor();
+    @Accessor("cursor")
+    int chatnotify$getCursor();
 
     @Accessor("cursor")
-    void setCursor(int cursor);
+    void chatnotify$setCursor(int cursor);
 
     @Accessor("selectCursor")
-    void setSelectCursor(int selectCursor);
+    void chatnotify$setSelectCursor(int selectCursor);
 
     @Mutable
     @Accessor("width")
-    void setWidth(int width);
+    void chatnotify$setWidth(int width);
 }

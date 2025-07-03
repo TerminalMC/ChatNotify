@@ -159,7 +159,7 @@ public class DefaultList extends OptionList {
                             colorField.setTextColor(color);
                     }
                 });
-                colorField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(Config.get().defaultColor)).callFormatValue());
+                colorField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(Config.get().defaultColor)).chatnotify$formatValue());
                 elements.add(colorField);
             }
         }

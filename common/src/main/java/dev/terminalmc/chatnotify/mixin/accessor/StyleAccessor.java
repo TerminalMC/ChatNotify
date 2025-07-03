@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface StyleAccessor {
 
     @Invoker("<init>")
-    static Style callNew(
+    static Style chatnotify$new(
             @Nullable TextColor color,
             @Nullable Boolean bold,
             @Nullable Boolean italic,

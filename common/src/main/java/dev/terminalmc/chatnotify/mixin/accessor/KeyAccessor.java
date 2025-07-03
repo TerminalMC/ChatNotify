@@ -26,7 +26,7 @@ import java.util.Map;
 public interface KeyAccessor {
 
     @Accessor("NAME_MAP")
-    static Map<String, InputConstants.Key> getNameMap() {
+    static Map<String, InputConstants.Key> chatnotify$getNameMap() {
         throw new AssertionError();
     }
 }

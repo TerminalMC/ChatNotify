@@ -35,8 +35,8 @@ public class CommandKeysCompat {
         String limitKeyStr = splitStr[0];
         String KeyStr = splitStr[1];
 
-        InputConstants.Key limitKey = KeyAccessor.getNameMap().get(limitKeyStr);
-        InputConstants.Key key = KeyAccessor.getNameMap().get(KeyStr);
+        InputConstants.Key limitKey = KeyAccessor.chatnotify$getNameMap().get(limitKeyStr);
+        InputConstants.Key key = KeyAccessor.chatnotify$getNameMap().get(KeyStr);
         if (key == null || limitKey == null)
             return;
 

@@ -168,7 +168,7 @@ public class HsvColorPicker extends OverlayWidget {
                 hsv[0],
                 hsv[1],
                 hsv[2]
-        ))).callFormatValue());
+        ))).chatnotify$formatValue());
 
         // Cancel and confirm buttons
         int cancelButtonWidth = interiorWidth - hsvPickerBoxWidth - (hsvPickerBoxWidth / 2);
@@ -251,14 +251,14 @@ public class HsvColorPicker extends OverlayWidget {
         );
         oldColor = color;
         if (hexField != null) {
-            hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(color)).callFormatValue());
+            hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(color)).chatnotify$formatValue());
         }
     }
 
     private void updateHexField() {
         updateFromCursor = true;
         int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
-        hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(color)).callFormatValue());
+        hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(color)).chatnotify$formatValue());
         updateFromCursor = false;
     }
 

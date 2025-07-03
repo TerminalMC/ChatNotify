@@ -28,12 +28,12 @@ import java.util.List;
 @Mixin(Screen.class)
 public interface ScreenAccessor {
 
-    @Accessor
-    List<Renderable> getRenderables();
+    @Accessor("children")
+    List<GuiEventListener> chatnotify$getChildren();
 
-    @Accessor
-    List<GuiEventListener> getChildren();
+    @Accessor("renderables")
+    List<Renderable> chatnotify$getRenderables();
 
-    @Accessor
-    List<NarratableEntry> getNarratables();
+    @Accessor("narratables")
+    List<NarratableEntry> chatnotify$getNarratables();
 }

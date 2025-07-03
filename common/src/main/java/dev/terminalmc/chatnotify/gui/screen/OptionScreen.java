@@ -284,9 +284,9 @@ public abstract class OptionScreen extends OptionsSubScreen {
         removeOverlay();
         overlay = widget;
         setChildrenVisible(false);
-        ((ScreenAccessor) this).getChildren().addFirst(widget);
-        ((ScreenAccessor) this).getNarratables().addFirst(widget);
-        ((ScreenAccessor) this).getRenderables().addLast(widget);
+        ((ScreenAccessor) this).chatnotify$getChildren().addFirst(widget);
+        ((ScreenAccessor) this).chatnotify$getNarratables().addFirst(widget);
+        ((ScreenAccessor) this).chatnotify$getRenderables().addLast(widget);
     }
 
     public void removeOverlay() {

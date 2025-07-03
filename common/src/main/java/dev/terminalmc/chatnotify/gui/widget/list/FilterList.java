@@ -591,7 +591,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 if (message.type.equals(ResponseMessage.Type.COMMANDKEYS)) {
                     int keyFieldWidth = msgFieldWidth / 2;
                     List<String> keys =
-                            KeyAccessor.getNameMap().keySet().stream().sorted().toList();
+                            KeyAccessor.chatnotify$getNameMap().keySet().stream().sorted().toList();
                     FakeTextField keyField1 = new FakeTextField(
                             movingX, 0, keyFieldWidth, height, () -> {
                         int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
@@ -976,7 +976,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                     .withColor(color));
                         }
                     });
-                    colorField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(notif.textStyle.color)).callFormatValue());
+                    colorField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(notif.textStyle.color)).chatnotify$formatValue());
                     colorField.setTooltip(Tooltip.create(localized(
                             "option",
                             "notif.color.field.tooltip"
