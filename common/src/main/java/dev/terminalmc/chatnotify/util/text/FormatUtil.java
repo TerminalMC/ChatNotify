@@ -329,6 +329,7 @@ public class FormatUtil {
         Style createStyle() {
             return StyleAccessor.chatnotify$new(
                     color == null ? null : TextColor.fromLegacyFormat(color),
+                    null,
                     bold ? true : null,
                     italic ? true : null,
                     underline ? true : null,
