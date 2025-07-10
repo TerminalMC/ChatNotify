@@ -298,13 +298,13 @@ public class StyleUtil {
         if (msg.getContents() instanceof PlainTextContents contents) {
             if (debug)
                 ChatNotify.LOG.warn("PlainTextContents");
+            Style oldStyle = msg.getStyle();
+            msg = Component.empty().withStyle(oldStyle);
+
             String str = contents.text();
             if (index + str.length() >= start && index < end) {
                 // Target substring overlaps with current substring,
                 // so add the included section with its original style
-                Style oldStyle = msg.getStyle();
-                msg = Component.empty().withStyle(oldStyle);
-
                 int localStart = Math.max(0, start - index);
                 int localEnd = Math.min(str.length(), end - index);
 

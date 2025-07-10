@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.7
+
+- Fixed an issue with replacement message styling duplicating components
+
 ## 2.4.6
 
 - Updated Russian translation (rfin0)
