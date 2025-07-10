@@ -16,7 +16,6 @@
 
 package dev.terminalmc.chatnotify.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -246,7 +245,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the partially-translucent background texture.
      */
     protected void renderListBackground(GuiGraphics graphics) {
-        RenderSystem.enableBlend();
         graphics.blit(
                 RenderType::guiTextured,
                 MENU_LIST_BACKGROUND,
@@ -259,7 +257,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 32,
                 32
         );
-        RenderSystem.disableBlend();
     }
 
     /**
@@ -307,7 +304,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                     (int) scrollAmount * (getWidth() - scrollerWidth) / getMaxScroll() + getX()
             );
 
-            RenderSystem.enableBlend();
             graphics.blitSprite(
                     RenderType::guiTextured,
                     SCROLLER_BACKGROUND_SPRITE,
@@ -324,7 +320,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                     scrollerWidth,
                     SCROLLBAR_HEIGHT
             );
-            RenderSystem.disableBlend();
         }
     }
 
@@ -339,7 +334,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the list separator textures.
      */
     protected void renderSeparators(GuiGraphics guiGraphics) {
-        RenderSystem.enableBlend();
         guiGraphics.blit(
                 RenderType::guiTextured,
                 LEFT_SEPARATOR,
@@ -388,7 +382,6 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 32,
                 2
         );
-        RenderSystem.disableBlend();
     }
 
     // Focus and visibility
