@@ -17,8 +17,8 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.config.util.JsonUtil;
 import dev.terminalmc.chatnotify.mixin.accessor.StyleAccessor;
-import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 
@@ -129,7 +129,7 @@ public class TextStyle {
     // Validation
 
     /**
-     * Validates this instance. To be called after editing and before saving.
+     * Validates this instance. Called after deserialization and before saving.
      */
     TextStyle validate() {
         if (color < 0 || color > 0xFFFFFF)

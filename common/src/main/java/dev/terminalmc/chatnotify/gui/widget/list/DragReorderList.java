@@ -338,13 +338,13 @@ public abstract class DragReorderList extends OptionList {
         // Check whether the move operation would actually change anything
         if (hoveredSlot > dragSourceSlot || hoveredSlot < dragSourceSlot - 1) {
             // Account for the list not starting at slot 0
-            int sourceIndex = dragSourceSlot - getOffset(dragSourceSlot);
-            int destIndex = hoveredSlot - getOffset(hoveredSlot);
+            int srcIdx = dragSourceSlot - getOffset(dragSourceSlot);
+            int dstIdx = hoveredSlot - getOffset(hoveredSlot);
             // I can't really explain why
-            if (sourceIndex > destIndex)
-                destIndex += 1;
+            if (srcIdx > dstIdx)
+                dstIdx += 1;
             // Move
-            if (clsFunMap.get(dragClass).apply(sourceIndex, destIndex)) {
+            if (clsFunMap.get(dragClass).apply(srcIdx, dstIdx)) {
                 init();
             }
         }

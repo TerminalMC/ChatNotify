@@ -19,12 +19,15 @@ package dev.terminalmc.chatnotify.compat.commandkeys;
 import com.mojang.blaze3d.platform.InputConstants;
 
 /**
- * Wraps {@link CommandKeysCompat} to catch errors caused by the CommandKeys mod not providing the
- * expected methods.
+ * Wraps {@link CommandKeysCompat} to catch errors caused by the other mod not existing or not
+ * providing the expected methods.
  */
 public class CommandKeysWrapper {
 
     private static boolean hasFailed = false;
+
+    private CommandKeysWrapper() {
+    }
 
     /**
      * Parses the specified string into two {@link InputConstants.Key} instances, and passes them to

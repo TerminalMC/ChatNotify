@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.compat.chatheads;
+package dev.terminalmc.chatnotify.util.functional;
 
-import net.minecraft.client.multiplayer.PlayerInfo;
+@FunctionalInterface
+public interface StringSupplier {
 
-/**
- * Mimics {@link dzwdz.chat_heads.mixininterface.Ownable} to allow access without classloading
- * ChatHeads.
- */
-public interface Ownable {
-
-    PlayerInfo chatheads$getOwner();
+    String getString();
 }

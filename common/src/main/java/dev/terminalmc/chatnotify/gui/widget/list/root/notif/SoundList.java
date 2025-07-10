@@ -24,6 +24,7 @@ import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -369,7 +370,7 @@ public class SoundList extends OptionList {
                         ));
 
                 elements.add(Button.builder(
-                                Component.literal("\uD83D\uDD0A"),
+                                Component.literal(Unicode.SOUND.str),
                                 (button) -> Minecraft.getInstance()
                                         .setScreen(new SoundOptionsScreen(
                                                 list.screen,

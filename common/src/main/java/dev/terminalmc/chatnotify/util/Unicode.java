@@ -16,11 +16,25 @@
 
 package dev.terminalmc.chatnotify.util;
 
-public class Functional {
+@SuppressWarnings("UnnecessaryUnicodeEscape")
+public enum Unicode {
+    CHECK("\u2714"), // ✔
+    CROSS("\u274C"), // ❌
+    DOWN("\u2193"), // ↓
+    EDIT("\u270E"), // ✎
+    INFO("\u2139"), // ℹ
+    KEY("\uD83D\uDD11"), // 🔑
+    PAINT("\uD83C\uDF22"), // 🌢
+    SECTION("\u00A7"), // §
+    SOUND("\uD83D\uDD0A"), // 🔊
+    UP("\u2191"), // ↑
+    UP_DOWN("\u2191\u2193"); // ↑i
 
-    @FunctionalInterface
-    public interface StringSupplier {
+    public final Character chr;
+    public final String str;
 
-        String getString();
+    Unicode(String str) {
+        this.chr = str.isEmpty() ? null : str.charAt(0);
+        this.str = str;
     }
 }

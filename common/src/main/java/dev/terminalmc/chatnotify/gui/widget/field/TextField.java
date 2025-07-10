@@ -20,7 +20,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Trigger;
-import dev.terminalmc.chatnotify.util.ColorUtil;
+import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -548,7 +548,7 @@ public class TextField extends EditBox {
      */
     public static String fixRegexMessage(String str) {
         // Remove carriage returns
-        str = str.replaceAll("\\u000D", "");
+        str = str.replaceAll("\\n", "");
 
         // If there is a cursor, fix its position
         if (str.endsWith("^")) {

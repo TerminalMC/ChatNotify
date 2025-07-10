@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.util;
+package dev.terminalmc.chatnotify.util.text;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
@@ -33,6 +33,9 @@ import java.util.regex.Pattern;
 public class StyleUtil {
 
     private static boolean debug = false;
+
+    private StyleUtil() {
+    }
 
     public static Component restyle(
             Component msg,
@@ -172,7 +175,7 @@ public class StyleUtil {
     /**
      * Recursive traversal restyling algorithm.
      * <p>
-     * <b>Note:</b> Unable to process format codes or translatable components, use
+     * Note: Unable to process format codes or translatable components, use
      * {@link FormatUtil#convertToStyledLiteral} prior to invoking this method.
      *
      * @param msg   the message to restyle.
@@ -263,7 +266,7 @@ public class StyleUtil {
     /**
      * Recursive traversal algorithm to get a substring of a message with its original style.
      * <p>
-     * <b>Note:</b> Unable to process format codes or translatable components, use
+     * Note: Unable to process format codes or translatable components, use
      * {@link FormatUtil#convertToStyledLiteral} prior to invoking this method.
      *
      * @param msg   the message to get a substring of.

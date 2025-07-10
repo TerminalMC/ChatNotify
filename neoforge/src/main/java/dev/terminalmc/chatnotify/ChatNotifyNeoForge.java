@@ -34,11 +34,10 @@ public class ChatNotifyNeoForge {
 
     public ChatNotifyNeoForge() {
         // Register config screen
-        ModLoadingContext.get()
-                .registerExtensionPoint(
-                        IConfigScreenFactory.class,
-                        () -> (minecraft, parent) -> new RootScreen(parent)
-                );
+        ModLoadingContext.get().registerExtensionPoint(
+                IConfigScreenFactory.class,
+                () -> (minecraft, parent) -> new RootScreen(parent)
+        );
 
         // Initialize client
         ChatNotify.init();

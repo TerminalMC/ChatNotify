@@ -23,7 +23,8 @@ import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
-import dev.terminalmc.chatnotify.util.ColorUtil;
+import dev.terminalmc.chatnotify.util.Unicode;
+import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -61,7 +62,7 @@ public class DefaultList extends OptionList {
                 entryX,
                 entryWidth,
                 entryHeight,
-                localized("option", "default.list", "ℹ"),
+                localized("option", "default.list", Unicode.INFO.str),
                 Tooltip.create(localized("option", "default.list.tooltip")),
                 -1
         ));
@@ -224,7 +225,7 @@ public class DefaultList extends OptionList {
                         ));
 
                 elements.add(Button.builder(
-                                Component.literal("\uD83D\uDD0A"),
+                                Component.literal(Unicode.SOUND.str),
                                 (button) -> Minecraft.getInstance()
                                         .setScreen(new SoundOptionsScreen(
                                                 list.screen,

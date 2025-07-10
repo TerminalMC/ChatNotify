@@ -18,7 +18,7 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.util.JsonUtil;
+import dev.terminalmc.chatnotify.config.util.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+/**
+ * An identifier used to determine what part of a message to restyle when a {@link Notification} is
+ * triggered.
+ */
 public class StyleTarget {
 
     public static final int VERSION = 2;
@@ -132,7 +136,7 @@ public class StyleTarget {
     // Validation
 
     /**
-     * Validates this instance. To be called after editing and before saving.
+     * Validates this instance. Called after deserialization and before saving.
      */
     StyleTarget validate() {
         return this;

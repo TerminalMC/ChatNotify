@@ -22,7 +22,7 @@ import com.mojang.authlib.GameProfile;
 import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
 import dev.terminalmc.chatnotify.compat.chatheads.Ownable;
 import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.util.MessageUtil;
+import dev.terminalmc.chatnotify.util.text.MessageUtil;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;

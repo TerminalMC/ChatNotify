@@ -23,7 +23,8 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
-import dev.terminalmc.chatnotify.util.ColorUtil;
+import dev.terminalmc.chatnotify.util.Unicode;
+import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -67,7 +68,7 @@ public class FormatList extends OptionList {
                 entryX,
                 entryWidth,
                 entryHeight,
-                localized("option", "notif.format.list", "ℹ"),
+                localized("option", "notif.format.list", Unicode.INFO.str),
                 Tooltip.create(localized("option", "notif.format.list.tooltip")),
                 -1
         ));

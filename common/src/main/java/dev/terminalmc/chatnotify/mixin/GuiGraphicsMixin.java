@@ -39,7 +39,6 @@ public abstract class GuiGraphicsMixin implements IGuiGraphics {
     private PoseStack pose;
 
     @Shadow
-    @Deprecated
     protected abstract void flushIfUnmanaged();
 
     @Override

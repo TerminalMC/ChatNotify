@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.util.MessageUtil;
+import dev.terminalmc.chatnotify.util.text.MessageUtil;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ChatComponent;

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.util;
+package dev.terminalmc.chatnotify.util.text;
 
-import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
-import dev.terminalmc.chatnotify.config.ResponseMessage;
+import dev.terminalmc.chatnotify.config.Response;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.toast.NotificationToast;
+import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -49,6 +49,9 @@ public class MessageUtil {
 
     private static boolean debug = false;
     private static boolean ownMsg = false;
+
+    private MessageUtil() {
+    }
 
     /**
      * Initiates the message processing algorithm.
@@ -121,38 +124,36 @@ public class MessageUtil {
      * @return the string, a modified copy, or {@code null} depending on the result of the check.
      */
     private static String checkOwner(String cleanStr) {
-        boolean checkSuccessful = false;
+        PlayerInfo ownerInfo = null;
         String cleanOwnedStr = cleanStr;
         if (Config.get().senderDetectionMode == COMBINED) {
-            // Ask chat heads who the message owner is
-            Pair<PlayerInfo, Integer> info = ChatHeadsWrapper.getPlayerInfo();
-            if (info != null) { // null indicates ChatHeads failure
-                checkSuccessful = true;
-                if (debug)
-                    ChatNotify.LOG.warn("Owner check using ChatHeads");
-                if (info.getFirst() != null && Minecraft.getInstance().player != null) {
-                    UUID id = info.getFirst().getProfile().getId();
-                    if (id.equals(Minecraft.getInstance().player.getUUID())) {
-                        if (debug)
-                            ChatNotify.LOG.warn("Matched user's UUID");
-                        for (Trigger t : Config.get().getUserNotif().triggers) {
-                            Matcher matcher = normalSearch(cleanStr, t.string);
-                            if (matcher.find()) {
-                                if (debug)
-                                    ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
-                                // Modify message according to config
-                                cleanOwnedStr =
-                                        cleanStr.substring(0, matcher.start()) + cleanStr.substring(
-                                                matcher.end());
-                                break;
-                            }
+            // Ask ChatHeads who the message owner is
+            ownerInfo = ChatHeadsWrapper.getPlayerInfo();
+        }
+        if (ownerInfo != null) {
+            // Use info from ChatHeads
+            if (debug)
+                ChatNotify.LOG.warn("Owner check using ChatHeads");
+            if (Minecraft.getInstance().player != null) {
+                UUID id = ownerInfo.getProfile().getId();
+                if (id.equals(Minecraft.getInstance().player.getUUID())) {
+                    if (debug)
+                        ChatNotify.LOG.warn("Matched user's UUID");
+                    for (Trigger t : Config.get().getUserNotif().triggers) {
+                        Matcher matcher = normalSearch(cleanStr, t.string);
+                        if (matcher.find()) {
+                            if (debug)
+                                ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
+                            // Modify message according to config
+                            cleanOwnedStr = cleanStr.substring(0, matcher.start())
+                                    + cleanStr.substring(matcher.end());
+                            break;
                         }
                     }
                 }
             }
-        }
-        // Default to sent-message-match heuristic
-        if (!checkSuccessful) {
+        } else {
+            // Default to sent-message-match heuristic
             if (debug)
                 ChatNotify.LOG.warn("Owner check using heuristic");
             // Check for a matching stored message
@@ -207,13 +208,12 @@ public class MessageUtil {
      * message.
      * <p>
      * When a trigger matches, checks the exclusion triggers of the notification to determine
-     * whether to activate the notification.
+     * whether to trigger the notification.
      * <p>
-     * If the notification should be activated, completes the relevant notification actions.
+     * If the notification should be triggered, completes the relevant notification actions.
      * <p>
-     * <b>Note:</b> For performance and simplicity reasons, this method only allows one
-     * notification
-     * to be triggered by a given message.
+     * Note: For performance and simplicity reasons, this method only allows one
+     * notification to be triggered by a given message.
      *
      * @param msg           the message.
      * @param cleanStr      the message string, with all format codes removed.
@@ -227,12 +227,12 @@ public class MessageUtil {
             String cleanOwnedStr
     ) {
         boolean restyleAll = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
-        boolean anyActivated = false;
+        boolean anyTriggered = false;
         boolean anySoundPlayed = false;
 
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
-            if (!notif.canActivate(ownMsg))
+            if (!notif.canBeTriggered(ownMsg))
                 continue;
 
             // Trigger search
@@ -297,8 +297,8 @@ public class MessageUtil {
                 if (exHit)
                     continue;
 
-                // Activate notification
-                anyActivated = true;
+                // Trigger notification
+                anyTriggered = true;
 
                 // Play sound
                 if (!anySoundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
@@ -327,7 +327,7 @@ public class MessageUtil {
                     cleanStr = FormatUtil.stripCodes(str);
                     cleanOwnedStr = cleanStr;
 
-                    // No other notifications can activate on a blank message
+                    // No other notifications can be triggered on a blank message
                     if (str.isBlank())
                         return null;
                 }
@@ -335,7 +335,7 @@ public class MessageUtil {
                 break;
             }
             // If only activating single, return early
-            if (anyActivated && Config.get().notifMode.equals(Config.NotifMode.SINGLE))
+            if (anyTriggered && Config.get().notifMode.equals(Config.NotifMode.SINGLE))
                 return msg;
         }
         return msg;
@@ -422,7 +422,7 @@ public class MessageUtil {
             Component msg
     ) {
         // Replace $ with section sign
-        msgString = msgString.replaceAll(Matcher.quoteReplacement("$"), "§");
+        msgString = msgString.replaceAll(Matcher.quoteReplacement("$"), Unicode.SECTION.str);
 
         // Substitute capturing groups
         if (matcher != null && matcher.find(0)) {
@@ -430,7 +430,10 @@ public class MessageUtil {
             // their original style, so we substitute them in first
             for (int i = 0; i <= matcher.groupCount(); i++) {
                 String replacement = matcher.group(i) == null ? "" : matcher.group(i);
-                msgString = msgString.replaceAll("§\\(" + i + "\\)", replacement);
+                msgString = msgString.replaceAll(
+                        Matcher.quoteReplacement(Unicode.SECTION.str + "(" + i + ")"),
+                        replacement
+                );
             }
 
             // Convert message into a format suitable for recursive processing
@@ -577,9 +580,9 @@ public class MessageUtil {
     private static void sendResponses(Notification notif, @Nullable Matcher matcher) {
         if (notif.responseEnabled) {
             int totalDelay = 0;
-            for (ResponseMessage msg : notif.responseMessages) {
+            for (Response msg : notif.responses) {
                 msg.sendingString = msg.string;
-                if (msg.type.equals(ResponseMessage.Type.REGEX) && matcher != null
+                if (msg.type.equals(Response.Type.REGEX) && matcher != null
                         && matcher.find(0)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {
@@ -590,7 +593,7 @@ public class MessageUtil {
                 }
                 totalDelay += msg.delayTicks;
                 msg.countdown = totalDelay;
-                ChatNotify.responseMessages.add(msg);
+                ChatNotify.RESPONSES.add(msg);
             }
         }
     }

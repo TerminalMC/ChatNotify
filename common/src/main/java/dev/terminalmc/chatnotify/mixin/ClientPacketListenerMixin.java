@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.mixin;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.util.FormatUtil;
+import dev.terminalmc.chatnotify.util.text.FormatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * a) Not process the message, if the config checkOwnMessages is FALSE, or
  * b) Remove the first occurrence of the user's name from the message before
  *    checking it for triggers (else every message sent by the user would
- *    activate the username notification).
+ *    trigger the username notification).
  *
  * Player-sent messages can be stripped of identifying data by mods or plugins,
  * or can be converted to server-sent messages, so it is not possible to
@@ -79,7 +79,7 @@ public class ClientPacketListenerMixin {
             method = "handleLogin",
             at = @At("TAIL")
     )
-    public void getProfileName(ClientboundLoginPacket packet, CallbackInfo ci) {
+    private void getProfileName(ClientboundLoginPacket packet, CallbackInfo ci) {
         if (Minecraft.getInstance().player == null)
             return;
         String name = FormatUtil.stripCodes(Minecraft.getInstance().player.getName().getString());
@@ -121,7 +121,7 @@ public class ClientPacketListenerMixin {
             method = "sendChat",
             at = @At("HEAD")
     )
-    public void getMessage(String message, CallbackInfo ci) {
+    private void getMessage(String message, CallbackInfo ci) {
         chatnotify$storeMessage(message);
     }
 
@@ -129,7 +129,7 @@ public class ClientPacketListenerMixin {
             method = "sendCommand",
             at = @At("HEAD")
     )
-    public void getCommand(String command, CallbackInfo ci) {
+    private void getCommand(String command, CallbackInfo ci) {
         chatnotify$storeCommand(command);
     }
 
@@ -137,7 +137,7 @@ public class ClientPacketListenerMixin {
             method = "sendUnsignedCommand",
             at = @At("HEAD")
     )
-    public void getUnsignedCommand(String command, CallbackInfoReturnable<Boolean> cir) {
+    private void getUnsignedCommand(String command, CallbackInfoReturnable<Boolean> cir) {
         chatnotify$storeCommand(command);
     }
 

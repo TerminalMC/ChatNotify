@@ -29,8 +29,9 @@ import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
-import dev.terminalmc.chatnotify.util.ColorUtil;
-import dev.terminalmc.chatnotify.util.Functional;
+import dev.terminalmc.chatnotify.util.Unicode;
+import dev.terminalmc.chatnotify.util.functional.StringSupplier;
+import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -55,7 +56,7 @@ import java.util.regex.Pattern;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
-public class FilterList<E extends Functional.StringSupplier> extends DragReorderList {
+public class FilterList<E extends StringSupplier> extends DragReorderList {
 
     private String filterString = "";
     private @Nullable Pattern filterPattern = null;
@@ -183,13 +184,13 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
     }
 
     @FunctionalInterface
-    public interface EntrySupplier<E extends Functional.StringSupplier> {
+    public interface EntrySupplier<E extends StringSupplier> {
 
         Entry.ListEntry get(int x, int width, int height, FilterList<?> list, E e, int index);
     }
 
     @FunctionalInterface
-    public interface TrailerSupplier<E extends Functional.StringSupplier> {
+    public interface TrailerSupplier<E extends StringSupplier> {
 
         @Nullable Entry.ListEntryTrailer get(int x, int width, int height, FilterList<?> list, E e);
     }
@@ -314,7 +315,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Drag reorder button
                 Button dragButton = Button.builder(
-                                Component.literal("↑↓"), (button) -> {
+                                Component.literal(Unicode.UP_DOWN.str), (button) -> {
                                     this.setDragging(true);
                                     list.startDragging(
                                             this,
@@ -356,7 +357,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Trigger editor button
                 Button editorButton = Button.builder(
-                                Component.literal("✎"),
+                                Component.literal(Unicode.EDIT.str),
                                 (button) -> mc.setScreen(new TriggerScreen(
                                         mc.screen,
                                         trigger,
@@ -414,7 +415,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED), (button) -> {
+                                Component.literal(Unicode.CROSS.str).withStyle(ChatFormatting.RED),
+                                (button) -> {
                                     removeFunction.accept(index);
                                     list.init();
                                 }
@@ -470,7 +472,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         0,
                         list.tinyWidgetWidth,
                         height,
-                        Component.literal("ℹ"),
+                        Component.literal(Unicode.INFO.str),
                         Minecraft.getInstance().font
                 );
                 infoIcon.alignCenter();
@@ -520,7 +522,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED), (button) -> {
+                                Component.literal(Unicode.CROSS.str).withStyle(ChatFormatting.RED),
+                                (button) -> {
                                     styleTarget.enabled = false;
                                     list.init();
                                 }
@@ -532,7 +535,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
         }
 
         /**
-         * Text fields for configuration of a {@link ResponseMessage}.
+         * Text fields for configuration of a {@link Response}.
          */
         public static class ResponseOptions extends SpacedListEntry {
 
@@ -541,7 +544,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     int width,
                     int height,
                     FilterList<?> list,
-                    ResponseMessage message,
+                    Response message,
                     int index,
                     Consumer<Integer> removeFunction
             ) {
@@ -554,7 +557,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Drag reorder button
                 elements.add(Button.builder(
-                                Component.literal("↑↓"), (button) -> {
+                                Component.literal(Unicode.UP_DOWN.str), (button) -> {
                                     this.setDragging(true);
                                     list.startDragging(this, null, false);
                                 }
@@ -564,9 +567,9 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         .build());
 
                 // Type button
-                CycleButton<ResponseMessage.Type> typeButton =
-                        CycleButton.<ResponseMessage.Type>builder((type) -> Component.literal(type.icon))
-                                .withValues(ResponseMessage.Type.values())
+                CycleButton<Response.Type> typeButton =
+                        CycleButton.<Response.Type>builder((type) -> Component.literal(type.icon))
+                                .withValues(Response.Type.values())
                                 .displayOnlyValue()
                                 .withInitialValue(message.type)
                                 .withTooltip((type) -> Tooltip.create(localized(
@@ -588,7 +591,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
 
-                if (message.type.equals(ResponseMessage.Type.COMMANDKEYS)) {
+                if (message.type.equals(Response.Type.COMMANDKEYS)) {
                     int keyFieldWidth = msgFieldWidth / 2;
                     List<String> keys =
                             KeyAccessor.chatnotify$getNameMap().keySet().stream().sorted().toList();
@@ -693,7 +696,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED), (button) -> {
+                                Component.literal(Unicode.CROSS.str).withStyle(ChatFormatting.RED),
+                                (button) -> {
                                     removeFunction.accept(index);
                                     list.init();
                                 }
@@ -801,7 +805,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                     // Drag reorder button (left-side extension)
                     Button dragButton = Button.builder(
-                                    Component.literal("↑↓"), (button) -> {
+                                    Component.literal(Unicode.UP_DOWN.str), (button) -> {
                                         this.setDragging(true);
                                         list.startDragging(this, null, false);
                                     }
@@ -841,7 +845,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                     // Trigger editor button
                     Button editorButton = Button.builder(
-                                    Component.literal("✎"), (button) -> {
+                                    Component.literal(Unicode.EDIT.str), (button) -> {
                                         notif.editing = true;
                                         mc.setScreen(new TriggerScreen(
                                                 mc.screen,
@@ -917,7 +921,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         0,
                         list.tinyWidgetWidth,
                         height,
-                        Component.literal("\uD83C\uDF22")
+                        Component.literal(Unicode.PAINT.str)
                                 .withColor(notif.textStyle.doColor
                                         ? notif.textStyle.color
                                         : 0xffffff),
@@ -1010,7 +1014,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         0,
                         list.tinyWidgetWidth,
                         height,
-                        Component.literal("\uD83D\uDD0A")
+                        Component.literal(Unicode.SOUND.str)
                                 .withStyle(notif.sound.isEnabled()
                                         ? ChatFormatting.WHITE
                                         : ChatFormatting.RED),
@@ -1060,8 +1064,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             0,
                             list.smallWidgetWidth,
                             height,
-                            Component.literal("❌"),
-                            Component.literal("❌").withStyle(ChatFormatting.RED),
+                            Component.literal(Unicode.CROSS.str),
+                            Component.literal(Unicode.CROSS.str).withStyle(ChatFormatting.RED),
                             (button) -> {
                                 if (Config.get().removeNotif(index)) {
                                     list.init();

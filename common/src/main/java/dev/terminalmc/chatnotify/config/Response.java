@@ -17,12 +17,15 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
-import dev.terminalmc.chatnotify.util.Functional;
-import dev.terminalmc.chatnotify.util.JsonUtil;
+import dev.terminalmc.chatnotify.config.util.JsonUtil;
+import dev.terminalmc.chatnotify.util.functional.StringSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ResponseMessage implements Functional.StringSupplier {
+/**
+ * A response to be sent when a {@link Notification} is triggered.
+ */
+public class Response implements StringSupplier {
 
     public static final int VERSION = 2;
     public final int version = VERSION;
@@ -33,7 +36,7 @@ public class ResponseMessage implements Functional.StringSupplier {
     public transient int countdown;
 
     /**
-     * The processed version of {@link ResponseMessage#string}
+     * The processed version of {@link Response#string}
      */
     public transient @Nullable String sendingString;
 
@@ -46,7 +49,7 @@ public class ResponseMessage implements Functional.StringSupplier {
     public static final boolean enabledDefault = true;
 
     /**
-     * The string to process when activated.
+     * The string to process when triggered.
      */
     public String string;
     public static final String stringDefault = "";
@@ -58,7 +61,7 @@ public class ResponseMessage implements Functional.StringSupplier {
     public static final int delayTicksDefault = 0;
 
     /**
-     * Controls how {@link ResponseMessage#string} is processed.
+     * Controls how {@link Response#string} is processed.
      */
     public Type type;
 
@@ -86,7 +89,7 @@ public class ResponseMessage implements Functional.StringSupplier {
     /**
      * Creates a default instance.
      */
-    public ResponseMessage() {
+    public Response() {
         enabled = enabledDefault;
         string = stringDefault;
         delayTicks = delayTicksDefault;
@@ -96,7 +99,7 @@ public class ResponseMessage implements Functional.StringSupplier {
     /**
      * Not validated.
      */
-    ResponseMessage(boolean enabled, String string, Type type, int delayTicks) {
+    Response(boolean enabled, String string, Type type, int delayTicks) {
         this.enabled = enabled;
         this.string = string;
         this.type = type;
@@ -111,9 +114,9 @@ public class ResponseMessage implements Functional.StringSupplier {
     // Validation
 
     /**
-     * Validates this instance. To be called after editing and before saving.
+     * Validates this instance. Called after deserialization and before saving.
      */
-    ResponseMessage validate() {
+    Response validate() {
         if (delayTicks < 0)
             delayTicks = delayTicksDefault;
         return this;
@@ -121,10 +124,10 @@ public class ResponseMessage implements Functional.StringSupplier {
 
     // Deserialization
 
-    public static class Deserializer implements JsonDeserializer<ResponseMessage> {
+    public static class Deserializer implements JsonDeserializer<Response> {
 
         @Override
-        public ResponseMessage deserialize(
+        public Response deserialize(
                 JsonElement json,
                 java.lang.reflect.Type typeOfT,
                 JsonDeserializationContext ctx
@@ -162,7 +165,7 @@ public class ResponseMessage implements Functional.StringSupplier {
                     silent
             );
 
-            return new ResponseMessage(enabled, string, type, delayTicks).validate();
+            return new Response(enabled, string, type, delayTicks).validate();
         }
     }
 }

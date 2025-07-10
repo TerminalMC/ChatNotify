@@ -21,6 +21,7 @@ import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CycleButton;
@@ -71,7 +72,7 @@ public class MiscOptionList extends OptionList {
                 entryX,
                 entryWidth,
                 entryHeight,
-                localized("option", "notif.misc.msg", "ℹ"),
+                localized("option", "notif.misc.msg", Unicode.INFO.str),
                 Tooltip.create(localized("option", "notif.misc.msg.tooltip.format_codes")
                         .append("\n\n")
                         .append(localized("option", "notif.misc.msg.tooltip.regex_groups"))),

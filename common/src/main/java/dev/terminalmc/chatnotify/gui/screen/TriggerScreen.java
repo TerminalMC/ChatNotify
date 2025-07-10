@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger.KeySelectorList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger.TriggerEditorList;
 import net.minecraft.client.Minecraft;
@@ -28,10 +29,21 @@ import java.util.List;
 import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
- * Supports two {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s; one to allow enhanced
- * editing of a {@link Trigger}, and another to allow selection of translation keys.
+ * Supports two {@link OptionList}s; one to allow enhanced editing of a {@link Trigger}, and another
+ * to allow selection of translation keys.
  */
 public class TriggerScreen extends OptionScreen {
+
+    public enum TabKey {
+        TRIGGER_EDITOR(translationKey("option", "notif.trigger.editor")),
+        KEY_SELECTOR(translationKey("option", "notif.trigger.selector"));
+
+        public final String key;
+
+        TabKey(String key) {
+            this.key = key;
+        }
+    }
 
     private final Trigger trigger;
     private final TextStyle textStyle;
@@ -53,47 +65,44 @@ public class TriggerScreen extends OptionScreen {
 
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
-                new Tab(
-                        TabKey.TRIGGER_EDITOR.key,
-                        (screen) -> new TriggerEditorList(
-                                Minecraft.getInstance(),
-                                screen,
-                                0,
-                                0,
-                                0,
-                                BASE_LIST_ENTRY_WIDTH,
-                                LIST_ENTRY_HEIGHT,
-                                LIST_ENTRY_SPACING,
-                                cast(screen).trigger,
-                                cast(screen).textStyle
-                        )
-                ),
-                new Tab(
-                        TabKey.KEY_SELECTOR.key,
-                        (screen) -> new KeySelectorList(
-                                Minecraft.getInstance(),
-                                screen,
-                                0,
-                                0,
-                                0,
-                                BASE_LIST_ENTRY_WIDTH,
-                                LIST_ENTRY_HEIGHT,
-                                cast(screen).trigger
-                        )
-                )
+                new Tab(TabKey.TRIGGER_EDITOR.key, TriggerScreen::getTriggerEditorList),
+                new Tab(TabKey.KEY_SELECTOR.key, TriggerScreen::getKeySelectorList)
         );
         super.setTabs(tabs, defaultKey);
     }
 
-    public enum TabKey {
-        TRIGGER_EDITOR(translationKey("option", "notif.trigger.editor")),
-        KEY_SELECTOR(translationKey("option", "notif.trigger.selector"));
+    @Override
+    public void onClose() {
+        onClose.run();
+        super.onClose();
+    }
 
-        public final String key;
+    private static OptionList getTriggerEditorList(OptionScreen screen) {
+        return new TriggerEditorList(
+                Minecraft.getInstance(),
+                screen,
+                0,
+                0,
+                0,
+                BASE_LIST_ENTRY_WIDTH,
+                LIST_ENTRY_HEIGHT,
+                LIST_ENTRY_SPACING,
+                cast(screen).trigger,
+                cast(screen).textStyle
+        );
+    }
 
-        TabKey(String key) {
-            this.key = key;
-        }
+    private static OptionList getKeySelectorList(OptionScreen screen) {
+        return new KeySelectorList(
+                Minecraft.getInstance(),
+                screen,
+                0,
+                0,
+                0,
+                BASE_LIST_ENTRY_WIDTH,
+                LIST_ENTRY_HEIGHT,
+                cast(screen).trigger
+        );
     }
 
     private static TriggerScreen cast(OptionScreen screen) {
@@ -104,11 +113,5 @@ public class TriggerScreen extends OptionScreen {
                     screen.getClass().getName()
             ));
         return s;
-    }
-
-    @Override
-    public void onClose() {
-        onClose.run();
-        super.onClose();
     }
 }

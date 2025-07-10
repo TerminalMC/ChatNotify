@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.util;
+package dev.terminalmc.chatnotify.util.text;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.mixin.accessor.StyleAccessor;
+import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -37,10 +38,14 @@ import java.util.regex.Pattern;
 
 public class FormatUtil {
 
-    private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("\\u00A7.?");
+    private static final Pattern COLOR_CODE_PATTERN =
+            Pattern.compile(Pattern.quote(Unicode.SECTION.str) + ".?");
     private static final String PLACEHOLDER_PATTERN_STRING =
             "%(\\d+\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(PLACEHOLDER_PATTERN_STRING);
+
+    private FormatUtil() {
+    }
 
     /**
      * {@link net.minecraft.util.StringUtil#stripColor} only strips valid format codes, but invalid
@@ -77,7 +82,7 @@ public class FormatUtil {
      * Converts the contents of the {@link MutableComponent} from {@link TranslatableContents} to
      * {@link PlainTextContents}.
      * <p>
-     * <b>Note:</b> Does not recurse, only affects root. Caller must recurse if required.
+     * Note: Does not recurse, only affects root. Caller must recurse if required.
      */
     private static MutableComponent convertToLiteral(MutableComponent text)
             throws IllegalArgumentException {
@@ -229,7 +234,7 @@ public class FormatUtil {
      * Converts any format codes in the literal contents of the {@link MutableComponent} to
      * {@link Style}s.
      * <p>
-     * <b>Note:</b> does not recurse, only affects root.
+     * Note: does not recurse, only affects root.
      */
     private static MutableComponent convertCodesToStyles(MutableComponent text) {
         if (!(text.getContents() instanceof PlainTextContents contents))
@@ -237,7 +242,7 @@ public class FormatUtil {
 
         // Check whether conversion is required
         String str = contents.text();
-        if (!str.contains("§"))
+        if (!str.contains(Unicode.SECTION.str))
             return text;
 
         // Detach siblings
@@ -250,7 +255,7 @@ public class FormatUtil {
         FormatCodes codes = new FormatCodes();
 
         for (int i = 0; i < chars.length; i++) {
-            if (chars[i] == '§') { // Section sign
+            if (chars[i] == Unicode.SECTION.chr) { // Section sign
                 if (!sb.isEmpty()) {
                     // Clear backlog
                     text.append(Component.literal(sb.toString()).withStyle(codes.createStyle()));

@@ -16,35 +16,31 @@
 
 package dev.terminalmc.chatnotify.compat.chatheads;
 
-import com.mojang.datafixers.util.Pair;
 import dzwdz.chat_heads.ChatHeads;
 import dzwdz.chat_heads.HeadData;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ChatHeadsCompat {
 
+    private ChatHeadsCompat() {
+    }
+
     /**
-     * Gets the most recently saved message ownership data from ChatHeads.
-     * <p>
-     * Both pair elements will be {@code null} if there was no data.
+     * @return the most recently saved message ownership data from ChatHeads, if any exists.
      */
-    static @NotNull Pair<@Nullable PlayerInfo, @Nullable Integer> getPlayerInfo() {
+    static @Nullable PlayerInfo getPlayerInfo() {
         if (ChatHeads.lastSenderData == HeadData.EMPTY) {
-            return new Pair<>(null, null);
+            return null;
         } else {
-            return new Pair<>(
-                    ChatHeads.lastSenderData.playerInfo(),
-                    ChatHeads.lastSenderData.codePointIndex()
-            );
+            return ChatHeads.lastSenderData.playerInfo();
         }
     }
 
     /**
-     * Tells ChatHeads to update its saved message ownership data.
+     * Instructs ChatHeads to update its saved message ownership data.
      */
     static void handleAddedMessage(
             Component message,

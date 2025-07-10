@@ -25,7 +25,7 @@ import org.lwjgl.glfw.GLFW;
 /**
  * A {@link Button} that accepts right as well as left clicks.
  * <p>
- * <b>Note:</b> If contained within a parent element such as a
+ * Note: If contained within a parent element such as a
  * {@link net.minecraft.client.gui.components.ContainerObjectSelectionList}, the parent element must
  * also be modified to accept right clicks.
  */

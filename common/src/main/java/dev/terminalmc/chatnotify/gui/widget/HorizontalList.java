@@ -41,7 +41,7 @@ import java.util.List;
  * A horizontal semi-equivalent of
  * {@link net.minecraft.client.gui.components.AbstractSelectionList}.
  * <p>
- * <b>Note:</b> Minimal methods available, more to be added as required.
+ * Note: Minimal methods available, more to be added as required.
  */
 public class HorizontalList<E extends AbstractWidget> extends AbstractContainerWidget {
 

@@ -59,10 +59,10 @@ public class OptionInstanceMixin {
     )
     private void init(CallbackInfo ci) {
         ComponentContents content = this.caption.getContents();
-        if (!(content instanceof TranslatableContents))
+        if (!(content instanceof TranslatableContents translatableContents))
             return;
 
-        String key = ((TranslatableContents) content).getKey();
+        String key = translatableContents.getKey();
         if (!key.equals("options.chat.height.focused"))
             return;
 

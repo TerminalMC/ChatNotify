@@ -19,8 +19,8 @@ package dev.terminalmc.chatnotify;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.compat.commandkeys.CommandKeysWrapper;
 import dev.terminalmc.chatnotify.config.*;
-import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.ModLogger;
+import dev.terminalmc.chatnotify.util.text.FormatUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -53,7 +53,7 @@ public class ChatNotify {
     /**
      * Stores activated (but not sent) response messages.
      */
-    public static final List<ResponseMessage> responseMessages = new ArrayList<>();
+    public static final List<Response> RESPONSES = new ArrayList<>();
 
     /**
      * Stores an unmodified copy of recent incoming chat messages.
@@ -84,7 +84,7 @@ public class ChatNotify {
     }
 
     public static void afterClientTick(Minecraft mc) {
-        tickResponseMessages(mc);
+        tickResponses(mc);
 
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
@@ -102,17 +102,17 @@ public class ChatNotify {
         }
     }
 
-    private static void tickResponseMessages(Minecraft mc) {
+    private static void tickResponses(Minecraft mc) {
         if (mc.getConnection() == null || !mc.getConnection().isAcceptingMessages()) {
-            responseMessages.clear();
+            RESPONSES.clear();
             return;
         }
 
         List<String> sending = new ArrayList<>();
-        responseMessages.removeIf((resMsg) -> {
+        RESPONSES.removeIf((resMsg) -> {
             if (--resMsg.countdown <= 0) {
                 if (resMsg.sendingString != null && !resMsg.sendingString.isBlank()) {
-                    if (resMsg.type.equals(ResponseMessage.Type.COMMANDKEYS)) {
+                    if (resMsg.type.equals(Response.Type.COMMANDKEYS)) {
                         CommandKeysWrapper.trySend(resMsg.sendingString);
                     } else {
                         sending.add(resMsg.sendingString);

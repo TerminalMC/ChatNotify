@@ -24,6 +24,9 @@ public class CommandKeysCompat {
 
     public static final String DUAL_KEY_PATTERN_STRING = "^[a-z0-9.]+-[a-z0-9.]++$";
 
+    private CommandKeysCompat() {
+    }
+
     /**
      * Parses the specified string into two {@link InputConstants.Key} instances, and passes them to
      * CommandKeys' keypress handler.

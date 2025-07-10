@@ -18,8 +18,9 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.util.Functional;
-import dev.terminalmc.chatnotify.util.JsonUtil;
+import dev.terminalmc.chatnotify.config.util.JsonUtil;
+import dev.terminalmc.chatnotify.util.Unicode;
+import dev.terminalmc.chatnotify.util.functional.StringSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +29,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class Trigger implements Functional.StringSupplier {
+public class Trigger implements StringSupplier {
 
     public static final int VERSION = 4;
     public final int version = VERSION;
@@ -76,7 +77,7 @@ public class Trigger implements Functional.StringSupplier {
         /**
          * Translation key substring matching.
          */
-        KEY("\uD83D\uDD11");
+        KEY(Unicode.KEY.str);
 
         public final String icon;
 
@@ -126,7 +127,7 @@ public class Trigger implements Functional.StringSupplier {
     // Validation
 
     /**
-     * Validates this instance. To be called after editing and before saving.
+     * Validates this instance. Called after deserialization and before saving.
      */
     Trigger validate() {
         if (type == Type.KEY)

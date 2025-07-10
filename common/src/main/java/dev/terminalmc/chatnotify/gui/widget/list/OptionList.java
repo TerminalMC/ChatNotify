@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  * {@link OptionList#itemHeight}. The actual height of list entries, specified by
  * {@link OptionList#entryHeight}, can be less but should not be more.
  * <p>
- * <b>Note:</b> If you want multiple widgets to appear side-by-side, you must
+ * Note: If you want multiple widgets to appear side-by-side, you must
  * add them all to a single {@link Entry}'s list of widgets, which are all rendered at the same list
  * level.
  */

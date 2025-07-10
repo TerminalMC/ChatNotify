@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.util;
+package dev.terminalmc.chatnotify.util.text;
 
 import net.minecraft.network.chat.TextColor;
 
 import java.util.Optional;
 
 public class ColorUtil {
+
+    private ColorUtil() {
+    }
 
     /**
      * Converts a hex color string into a {@link TextColor}.

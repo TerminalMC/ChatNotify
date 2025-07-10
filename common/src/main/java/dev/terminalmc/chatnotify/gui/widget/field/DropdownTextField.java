@@ -19,6 +19,7 @@ package dev.terminalmc.chatnotify.gui.widget.field;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.gui.widget.ExpandingList;
 import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
+import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -52,8 +53,8 @@ public class DropdownTextField extends OverlayWidget {
     public static final int MAX_WIDTH = 500;
     public static final int MAX_HEIGHT = 800;
 
-    private final Supplier<String> source;
-    private final Consumer<String> dest;
+    private final Supplier<String> supplier;
+    private final Consumer<String> consumer;
 
     private final Collection<String> dropdownValues;
     private Function<String, DropdownWidget> dropWidgetProvider;
@@ -71,14 +72,14 @@ public class DropdownTextField extends OverlayWidget {
             int width,
             int height,
             Component msg,
-            Supplier<String> source,
-            Consumer<String> dest,
+            Supplier<String> supplier,
+            Consumer<String> consumer,
             Consumer<OverlayWidget> close,
             Collection<String> dropdownValues
     ) {
         super(x, y, width, height, false, msg, close);
-        this.source = source;
-        this.dest = dest;
+        this.supplier = supplier;
+        this.consumer = consumer;
         this.dropdownValues = dropdownValues;
         this.dropWidgetProvider = this::createDefaultDropWidget;
         init();
@@ -96,16 +97,16 @@ public class DropdownTextField extends OverlayWidget {
         int textFieldWidth = width - (2 * widgetHeight);
 
         cancelButton = Button.builder(
-                        Component.literal("❌").withStyle(ChatFormatting.RED),
+                        Component.literal(Unicode.CROSS.str).withStyle(ChatFormatting.RED),
                         (button) -> onClose()
                 )
                 .pos(x + width - (buttonWidth * 2), y)
                 .size(buttonWidth, widgetHeight)
                 .build();
         confirmButton = Button.builder(
-                        Component.literal("✔").withStyle(ChatFormatting.GREEN),
+                        Component.literal(Unicode.CHECK.str).withStyle(ChatFormatting.GREEN),
                         (button) -> {
-                            dest.accept(textField.getValue());
+                            consumer.accept(textField.getValue());
                             onClose();
                         }
                 )
@@ -125,7 +126,7 @@ public class DropdownTextField extends OverlayWidget {
 
         textField.setMaxLength(240);
         textField.setResponder(this::valueResponder);
-        textField.setValue(oldVal == null ? source.get() : oldVal);
+        textField.setValue(oldVal == null ? supplier.get() : oldVal);
         textField.setFocused(true);
     }
 
@@ -336,7 +337,7 @@ public class DropdownTextField extends OverlayWidget {
 
     public static class DropdownWidget extends StringWidget {
 
-        private final Consumer<String> dest;
+        private final Consumer<String> consumer;
 
         private DropdownWidget(
                 int x,
@@ -345,11 +346,11 @@ public class DropdownTextField extends OverlayWidget {
                 int height,
                 Component msg,
                 Font font,
-                Consumer<String> dest
+                Consumer<String> consumer
         ) {
             super(x, y, width, height, msg, font);
             this.active = true;
-            this.dest = dest;
+            this.consumer = consumer;
         }
 
         public static DropdownWidget create(
@@ -366,7 +367,7 @@ public class DropdownTextField extends OverlayWidget {
 
         @Override
         public void onClick(double mouseX, double mouseY) {
-            dest.accept(getMessage().getString());
+            consumer.accept(getMessage().getString());
         }
     }
 
@@ -381,9 +382,9 @@ public class DropdownTextField extends OverlayWidget {
                 int height,
                 Component msg,
                 Font font,
-                Consumer<String> dest
+                Consumer<String> consumer
         ) {
-            super(x, y, width, height, msg, font, dest);
+            super(x, y, width, height, msg, font, consumer);
         }
 
         public static SoundDropdownWidget create(
@@ -393,9 +394,9 @@ public class DropdownTextField extends OverlayWidget {
                 int height,
                 Component msg,
                 Font font,
-                Consumer<String> dest
+                Consumer<String> consumer
         ) {
-            return new SoundDropdownWidget(x, y, width, height, msg, font, dest);
+            return new SoundDropdownWidget(x, y, width, height, msg, font, consumer);
         }
 
         @Override

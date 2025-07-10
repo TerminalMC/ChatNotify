@@ -17,17 +17,20 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
-import dev.terminalmc.chatnotify.util.JsonUtil;
+import dev.terminalmc.chatnotify.config.util.JsonUtil;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A sound to be played when a {@link Notification} is triggered.
+ */
 public class Sound {
 
     public static final int VERSION = 1;
     public final int version = VERSION;
 
     /**
-     * Whether this instance is eligible for activation.
+     * Whether this instance is eligible for triggering.
      */
     private boolean enabled;
     private static final boolean enabledDefault = true;
@@ -167,7 +170,7 @@ public class Sound {
     // Validation
 
     /**
-     * Validates this instance. To be called after editing and before saving.
+     * Validates this instance. Called after deserialization and before saving.
      */
     Sound validate() {
         if (volume < 0 || volume > 1)

@@ -17,42 +17,43 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
-import dev.terminalmc.chatnotify.util.Functional;
-import dev.terminalmc.chatnotify.util.JsonUtil;
+import dev.terminalmc.chatnotify.config.util.JsonUtil;
+import dev.terminalmc.chatnotify.util.functional.StringSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Consists of:
+ * A {@link Notification} is triggered by a chat message and, when triggered, can in turn trigger a
+ * range of other events. Consists of:
  * <p>
- * A range of controls (boolean or enum) defining behavior.
+ * - A range of controls (boolean or enum) defining behavior.
  * <p>
- * A {@link Sound} instance, defining the sound to be played on activation, with volume and pitch
+ * - A {@link Sound} instance, defining the sound to be played on triggering, with volume and pitch
  * controls.
  * <p>
- * A {@link TextStyle} instance, defining how the triggering message should be restyled.
+ * - A {@link TextStyle} instance, defining how the triggering message should be restyled.
  * <p>
- * A series of custom message strings, to be optionally displayed to the user in various different
- * ways on activation.
+ * - A series of custom message strings, to be optionally displayed to the user in various different
+ * ways on triggering.
  * <p>
- * A list of {@link Trigger} instances, to be checked against incoming messages to determine whether
- * the {@link Notification} should be activated.
+ * - A list of {@link Trigger} instances, to be checked against incoming messages to determine
+ * whether the {@link Notification} should be triggered.
  * <p>
- * A list of inclusion {@link Trigger} instances which, if not matched, prevent activation.
+ * - A list of inclusion {@link Trigger} instances which, if not matched, prevent triggering.
  * <p>
- * A list of exclusion {@link Trigger} instances which, if matched, prevent activation.</p>
+ * - A list of exclusion {@link Trigger} instances which, if matched, prevent triggering.</p>
  * <p>
- * A list of {@link ResponseMessage} instances, to be sent on activation.
+ * - A list of {@link Response} instances, to be sent on triggering.
  */
-public class Notification implements Functional.StringSupplier {
+public class Notification implements StringSupplier {
 
-    public static final int VERSION = 7;
+    public static final int VERSION = 8;
     public final int version = VERSION;
 
     /**
-     * A status flag to indicate that this instance is being edited, and should not be activated
+     * A status flag to indicate that this instance is being edited, and should not be triggered
      * irrespective of {@link Notification#enabled}.
      */
     public transient boolean editing = false;
@@ -60,17 +61,17 @@ public class Notification implements Functional.StringSupplier {
     // Options
 
     /**
-     * Whether this instance is set by the user to be eligible for activation.
+     * Whether this instance is set by the user to be eligible for triggering.
      * <p>
-     * Necessary but not sufficient condition; never activate if this is {@code false}, but it being
-     * {@code true} does not mean that this instance can be safely activated. Instead, check
-     * {@link Notification#canActivate}.
+     * Necessary but not sufficient condition; never trigger if this is {@code false}, but it being
+     * {@code true} does not mean that this instance can be safely triggered. Instead, check
+     * {@link Notification#canBeTriggered}.
      */
     public boolean enabled;
     public static final boolean enabledDefault = true;
 
     /**
-     * Controls whether this instance is eligible for activation on user-sent messages.
+     * Controls whether this instance is eligible for triggering on user-sent messages.
      * <p>
      * {@link CheckOwnMode#DEFER} means that {@link Config#checkOwnMessages} should be used
      * instead.
@@ -102,13 +103,13 @@ public class Notification implements Functional.StringSupplier {
     public static final boolean responseEnabledDefault = true;
 
     /**
-     * The {@link Sound} to play on activation.
+     * The {@link Sound} to play on triggering.
      */
     public final Sound sound;
     public static final Supplier<Sound> soundDefault = Sound::new;
 
     /**
-     * The {@link TextStyle} to use for restyling messages on activation.
+     * The {@link TextStyle} to use for restyling messages on triggering.
      */
     public final TextStyle textStyle;
     public static final Supplier<TextStyle> textStyleDefault = TextStyle::new;
@@ -162,36 +163,37 @@ public class Notification implements Functional.StringSupplier {
     public static final boolean clipboardMsgEnabledDefault = false;
 
     /**
-     * The list of {@link Trigger}s which can activate this instance.
+     * A list of {@link Trigger} instances, of which any one can trigger this instance.
      */
     public final List<Trigger> triggers;
     public static final Supplier<List<Trigger>> triggersDefault = ArrayList::new;
 
     /**
-     * The list of {@link Trigger}s which are required for activation of this instance.
+     * A list of {@link Trigger} instances, of which all must match for this instance to be
+     * triggered.
      * <p>
-     * <b>Note:</b> For simplicity, this list uses the same {@link Trigger}
-     * class as {@link Notification#triggers}. However, instances in this list will never use the
+     * Note: For simplicity, this list uses the same {@link Trigger} class as
+     * {@link Notification#triggers}. However, instances in this list will never use the
      * {@link Trigger#styleTarget} capability.
      */
     public final List<Trigger> inclusionTriggers;
     public static final Supplier<List<Trigger>> inclusionTriggersDefault = ArrayList::new;
 
     /**
-     * The list of {@link Trigger}s which prevent activation of this instance.
+     * The list of {@link Trigger}s which prevent triggering of this instance.
      * <p>
-     * <b>Note:</b> For simplicity, this list uses the same {@link Trigger}
-     * class as {@link Notification#triggers}. However, instances in this list will never use the
+     * Note: For simplicity, this list uses the same {@link Trigger} class as
+     * {@link Notification#triggers}. However, instances in this list will never use the
      * {@link Trigger#styleTarget} capability.
      */
     public final List<Trigger> exclusionTriggers;
     public static final Supplier<List<Trigger>> exclusionTriggersDefault = ArrayList::new;
 
     /**
-     * The list of {@link ResponseMessage}s to be sent on activation.
+     * The list of {@link Response}s to be sent on triggering.
      */
-    public final List<ResponseMessage> responseMessages;
-    public static final Supplier<List<ResponseMessage>> responseMessagesDefault = ArrayList::new;
+    public final List<Response> responses;
+    public static final Supplier<List<Response>> responsesDefault = ArrayList::new;
 
     /**
      * Not validated.
@@ -219,7 +221,7 @@ public class Notification implements Functional.StringSupplier {
             List<Trigger> triggers,
             List<Trigger> inclusionTriggers,
             List<Trigger> exclusionTriggers,
-            List<ResponseMessage> responseMessages
+            List<Response> responses
     ) {
         this.enabled = enabled;
         this.checkOwnMode = checkOwnMode;
@@ -243,7 +245,7 @@ public class Notification implements Functional.StringSupplier {
         this.triggers = triggers;
         this.inclusionTriggers = inclusionTriggers;
         this.exclusionTriggers = exclusionTriggers;
-        this.responseMessages = responseMessages;
+        this.responses = responses;
     }
 
     /**
@@ -274,7 +276,7 @@ public class Notification implements Functional.StringSupplier {
                 new ArrayList<>(List.of(new Trigger("Profile name"), new Trigger("Display name"))),
                 inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
-                responseMessagesDefault.get()
+                responsesDefault.get()
         );
     }
 
@@ -305,15 +307,15 @@ public class Notification implements Functional.StringSupplier {
                 new ArrayList<>(List.of(new Trigger(""))),
                 inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
-                responseMessagesDefault.get()
+                responsesDefault.get()
         );
     }
 
     /**
-     * @return {@code true} if this instance is eligible for activation (on a message sent by the
+     * @return {@code true} if this instance is eligible for triggering (on a message sent by the
      * user if {@code ownMsg} is {@code true}).
      */
-    public boolean canActivate(boolean ownMsg) {
+    public boolean canBeTriggered(boolean ownMsg) {
         if (enabled && !editing) {
             if (ownMsg) {
                 return switch (checkOwnMode) {
@@ -334,13 +336,13 @@ public class Notification implements Functional.StringSupplier {
     /**
      * Moves the {@link Trigger} at the source index to the destination index in the list.
      *
-     * @param sourceIndex the index of the element to move.
-     * @param destIndex   the desired final index of the element.
+     * @param srcIdx the index of the element to move.
+     * @param dstIdx the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
-    public boolean moveTrigger(int sourceIndex, int destIndex) {
-        if (sourceIndex != destIndex) {
-            triggers.add(destIndex, triggers.remove(sourceIndex));
+    public boolean moveTrigger(int srcIdx, int dstIdx) {
+        if (srcIdx != dstIdx) {
+            triggers.add(dstIdx, triggers.remove(srcIdx));
             return true;
         }
         return false;
@@ -350,13 +352,13 @@ public class Notification implements Functional.StringSupplier {
      * Moves the inclusion {@link Trigger} at the source index to the destination index in the
      * list.
      *
-     * @param sourceIndex the index of the element to move.
-     * @param destIndex   the desired final index of the element.
+     * @param srcIdx the index of the element to move.
+     * @param dstIdx the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
-    public boolean moveInclusionTrigger(int sourceIndex, int destIndex) {
-        if (sourceIndex != destIndex) {
-            inclusionTriggers.add(destIndex, inclusionTriggers.remove(sourceIndex));
+    public boolean moveInclusionTrigger(int srcIdx, int dstIdx) {
+        if (srcIdx != dstIdx) {
+            inclusionTriggers.add(dstIdx, inclusionTriggers.remove(srcIdx));
             return true;
         }
         return false;
@@ -366,28 +368,28 @@ public class Notification implements Functional.StringSupplier {
      * Moves the exclusion {@link Trigger} at the source index to the destination index in the
      * list.
      *
-     * @param sourceIndex the index of the element to move.
-     * @param destIndex   the desired final index of the element.
+     * @param srcIdx the index of the element to move.
+     * @param dstIdx the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
-    public boolean moveExclusionTrigger(int sourceIndex, int destIndex) {
-        if (sourceIndex != destIndex) {
-            exclusionTriggers.add(destIndex, exclusionTriggers.remove(sourceIndex));
+    public boolean moveExclusionTrigger(int srcIdx, int dstIdx) {
+        if (srcIdx != dstIdx) {
+            exclusionTriggers.add(dstIdx, exclusionTriggers.remove(srcIdx));
             return true;
         }
         return false;
     }
 
     /**
-     * Moves the {@link ResponseMessage} at the source index to the destination index in the list.
+     * Moves the {@link Response} at the source index to the destination index in the list.
      *
-     * @param sourceIndex the index of the element to move.
-     * @param destIndex   the desired final index of the element.
+     * @param srcIdx the index of the element to move.
+     * @param dstIdx the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
-    public boolean moveResponseMessage(int sourceIndex, int destIndex) {
-        if (sourceIndex != destIndex) {
-            responseMessages.add(destIndex, responseMessages.remove(sourceIndex));
+    public boolean moveResponseMessage(int srcIdx, int dstIdx) {
+        if (srcIdx != dstIdx) {
+            responses.add(dstIdx, responses.remove(srcIdx));
             return true;
         }
         return false;
@@ -410,7 +412,7 @@ public class Notification implements Functional.StringSupplier {
     // Validation
 
     /**
-     * Validates this instance. To be called after editing and before saving.
+     * Validates this instance. Called after deserialization and before saving.
      */
     Notification validate() {
         textStyle.validate();
@@ -431,7 +433,7 @@ public class Notification implements Functional.StringSupplier {
             return t.string.isBlank();
         });
 
-        responseMessages.removeIf(m -> {
+        responses.removeIf(m -> {
             m.validate();
             return m.string.isBlank();
         });
@@ -618,17 +620,27 @@ public class Notification implements Functional.StringSupplier {
                     silent
             );
 
-            List<ResponseMessage> responseMessages = JsonUtil.getOrDefault(
+            List<Response> responses = JsonUtil.getOrDefault(
                     ctx,
                     obj,
-                    "responseMessages",
-                    ResponseMessage.class,
-                    responseMessagesDefault.get(),
+                    "responses",
+                    Response.class,
+                    responsesDefault.get(),
                     silent
             );
+            if (version < 8) { // pre-v2.4.7 (2025-07-10)
+                responses = JsonUtil.getOrDefault(
+                        ctx,
+                        obj,
+                        "responseMessages",
+                        Response.class,
+                        responsesDefault.get(),
+                        true
+                );
+            }
             if (version <= 3) {
                 int totalDelay = 0;
-                for (ResponseMessage resMsg : responseMessages) {
+                for (Response resMsg : responses) {
                     resMsg.delayTicks -= totalDelay;
                     totalDelay += resMsg.delayTicks;
                 }
@@ -657,7 +669,7 @@ public class Notification implements Functional.StringSupplier {
                     triggers,
                     inclusionTriggers,
                     exclusionTriggers,
-                    responseMessages
+                    responses
             ).validate();
         }
     }

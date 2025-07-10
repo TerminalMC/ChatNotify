@@ -20,6 +20,7 @@ import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -81,7 +82,7 @@ public class KeySelectorList extends OptionList {
                 entryX,
                 entryWidth,
                 entryHeight,
-                localized("option", "notif.trigger.selector.list", "ℹ"),
+                localized("option", "notif.trigger.selector.list", Unicode.INFO.str),
                 Tooltip.create(localized("option", "notif.trigger.selector.list.tooltip")),
                 -1
         ));

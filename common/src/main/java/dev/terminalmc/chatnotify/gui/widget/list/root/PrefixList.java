@@ -20,6 +20,7 @@ import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -49,7 +50,7 @@ public class PrefixList extends OptionList {
                 entryX,
                 entryWidth,
                 entryHeight,
-                localized("option", "prefix.list", "ℹ"),
+                localized("option", "prefix.list", Unicode.INFO.str),
                 Tooltip.create(localized("option", "prefix.list.tooltip")),
                 -1
         ));
@@ -91,7 +92,8 @@ public class PrefixList extends OptionList {
                 elements.add(prefixField);
 
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED), (button) -> {
+                                Component.literal(Unicode.CROSS.str).withStyle(ChatFormatting.RED),
+                                (button) -> {
                                     Config.get().prefixes.remove(index);
                                     list.init();
                                 }

@@ -18,8 +18,8 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.config.util.JsonUtil;
 import dev.terminalmc.chatnotify.platform.Services;
-import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,26 +36,26 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Root configuration options class. Consists of:
+ * The root configuration options class. Consists of:
  * <p>
- * A range of mostly-enum controls for global behavior.
+ * - A range of mostly-enum controls for global behavior.
  * <p>
- * A set of default values for new {@link Notification} instances.
+ * - A set of default values for new {@link Notification} instances.
  * <p>
- * A list of prefix strings for use in message sender detection.
+ * - A list of prefix strings for use in message sender detection.
  * <p>
- * A list of {@link Notification} instances.
+ * - A list of {@link Notification} instances.
  * <p>
- * <b>Note:</b> The list of {@link Notification}s is required to maintain an
- * instance at index {@code 0} for the user's name. This instance is handled differently in several
- * ways, but is kept in the list for ease of iteration.
+ * Note: The {@link Notification} list is required to maintain an instance at index {@code 0} for
+ * the user's name. This instance is handled differently in several ways, but is kept in the list
+ * for ease of iteration.
  * <p>
- * <b>Note:</b> The {@code VERSION} constant of a config class must be
- * incremented whenever the json structure of the class is changed, to facilitate correct
+ * Note: The {@code VERSION} constant of a config class (e.g. {@link Config#VERSION}) must be
+ * incremented whenever the JSON structure of the class is changed, to facilitate correct
  * conditional deserialization.
  * <p>
- * <b>Note:</b> For enum controls without a specified default value, the
- * first value of the enum should be used as the default.
+ * Note: For enum controls without a specified default value, the first value of the enum should be
+ * used as the default.
  */
 public class Config {
 
@@ -72,7 +72,7 @@ public class Config {
             .registerTypeAdapter(TextStyle.class, new TextStyle.Deserializer())
             .registerTypeAdapter(Trigger.class, new Trigger.Deserializer())
             .registerTypeAdapter(StyleTarget.class, new StyleTarget.Deserializer())
-            .registerTypeAdapter(ResponseMessage.class, new ResponseMessage.Deserializer())
+            .registerTypeAdapter(Response.class, new Response.Deserializer())
             .setPrettyPrinting()
             .create();
 
@@ -100,7 +100,7 @@ public class Config {
     }
 
     /**
-     * Controls how many {@link Notification}s can be activated by a single message.
+     * Controls how many notifications can be triggered by a single message.
      */
     public NotifMode notifMode;
 
@@ -121,7 +121,7 @@ public class Config {
     }
 
     /**
-     * Controls how {@link ResponseMessage}s are sent.
+     * Controls how response messages are sent.
      */
     public SendMode sendMode;
 
@@ -141,14 +141,13 @@ public class Config {
     }
 
     /**
-     * Whether messages identified as sent by the user should be able to activate
-     * {@link Notification}s.
+     * Whether messages identified as sent by the user should be able to trigger notifications.
      */
     public boolean checkOwnMessages;
     public static final boolean checkOwnMessagesDefault = true;
 
     /**
-     * The sound source (and thus, volume control category) of {@link Notification} sounds.
+     * The sound source (and thus, volume control category) of notification sounds.
      */
     public SoundSource soundSource;
     public static final SoundSource soundSourceDefault = SoundSource.PLAYERS;
@@ -156,13 +155,13 @@ public class Config {
     // Defaults
 
     /**
-     * The default {@link TextStyle} color for new {@link Notification}s.
+     * The default {@link TextStyle} color for new {@link Notification} instances.
      */
     public int defaultColor;
     public static final int defaultColorDefault = 0xffc400;
 
     /**
-     * The default {@link Sound} identifier for new {@link Notification}s.
+     * The default {@link Sound} identifier for new {@link Notification} instances.
      */
     public final Sound defaultSound;
     public static final Supplier<Sound> defaultSoundDefault = Sound::new;
@@ -275,7 +274,7 @@ public class Config {
     /**
      * Removes the {@link Notification} at the specified index in the list, if possible
      * <p>
-     * <b>Note:</b> Will fail without error if the index is {@code 0}.
+     * Note: Will fail without error if the index is {@code 0}.
      *
      * @param index the index of the notification.
      * @return {@code true} if the list was modified.
@@ -290,17 +289,17 @@ public class Config {
 
     /**
      * Removes the {@link Notification} at the source index to the destination index in the list, if
-     * possible,
+     * possible.
      * <p>
-     * <b>Note:</b> Will fail without error if either index is {@code 0}.
+     * Note: Will fail without error if either index is {@code 0}.
      *
-     * @param sourceIndex the index of the element to move.
-     * @param destIndex   the desired final index of the element.
+     * @param srcIdx the index of the element to move.
+     * @param dstIdx the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
-    public boolean moveNotif(int sourceIndex, int destIndex) {
-        if (sourceIndex > 0 && destIndex > 0 && sourceIndex != destIndex) {
-            notifications.add(destIndex, notifications.remove(sourceIndex));
+    public boolean moveNotif(int srcIdx, int dstIdx) {
+        if (srcIdx > 0 && dstIdx > 0 && srcIdx != dstIdx) {
+            notifications.add(dstIdx, notifications.remove(srcIdx));
             return true;
         }
         return false;
@@ -335,7 +334,7 @@ public class Config {
     public static Config reload() {
         instance = null;
         get();
-        ChatNotify.responseMessages.clear();
+        ChatNotify.RESPONSES.clear();
         ChatNotify.updateUsernameNotif(instance);
         return instance;
     }
@@ -428,7 +427,7 @@ public class Config {
     // Validation
 
     /**
-     * Validates this instance. To be called after editing and before saving.
+     * Validates this instance. Called after deserialization and before saving.
      */
     private Config validate() {
         // Validate defaults
@@ -447,7 +446,7 @@ public class Config {
         notifications.removeIf((n) -> {
             n.validate();
             return (n != notifications.getFirst() && n.triggers.isEmpty()
-                    && n.exclusionTriggers.isEmpty() && n.responseMessages.isEmpty());
+                    && n.exclusionTriggers.isEmpty() && n.responses.isEmpty());
         });
 
         return this;

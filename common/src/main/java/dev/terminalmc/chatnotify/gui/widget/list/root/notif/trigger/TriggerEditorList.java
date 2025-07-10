@@ -27,9 +27,10 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import dev.terminalmc.chatnotify.util.FormatUtil;
-import dev.terminalmc.chatnotify.util.MessageUtil;
-import dev.terminalmc.chatnotify.util.StyleUtil;
+import dev.terminalmc.chatnotify.util.Unicode;
+import dev.terminalmc.chatnotify.util.text.FormatUtil;
+import dev.terminalmc.chatnotify.util.text.MessageUtil;
+import dev.terminalmc.chatnotify.util.text.StyleUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
@@ -323,7 +324,7 @@ public class TriggerEditorList extends OptionList {
                         0,
                         list.tinyWidgetWidth,
                         height,
-                        Component.literal("ℹ"),
+                        Component.literal(Unicode.INFO.str),
                         Minecraft.getInstance().font
                 );
                 infoIcon.alignCenter();
@@ -379,7 +380,8 @@ public class TriggerEditorList extends OptionList {
 
                 // Delete button
                 elements.add(Button.builder(
-                                Component.literal("❌").withStyle(ChatFormatting.RED), (button) -> {
+                                Component.literal(Unicode.CROSS.str).withStyle(ChatFormatting.RED),
+                                (button) -> {
                                     styleTarget.enabled = false;
                                     list.init();
                                 }
