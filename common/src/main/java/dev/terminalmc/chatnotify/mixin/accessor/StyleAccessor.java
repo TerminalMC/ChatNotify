@@ -31,6 +31,7 @@ public interface StyleAccessor {
     @Invoker("<init>")
     static Style chatnotify$new(
             @Nullable TextColor color,
+            @Nullable Integer shadowColor,
             @Nullable Boolean bold,
             @Nullable Boolean italic,
             @Nullable Boolean underlined,
