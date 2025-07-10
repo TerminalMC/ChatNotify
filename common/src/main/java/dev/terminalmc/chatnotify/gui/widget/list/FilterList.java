@@ -180,7 +180,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
             }
         }
         tabNameUpdate.run();
-        clampScrollAmount();
+        refreshScrollAmount();
     }
 
     @FunctionalInterface
