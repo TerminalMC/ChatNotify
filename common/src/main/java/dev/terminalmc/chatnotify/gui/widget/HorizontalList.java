@@ -218,7 +218,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     @Override
     public void setSize(int width, int height) {
         super.setSize(Math.max(width, MIN_WIDTH), Math.max(height, MIN_HEIGHT));
-        clampScrollAmount();
+        refreshScrollAmount();
     }
 
     public void setBounds(int width, int height, int x, int y) {
@@ -294,9 +294,9 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     /**
      * Renders the scrollbar, if required.
      */
-    protected void renderScrollbar(GuiGraphics graphics) {
+    protected void renderScrollbar(@NotNull GuiGraphics graphics) {
         if (scrollbarVisible()) {
-            int y = getScrollbarPosition();
+            int y = scrollBarX();
 
             int scrollerWidth =
                     (int) ((float) (getWidth() * getWidth()) / (float) getMaxPosition());
@@ -475,11 +475,11 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
 
     protected void updateScrollingState(double mouseX, double mouseY, int button) {
         scrolling =
-                button == 0 && mouseY >= getScrollbarPosition() && mouseY < (getScrollbarPosition()
+                button == 0 && mouseY >= scrollBarX() && mouseY < (scrollBarX()
                         + SCROLLBAR_HEIGHT) && mouseX >= getX() && mouseX < getRight();
     }
 
-    protected int getScrollbarPosition() {
+    protected int scrollBarX() {
         return topScrollbar ? getY() : getY() + getHeight() - SCROLLBAR_HEIGHT;
     }
 
@@ -500,7 +500,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         setClampedScrollAmount(scroll);
     }
 
-    public void clampScrollAmount() {
+    public void refreshScrollAmount() {
         setClampedScrollAmount(scrollAmount);
     }
 
@@ -510,6 +510,18 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
 
     public int getMaxScroll() {
         return Math.max(0, getMaxPosition() - getWidth());
+    }
+
+    @Override
+    protected int contentHeight() {
+        // Not currently used
+        return 0;
+    }
+
+    @Override
+    protected double scrollRate() {
+        // Not currently used
+        return 0;
     }
 
     // Narration
