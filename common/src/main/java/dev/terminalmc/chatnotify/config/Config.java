@@ -431,8 +431,11 @@ public class Config {
      */
     private Config validate() {
         // Validate defaults
-        if (defaultColor < 0 || defaultColor > 0xFFFFFFFF)
+        if (defaultColor < -0xFFFFFF || defaultColor > 0xFFFFFF) {
             defaultColor = defaultColorDefault;
+        } else {
+            defaultColor = rgbToArgb(defaultColor);
+        }
         defaultSound.validate();
 
         // Remove blank prefixes and sort by decreasing length
@@ -462,6 +465,17 @@ public class Config {
         } else if (notifications.getFirst().triggers.size() < 2) {
             ChatNotify.LOG.error("Username notification missing triggers! Recreating...");
             notifications.set(0, Notification.createUser());
+        }
+    }
+
+    /**
+     * Converts an RGB color to an ARGB color, if necessary.
+     */
+    static int rgbToArgb(int rgb) {
+        if (rgb >= 0x000000 && rgb <= 0xFFFFFF) {
+            return rgb | 0xFF000000;
+        } else {
+            return rgb;
         }
     }
 

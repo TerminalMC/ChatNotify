@@ -133,8 +133,11 @@ public class TextStyle {
      * Validates this instance. Called after deserialization and before saving.
      */
     TextStyle validate() {
-        if (color < 0 || color > 0xFFFFFFFF)
+        if (color < -0xFFFFFF || color > 0xFFFFFF) {
             color = colorDefault;
+        } else {
+            color = Config.rgbToArgb(color);
+        }
         return this;
     }
 
