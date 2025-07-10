@@ -36,10 +36,10 @@ public class TextStyle {
     public static final boolean doColorDefault = true;
 
     /**
-     * The text color, from {@link 0x000000} to {@link 0xffffff} inclusive.
+     * The text color, from {@link 0xFF000000} to {@link 0xFFffffff} inclusive.
      */
     public int color;
-    public static final int colorDefault = 0xffc400;
+    public static final int colorDefault = 0xFFffc400;
 
     // Format controls
 
@@ -133,7 +133,7 @@ public class TextStyle {
      * Validates this instance. Called after deserialization and before saving.
      */
     TextStyle validate() {
-        if (color < 0 || color > 0xFFFFFF)
+        if (color < 0 || color > 0xFFFFFFFF)
             color = colorDefault;
         return this;
     }

@@ -158,7 +158,7 @@ public class Config {
      * The default {@link TextStyle} color for new {@link Notification} instances.
      */
     public int defaultColor;
-    public static final int defaultColorDefault = 0xffc400;
+    public static final int defaultColorDefault = 0xFFffc400;
 
     /**
      * The default {@link Sound} identifier for new {@link Notification} instances.
@@ -431,7 +431,7 @@ public class Config {
      */
     private Config validate() {
         // Validate defaults
-        if (defaultColor < 0 || defaultColor > 0xFFFFFF)
+        if (defaultColor < 0 || defaultColor > 0xFFFFFFFF)
             defaultColor = defaultColorDefault;
         defaultSound.validate();
 
