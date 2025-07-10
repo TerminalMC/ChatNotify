@@ -114,6 +114,7 @@ public class TextStyle {
     public Style getStyle() {
         return StyleAccessor.chatnotify$new(
                 doColor ? TextColor.fromRgb(color) : null,
+                null,
                 bold != FormatMode.DISABLED ? bold == FormatMode.ON : null,
                 italic != FormatMode.DISABLED ? italic == FormatMode.ON : null,
                 underlined != FormatMode.DISABLED ? underlined == FormatMode.ON : null,
