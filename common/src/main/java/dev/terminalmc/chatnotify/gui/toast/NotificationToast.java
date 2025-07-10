@@ -22,7 +22,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,8 +29,7 @@ import java.util.List;
 
 public class NotificationToast implements Toast {
 
-    private static final ResourceLocation BACKGROUND_SPRITE =
-            ResourceLocation.withDefaultNamespace("toast/advancement");
+    private static final int SPRITE_Y = 0;
     private static final int DISPLAY_TIME = 5000;
     private static final int WIDTH = 160;
     private static final int HEIGHT = 32;
@@ -56,7 +54,7 @@ public class NotificationToast implements Toast {
         Font font = component.getMinecraft().font;
         if (messageLines.size() <= 1) {
             // Message fits in a single line, render a single sprite
-            graphics.blitSprite(BACKGROUND_SPRITE, 0, 0, WIDTH, height());
+            graphics.blit(TEXTURE, 0, 0, 0, SPRITE_Y, WIDTH, height());
         } else {
             // Message requires multiple lines, stretch vertically by rendering
             // multiple sprites
@@ -90,7 +88,7 @@ public class NotificationToast implements Toast {
             // Single line, center vertically
             graphics.drawString(
                     font,
-                    messageLines.getFirst(),
+                    messageLines.get(0),
                     X_MARGIN,
                     Y_MARGIN + lineHeight / 2,
                     -1,
@@ -126,13 +124,13 @@ public class NotificationToast implements Toast {
         int uRemainder = Math.min(60, width - uWidth);
 
         // Left border
-        graphics.blitSprite(BACKGROUND_SPRITE, WIDTH, HEIGHT, 0, vOffset, 0, y, uWidth, vHeight);
+        graphics.blit(TEXTURE, WIDTH, HEIGHT, 0, vOffset, 0, y, uWidth, vHeight);
 
         // Middle background
         int offset = 64;
         for (int x = uWidth; x < width - uRemainder; x += offset) {
-            graphics.blitSprite(
-                    BACKGROUND_SPRITE,
+            graphics.blit(
+                    TEXTURE,
                     WIDTH,
                     HEIGHT,
                     HEIGHT,
@@ -145,8 +143,8 @@ public class NotificationToast implements Toast {
         }
 
         // Right border
-        graphics.blitSprite(
-                BACKGROUND_SPRITE,
+        graphics.blit(
+                TEXTURE,
                 WIDTH,
                 HEIGHT,
                 WIDTH - uRemainder,

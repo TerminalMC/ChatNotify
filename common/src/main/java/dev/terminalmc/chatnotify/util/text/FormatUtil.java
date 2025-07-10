@@ -26,7 +26,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,7 +57,7 @@ public class FormatUtil {
 
     /**
      * Recursively converts any {@link TranslatableContents} elements of the
-     * {@link MutableComponent} tree to {@link PlainTextContents} elements, and in the process
+     * {@link MutableComponent} tree to {@link LiteralContents} elements, and in the process
      * converts any format codes to {@link Style}s.
      */
     public static MutableComponent convertToStyledLiteral(MutableComponent text)
@@ -71,7 +71,7 @@ public class FormatUtil {
         text.getSiblings().replaceAll(sibling -> convertToStyledLiteral(sibling.copy()));
 
         // Convert codes in contents
-        if (text.getContents() instanceof PlainTextContents) {
+        if (text.getContents() instanceof LiteralContents) {
             text = convertCodesToStyles(text);
         }
 
@@ -80,7 +80,7 @@ public class FormatUtil {
 
     /**
      * Converts the contents of the {@link MutableComponent} from {@link TranslatableContents} to
-     * {@link PlainTextContents}.
+     * {@link LiteralContents}.
      * <p>
      * Note: Does not recurse, only affects root. Caller must recurse if required.
      */
@@ -218,8 +218,8 @@ public class FormatUtil {
                     }
                 }
                 // Add final translated substring
-                if (!split.getLast().isEmpty()) {
-                    siblings.add(Component.literal(split.getLast()));
+                if (!split.get(split.size() - 1).isEmpty()) {
+                    siblings.add(Component.literal(split.get(split.size() - 1)));
                 }
             }
         }
@@ -237,7 +237,7 @@ public class FormatUtil {
      * Note: does not recurse, only affects root.
      */
     private static MutableComponent convertCodesToStyles(MutableComponent text) {
-        if (!(text.getContents() instanceof PlainTextContents contents))
+        if (!(text.getContents() instanceof LiteralContents contents))
             return text;
 
         // Check whether conversion is required
