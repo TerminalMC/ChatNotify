@@ -24,6 +24,16 @@ import java.nio.file.Path;
 public class FabricServices implements IPlatformServices {
 
     @Override
+    public boolean isDevEnv() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
+    }
+
+    @Override
+    public boolean isModLoaded(String modId) {
+        return FabricLoader.getInstance().isModLoaded(modId);
+    }
+
+    @Override
     public String getPlatformName() {
         return "Fabric";
     }
@@ -36,15 +46,5 @@ public class FabricServices implements IPlatformServices {
     @Override
     public Path getConfigDir() {
         return FabricLoader.getInstance().getConfigDir();
-    }
-
-    @Override
-    public boolean isDevEnv() {
-        return FabricLoader.getInstance().isDevelopmentEnvironment();
-    }
-
-    @Override
-    public boolean isModLoaded(String modId) {
-        return FabricLoader.getInstance().isModLoaded(modId);
     }
 }

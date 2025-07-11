@@ -18,7 +18,18 @@ package dev.terminalmc.chatnotify.platform.services;
 
 import java.nio.file.Path;
 
+@SuppressWarnings("unused")
 public interface IPlatformServices {
+
+    /**
+     * @return {@code true} if in a development environment.
+     */
+    boolean isDevEnv();
+
+    /**
+     * @return {@code true} if the mod is loaded.
+     */
+    boolean isModLoaded(String modId);
 
     /**
      * @return the name of the current platform.
@@ -36,12 +47,9 @@ public interface IPlatformServices {
     Path getConfigDir();
 
     /**
-     * @return {@code true} if in a development environment.
+     * @return the name of the environment type.
      */
-    boolean isDevEnv();
-
-    /**
-     * @return {@code true} if the mod is loaded, false otherwise.
-     */
-    boolean isModLoaded(String modId);
+    default String getEnvName() {
+        return isDevEnv() ? "development" : "production";
+    }
 }

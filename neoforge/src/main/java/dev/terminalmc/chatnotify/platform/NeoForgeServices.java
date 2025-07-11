@@ -26,6 +26,16 @@ import java.nio.file.Path;
 public class NeoForgeServices implements IPlatformServices {
 
     @Override
+    public boolean isDevEnv() {
+        return !FMLLoader.isProduction();
+    }
+
+    @Override
+    public boolean isModLoaded(String modId) {
+        return LoadingModList.get().getModFileById(modId) != null;
+    }
+
+    @Override
     public String getPlatformName() {
         return "NeoForge";
     }
@@ -38,15 +48,5 @@ public class NeoForgeServices implements IPlatformServices {
     @Override
     public Path getConfigDir() {
         return FMLPaths.CONFIGDIR.get();
-    }
-
-    @Override
-    public boolean isDevEnv() {
-        return !FMLLoader.isProduction();
-    }
-
-    @Override
-    public boolean isModLoaded(String modId) {
-        return LoadingModList.get().getModFileById(modId) != null;
     }
 }
