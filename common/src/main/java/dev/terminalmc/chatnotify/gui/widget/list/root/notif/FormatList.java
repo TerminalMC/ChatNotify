@@ -158,7 +158,7 @@ public class FormatList extends OptionList {
                                 hsv
                         );
                         if (hsv[2] < 0.1)
-                            colorField.setTextColor(0xFFFFFF);
+                            colorField.setTextColor(0xFFFFFFFF);
                         else
                             colorField.setTextColor(color);
                     }
