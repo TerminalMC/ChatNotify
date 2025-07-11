@@ -38,9 +38,6 @@ public abstract class GuiGraphicsMixin implements IGuiGraphics {
     @Final
     private PoseStack pose;
 
-    @Shadow
-    protected abstract void flushIfUnmanaged();
-
     @Override
     public void chatnotify$fillGradientHorizontal(
             int x0,
@@ -56,6 +53,5 @@ public abstract class GuiGraphicsMixin implements IGuiGraphics {
         consumer.addVertex(matrix4f, (float) x0, (float) y1, 0F).setColor(colorFrom);
         consumer.addVertex(matrix4f, (float) x1, (float) y1, 0F).setColor(colorTo);
         consumer.addVertex(matrix4f, (float) x1, (float) y0, 0F).setColor(colorTo);
-        flushIfUnmanaged();
     }
 }
