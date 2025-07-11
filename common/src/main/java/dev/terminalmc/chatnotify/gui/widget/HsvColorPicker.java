@@ -29,7 +29,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
@@ -258,9 +258,9 @@ public class HsvColorPicker extends OverlayWidget {
     public void updateColorFromSource() {
         int color = source.get();
         Color.RGBtoHSB(
-                FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
+                ARGB.red(color),
+                ARGB.green(color),
+                ARGB.blue(color),
                 hsv
         );
         oldColor = color;
@@ -282,9 +282,9 @@ public class HsvColorPicker extends OverlayWidget {
             int color = textColor.getValue();
             if (!updateFromCursor) {
                 Color.RGBtoHSB(
-                        FastColor.ARGB32.red(color),
-                        FastColor.ARGB32.green(color),
-                        FastColor.ARGB32.blue(color),
+                        ARGB.red(color),
+                        ARGB.green(color),
+                        ARGB.blue(color),
                         hsv
                 );
                 updateHCursor();
