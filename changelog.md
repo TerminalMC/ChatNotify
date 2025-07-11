@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.9
+
+- Added bidirectional compatibility with RGB (< mc1.21.6) and ARGB (>= mc1.21.6) colors
+
+## 2.4.8
+
+- Fixed color deserialization (mc1.21.7)
+
 ## 2.4.7
 
 - Fixed an issue with replacement message styling duplicating components
