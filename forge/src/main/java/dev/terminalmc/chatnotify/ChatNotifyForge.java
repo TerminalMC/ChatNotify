@@ -18,25 +18,23 @@ package dev.terminalmc.chatnotify;
 
 import dev.terminalmc.chatnotify.gui.screen.RootScreen;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@Mod(
-        value = ChatNotify.MOD_ID,
-        dist = Dist.CLIENT
-)
-public class ChatNotifyNeoForge {
+@Mod(value = ChatNotify.MOD_ID)
+public class ChatNotifyForge {
 
-    public ChatNotifyNeoForge() {
+    public ChatNotifyForge() {
         // Register config screen
         ModLoadingContext.get().registerExtensionPoint(
-                IConfigScreenFactory.class,
-                () -> (minecraft, parent) -> new RootScreen(parent)
+                ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new ConfigScreenHandler.ConfigScreenFactory(
+                        (minecraft, parent) -> new RootScreen(parent))
         );
 
         // Initialize client
@@ -53,8 +51,10 @@ public class ChatNotifyNeoForge {
          * Registers client after-tick event.
          */
         @SubscribeEvent
-        public static void clientTickEvent(ClientTickEvent.Post event) {
-            ChatNotify.afterClientTick(Minecraft.getInstance());
+        public static void clientTickEvent(TickEvent.ClientTickEvent event) {
+            if (event.phase.equals(TickEvent.Phase.END)) {
+                ChatNotify.afterClientTick(Minecraft.getInstance());
+            }
         }
     }
 }
