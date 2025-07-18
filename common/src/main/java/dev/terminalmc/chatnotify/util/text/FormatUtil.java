@@ -134,6 +134,12 @@ public class FormatUtil {
             // PLACEHOLDER_PATTERN.split(string) cannot be used as that doesn't
             // split between consecutive occurrences of the pattern.
 
+            // Some translation strings require args to be in a different order,
+            // so we re-order the array here
+            Object[] unorderedArgs = contents.getArgs();
+            Object[] args = new Object[unorderedArgs.length];
+            int argIdx = 0;
+
             List<String> split = new ArrayList<>();
             Matcher m = PLACEHOLDER_PATTERN.matcher(string);
             int previousEnd = 0;
@@ -141,6 +147,22 @@ public class FormatUtil {
                 // Add preceding plain text, which will be blank if at start
                 split.add(string.substring(previousEnd, m.start()));
                 previousEnd = m.end();
+                // Add relevant arg
+                if (m.group(1) == null) {
+                    args[argIdx] = unorderedArgs[argIdx];
+                } else {
+                    int num = Integer.parseInt(m.group(1).substring(0, m.group(1).length() - 1));
+                    if (num < 1 || num > unorderedArgs.length) {
+                        ChatNotify.LOG.warn(
+                                "Translation specifies arg number {} out of range for length {}",
+                                num,
+                                unorderedArgs.length
+                        );
+                        num = argIdx + 1;
+                    }
+                    args[argIdx] = unorderedArgs[num - 1];
+                }
+                argIdx++;
             }
 
             //noinspection StatementWithEmptyBody
@@ -179,7 +201,6 @@ public class FormatUtil {
                 // Create component by alternating literal elements and args
                 // Note: args.length is at least numPlaceholders at this point,
                 // else the earlier String.format check would have failed.
-                Object[] args = contents.getArgs();
                 int numPlaceholders = split.size() - 1;
 
                 // Create an empty component, and add each literal element and

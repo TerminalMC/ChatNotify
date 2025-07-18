@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.10
+
+- Fixed custom ordering of translatable message arguments in certain languages
+
 ## 2.4.9
 
 - Added bidirectional compatibility with RGB (< mc1.21.6) and ARGB (>= mc1.21.6) colors
