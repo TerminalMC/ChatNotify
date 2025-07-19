@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.11
+
+- Updated zh_cn translation (jian2486)
+
 ## 2.4.10
 
 - Fixed custom ordering of translatable message arguments in certain languages
