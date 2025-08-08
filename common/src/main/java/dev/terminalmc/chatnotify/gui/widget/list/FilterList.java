@@ -924,7 +924,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         Component.literal(Unicode.PAINT.str)
                                 .withColor(notif.textStyle.doColor
                                         ? notif.textStyle.color
-                                        : 0xffffff),
+                                        : 0xFFffffff),
                         (button) -> {
                             // Open color picker overlay widget
                             int cpHeight = HsvColorPicker.MIN_HEIGHT;
@@ -971,9 +971,9 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                                     hsv
                             );
                             if (hsv[2] < 0.1)
-                                colorField.setTextColor(0xFFFFFF);
+                                colorField.setTextColor(0xFFFFFFFF);
                             else
-                                colorField.setTextColor(color);
+                                colorField.setTextColor((0xFF << 24) | color);
                             // Update status button color
                             colorEditButton.setMessage(colorEditButton.getMessage()
                                     .copy()

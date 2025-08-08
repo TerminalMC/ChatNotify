@@ -21,7 +21,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -65,7 +65,14 @@ public class NotificationToast implements Toast {
     public void render(@NotNull GuiGraphics graphics, @NotNull Font font, long elapsedTime) {
         if (messageLines.size() <= 1) {
             // Message fits in a single line, render a single sprite
-            graphics.blitSprite(RenderType::guiTextured, BACKGROUND_SPRITE, 0, 0, WIDTH, height());
+            graphics.blitSprite(
+                    RenderPipelines.GUI_TEXTURED,
+                    BACKGROUND_SPRITE,
+                    0,
+                    0,
+                    WIDTH,
+                    height()
+            );
         } else {
             // Message requires multiple lines, stretch vertically by rendering
             // multiple sprites
@@ -132,7 +139,7 @@ public class NotificationToast implements Toast {
 
         // Left border
         graphics.blitSprite(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 BACKGROUND_SPRITE,
                 WIDTH,
                 HEIGHT,
@@ -148,7 +155,7 @@ public class NotificationToast implements Toast {
         int offset = 64;
         for (int x = uWidth; x < width - uRemainder; x += offset) {
             graphics.blitSprite(
-                    RenderType::guiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     BACKGROUND_SPRITE,
                     WIDTH,
                     HEIGHT,
@@ -163,7 +170,7 @@ public class NotificationToast implements Toast {
 
         // Right border
         graphics.blitSprite(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 BACKGROUND_SPRITE,
                 WIDTH,
                 HEIGHT,
