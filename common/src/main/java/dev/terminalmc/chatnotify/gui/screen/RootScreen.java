@@ -21,7 +21,7 @@ import dev.terminalmc.chatnotify.gui.widget.list.FilterList;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.ControlList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.DefaultList;
-import dev.terminalmc.chatnotify.gui.widget.list.root.PrefixList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.DetectionList;
 import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -50,7 +50,7 @@ public class RootScreen extends OptionScreen {
         NOTIFICATION(translationKey("option", "notif")),
         CONTROL(translationKey("option", "control")),
         DEFAULT(translationKey("option", "default")),
-        PREFIX(translationKey("option", "prefix"));
+        DETECTION(translationKey("option", "detection"));
 
         public final String key;
 
@@ -74,7 +74,7 @@ public class RootScreen extends OptionScreen {
                 new Tab(TabKey.NOTIFICATION.key, this::getNotificationList),
                 new Tab(TabKey.CONTROL.key, RootScreen::getControlList),
                 new Tab(TabKey.DEFAULT.key, RootScreen::getDefaultList),
-                new Tab(TabKey.PREFIX.key, RootScreen::getPrefixList)
+                new Tab(TabKey.DETECTION.key, RootScreen::getDetectionList)
         );
         super.setTabs(tabs, defaultKey);
     }
@@ -185,8 +185,8 @@ public class RootScreen extends OptionScreen {
         );
     }
 
-    private static OptionList getDefaultList(OptionScreen screen) {
-        return new DefaultList(
+    private static OptionList getDetectionList(OptionScreen screen) {
+        return new DetectionList(
                 Minecraft.getInstance(),
                 screen,
                 0,
@@ -198,8 +198,8 @@ public class RootScreen extends OptionScreen {
         );
     }
 
-    private static OptionList getPrefixList(OptionScreen screen) {
-        return new PrefixList(
+    private static OptionList getDefaultList(OptionScreen screen) {
+        return new DefaultList(
                 Minecraft.getInstance(),
                 screen,
                 0,

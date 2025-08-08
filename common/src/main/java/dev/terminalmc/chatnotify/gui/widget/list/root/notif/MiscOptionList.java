@@ -226,7 +226,7 @@ public class MiscOptionList extends OptionList {
                                 0,
                                 width,
                                 height,
-                                localized("option", "control.self_notify"),
+                                localized("option", "detection.self_notify"),
                                 (button, status) -> notif.checkOwnMode = status
                         ));
             }

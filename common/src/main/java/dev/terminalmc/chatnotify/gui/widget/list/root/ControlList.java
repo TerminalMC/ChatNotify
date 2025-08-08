@@ -19,11 +19,9 @@ package dev.terminalmc.chatnotify.gui.widget.list.root;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.network.chat.CommonComponents;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -46,8 +44,6 @@ public class ControlList extends OptionList {
     protected void addEntries() {
         addEntry(new Entry.Controls1(dynEntryX, dynEntryWidth, entryHeight));
         addEntry(new Entry.Controls2(dynEntryX, dynEntryWidth, entryHeight));
-        addEntry(new Entry.Controls3(dynEntryX, dynEntryWidth, entryHeight));
-        addEntry(new Entry.Controls4(dynEntryX, dynEntryWidth, entryHeight));
     }
 
     // Custom entries
@@ -60,25 +56,25 @@ public class ControlList extends OptionList {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
-                elements.add(CycleButton.<Config.DetectionMode>builder((mode) -> localized(
+                elements.add(CycleButton.<Config.SendMode>builder((status) -> localized(
                                 "option",
-                                "control.detection_mode.status." + mode.name()
+                                "control.send_mode.status." + status.name()
                         ))
-                        .withValues(Config.DetectionMode.values())
-                        .withInitialValue(Config.get().detectionMode)
-                        .withTooltip((status) -> Tooltip.create(localized(
+                        .withValues(Config.SendMode.values())
+                        .withInitialValue(Config.get().sendMode)
+                        .withTooltip((mode) -> Tooltip.create(localized(
                                 "option",
-                                "control.detection_mode.status." + status.name() + ".tooltip"
+                                "control.send_mode.status." + mode.name() + ".tooltip"
                         )
                                 .append("\n\n")
-                                .append(localized("option", "control.detection_mode.tooltip"))))
+                                .append(localized("option", "control.send_mode.tooltip"))))
                         .create(
                                 x,
                                 0,
                                 buttonWidth,
                                 height,
-                                localized("option", "control.detection_mode"),
-                                (button, mode) -> Config.get().detectionMode = mode
+                                localized("option", "control.send_mode"),
+                                (button, status) -> Config.get().sendMode = status
                         ));
 
                 elements.add(CycleButton.<Config.DebugMode>builder((mode) -> localized(
@@ -105,53 +101,6 @@ public class ControlList extends OptionList {
         private static class Controls2 extends Entry {
 
             Controls2(int x, int width, int height) {
-                super();
-                int buttonWidth = (width - SPACE) / 2;
-
-                elements.add(CycleButton.booleanBuilder(
-                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
-                        )
-                        .withInitialValue(Config.get().checkOwnMessages)
-                        .withTooltip((status) -> Tooltip.create(localized(
-                                "option",
-                                "control.self_notify.tooltip"
-                        )))
-                        .create(
-                                x,
-                                0,
-                                buttonWidth,
-                                height,
-                                localized("option", "control.self_notify"),
-                                (button, status) -> Config.get().checkOwnMessages = status
-                        ));
-
-                elements.add(CycleButton.<Config.SendMode>builder((status) -> localized(
-                                "option",
-                                "control.send_mode.status." + status.name()
-                        ))
-                        .withValues(Config.SendMode.values())
-                        .withInitialValue(Config.get().sendMode)
-                        .withTooltip((mode) -> Tooltip.create(localized(
-                                "option",
-                                "control.send_mode.status." + mode.name() + ".tooltip"
-                        )
-                                .append("\n\n")
-                                .append(localized("option", "control.send_mode.tooltip"))))
-                        .create(
-                                x + width - buttonWidth,
-                                0,
-                                buttonWidth,
-                                height,
-                                localized("option", "control.send_mode"),
-                                (button, status) -> Config.get().sendMode = status
-                        ));
-            }
-        }
-
-        private static class Controls3 extends Entry {
-
-            Controls3(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
@@ -191,32 +140,6 @@ public class ControlList extends OptionList {
                                 height,
                                 localized("option", "control.restyle_mode"),
                                 (button, status) -> Config.get().restyleMode = status
-                        ));
-            }
-        }
-
-        private static class Controls4 extends Entry {
-
-            Controls4(int x, int width, int height) {
-                super();
-
-                elements.add(CycleButton.<Config.SenderDetectionMode>builder((status) -> localized(
-                                "option",
-                                "control.sender_detection_mode.status." + status.name()
-                        ))
-                        .withValues(Config.SenderDetectionMode.values())
-                        .withInitialValue(Config.get().senderDetectionMode)
-                        .withTooltip((mode) -> Tooltip.create(localized(
-                                "option",
-                                "control.sender_detection_mode.status." + mode.name() + ".tooltip"
-                        )))
-                        .create(
-                                x,
-                                0,
-                                width,
-                                height,
-                                localized("option", "control.sender_detection_mode"),
-                                (button, status) -> Config.get().senderDetectionMode = status
                         ));
             }
         }

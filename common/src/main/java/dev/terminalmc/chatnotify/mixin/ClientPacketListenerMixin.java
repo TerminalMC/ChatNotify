@@ -16,13 +16,19 @@
 
 package dev.terminalmc.chatnotify.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.config.Config.CommonDetectionMode;
 import dev.terminalmc.chatnotify.util.text.FormatUtil;
+import dev.terminalmc.chatnotify.util.text.MessageUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import org.spongepowered.asm.mixin.Mixin;
@@ -66,11 +72,83 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (if any) is cut from the message.
  */
 
+@SuppressWarnings("JavadocReference")
 @Mixin(
         value = ClientPacketListener.class,
         priority = 792
 )
 public class ClientPacketListenerMixin {
+
+    /**
+     * Packet-level interceptor for action bar messages.
+     *
+     * @see GuiMixin#wrapSetOverlayMessage
+     */
+    @WrapOperation(
+            method = "setActionBarText",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/gui/Gui;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V"
+            )
+    )
+    private void wrapSetOverlayMessage(
+            Gui instance,
+            Component message,
+            boolean animateColor,
+            Operation<Void> original
+    ) {
+        if (Config.get().actionBarDetectionMode.equals(CommonDetectionMode.PACKET)) {
+            message = MessageUtil.processMessage(message);
+            if (message != null)
+                original.call(instance, message, animateColor);
+        } else {
+            original.call(instance, message, animateColor);
+        }
+    }
+
+    /**
+     * Packet-level interceptor for title messages.
+     *
+     * @see GuiMixin#wrapSetTitle
+     */
+    @WrapOperation(
+            method = "setTitleText",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/gui/Gui;setTitle(Lnet/minecraft/network/chat/Component;)V"
+            )
+    )
+    private void wrapSetTitle(Gui instance, Component message, Operation<Void> original) {
+        if (Config.get().titleDetectionMode.equals(CommonDetectionMode.PACKET)) {
+            message = MessageUtil.processMessage(message);
+            if (message != null)
+                original.call(instance, message);
+        } else {
+            original.call(instance, message);
+        }
+    }
+
+    /**
+     * Packet-level interceptor for subtitle messages.
+     *
+     * @see GuiMixin#wrapSetSubtitle
+     */
+    @WrapOperation(
+            method = "setSubtitleText",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/gui/Gui;setSubtitle(Lnet/minecraft/network/chat/Component;)V"
+            )
+    )
+    private void wrapSetSubtitle(Gui instance, Component message, Operation<Void> original) {
+        if (Config.get().subtitleDetectionMode.equals(CommonDetectionMode.PACKET)) {
+            message = MessageUtil.processMessage(message);
+            if (message != null)
+                original.call(instance, message);
+        } else {
+            original.call(instance, message);
+        }
+    }
 
     /**
      * Update profileName.

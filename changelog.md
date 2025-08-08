@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.0
+
+- Added options to detect action bar, title and subtitle messages
+
 ## 2.4.11
 
 - Updated zh_cn translation (jian2486)

@@ -79,17 +79,6 @@ public class Config {
     // Controls
 
     /**
-     * Controls how messages are intercepted.
-     */
-    public DetectionMode detectionMode;
-
-    public enum DetectionMode {
-        HUD_KNOWN_TAGS,
-        HUD,
-        PACKET,
-    }
-
-    /**
      * Controls debug logging.
      */
     public DebugMode debugMode;
@@ -131,22 +120,6 @@ public class Config {
     }
 
     /**
-     * Controls how messages are identified as sent by the user.
-     */
-    public SenderDetectionMode senderDetectionMode;
-
-    public enum SenderDetectionMode {
-        COMBINED,
-        SENT_MATCH,
-    }
-
-    /**
-     * Whether messages identified as sent by the user should be able to trigger notifications.
-     */
-    public boolean checkOwnMessages;
-    public static final boolean checkOwnMessagesDefault = true;
-
-    /**
      * The sound source (and thus, volume control category) of notification sounds.
      */
     public SoundSource soundSource;
@@ -166,7 +139,55 @@ public class Config {
     public final Sound defaultSound;
     public static final Supplier<Sound> defaultSoundDefault = Sound::new;
 
-    // Prefixes
+    // Detection
+
+    /**
+     * Controls how chat messages are intercepted.
+     */
+    public ChatDetectionMode detectionMode;
+
+    public enum ChatDetectionMode {
+        HUD_KNOWN_TAGS,
+        HUD,
+        PACKET,
+    }
+
+    /**
+     * Controls how action bar messages are intercepted.
+     */
+    public CommonDetectionMode actionBarDetectionMode;
+
+    public enum CommonDetectionMode {
+        NONE,
+        HUD,
+        PACKET,
+    }
+
+    /**
+     * Controls how title messages are intercepted.
+     */
+    public CommonDetectionMode titleDetectionMode;
+
+    /**
+     * Controls how subtitle messages are intercepted.
+     */
+    public CommonDetectionMode subtitleDetectionMode;
+
+    /**
+     * Controls how messages are identified as sent by the user.
+     */
+    public SenderDetectionMode senderDetectionMode;
+
+    public enum SenderDetectionMode {
+        COMBINED,
+        SENT_MATCH,
+    }
+
+    /**
+     * Whether messages identified as sent by the user should be able to trigger notifications.
+     */
+    public boolean checkOwnMessages;
+    public static final boolean checkOwnMessagesDefault = true;
 
     /**
      * The list of prefix strings to be checked when evaluating whether a message was sent by the
@@ -191,16 +212,19 @@ public class Config {
      */
     public Config() {
         this(
-                DetectionMode.values()[0],
                 DebugMode.values()[0],
                 NotifMode.values()[0],
                 RestyleMode.values()[0],
                 SendMode.values()[0],
-                SenderDetectionMode.values()[0],
-                checkOwnMessagesDefault,
                 soundSourceDefault,
                 defaultColorDefault,
                 defaultSoundDefault.get(),
+                ChatDetectionMode.values()[0],
+                CommonDetectionMode.values()[0],
+                CommonDetectionMode.values()[0],
+                CommonDetectionMode.values()[0],
+                SenderDetectionMode.values()[0],
+                checkOwnMessagesDefault,
                 prefixesDefault.get(),
                 notificationsDefault.get()
         );
@@ -210,29 +234,35 @@ public class Config {
      * Not validated.
      */
     Config(
-            DetectionMode detectionMode,
             DebugMode debugMode,
             NotifMode notifMode,
             RestyleMode restyleMode,
             SendMode sendMode,
-            SenderDetectionMode senderDetectionMode,
-            boolean checkOwnMessages,
             SoundSource soundSource,
             int defaultColor,
             Sound defaultSound,
+            ChatDetectionMode detectionMode,
+            CommonDetectionMode actionBarDetectionMode,
+            CommonDetectionMode titleDetectionMode,
+            CommonDetectionMode subtitleDetectionMode,
+            SenderDetectionMode senderDetectionMode,
+            boolean checkOwnMessages,
             List<String> prefixes,
             List<Notification> notifications
     ) {
-        this.detectionMode = detectionMode;
         this.debugMode = debugMode;
         this.notifMode = notifMode;
         this.restyleMode = restyleMode;
         this.sendMode = sendMode;
-        this.senderDetectionMode = senderDetectionMode;
-        this.checkOwnMessages = checkOwnMessages;
         this.soundSource = soundSource;
         this.defaultColor = defaultColor;
         this.defaultSound = defaultSound;
+        this.detectionMode = detectionMode;
+        this.actionBarDetectionMode = actionBarDetectionMode;
+        this.titleDetectionMode = titleDetectionMode;
+        this.subtitleDetectionMode = subtitleDetectionMode;
+        this.senderDetectionMode = senderDetectionMode;
+        this.checkOwnMessages = checkOwnMessages;
         this.prefixes = prefixes;
         this.notifications = notifications;
     }
@@ -491,14 +521,6 @@ public class Config {
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            DetectionMode detectionMode = JsonUtil.getOrDefault(
-                    obj,
-                    "detectionMode",
-                    DetectionMode.class,
-                    DetectionMode.values()[0],
-                    silent
-            );
-
             DebugMode debugMode = JsonUtil.getOrDefault(
                     obj,
                     "debugMode",
@@ -531,21 +553,6 @@ public class Config {
                     silent
             );
 
-            SenderDetectionMode senderDetectionMode = JsonUtil.getOrDefault(
-                    obj,
-                    "senderDetectionMode",
-                    SenderDetectionMode.class,
-                    SenderDetectionMode.values()[0],
-                    silent
-            );
-
-            boolean checkOwnMessages = JsonUtil.getOrDefault(
-                    obj,
-                    "checkOwnMessages",
-                    checkOwnMessagesDefault,
-                    silent
-            );
-
             SoundSource soundSource = JsonUtil.getOrDefault(
                     obj,
                     "soundSource",
@@ -570,6 +577,53 @@ public class Config {
                     silent
             );
 
+            ChatDetectionMode detectionMode = JsonUtil.getOrDefault(
+                    obj,
+                    "detectionMode",
+                    ChatDetectionMode.class,
+                    ChatDetectionMode.values()[0],
+                    silent
+            );
+
+            CommonDetectionMode actionBarDetectionMode = JsonUtil.getOrDefault(
+                    obj,
+                    "actionBarDetectionMode",
+                    CommonDetectionMode.class,
+                    CommonDetectionMode.values()[0],
+                    silent
+            );
+
+            CommonDetectionMode titleDetectionMode = JsonUtil.getOrDefault(
+                    obj,
+                    "titleDetectionMode",
+                    CommonDetectionMode.class,
+                    CommonDetectionMode.values()[0],
+                    silent
+            );
+
+            CommonDetectionMode subtitleDetectionMode = JsonUtil.getOrDefault(
+                    obj,
+                    "subtitleDetectionMode",
+                    CommonDetectionMode.class,
+                    CommonDetectionMode.values()[0],
+                    silent
+            );
+
+            SenderDetectionMode senderDetectionMode = JsonUtil.getOrDefault(
+                    obj,
+                    "senderDetectionMode",
+                    SenderDetectionMode.class,
+                    SenderDetectionMode.values()[0],
+                    silent
+            );
+
+            boolean checkOwnMessages = JsonUtil.getOrDefault(
+                    obj,
+                    "checkOwnMessages",
+                    checkOwnMessagesDefault,
+                    silent
+            );
+
             List<String> prefixes = JsonUtil.getOrDefault(
                     obj,
                     "prefixes",
@@ -587,16 +641,19 @@ public class Config {
             );
 
             return new Config(
-                    detectionMode,
                     debugMode,
                     notifMode,
                     restyleMode,
                     sendMode,
-                    senderDetectionMode,
-                    checkOwnMessages,
                     soundSource,
                     defaultColor,
                     defaultSound,
+                    detectionMode,
+                    actionBarDetectionMode,
+                    titleDetectionMode,
+                    subtitleDetectionMode,
+                    senderDetectionMode,
+                    checkOwnMessages,
                     prefixes,
                     notifications
             ).validate();

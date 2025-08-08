@@ -11,6 +11,7 @@
     "ChatListenerMixin",
     "ClientPacketListenerMixin",
     "GuiGraphicsMixin",
+    "GuiMixin",
     "MultiLineEditBoxMixin",
     "OptionInstanceMixin",
     "accessor.KeyAccessor",

@@ -61,8 +61,13 @@ import org.spongepowered.asm.mixin.Unique;
 )
 public class ChatComponentMixin {
 
+    /**
+     * HUD-level interceptor for chat messages.
+     *
+     * @see ChatListenerMixin
+     */
     @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V")
-    private void replaceMessage(
+    private void wrapAddMessage(
             Component message,
             MessageSignature headerSignature,
             GuiMessageTag tag,

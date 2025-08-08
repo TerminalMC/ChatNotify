@@ -22,6 +22,7 @@ import com.mojang.authlib.GameProfile;
 import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
 import dev.terminalmc.chatnotify.compat.chatheads.Ownable;
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.config.Config.ChatDetectionMode;
 import dev.terminalmc.chatnotify.util.text.MessageUtil;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.ChatType;
@@ -32,24 +33,28 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.time.Instant;
 
 /**
- * Refer to {@link ChatComponentMixin} for an overview of Minecraft's message handling call stacks.
- * <p>
  * ChatHeads' injection points are too late for these capture methods, so if they are being used,
  * {@link ChatHeadsWrapper#handleAddedMessage} must be called manually.
  */
+@SuppressWarnings("JavadocReference")
 @Mixin(
         value = ChatListener.class,
         priority = 792
 )
 public class ChatListenerMixin {
 
+    /**
+     * Packet-level interceptor for chat messages.
+     *
+     * @see ChatComponentMixin#wrapAddMessage
+     */
     @WrapMethod(method = "handleDisguisedChatMessage")
     private void wrapHandleDisguisedChatMessage(
             Component message,
             ChatType.Bound boundChatType,
             Operation<Void> original
     ) {
-        if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
+        if (Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(message, boundChatType, null);
             message = MessageUtil.processMessage(message);
             if (message != null)
@@ -59,13 +64,19 @@ public class ChatListenerMixin {
         }
     }
 
+    /**
+     * Packet-level interceptor for chat messages.
+     *
+     * @see ChatComponentMixin#wrapAddMessage
+     */
     @WrapMethod(method = "handleSystemMessage")
     private void wrapHandleSystemMessage(
             Component message,
             boolean isOverlay,
             Operation<Void> original
     ) {
-        if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
+        // Ignore if it's an overlay message to avoid conflict with the action bar interceptor
+        if (!isOverlay && Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(message, null, null);
             message = MessageUtil.processMessage(message);
             if (message != null)
@@ -75,7 +86,13 @@ public class ChatListenerMixin {
         }
     }
 
-    // Unable to use handlePlayerChatMessage as that takes a PlayerChatMessage
+    /**
+     * Packet-level interceptor for chat messages.
+     * <p>
+     * Unable to use handlePlayerChatMessage as that takes a PlayerChatMessage.
+     *
+     * @see ChatComponentMixin#wrapAddMessage
+     */
     @WrapMethod(method = "showMessageToPlayer")
     private boolean wrapShowMessageToPlayer(
             ChatType.Bound bound,
@@ -86,7 +103,7 @@ public class ChatListenerMixin {
             Instant timestamp,
             Operation<Boolean> original
     ) {
-        if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
+        if (Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(
                     message,
                     bound,
