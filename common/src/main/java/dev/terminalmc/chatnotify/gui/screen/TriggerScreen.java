@@ -84,6 +84,7 @@ public class TriggerScreen extends OptionScreen {
                 0,
                 0,
                 0,
+                0,
                 BASE_LIST_ENTRY_WIDTH,
                 LIST_ENTRY_HEIGHT,
                 LIST_ENTRY_SPACING,
@@ -96,6 +97,7 @@ public class TriggerScreen extends OptionScreen {
         return new KeySelectorList(
                 Minecraft.getInstance(),
                 screen,
+                0,
                 0,
                 0,
                 0,
