@@ -20,6 +20,7 @@ import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.util.JsonUtil;
 import dev.terminalmc.chatnotify.platform.Services;
+import dev.terminalmc.chatnotify.util.ResponseUtil;
 import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -364,7 +365,7 @@ public class Config {
     public static Config reload() {
         instance = null;
         get();
-        ChatNotify.RESPONSES.clear();
+        ResponseUtil.clear();
         ChatNotify.updateUsernameNotif(instance);
         return instance;
     }

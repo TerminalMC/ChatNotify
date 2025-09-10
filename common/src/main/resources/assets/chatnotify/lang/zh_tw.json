@@ -145,6 +145,7 @@
   "option.chatnotify.notif.response.commandkeys.key.tooltip": "Example: If the keybind is [B] or [LEFT CONTROL + B], this should be 'key.keyboard.b'.",
   "option.chatnotify.notif.response.commandkeys.limit_key": "Modifier Key",
   "option.chatnotify.notif.response.commandkeys.limit_key.tooltip": "Example: If the keybind is [LEFT CONTROL + B], this should be 'key.keyboard.left.control'. If the keybind is [B] this should be 'key.keyboard.unknown'.",
+  "option.chatnotify.notif.response.cooldown.tooltip": "Minimum time in ticks between consecutive sends.",
   "option.chatnotify.notif.response.list": "回應訊息 %s",
   "option.chatnotify.notif.response.list.tooltip": "當此通知啟動時要傳送的聊天訊息或指令。",
   "option.chatnotify.notif.response.list.tooltip.warning": "警告：可能會導致遊戲崩潰，請謹慎使用。",

@@ -17,17 +17,17 @@
 package dev.terminalmc.chatnotify;
 
 import com.mojang.datafixers.util.Pair;
-import dev.terminalmc.chatnotify.compat.commandkeys.CommandKeysWrapper;
-import dev.terminalmc.chatnotify.config.*;
+import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.config.Notification;
+import dev.terminalmc.chatnotify.config.StyleTarget;
+import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.util.ModLogger;
+import dev.terminalmc.chatnotify.util.ResponseUtil;
 import dev.terminalmc.chatnotify.util.text.FormatUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -49,11 +49,6 @@ public class ChatNotify {
      * determine sender identity.
      */
     public static final List<Pair<Long, String>> recentMessages = new ArrayList<>();
-
-    /**
-     * Stores activated (but not sent) response messages.
-     */
-    public static final List<Response> RESPONSES = new ArrayList<>();
 
     /**
      * Stores an unmodified copy of recent incoming chat messages.
@@ -84,7 +79,7 @@ public class ChatNotify {
     }
 
     public static void afterClientTick(Minecraft mc) {
-        tickResponses(mc);
+        ResponseUtil.tickResponses(mc);
 
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
@@ -99,60 +94,6 @@ public class ChatNotify {
                                     .withStyle(ChatFormatting.GOLD)
                     )
             ));
-        }
-    }
-
-    private static void tickResponses(Minecraft mc) {
-        if (mc.getConnection() == null || !mc.getConnection().isAcceptingMessages()) {
-            RESPONSES.clear();
-            return;
-        }
-
-        List<String> sending = new ArrayList<>();
-        RESPONSES.removeIf((resMsg) -> {
-            if (--resMsg.countdown <= 0) {
-                if (resMsg.sendingString != null && !resMsg.sendingString.isBlank()) {
-                    if (resMsg.type.equals(Response.Type.COMMANDKEYS)) {
-                        CommandKeysWrapper.trySend(resMsg.sendingString);
-                    } else {
-                        sending.add(resMsg.sendingString);
-                    }
-                }
-                return true;
-            }
-            return false;
-        });
-
-        sendMessages(sending, mc.getConnection());
-    }
-
-    private static void sendMessages(List<String> messages, ClientPacketListener connection) {
-        if (messages.isEmpty())
-            return;
-        Minecraft mc = Minecraft.getInstance();
-        switch (Config.get().sendMode) {
-            case SCREEN -> {
-                // Compat mode for mods mixing into handleChatInput
-                Screen oldScreen = mc.screen;
-                if (!(mc.screen instanceof ChatScreen)) {
-                    mc.setScreen(new ChatScreen(""));
-                }
-                if (mc.screen instanceof ChatScreen cs) {
-                    for (String msg : messages) {
-                        cs.handleChatInput(msg, false);
-                    }
-                }
-                mc.setScreen(oldScreen);
-            }
-            case PACKET -> {
-                for (String msg : messages) {
-                    if (msg.startsWith("/")) {
-                        connection.sendCommand(msg.substring(1));
-                    } else {
-                        connection.sendChat(msg);
-                    }
-                }
-            }
         }
     }
 

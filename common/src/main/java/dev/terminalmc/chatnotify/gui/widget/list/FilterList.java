@@ -552,7 +552,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 int fieldSpacing = 1;
                 int timeFieldWidth = Minecraft.getInstance().font.width("00000");
                 int msgFieldWidth =
-                        width - timeFieldWidth - list.tinyWidgetWidth - fieldSpacing * 2;
+                        width - timeFieldWidth * 2 - list.tinyWidgetWidth - fieldSpacing * 2;
                 int movingX = x;
 
                 // Drag reorder button
@@ -682,7 +682,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
 
                 // Delay field
                 TextField timeField =
-                        new TextField(x + width - timeFieldWidth, 0, timeFieldWidth, height);
+                        new TextField(x + width - timeFieldWidth * 2, 0, timeFieldWidth, height);
                 timeField.posIntValidator().strict();
                 timeField.setTooltip(Tooltip.create(localized(
                         "option",
@@ -693,6 +693,21 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 timeField.setResponder((s) -> message.delayTicks = Integer.parseInt(s.strip()));
                 timeField.setValue(String.valueOf(message.delayTicks));
                 elements.add(timeField);
+
+                // Cooldown field
+                TextField cooldownField =
+                        new TextField(x + width - timeFieldWidth, 0, timeFieldWidth, height);
+                cooldownField.posIntValidator().strict();
+                cooldownField.setTooltip(Tooltip.create(localized(
+                        "option",
+                        "notif.response.cooldown.tooltip"
+                )));
+                cooldownField.setTooltipDelay(Duration.ofMillis(500));
+                cooldownField.setMaxLength(5);
+                cooldownField.setResponder((s) ->
+                        message.cooldownTicks = Integer.parseInt(s.strip()));
+                cooldownField.setValue(String.valueOf(message.cooldownTicks));
+                elements.add(cooldownField);
 
                 // Delete button
                 elements.add(Button.builder(

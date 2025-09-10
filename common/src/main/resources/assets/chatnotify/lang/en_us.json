@@ -145,6 +145,7 @@
   "option.chatnotify.notif.response.commandkeys.key.tooltip": "Example: If the keybind is [B] or [LEFT CONTROL + B], this should be 'key.keyboard.b'.",
   "option.chatnotify.notif.response.commandkeys.limit_key": "Modifier Key",
   "option.chatnotify.notif.response.commandkeys.limit_key.tooltip": "Example: If the keybind is [LEFT CONTROL + B], this should be 'key.keyboard.left.control'. If the keybind is [B] this should be 'key.keyboard.unknown'.",
+  "option.chatnotify.notif.response.cooldown.tooltip": "Minimum time in ticks between consecutive sends.",
   "option.chatnotify.notif.response.list": "Response Messages %s",
   "option.chatnotify.notif.response.list.tooltip": "Chat messages or commands to be sent when this notification is activated.",
   "option.chatnotify.notif.response.list.tooltip.warning": "Warning: Can crash the game, use with caution.",

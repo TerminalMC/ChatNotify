@@ -145,6 +145,7 @@
   "option.chatnotify.notif.response.commandkeys.key.tooltip": "Пример: Если привязка клавиш [LEFT CONTROL + B], это поле должно быть 'key.keyboard.b'.",
   "option.chatnotify.notif.response.commandkeys.limit_key": "Клавиша-модификатор",
   "option.chatnotify.notif.response.commandkeys.limit_key.tooltip": "Пример: Если привязка клавиш [LEFT CONTROL + B], это поле должно быть 'key.keyboard.left.control'. Если привязка использует только одну клавишу, установите это значение как 'key.keyboard.unknown'.",
+  "option.chatnotify.notif.response.cooldown.tooltip": "Minimum time in ticks between consecutive sends.",
   "option.chatnotify.notif.response.list": "Ответные сообщения %s",
   "option.chatnotify.notif.response.list.tooltip": "Сообщения чата или команды, которые будут отправлены при активации этого уведомления.",
   "option.chatnotify.notif.response.list.tooltip.warning": "Предупреждение: Может вызвать сбой игры. Используйте с осторожностью.",

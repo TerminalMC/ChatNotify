@@ -31,9 +31,9 @@ public class Response implements StringSupplier {
     public final int version = VERSION;
 
     /**
-     * The active countdown value.
+     * The active cooldown value.
      */
-    public transient int countdown;
+    public transient int cooldown;
 
     /**
      * The processed version of {@link Response#string}
@@ -59,6 +59,12 @@ public class Response implements StringSupplier {
      */
     public int delayTicks;
     public static final int delayTicksDefault = 0;
+
+    /**
+     * The minimum time in ticks between consecutive sends.
+     */
+    public int cooldownTicks;
+    public static final int cooldownTicksDefault = 0;
 
     /**
      * Controls how {@link Response#string} is processed.
@@ -99,11 +105,12 @@ public class Response implements StringSupplier {
     /**
      * Not validated.
      */
-    Response(boolean enabled, String string, Type type, int delayTicks) {
+    Response(boolean enabled, String string, Type type, int delayTicks, int cooldownTicks) {
         this.enabled = enabled;
         this.string = string;
         this.type = type;
         this.delayTicks = delayTicks;
+        this.cooldownTicks = cooldownTicks;
     }
 
     @Override
@@ -157,6 +164,13 @@ public class Response implements StringSupplier {
                     silent
             );
 
+            int cooldownTicks = JsonUtil.getOrDefault(
+                    obj,
+                    "cooldownTicks",
+                    cooldownTicksDefault,
+                    silent
+            );
+
             Type type = JsonUtil.getOrDefault(
                     obj,
                     "type",
@@ -165,7 +179,7 @@ public class Response implements StringSupplier {
                     silent
             );
 
-            return new Response(enabled, string, type, delayTicks).validate();
+            return new Response(enabled, string, type, delayTicks, cooldownTicks).validate();
         }
     }
 }

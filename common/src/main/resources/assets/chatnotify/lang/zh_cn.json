@@ -145,6 +145,7 @@
   "option.chatnotify.notif.response.commandkeys.key.tooltip": "例如：如果快捷键是 [B] 或 [左控制 + B],这里应填写 'key.keyboard.b'",
   "option.chatnotify.notif.response.commandkeys.limit_key": "修饰键",
   "option.chatnotify.notif.response.commandkeys.limit_key.tooltip": "例如：如果快捷键是 [左控制 + B],这里应填写 'key.keyboard.left.control'如果快捷键是 [B],这里应填写 'key.keyboard.unknown'",
+  "option.chatnotify.notif.response.cooldown.tooltip": "Minimum time in ticks between consecutive sends.",
   "option.chatnotify.notif.response.list": "响应消息%s",
   "option.chatnotify.notif.response.list.tooltip": "当此通知激活时要发送的聊天消息或命令",
   "option.chatnotify.notif.response.list.tooltip.warning": "警告：可能会导致游戏崩溃,请谨慎使用",

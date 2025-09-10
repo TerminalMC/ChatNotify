@@ -23,6 +23,7 @@ import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Response;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.toast.NotificationToast;
+import dev.terminalmc.chatnotify.util.ResponseUtil;
 import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -592,8 +593,7 @@ public class MessageUtil {
                     }
                 }
                 totalDelay += msg.delayTicks;
-                msg.countdown = totalDelay;
-                ChatNotify.RESPONSES.add(msg);
+                ResponseUtil.send(msg, totalDelay);
             }
         }
     }

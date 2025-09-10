@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.2
+
+- Added a cooldown option for response messages
+
 ## 2.5.1
 
 - Updated Russian translation (rfin0)
