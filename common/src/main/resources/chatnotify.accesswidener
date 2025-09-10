@@ -2,3 +2,5 @@ accessWidener v2 named
 # https://fabricmc.net/wiki/tutorial:accesswideners
 accessible class net/minecraft/client/OptionInstance$SliderableValueSet
 accessible class net/minecraft/client/OptionInstance$ValueSet
+accessible method net/minecraft/client/gui/components/MultiLineEditBox <init> (Lnet/minecraft/client/gui/Font;IIIILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;IZIZZ)V
+accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
