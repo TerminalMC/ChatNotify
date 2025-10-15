@@ -125,6 +125,8 @@
   "option.chatnotify.notif.misc.msg.replacement.tooltip": "替换触发通知的聊天消息",
   "option.chatnotify.notif.misc.msg.status_bar": "状态栏消息",
   "option.chatnotify.notif.misc.msg.status_bar.tooltip": "在快捷栏上方显示几秒钟",
+  "option.chatnotify.notif.misc.msg.subtitle": "CHANGEME",
+  "option.chatnotify.notif.misc.msg.subtitle.tooltip": "CHANGEME",
   "option.chatnotify.notif.misc.msg.title": "标题消息",
   "option.chatnotify.notif.misc.msg.title.tooltip": "在屏幕中央显示几秒钟",
   "option.chatnotify.notif.misc.msg.toast": "弹窗消息",

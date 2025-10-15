@@ -125,6 +125,8 @@
   "option.chatnotify.notif.misc.msg.replacement.tooltip": "Заменяет сообщение в чате, которое вызвало уведомление",
   "option.chatnotify.notif.misc.msg.status_bar": "Сообщение в строке состояния",
   "option.chatnotify.notif.misc.msg.status_bar.tooltip": "Отображается над хотбаром (панелью быстрого доступа) несколько секунд.",
+  "option.chatnotify.notif.misc.msg.subtitle": "Сообщение субтитров",
+  "option.chatnotify.notif.misc.msg.subtitle.tooltip": "Небольшое сообщение, отображаемое под основным заголовком в течение короткого времени.",
   "option.chatnotify.notif.misc.msg.title": "Заголовок сообщения",
   "option.chatnotify.notif.misc.msg.title.tooltip": "Отображается в центре экрана в течение нескольких секунд",
   "option.chatnotify.notif.misc.msg.toast": "Всплывающее сообщение",

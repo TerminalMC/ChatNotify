@@ -139,6 +139,14 @@ public class Notification implements StringSupplier {
     public static final boolean titleMsgEnabledDefault = false;
 
     /**
+     * Optional message to display in subtitle text.
+     */
+    public String subtitleMsg;
+    public static final String subtitleMsgDefault = "";
+    public boolean subtitleMsgEnabled;
+    public static final boolean subtitleMsgEnabledDefault = false;
+
+    /**
      * Optional message to display in a toast popup.
      */
     public String toastMsg;
@@ -230,6 +238,8 @@ public class Notification implements StringSupplier {
             boolean statusBarMsgEnabled,
             String titleMsg,
             boolean titleMsgEnabled,
+            String subtitleMsg,
+            boolean subtitleMsgEnabled,
             String toastMsg,
             boolean toastMsgEnabled,
             String typedMsg,
@@ -261,6 +271,8 @@ public class Notification implements StringSupplier {
         this.statusBarMsgEnabled = statusBarMsgEnabled;
         this.titleMsg = titleMsg;
         this.titleMsgEnabled = titleMsgEnabled;
+        this.subtitleMsg = subtitleMsg;
+        this.subtitleMsgEnabled = subtitleMsgEnabled;
         this.toastMsg = toastMsg;
         this.toastMsgEnabled = toastMsgEnabled;
         this.typedMsg = typedMsg;
@@ -299,6 +311,8 @@ public class Notification implements StringSupplier {
                 statusBarMsgEnabledDefault,
                 titleMsgDefault,
                 titleMsgEnabledDefault,
+                subtitleMsgDefault,
+                subtitleMsgEnabledDefault,
                 toastMsgDefault,
                 toastMsgEnabledDefault,
                 typedMsgDefault,
@@ -337,6 +351,8 @@ public class Notification implements StringSupplier {
                 statusBarMsgEnabledDefault,
                 titleMsgDefault,
                 titleMsgEnabledDefault,
+                subtitleMsgDefault,
+                subtitleMsgEnabledDefault,
                 toastMsgDefault,
                 toastMsgEnabledDefault,
                 typedMsgDefault,
@@ -597,6 +613,20 @@ public class Notification implements StringSupplier {
                     silent
             );
 
+            String subtitleMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "subtitleMsg",
+                    subtitleMsgDefault,
+                    silent
+            );
+
+            boolean subtitleMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "subtitleMsgEnabled",
+                    subtitleMsgEnabledDefault,
+                    silent
+            );
+
             String toastMsg = JsonUtil.getOrDefault(
                     obj,
                     "toastMsg",
@@ -755,6 +785,8 @@ public class Notification implements StringSupplier {
                     statusBarMsgEnabled,
                     titleMsg,
                     titleMsgEnabled,
+                    subtitleMsg,
+                    subtitleMsgEnabled,
                     toastMsg,
                     toastMsgEnabled,
                     typedMsg,

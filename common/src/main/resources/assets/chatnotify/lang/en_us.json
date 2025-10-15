@@ -125,6 +125,8 @@
   "option.chatnotify.notif.misc.msg.replacement.tooltip": "Replaces the chat message that triggered the notification.",
   "option.chatnotify.notif.misc.msg.status_bar": "Status bar message",
   "option.chatnotify.notif.misc.msg.status_bar.tooltip": "Displayed above the hotbar for a few seconds.",
+  "option.chatnotify.notif.misc.msg.subtitle": "Subtitle message",
+  "option.chatnotify.notif.misc.msg.subtitle.tooltip": "A smaller message shown under the main title for a short time.",
   "option.chatnotify.notif.misc.msg.title": "Title message",
   "option.chatnotify.notif.misc.msg.title.tooltip": "Displayed in the middle of the screen for a few seconds.",
   "option.chatnotify.notif.misc.msg.toast": "Toast message",

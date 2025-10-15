@@ -550,8 +550,15 @@ public class MessageUtil {
                     ? msg
                     : convertMsg(notif.titleMsg, matcher, msg);
 
+            Component subdisplayMsg = notif.subtitleMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.subtitleMsg, matcher, msg);
+
             Minecraft.getInstance().gui.setTimes(notif.titleFadeIn, notif.titleStay, notif.titleFadeOut);
             Minecraft.getInstance().gui.setTitle(displayMsg);
+
+            if (notif.subtitleMsgEnabled)
+                Minecraft.getInstance().gui.setSubtitle(subdisplayMsg);
         }
     }
 
