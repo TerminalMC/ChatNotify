@@ -191,11 +191,11 @@ public class MiscOptionList extends OptionList {
         // register all label texts, so that they are properly aligned
         resetLabelWidth();
         registerLabel(localized("options", "notif.misc.timing.delay"));
-        registerLabel(localized("option", "notif.misc.timing.titlefadein"));
-        registerLabel(localized("option", "notif.misc.timing.titlestay"));
-        registerLabel(localized("option", "notif.misc.timing.titlefadeout"));
-        registerLabel(localized("option", "notif.misc.timing.statusbarstay"));
-        registerLabel(localized("option", "notif.misc.timing.toaststay"));
+        registerLabel(localized("option", "notif.misc.timing.title_fade_in"));
+        registerLabel(localized("option", "notif.misc.timing.title_stay"));
+        registerLabel(localized("option", "notif.misc.timing.title_fade_out"));
+        registerLabel(localized("option", "notif.misc.timing.status_bar_stay"));
+        registerLabel(localized("option", "notif.misc.timing.toast_stay"));
 
         addEntry(new OptionList.Entry.Text(
                 entryX,
@@ -211,9 +211,9 @@ public class MiscOptionList extends OptionList {
                 entryHeight,
                 () -> notif.soundSync,
                 (b) -> notif.soundSync = b,
-                localized("option", "notif.misc.timing.sounddelay"),
-                localized("option", "notif.misc.timing.sounddelay.tooltip.on"),
-                localized("option", "notif.misc.timing.sounddelay.tooltip.off")
+                localized("option", "notif.misc.timing.sound_delay"),
+                localized("option", "notif.misc.timing.sound_delay.tooltip.on"),
+                localized("option", "notif.misc.timing.sound_delay.tooltip.off")
         ));
         addEntry(new Entry.CustomLabeledMessageReset(
                 dynWideEntryX,
@@ -234,10 +234,10 @@ public class MiscOptionList extends OptionList {
                 () -> notif.titleFadeIn,
                 (s) -> notif.titleFadeIn = Integer.parseInt(s.strip()),
                 Notification.titleFadeInDefault,
-                localized("option", "notif.misc.timing.titlefadein"),
-                localized("option", "notif.misc.timing.titlefadein")
+                localized("option", "notif.misc.timing.title_fade_in"),
+                localized("option", "notif.misc.timing.title_fade_in")
                         .append(".\n")
-                        .append(localized("option", "notif.misc.timing.titlefadein.tooltip"))
+                        .append(localized("option", "notif.misc.timing.title_fade_in.tooltip"))
         ));
         addEntry(new Entry.CustomLabeledMessageReset(
                 dynWideEntryX,
@@ -246,10 +246,10 @@ public class MiscOptionList extends OptionList {
                 () -> notif.titleStay,
                 (s) -> notif.titleStay = Integer.parseInt(s.strip()),
                 Notification.titleStayDefault,
-                localized("option", "notif.misc.timing.titlestay"),
-                localized("option", "notif.misc.timing.titlestay")
+                localized("option", "notif.misc.timing.title_stay"),
+                localized("option", "notif.misc.timing.title_stay")
                         .append(".\n")
-                        .append(localized("option", "notif.misc.timing.titlestay.tooltip"))
+                        .append(localized("option", "notif.misc.timing.title_stay.tooltip"))
         ));
         addEntry(new Entry.CustomLabeledMessageReset(
                 dynWideEntryX,
@@ -258,10 +258,10 @@ public class MiscOptionList extends OptionList {
                 () -> notif.titleFadeOut,
                 (s) -> notif.titleFadeOut = Integer.parseInt(s.strip()),
                 Notification.titleFadeOutDefault,
-                localized("option", "notif.misc.timing.titlefadeout"),
-                localized("option", "notif.misc.timing.titlefadeout")
+                localized("option", "notif.misc.timing.title_fade_out"),
+                localized("option", "notif.misc.timing.title_fade_out")
                         .append(".\n")
-                        .append(localized("option", "notif.misc.timing.titlefadeout.tooltip"))
+                        .append(localized("option", "notif.misc.timing.title_fade_out.tooltip"))
         ));
         addEntry(new Entry.CustomLabeledMessageReset(
                 dynWideEntryX,
@@ -270,10 +270,10 @@ public class MiscOptionList extends OptionList {
                 () -> notif.statusBarStay,
                 (s) -> notif.statusBarStay = Integer.parseInt(s.strip()),
                 Notification.statusBarStayDefault,
-                localized("option", "notif.misc.timing.statusbarstay"),
-                localized("option", "notif.misc.timing.statusbarstay")
+                localized("option", "notif.misc.timing.status_bar_stay"),
+                localized("option", "notif.misc.timing.status_bar_stay")
                         .append(".\n")
-                        .append(localized("option", "notif.misc.timing.statusbarstay.tooltip"))
+                        .append(localized("option", "notif.misc.timing.status_bar_stay.tooltip"))
         ));
         addEntry(new Entry.CustomLabeledMessageReset(
                 dynWideEntryX,
@@ -282,10 +282,10 @@ public class MiscOptionList extends OptionList {
                 () -> notif.toastStay,
                 (s) -> notif.toastStay = Integer.parseInt(s.strip()),
                 Notification.toastStayDefault,
-                localized("option", "notif.misc.timing.toaststay"),
-                localized("option", "notif.misc.timing.toaststay")
+                localized("option", "notif.misc.timing.toast_stay"),
+                localized("option", "notif.misc.timing.toast_stay")
                         .append(".\n")
-                        .append(localized("option", "notif.misc.timing.toaststay.tooltip"))
+                        .append(localized("option", "notif.misc.timing.toast_stay.tooltip"))
         ));
 
         addEntry(new OptionList.Entry.Text(
