@@ -23,6 +23,7 @@ import dev.terminalmc.chatnotify.config.StyleTarget;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.util.ModLogger;
 import dev.terminalmc.chatnotify.util.ResponseUtil;
+import dev.terminalmc.chatnotify.util.TimingUtil;
 import dev.terminalmc.chatnotify.util.text.FormatUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -38,6 +39,7 @@ import java.util.Queue;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class ChatNotify {
+    private ChatNotify() {throw new IllegalStateException("This class should not be instantiated.");}
 
     public static final String MOD_ID = "chatnotify";
     public static final String MOD_NAME = "ChatNotify";
@@ -80,6 +82,7 @@ public class ChatNotify {
 
     public static void afterClientTick(Minecraft mc) {
         ResponseUtil.tickResponses(mc);
+        TimingUtil.tickActions();
 
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {

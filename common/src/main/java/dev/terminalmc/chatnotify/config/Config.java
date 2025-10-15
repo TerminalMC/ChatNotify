@@ -21,6 +21,7 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.util.JsonUtil;
 import dev.terminalmc.chatnotify.platform.Services;
 import dev.terminalmc.chatnotify.util.ResponseUtil;
+import dev.terminalmc.chatnotify.util.TimingUtil;
 import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -366,6 +367,7 @@ public class Config {
         instance = null;
         get();
         ResponseUtil.clear();
+        TimingUtil.clear();
         ChatNotify.updateUsernameNotif(instance);
         return instance;
     }

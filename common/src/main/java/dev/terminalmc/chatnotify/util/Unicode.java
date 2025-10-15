@@ -25,10 +25,11 @@ public enum Unicode {
     INFO("\u2139"), // ℹ
     KEY("\uD83D\uDD11"), // 🔑
     PAINT("\uD83C\uDF22"), // 🌢
+    RESET("\u267B"), // ♻
     SECTION("\u00A7"), // §
     SOUND("\uD83D\uDD0A"), // 🔊
     UP("\u2191"), // ↑
-    UP_DOWN("\u2191\u2193"); // ↑i
+    UP_DOWN("\u2191\u2193"); // ↑↓
 
     public final Character chr;
     public final String str;

@@ -24,7 +24,9 @@ import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.CommonComponents;
@@ -33,6 +35,8 @@ import net.minecraft.network.chat.Component;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static dev.terminalmc.chatnotify.gui.widget.list.root.notif.MiscOptionList.Entry.CustomLabeledMessageReset.registerLabel;
+import static dev.terminalmc.chatnotify.gui.widget.list.root.notif.MiscOptionList.Entry.CustomLabeledMessageReset.resetLabelWidth;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class MiscOptionList extends OptionList {
@@ -127,6 +131,21 @@ public class MiscOptionList extends OptionList {
                 dynWideEntryX,
                 dynWideEntryWidth,
                 entryHeight,
+                () -> notif.subtitleMsg,
+                (str) -> notif.subtitleMsg = str,
+                () -> notif.subtitleMsgEnabled,
+                (val) -> notif.subtitleMsgEnabled = val,
+                localized("option", "notif.misc.msg.subtitle"),
+                localized("option", "notif.misc.msg.subtitle")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.msg.subtitle.tooltip"))
+                        .append("\n\n")
+                        .append(localized("option", "notif.misc.msg.tooltip.blank_original"))
+        ));
+        addEntry(new Entry.CustomMessage(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
                 () -> notif.toastMsg,
                 (str) -> notif.toastMsg = str,
                 () -> notif.toastMsgEnabled,
@@ -169,6 +188,106 @@ public class MiscOptionList extends OptionList {
                         .append(localized("option", "notif.misc.msg.tooltip.blank_original"))
         ));
 
+        // register all label texts, so that they are properly aligned
+        resetLabelWidth();
+        registerLabel(localized("options", "notif.misc.timing.delay"));
+        registerLabel(localized("option", "notif.misc.timing.titlefadein"));
+        registerLabel(localized("option", "notif.misc.timing.titlestay"));
+        registerLabel(localized("option", "notif.misc.timing.titlefadeout"));
+        registerLabel(localized("option", "notif.misc.timing.statusbarstay"));
+        registerLabel(localized("option", "notif.misc.timing.toaststay"));
+
+        addEntry(new OptionList.Entry.Text(
+                entryX,
+                entryWidth,
+                entryHeight,
+                localized("option", "notif.misc.timing", Unicode.INFO.str),
+                Tooltip.create(localized("option", "notif.misc.timing.tooltip")),
+                -1
+        ));
+        addEntry(new Entry.CustomCycler(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.soundSync,
+                (b) -> notif.soundSync = b,
+                localized("option", "notif.misc.timing.sounddelay"),
+                localized("option", "notif.misc.timing.sounddelay.tooltip.on"),
+                localized("option", "notif.misc.timing.sounddelay.tooltip.off")
+        ));
+        addEntry(new Entry.CustomLabeledMessageReset(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.delay,
+                (s) -> notif.delay = Integer.parseInt(s.strip()),
+                Notification.timingDelayDefault,
+                localized("option", "notif.misc.timing.delay"),
+                localized("option", "notif.misc.timing.delay")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.timing.delay.tooltip"))
+        ));
+        addEntry(new Entry.CustomLabeledMessageReset(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.titleFadeIn,
+                (s) -> notif.titleFadeIn = Integer.parseInt(s.strip()),
+                Notification.titleFadeInDefault,
+                localized("option", "notif.misc.timing.titlefadein"),
+                localized("option", "notif.misc.timing.titlefadein")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.timing.titlefadein.tooltip"))
+        ));
+        addEntry(new Entry.CustomLabeledMessageReset(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.titleStay,
+                (s) -> notif.titleStay = Integer.parseInt(s.strip()),
+                Notification.titleStayDefault,
+                localized("option", "notif.misc.timing.titlestay"),
+                localized("option", "notif.misc.timing.titlestay")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.timing.titlestay.tooltip"))
+        ));
+        addEntry(new Entry.CustomLabeledMessageReset(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.titleFadeOut,
+                (s) -> notif.titleFadeOut = Integer.parseInt(s.strip()),
+                Notification.titleFadeOutDefault,
+                localized("option", "notif.misc.timing.titlefadeout"),
+                localized("option", "notif.misc.timing.titlefadeout")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.timing.titlefadeout.tooltip"))
+        ));
+        addEntry(new Entry.CustomLabeledMessageReset(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.statusBarStay,
+                (s) -> notif.statusBarStay = Integer.parseInt(s.strip()),
+                Notification.statusBarStayDefault,
+                localized("option", "notif.misc.timing.statusbarstay"),
+                localized("option", "notif.misc.timing.statusbarstay")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.timing.statusbarstay.tooltip"))
+        ));
+        addEntry(new Entry.CustomLabeledMessageReset(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.toastStay,
+                (s) -> notif.toastStay = Integer.parseInt(s.strip()),
+                Notification.toastStayDefault,
+                localized("option", "notif.misc.timing.toaststay"),
+                localized("option", "notif.misc.timing.toaststay")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.timing.toaststay.tooltip"))
+        ));
+
         addEntry(new OptionList.Entry.Text(
                 entryX,
                 entryWidth,
@@ -203,7 +322,7 @@ public class MiscOptionList extends OptionList {
 
     // Custom entries
 
-    private abstract static class Entry extends OptionList.Entry {
+    protected abstract static class Entry extends OptionList.Entry {
 
         private static class Controls extends Entry {
 
@@ -270,6 +389,82 @@ public class MiscOptionList extends OptionList {
                         Component.empty(),
                         (button, status) -> statusConsumer.accept(status)
                 ));
+            }
+        }
+
+        protected static class CustomLabeledMessageReset extends Entry {
+
+            CustomLabeledMessageReset(
+                    int x,
+                    int width,
+                    int height,
+                    Supplier<Integer> textSupplier,
+                    Consumer<String> textConsumer,
+                    int defaultVal,
+                    Component hint,
+                    Component tooltip
+            ) {
+                super();
+                int statusButtonWidth = Math.max(24, height);
+                int labelWidth = Math.min(250, longestLabelWidth);
+                int fieldWidth = width - statusButtonWidth - labelWidth - 2 * SPACE;
+
+                // Text label
+                StringWidget label = new StringWidget(x, 0, labelWidth, height, hint.copy().append(": "), Minecraft.getInstance().font);
+                label.alignLeft();
+                if (Minecraft.getInstance().font.width(hint.copy().append(": ").getString()) > 250) label.setTooltip(Tooltip.create(hint));
+                elements.add(label);
+
+                // Integer field
+                TextField titleField = new TextField(x + labelWidth + SPACE, 0, fieldWidth, height);
+                titleField.posIntValidator().strict();
+                titleField.setMaxLength(256);
+                titleField.setValue(textSupplier.get().toString());
+                titleField.setResponder(textConsumer);
+                titleField.setHint(hint);
+                titleField.setTooltip(Tooltip.create(tooltip));
+                elements.add(titleField);
+
+                // Reset button
+                elements.add(Button.builder(Component.literal(Unicode.RESET.str), (btn) -> {
+                        titleField.setValue(Integer.toString(defaultVal));
+                        textConsumer.accept(Integer.toString(defaultVal));
+                }).bounds(x + width - statusButtonWidth, 0, statusButtonWidth, height).build());
+            }
+
+            private static int longestLabelWidth = 0;
+            public static void registerLabel(Component text) {
+                int width = Minecraft.getInstance().font.width(text.copy().append(": ").getString());
+                if (width > longestLabelWidth)
+                        longestLabelWidth = width;
+            }
+
+            public static void resetLabelWidth() {
+                longestLabelWidth = 0;
+            }
+        }
+
+        private static class CustomCycler extends Entry {
+
+            CustomCycler(
+                    int x,
+                    int width,
+                    int height,
+                    Supplier<Boolean> statusSupplier,
+                    Consumer<Boolean> statusConsumer,
+                    Component hint,
+                    Component tooltipOn,
+                    Component tooltipOff
+            ) {
+                super();
+
+                elements.add(CycleButton.booleanBuilder(
+                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                )
+                .withInitialValue(statusSupplier.get())
+                .withTooltip((b) -> b ? Tooltip.create(tooltipOn) : Tooltip.create(tooltipOff))
+                .create(x, 0, width, height, hint.copy(), (btn, val) -> statusConsumer.accept(val)));
             }
         }
     }
