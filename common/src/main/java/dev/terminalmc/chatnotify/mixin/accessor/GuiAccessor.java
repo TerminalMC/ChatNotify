@@ -20,15 +20,11 @@ import net.minecraft.client.gui.Gui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-/**
- * Exposes the private overlayMessageTime field from Gui.
- * Lets ChatNotify adjust how long overlay messages stay visible.
- */
 @Mixin(Gui.class)
 public interface GuiAccessor {
     /**
      * Sets how long the overlay message remains visible (in ticks).
      */
     @Accessor("overlayMessageTime")
-    void setOverlayMessageTime(int ticks);
+    void chatnotify$setOverlayMessageTime(int ticks);
 }

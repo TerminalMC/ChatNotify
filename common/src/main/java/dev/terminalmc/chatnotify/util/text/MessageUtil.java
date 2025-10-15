@@ -532,7 +532,7 @@ public class MessageUtil {
                     : convertMsg(notif.statusBarMsg, matcher, msg);
             Gui gui = Minecraft.getInstance().gui;
             gui.setOverlayMessage(displayMsg, false);
-            ((GuiAccessor) gui).setOverlayMessageTime(notif.statusBarStay);
+            ((GuiAccessor) gui).chatnotify$setOverlayMessageTime(notif.statusBarStay);
         }
     }
 
