@@ -85,16 +85,11 @@ public class RootScreen extends OptionScreen {
         }
     }
 
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     private void updateTabTitle(TabKey tabKey) {
         MutableComponent title = Component.translatable(tabKey.key);
-        switch (tabKey) {
-            case NOTIFICATION -> {
-                if (!Config.get().getNotifs().isEmpty()) {
-                    title.append(" ");
-                    title.append(localized("common", "count", Config.get().getNotifs().size()));
-                }
-            }
+        if (tabKey == TabKey.NOTIFICATION && !Config.get().getNotifs().isEmpty()) {
+            title.append(" ");
+            title.append(localized("common", "count", Config.get().getNotifs().size()));
         }
         super.updateTabTitle(tabKey.key, title);
     }

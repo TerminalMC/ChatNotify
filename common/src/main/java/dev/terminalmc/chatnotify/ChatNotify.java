@@ -21,6 +21,7 @@ import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.StyleTarget;
 import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.platform.Services;
 import dev.terminalmc.chatnotify.util.ModLogger;
 import dev.terminalmc.chatnotify.util.ResponseUtil;
 import dev.terminalmc.chatnotify.util.TimingUtil;
@@ -59,6 +60,7 @@ public class ChatNotify {
 
     public static void init() {
         Config.getAndSave();
+        Services.COMMANDS.registerAll();
     }
 
     public static void onConfigSaved(Config config) {
