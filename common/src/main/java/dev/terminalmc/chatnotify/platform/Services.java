@@ -17,7 +17,6 @@
 package dev.terminalmc.chatnotify.platform;
 
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.platform.services.ICommandRegistrar;
 import dev.terminalmc.chatnotify.platform.services.IPlatformServices;
 
 import java.util.ServiceLoader;
@@ -26,7 +25,6 @@ public class Services {
     private Services() {throw new IllegalStateException("This class should not be instantiated.");}
 
     public static final IPlatformServices PLATFORM = load(IPlatformServices.class);
-    public static final ICommandRegistrar COMMANDS = load(ICommandRegistrar.class);
 
     public static <T> T load(Class<T> clazz) {
         final T loadedService = ServiceLoader.load(clazz)
