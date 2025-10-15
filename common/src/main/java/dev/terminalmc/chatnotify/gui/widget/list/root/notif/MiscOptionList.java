@@ -406,13 +406,13 @@ public class MiscOptionList extends OptionList {
             ) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
-                int labelWidth = Math.min(250, longestLabelWidth);
+                int labelWidth = MAX_SIZE_RELATIVE < longestLabelWidth/(double)width ? (int) Math.floor(MAX_SIZE_RELATIVE * width) : longestLabelWidth;
                 int fieldWidth = width - statusButtonWidth - labelWidth - 2 * SPACE;
 
                 // Text label
                 StringWidget label = new StringWidget(x, 0, labelWidth, height, hint.copy().append(": "), Minecraft.getInstance().font);
                 label.alignLeft();
-                if (Minecraft.getInstance().font.width(hint.copy().append(": ").getString()) > 250) label.setTooltip(Tooltip.create(hint));
+                if (Minecraft.getInstance().font.width(hint.copy().append(": ").getString())/(double)width > MAX_SIZE_RELATIVE) label.setTooltip(Tooltip.create(hint));
                 elements.add(label);
 
                 // Integer field
@@ -433,6 +433,7 @@ public class MiscOptionList extends OptionList {
             }
 
             private static int longestLabelWidth = 0;
+            private static final double MAX_SIZE_RELATIVE = 0.7;
             public static void registerLabel(Component text) {
                 int width = Minecraft.getInstance().font.width(text.copy().append(": ").getString());
                 if (width > longestLabelWidth)
