@@ -44,9 +44,8 @@ public class ChatHeadsCompat {
      */
     static void handleAddedMessage(
             Component message,
-            @Nullable ChatType.Bound bound,
             @Nullable PlayerInfo playerInfo
     ) {
-        ChatHeads.handleAddedMessage(message, bound, playerInfo);
+        ChatHeads.handleAddedMessage(message, playerInfo);
     }
 }

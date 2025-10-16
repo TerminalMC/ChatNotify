@@ -51,13 +51,12 @@ public class ChatHeadsWrapper {
      */
     public static void handleAddedMessage(
             Component message,
-            @Nullable ChatType.Bound bound,
             @Nullable PlayerInfo playerInfo
     ) {
         if (hasFailed)
             return;
         try {
-            ChatHeadsCompat.handleAddedMessage(message, bound, playerInfo);
+            ChatHeadsCompat.handleAddedMessage(message, playerInfo);
         } catch (NoClassDefFoundError | NoSuchMethodError ignored) {
             hasFailed = true;
         }

@@ -19,6 +19,8 @@ package dev.terminalmc.chatnotify.gui.widget;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
@@ -51,19 +53,19 @@ public class RightClickableButton extends Button {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
         if (GLFW.glfwGetMouseButton(
-                Minecraft.getInstance().getWindow().getWindow(),
+                Minecraft.getInstance().getWindow().handle(),
                 InputConstants.MOUSE_BUTTON_RIGHT
         ) == 1) {
             onRightPress();
         } else {
-            onPress();
+            onPress(event);
         }
     }
 
     @Override
-    protected boolean isValidClickButton(int button) {
-        return super.isValidClickButton(button) || button == InputConstants.MOUSE_BUTTON_RIGHT;
+    protected boolean isValidClickButton(MouseButtonInfo info) {
+        return super.isValidClickButton(info) || info.button() == InputConstants.MOUSE_BUTTON_RIGHT;
     }
 }
