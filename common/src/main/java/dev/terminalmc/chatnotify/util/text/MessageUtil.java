@@ -588,7 +588,7 @@ public class MessageUtil {
                     : convertMsg(notif.toastMsg, matcher, msg);
             // Convert from ticks to milliseconds
             Minecraft.getInstance()
-                    .getToasts()
+                    .getToastManager()
                     .addToast(new NotificationToast(displayMsg, notif.toastStay * 50));
         }
     }
