@@ -32,7 +32,6 @@ public class NotificationToast implements Toast {
 
     private static final ResourceLocation BACKGROUND_SPRITE =
             ResourceLocation.withDefaultNamespace("toast/advancement");
-    private static final int DISPLAY_TIME = 5000;
     private static final int WIDTH = 160;
     private static final int HEIGHT = 32;
     private static final int X_MARGIN = 10;
@@ -41,10 +40,12 @@ public class NotificationToast implements Toast {
 
     private final int lineHeight;
     private final List<FormattedCharSequence> messageLines;
+    private final int displayTime;
 
-    public NotificationToast(Component message) {
+    public NotificationToast(Component message, int displayTime) {
         this.messageLines = Minecraft.getInstance().font.split(message, WIDTH - X_MARGIN * 2);
         this.lineHeight = Minecraft.getInstance().font.lineHeight + LINE_SPACE;
+        this.displayTime = displayTime;
     }
 
     @Override
@@ -110,7 +111,7 @@ public class NotificationToast implements Toast {
             }
         }
 
-        return elapsedTime < DISPLAY_TIME * component.getNotificationDisplayTimeMultiplier()
+        return elapsedTime < displayTime * component.getNotificationDisplayTimeMultiplier()
                 ? Visibility.SHOW
                 : Visibility.HIDE;
     }

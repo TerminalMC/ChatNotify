@@ -23,9 +23,12 @@ import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Response;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.toast.NotificationToast;
+import dev.terminalmc.chatnotify.mixin.accessor.GuiAccessor;
 import dev.terminalmc.chatnotify.util.ResponseUtil;
+import dev.terminalmc.chatnotify.util.TimingUtil;
 import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -213,8 +216,8 @@ public class MessageUtil {
      * <p>
      * If the notification should be triggered, completes the relevant notification actions.
      * <p>
-     * Note: For performance and simplicity reasons, this method only allows one
-     * notification to be triggered by a given message.
+     * Note: For performance and simplicity reasons, this method only allows one notification to be
+     * triggered by a given message.
      *
      * @param msg           the message.
      * @param cleanStr      the message string, with all format codes removed.
@@ -315,9 +318,28 @@ public class MessageUtil {
 
                 // Send custom messages, after restyle in case of forwarding
                 // the entire message. Reset match by subsMatcher.find(0)
-                showStatusBarMsg(notif, msg, subsMatcher);
-                showTitleMsg(notif, msg, subsMatcher);
-                showToastMsg(notif, msg, subsMatcher);
+
+                // If there is no delay don't bother putting them in a queue
+                if (notif.delay == 0) {
+                    showStatusBarMsg(notif, msg, subsMatcher);
+                    showTitleMsg(notif, msg, subsMatcher);
+                    showToastMsg(notif, msg, subsMatcher);
+                } else {
+                    final Component fMsg = msg;
+
+                    if (notif.statusBarMsgEnabled)
+                        TimingUtil.send(
+                                () -> showStatusBarMsg(notif, fMsg, subsMatcher),
+                                notif.delay
+                        );
+
+                    if (notif.titleMsgEnabled)
+                        TimingUtil.send(() -> showTitleMsg(notif, fMsg, subsMatcher), notif.delay);
+
+                    if (notif.toastMsgEnabled)
+                        TimingUtil.send(() -> showToastMsg(notif, fMsg, subsMatcher), notif.delay);
+                }
+
                 typeTypedMsg(notif, msg, subsMatcher);
                 copyClipboardMsg(notif, msg, subsMatcher);
 
@@ -389,20 +411,29 @@ public class MessageUtil {
         if (notif.sound.isEnabled() && notif.sound.getVolume() > 0) {
             ResourceLocation location = notif.sound.getResourceLocation();
             if (location != null) {
-                Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(
-                        notif.sound.getResourceLocation(),
-                        Config.get().soundSource,
-                        notif.sound.getVolume(),
-                        notif.sound.getPitch(),
-                        SoundInstance.createUnseededRandom(),
-                        false,
-                        0,
-                        SoundInstance.Attenuation.NONE,
-                        0,
-                        0,
-                        0,
-                        true
-                ));
+                Runnable action = () -> Minecraft.getInstance().getSoundManager().play(
+                        new SimpleSoundInstance(
+                                notif.sound.getResourceLocation(),
+                                Config.get().soundSource,
+                                notif.sound.getVolume(),
+                                notif.sound.getPitch(),
+                                SoundInstance.createUnseededRandom(),
+                                false,
+                                0,
+                                SoundInstance.Attenuation.NONE,
+                                0,
+                                0,
+                                0,
+                                true
+                        )
+                );
+
+                if (notif.delay == 0 || !notif.soundSync) {
+                    action.run();
+                } else {
+                    TimingUtil.send(action, notif.delay);
+                }
+
                 return true;
             }
         }
@@ -503,7 +534,9 @@ public class MessageUtil {
             Component displayMsg = notif.statusBarMsg.isBlank()
                     ? msg
                     : convertMsg(notif.statusBarMsg, matcher, msg);
-            Minecraft.getInstance().gui.setOverlayMessage(displayMsg, false);
+            Gui gui = Minecraft.getInstance().gui;
+            gui.setOverlayMessage(displayMsg, false);
+            ((GuiAccessor) gui).chatnotify$setOverlayMessageTime(notif.statusBarStay);
         }
     }
 
@@ -517,9 +550,23 @@ public class MessageUtil {
      */
     private static void showTitleMsg(Notification notif, Component msg, Matcher matcher) {
         if (notif.titleMsgEnabled) {
-            Component displayMsg =
-                    notif.titleMsg.isBlank() ? msg : convertMsg(notif.titleMsg, matcher, msg);
+            Component displayMsg = notif.titleMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.titleMsg, matcher, msg);
+
+            Component subDisplayMsg = notif.subtitleMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.subtitleMsg, matcher, msg);
+
+            Minecraft.getInstance().gui.setTimes(
+                    notif.titleFadeIn,
+                    notif.titleStay,
+                    notif.titleFadeOut
+            );
             Minecraft.getInstance().gui.setTitle(displayMsg);
+
+            if (notif.subtitleMsgEnabled)
+                Minecraft.getInstance().gui.setSubtitle(subDisplayMsg);
         }
     }
 
@@ -533,9 +580,13 @@ public class MessageUtil {
      */
     private static void showToastMsg(Notification notif, Component msg, Matcher matcher) {
         if (notif.toastMsgEnabled) {
-            Component displayMsg =
-                    notif.toastMsg.isBlank() ? msg : convertMsg(notif.toastMsg, matcher, msg);
-            Minecraft.getInstance().getToasts().addToast(new NotificationToast(displayMsg));
+            Component displayMsg = notif.toastMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.toastMsg, matcher, msg);
+            // Convert from ticks to milliseconds
+            Minecraft.getInstance()
+                    .getToasts()
+                    .addToast(new NotificationToast(displayMsg, notif.toastStay * 50));
         }
     }
 
@@ -583,8 +634,7 @@ public class MessageUtil {
             int totalDelay = 0;
             for (Response msg : notif.responses) {
                 msg.sendingString = msg.string;
-                if (msg.type.equals(Response.Type.REGEX) && matcher != null
-                        && matcher.find(0)) {
+                if (msg.type.equals(Response.Type.REGEX) && matcher != null && matcher.find(0)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {
                         String replacement = matcher.group(i) == null ? "" : matcher.group(i);

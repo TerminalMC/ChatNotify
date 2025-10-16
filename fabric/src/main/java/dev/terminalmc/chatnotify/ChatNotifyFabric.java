@@ -16,7 +16,9 @@
 
 package dev.terminalmc.chatnotify;
 
+import dev.terminalmc.chatnotify.command.ChatNotifyCommand;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 public class ChatNotifyFabric implements ClientModInitializer {
@@ -25,6 +27,11 @@ public class ChatNotifyFabric implements ClientModInitializer {
     public void onInitializeClient() {
         // Register client after-tick event
         ClientTickEvents.END_CLIENT_TICK.register(ChatNotify::afterClientTick);
+
+        // Register all commands
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryEvent) -> {
+            ChatNotifyCommand.register(dispatcher);
+        });
 
         // Initialize client
         ChatNotify.init();

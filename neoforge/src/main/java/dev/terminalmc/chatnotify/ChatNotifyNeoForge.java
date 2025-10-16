@@ -16,6 +16,7 @@
 
 package dev.terminalmc.chatnotify;
 
+import dev.terminalmc.chatnotify.command.ChatNotifyCommand;
 import dev.terminalmc.chatnotify.gui.screen.RootScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -24,6 +25,7 @@ import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
 @Mod(
@@ -55,6 +57,14 @@ public class ChatNotifyNeoForge {
         @SubscribeEvent
         public static void clientTickEvent(ClientTickEvent.Post event) {
             ChatNotify.afterClientTick(Minecraft.getInstance());
+        }
+
+        /**
+         * Registers all commands.
+         */
+        @SubscribeEvent
+        public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+            ChatNotifyCommand.register(event.getDispatcher());
         }
     }
 }

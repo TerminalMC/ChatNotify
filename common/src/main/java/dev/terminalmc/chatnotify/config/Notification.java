@@ -139,6 +139,14 @@ public class Notification implements StringSupplier {
     public static final boolean titleMsgEnabledDefault = false;
 
     /**
+     * Optional message to display in subtitle text.
+     */
+    public String subtitleMsg;
+    public static final String subtitleMsgDefault = "";
+    public boolean subtitleMsgEnabled;
+    public static final boolean subtitleMsgEnabledDefault = false;
+
+    /**
      * Optional message to display in a toast popup.
      */
     public String toastMsg;
@@ -161,6 +169,24 @@ public class Notification implements StringSupplier {
     public static final String clipboardMsgDefault = "";
     public boolean clipboardMsgEnabled;
     public static final boolean clipboardMsgEnabledDefault = false;
+
+    /**
+     * Optional message timing (status bar, title text or toast popup).
+     */
+    public boolean soundSync;
+    public static final boolean soundSyncDefault = true;
+    public int delay;
+    public static final int timingDelayDefault = 0;
+    public int titleFadeIn;
+    public static final int titleFadeInDefault = 10;
+    public int titleStay;
+    public static final int titleStayDefault = 70;
+    public int titleFadeOut;
+    public static final int titleFadeOutDefault = 20;
+    public int statusBarStay;
+    public static final int statusBarStayDefault = 60;
+    public int toastStay;
+    public static final int toastStayDefault = 100;
 
     /**
      * A list of {@link Trigger} instances, of which any one can trigger this instance.
@@ -212,12 +238,21 @@ public class Notification implements StringSupplier {
             boolean statusBarMsgEnabled,
             String titleMsg,
             boolean titleMsgEnabled,
+            String subtitleMsg,
+            boolean subtitleMsgEnabled,
             String toastMsg,
             boolean toastMsgEnabled,
             String typedMsg,
             boolean typedMsgEnabled,
             String clipboardMsg,
             boolean clipboardMsgEnabled,
+            boolean soundSync,
+            int delay,
+            int titleFadeIn,
+            int titleStay,
+            int titleFadeOut,
+            int statusBarStay,
+            int toastStay,
             List<Trigger> triggers,
             List<Trigger> inclusionTriggers,
             List<Trigger> exclusionTriggers,
@@ -236,12 +271,21 @@ public class Notification implements StringSupplier {
         this.statusBarMsgEnabled = statusBarMsgEnabled;
         this.titleMsg = titleMsg;
         this.titleMsgEnabled = titleMsgEnabled;
+        this.subtitleMsg = subtitleMsg;
+        this.subtitleMsgEnabled = subtitleMsgEnabled;
         this.toastMsg = toastMsg;
         this.toastMsgEnabled = toastMsgEnabled;
         this.typedMsg = typedMsg;
         this.typedMsgEnabled = typedMsgEnabled;
         this.clipboardMsg = clipboardMsg;
         this.clipboardMsgEnabled = clipboardMsgEnabled;
+        this.soundSync = soundSync;
+        this.delay = delay;
+        this.titleFadeIn = titleFadeIn;
+        this.titleStay = titleStay;
+        this.titleFadeOut = titleFadeOut;
+        this.statusBarStay = statusBarStay;
+        this.toastStay = toastStay;
         this.triggers = triggers;
         this.inclusionTriggers = inclusionTriggers;
         this.exclusionTriggers = exclusionTriggers;
@@ -267,12 +311,21 @@ public class Notification implements StringSupplier {
                 statusBarMsgEnabledDefault,
                 titleMsgDefault,
                 titleMsgEnabledDefault,
+                subtitleMsgDefault,
+                subtitleMsgEnabledDefault,
                 toastMsgDefault,
                 toastMsgEnabledDefault,
                 typedMsgDefault,
                 typedMsgEnabledDefault,
                 clipboardMsgDefault,
                 clipboardMsgEnabledDefault,
+                soundSyncDefault,
+                timingDelayDefault,
+                titleFadeInDefault,
+                titleStayDefault,
+                titleFadeOutDefault,
+                statusBarStayDefault,
+                toastStayDefault,
                 new ArrayList<>(List.of(new Trigger("Profile name"), new Trigger("Display name"))),
                 inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
@@ -298,12 +351,21 @@ public class Notification implements StringSupplier {
                 statusBarMsgEnabledDefault,
                 titleMsgDefault,
                 titleMsgEnabledDefault,
+                subtitleMsgDefault,
+                subtitleMsgEnabledDefault,
                 toastMsgDefault,
                 toastMsgEnabledDefault,
                 typedMsgDefault,
                 typedMsgEnabledDefault,
                 clipboardMsgDefault,
                 clipboardMsgEnabledDefault,
+                soundSyncDefault,
+                timingDelayDefault,
+                titleFadeInDefault,
+                titleStayDefault,
+                titleFadeOutDefault,
+                statusBarStayDefault,
+                toastStayDefault,
                 new ArrayList<>(List.of(new Trigger(""))),
                 inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
@@ -551,6 +613,20 @@ public class Notification implements StringSupplier {
                     silent
             );
 
+            String subtitleMsg = JsonUtil.getOrDefault(
+                    obj,
+                    "subtitleMsg",
+                    subtitleMsgDefault,
+                    silent
+            );
+
+            boolean subtitleMsgEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "subtitleMsgEnabled",
+                    subtitleMsgEnabledDefault,
+                    silent
+            );
+
             String toastMsg = JsonUtil.getOrDefault(
                     obj,
                     "toastMsg",
@@ -591,6 +667,55 @@ public class Notification implements StringSupplier {
                     "clipboardMsgEnabled",
                     clipboardMsgEnabledDefault,
                     silent
+            );
+
+            boolean soundSync = JsonUtil.getOrDefault(
+                obj,
+                "soundSync",
+                soundSyncDefault,
+                silent
+            );
+
+            int delay = JsonUtil.getOrDefault(
+                obj,
+                "delay",
+                timingDelayDefault,
+                silent
+            );
+
+            int titleFadeIn = JsonUtil.getOrDefault(
+                obj,
+                "titleFadeIn",
+                titleFadeInDefault,
+                silent
+            );
+
+            int titleStay = JsonUtil.getOrDefault(
+                obj,
+                "titleStay",
+                titleStayDefault,
+                silent
+            );
+
+            int titleFadeOut = JsonUtil.getOrDefault(
+                obj,
+                "titleFadeOut",
+                titleFadeOutDefault,
+                silent
+            );
+
+            int statusBarStay = JsonUtil.getOrDefault(
+                obj,
+                "statusBarStay",
+                statusBarStayDefault,
+                silent
+            );
+
+            int toastStay = JsonUtil.getOrDefault(
+                obj,
+                "toastStay",
+                toastStayDefault,
+                silent
             );
 
             List<Trigger> triggers = JsonUtil.getOrDefault(
@@ -660,12 +785,21 @@ public class Notification implements StringSupplier {
                     statusBarMsgEnabled,
                     titleMsg,
                     titleMsgEnabled,
+                    subtitleMsg,
+                    subtitleMsgEnabled,
                     toastMsg,
                     toastMsgEnabled,
                     typedMsg,
                     typedMsgEnabled,
                     clipboardMsg,
                     clipboardMsgEnabled,
+                    soundSync,
+                    delay,
+                    titleFadeIn,
+                    titleStay,
+                    titleFadeOut,
+                    statusBarStay,
+                    toastStay,
                     triggers,
                     inclusionTriggers,
                     exclusionTriggers,
