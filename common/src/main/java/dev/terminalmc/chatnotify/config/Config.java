@@ -133,7 +133,7 @@ public class Config {
      * The default {@link TextStyle} color for new {@link Notification} instances.
      */
     public int defaultColor;
-    public static final int defaultColorDefault = 0xffc400;
+    public static final int defaultColorDefault = 0xFFffc400;
 
     /**
      * The default {@link Sound} identifier for new {@link Notification} instances.
@@ -502,11 +502,11 @@ public class Config {
      */
     static int validateColor(int color) {
         if (color >= 0 && color <= 0xFFFFFF) {
-            // In RGB range; return value
-            return color;
+            // In RGB range; add to ARGB
+            return color | 0xFF000000;
         } else {
-            // Out of RGB range; mask to RGB
-            return color & 0xFFFFFF;
+            // Out of RGB range; return value
+            return color;
         }
     }
 
