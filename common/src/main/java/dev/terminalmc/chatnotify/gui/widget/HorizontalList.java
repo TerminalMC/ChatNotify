@@ -26,7 +26,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -246,7 +246,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      */
     protected void renderListBackground(GuiGraphics graphics) {
         graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 MENU_LIST_BACKGROUND,
                 getX(),
                 getY(),
@@ -305,7 +305,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             );
 
             graphics.blitSprite(
-                    RenderType::guiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     SCROLLER_BACKGROUND_SPRITE,
                     getX(),
                     y,
@@ -313,7 +313,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                     SCROLLBAR_HEIGHT
             );
             graphics.blitSprite(
-                    RenderType::guiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     SCROLLER_SPRITE,
                     scrollerPos,
                     y,
@@ -335,7 +335,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      */
     protected void renderSeparators(GuiGraphics guiGraphics) {
         guiGraphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 LEFT_SEPARATOR,
                 getX() - 2,
                 getY() - 1,
@@ -347,7 +347,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 32
         );
         guiGraphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 RIGHT_SEPARATOR,
                 getRight(),
                 getY() - 1,
@@ -359,7 +359,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 32
         );
         guiGraphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 Screen.HEADER_SEPARATOR,
                 getX() - 1,
                 getY() - 2,
@@ -371,7 +371,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 2
         );
         guiGraphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 Screen.FOOTER_SEPARATOR,
                 getX() - 1,
                 getBottom(),
