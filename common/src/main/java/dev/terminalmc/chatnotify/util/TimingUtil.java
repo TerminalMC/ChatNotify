@@ -22,6 +22,7 @@ import java.util.List;
 public class TimingUtil {
 
     private TimingUtil() {
+        throw new IllegalStateException("This class should not be instantiated.");
     }
 
     /**

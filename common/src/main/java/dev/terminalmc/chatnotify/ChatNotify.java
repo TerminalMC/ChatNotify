@@ -39,7 +39,6 @@ import java.util.Queue;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class ChatNotify {
-    private ChatNotify() {throw new IllegalStateException("This class should not be instantiated.");}
 
     public static final String MOD_ID = "chatnotify";
     public static final String MOD_NAME = "ChatNotify";

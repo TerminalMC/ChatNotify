@@ -22,9 +22,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Gui.class)
 public interface GuiAccessor {
-    /**
-     * Sets how long the overlay message remains visible (in ticks).
-     */
+
     @Accessor("overlayMessageTime")
     void chatnotify$setOverlayMessageTime(int ticks);
 }

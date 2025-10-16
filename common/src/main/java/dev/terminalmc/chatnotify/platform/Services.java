@@ -22,7 +22,6 @@ import dev.terminalmc.chatnotify.platform.services.IPlatformServices;
 import java.util.ServiceLoader;
 
 public class Services {
-    private Services() {throw new IllegalStateException("This class should not be instantiated.");}
 
     public static final IPlatformServices PLATFORM = load(IPlatformServices.class);
 

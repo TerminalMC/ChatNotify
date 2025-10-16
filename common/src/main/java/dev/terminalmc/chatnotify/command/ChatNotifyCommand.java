@@ -19,22 +19,22 @@ package dev.terminalmc.chatnotify.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.gui.screen.RootScreen;
 import net.minecraft.client.Minecraft;
 
 public class ChatNotifyCommand {
-    private ChatNotifyCommand() {throw new IllegalStateException("This class should not be instantiated.");}
+
+    private ChatNotifyCommand() {
+        throw new IllegalStateException("This class should not be instantiated.");
+    }
 
     public static <S> void register(CommandDispatcher<S> dispatcher) {
-        dispatcher.register(LiteralArgumentBuilder.<S>literal(ChatNotify.MOD_ID)
-            .executes((ctx) -> {
-                Minecraft mc = Minecraft.getInstance();
-                mc.tell(() -> mc.setScreen(new RootScreen(mc.screen)));
+        dispatcher.register(LiteralArgumentBuilder.<S>literal(ChatNotify.MOD_ID).executes((ctx) -> {
+            Minecraft mc = Minecraft.getInstance();
+            mc.tell(() -> mc.setScreen(new RootScreen(mc.screen)));
 
-                return Command.SINGLE_SUCCESS;
-            })
-        );
+            return Command.SINGLE_SUCCESS;
+        }));
     }
 }

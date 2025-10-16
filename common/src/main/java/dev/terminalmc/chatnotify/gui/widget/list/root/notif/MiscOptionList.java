@@ -394,6 +394,9 @@ public class MiscOptionList extends OptionList {
 
         protected static class CustomLabeledMessageReset extends Entry {
 
+            private static final double MAX_SIZE_RELATIVE = 0.7;
+            private static int longestLabelWidth = 0;
+
             CustomLabeledMessageReset(
                     int x,
                     int width,
@@ -406,13 +409,25 @@ public class MiscOptionList extends OptionList {
             ) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
-                int labelWidth = MAX_SIZE_RELATIVE < longestLabelWidth/(double)width ? (int) Math.floor(MAX_SIZE_RELATIVE * width) : longestLabelWidth;
+                int labelWidth = MAX_SIZE_RELATIVE < longestLabelWidth / (double) width
+                        ? (int) Math.floor(MAX_SIZE_RELATIVE * width)
+                        : longestLabelWidth;
                 int fieldWidth = width - statusButtonWidth - labelWidth - 2 * SPACE;
 
                 // Text label
-                StringWidget label = new StringWidget(x, 0, labelWidth, height, hint.copy().append(": "), Minecraft.getInstance().font);
+                Component labelText = hint.copy().append(": ");
+                StringWidget label = new StringWidget(
+                        x,
+                        0,
+                        labelWidth,
+                        height,
+                        labelText,
+                        Minecraft.getInstance().font
+                );
                 label.alignLeft();
-                if (Minecraft.getInstance().font.width(hint.copy().append(": ").getString())/(double)width > MAX_SIZE_RELATIVE) label.setTooltip(Tooltip.create(hint));
+                if (Minecraft.getInstance().font.width(labelText.getString())
+                        / (double) width > MAX_SIZE_RELATIVE)
+                    label.setTooltip(Tooltip.create(hint));
                 elements.add(label);
 
                 // Integer field
@@ -426,18 +441,20 @@ public class MiscOptionList extends OptionList {
                 elements.add(titleField);
 
                 // Reset button
-                elements.add(Button.builder(Component.literal(Unicode.RESET.str), (btn) -> {
-                        titleField.setValue(Integer.toString(defaultVal));
-                        textConsumer.accept(Integer.toString(defaultVal));
-                }).bounds(x + width - statusButtonWidth, 0, statusButtonWidth, height).build());
+                elements.add(Button.builder(
+                        Component.literal(Unicode.RESET.str), (btn) -> {
+                            titleField.setValue(Integer.toString(defaultVal));
+                            textConsumer.accept(Integer.toString(defaultVal));
+                        }
+                ).bounds(x + width - statusButtonWidth, 0, statusButtonWidth, height).build());
             }
 
-            private static int longestLabelWidth = 0;
-            private static final double MAX_SIZE_RELATIVE = 0.7;
             public static void registerLabel(Component text) {
-                int width = Minecraft.getInstance().font.width(text.copy().append(": ").getString());
+                int width = Minecraft.getInstance().font.width(
+                        text.copy().append(": ").getString()
+                );
                 if (width > longestLabelWidth)
-                        longestLabelWidth = width;
+                    longestLabelWidth = width;
             }
 
             public static void resetLabelWidth() {
@@ -460,12 +477,21 @@ public class MiscOptionList extends OptionList {
                 super();
 
                 elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
-                )
-                .withInitialValue(statusSupplier.get())
-                .withTooltip((b) -> b ? Tooltip.create(tooltipOn) : Tooltip.create(tooltipOff))
-                .create(x, 0, width, height, hint.copy(), (btn, val) -> statusConsumer.accept(val)));
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                        )
+                        .withInitialValue(statusSupplier.get())
+                        .withTooltip((b) -> b
+                                ? Tooltip.create(tooltipOn)
+                                : Tooltip.create(tooltipOff))
+                        .create(
+                                x,
+                                0,
+                                width,
+                                height,
+                                hint.copy(),
+                                (btn, val) -> statusConsumer.accept(val)
+                        ));
             }
         }
     }
