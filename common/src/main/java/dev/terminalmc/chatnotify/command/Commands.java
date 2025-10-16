@@ -37,7 +37,7 @@ public class Commands {
         //noinspection unchecked
         dispatcher.register((LiteralArgumentBuilder<S>) literal(ChatNotify.MOD_ID)
                 .executes((ctx) -> {
-                    mc.tell(() -> mc.setScreen(new RootScreen(mc.screen)));
+                    mc.schedule(() -> mc.setScreen(new RootScreen(mc.screen)));
                     return Command.SINGLE_SUCCESS;
                 })
         );
