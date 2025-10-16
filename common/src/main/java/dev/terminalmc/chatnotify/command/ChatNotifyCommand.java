@@ -32,7 +32,7 @@ public class ChatNotifyCommand {
     public static <S> void register(CommandDispatcher<S> dispatcher) {
         dispatcher.register(LiteralArgumentBuilder.<S>literal(ChatNotify.MOD_ID).executes((ctx) -> {
             Minecraft mc = Minecraft.getInstance();
-            mc.tell(() -> mc.setScreen(new RootScreen(mc.screen)));
+            mc.schedule(() -> mc.setScreen(new RootScreen(mc.screen)));
 
             return Command.SINGLE_SUCCESS;
         }));
