@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.0
+
+- Added a subtitle custom message option (WehrWolff)
+- Added timing options for custom messages (WehrWolff)
+- Added a `/chatnotify` command to open config (WehrWolff)
+
 ## 2.5.2
 
 - Added a cooldown option for response messages
