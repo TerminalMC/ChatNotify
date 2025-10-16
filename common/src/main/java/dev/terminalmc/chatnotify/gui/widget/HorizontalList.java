@@ -27,6 +27,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -246,7 +247,18 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      */
     protected void renderListBackground(GuiGraphics graphics) {
         RenderSystem.enableBlend();
-        graphics.blit(MENU_LIST_BACKGROUND, getX(), getY(), 0, 0, getWidth(), getHeight(), 32, 32);
+        graphics.blit(
+                RenderType::guiTextured,
+                MENU_LIST_BACKGROUND,
+                getX(),
+                getY(),
+                0,
+                0,
+                getWidth(),
+                getHeight(),
+                32,
+                32
+        );
         RenderSystem.disableBlend();
     }
 
@@ -297,13 +309,21 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
 
             RenderSystem.enableBlend();
             graphics.blitSprite(
+                    RenderType::guiTextured,
                     SCROLLER_BACKGROUND_SPRITE,
                     getX(),
                     y,
                     getWidth(),
                     SCROLLBAR_HEIGHT
             );
-            graphics.blitSprite(SCROLLER_SPRITE, scrollerPos, y, scrollerWidth, SCROLLBAR_HEIGHT);
+            graphics.blitSprite(
+                    RenderType::guiTextured,
+                    SCROLLER_SPRITE,
+                    scrollerPos,
+                    y,
+                    scrollerWidth,
+                    SCROLLBAR_HEIGHT
+            );
             RenderSystem.disableBlend();
         }
     }
@@ -321,6 +341,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     protected void renderSeparators(GuiGraphics guiGraphics) {
         RenderSystem.enableBlend();
         guiGraphics.blit(
+                RenderType::guiTextured,
                 LEFT_SEPARATOR,
                 getX() - 2,
                 getY() - 1,
@@ -332,6 +353,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 32
         );
         guiGraphics.blit(
+                RenderType::guiTextured,
                 RIGHT_SEPARATOR,
                 getRight(),
                 getY() - 1,
@@ -343,6 +365,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 32
         );
         guiGraphics.blit(
+                RenderType::guiTextured,
                 Screen.HEADER_SEPARATOR,
                 getX() - 1,
                 getY() - 2,
@@ -354,6 +377,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 2
         );
         guiGraphics.blit(
+                RenderType::guiTextured,
                 Screen.FOOTER_SEPARATOR,
                 getX() - 1,
                 getBottom(),

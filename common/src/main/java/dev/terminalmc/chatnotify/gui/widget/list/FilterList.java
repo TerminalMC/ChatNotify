@@ -41,7 +41,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
@@ -980,9 +980,9 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                             notif.textStyle.color = color;
                             float[] hsv = new float[3];
                             Color.RGBtoHSB(
-                                    FastColor.ARGB32.red(color),
-                                    FastColor.ARGB32.green(color),
-                                    FastColor.ARGB32.blue(color),
+                                    ARGB.red(color),
+                                    ARGB.green(color),
+                                    ARGB.blue(color),
                                     hsv
                             );
                             if (hsv[2] < 0.1)

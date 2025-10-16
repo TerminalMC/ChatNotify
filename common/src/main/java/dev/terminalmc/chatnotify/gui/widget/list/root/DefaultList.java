@@ -35,7 +35,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 
 import java.awt.*;
 
@@ -149,9 +149,9 @@ public class DefaultList extends OptionList {
                         ).setStyle(Style.EMPTY.withColor(textColor)));
                         float[] hsv = new float[3];
                         Color.RGBtoHSB(
-                                FastColor.ARGB32.red(color),
-                                FastColor.ARGB32.green(color),
-                                FastColor.ARGB32.blue(color),
+                                ARGB.red(color),
+                                ARGB.green(color),
+                                ARGB.blue(color),
                                 hsv
                         );
                         if (hsv[2] < 0.1)
