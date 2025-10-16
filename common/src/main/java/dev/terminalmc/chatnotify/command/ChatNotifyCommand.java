@@ -26,7 +26,7 @@ import net.minecraft.client.Minecraft;
 public class ChatNotifyCommand {
 
     private ChatNotifyCommand() {
-        throw new IllegalStateException("This class should not be instantiated.");
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
     }
 
     public static <S> void register(CommandDispatcher<S> dispatcher) {
