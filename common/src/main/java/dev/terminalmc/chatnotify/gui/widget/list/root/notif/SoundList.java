@@ -30,7 +30,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
+import net.minecraft.client.gui.screens.SoundOptionsScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.CommonComponents;
@@ -120,12 +120,13 @@ public class SoundList extends OptionList {
             OptionScreen screen,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             Sound sound
     ) {
-        super(mc, screen, width, height, y, entryWidth, entryHeight, 1);
+        super(mc, screen, width, height, top, bottom, entryWidth, entryHeight, 1);
         this.sound = sound;
     }
 
@@ -299,7 +300,7 @@ public class SoundList extends OptionList {
                     int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                     int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                     int wX = x + (width / 2) - (wWidth / 2);
-                    int wY = list.getY();
+                    int wY = list.y0;
                     list.screen.setOverlayWidget(new DropdownTextField(
                             wX,
                             wY,

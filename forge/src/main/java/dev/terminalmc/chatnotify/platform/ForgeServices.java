@@ -17,13 +17,13 @@
 package dev.terminalmc.chatnotify.platform;
 
 import dev.terminalmc.chatnotify.platform.services.IPlatformServices;
-import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.fml.loading.LoadingModList;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.loading.LoadingModList;
 
 import java.nio.file.Path;
 
-public class NeoForgeServices implements IPlatformServices {
+public class ForgeServices implements IPlatformServices {
 
     @Override
     public boolean isDevEnv() {
@@ -37,7 +37,7 @@ public class NeoForgeServices implements IPlatformServices {
 
     @Override
     public String getPlatformName() {
-        return "NeoForge";
+        return "Forge";
     }
 
     @Override
