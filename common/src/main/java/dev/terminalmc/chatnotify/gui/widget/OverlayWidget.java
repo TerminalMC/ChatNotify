@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.widget;
 
 import com.mojang.blaze3d.platform.Window;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
+import dev.terminalmc.chatnotify.mixin.accessor.AbstractWidgetAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -118,7 +119,7 @@ public abstract class OverlayWidget extends AbstractWidget {
     public void updateBounds(int screenWidth, int screenHeight) {
         // Proportional resizing
         super.setWidth(getNominalWidth(screenWidth));
-        super.setHeight(getNominalHeight(screenHeight));
+        ((AbstractWidgetAccessor) this).chatnotify$setHeight(getNominalHeight(screenHeight));
         // Recenter
         super.setX(screenWidth / 2 - getWidth() / 2);
         super.setY(screenHeight / 2 - getHeight() / 2);
@@ -147,7 +148,6 @@ public abstract class OverlayWidget extends AbstractWidget {
      * @see OverlayWidget#checkWidth
      * @see OverlayWidget#checkHeight
      */
-    @Override
     public void setSize(int width, int height) {
         setWidth(width);
         setHeight(height);
@@ -168,9 +168,8 @@ public abstract class OverlayWidget extends AbstractWidget {
      * @throws IllegalArgumentException if {@code height} is out of range.
      * @see OverlayWidget#checkHeight
      */
-    @Override
     public void setHeight(int height) {
-        super.setHeight(checkHeight(height));
+        ((AbstractWidgetAccessor) this).chatnotify$setHeight(checkHeight(height));
         init();
     }
 
