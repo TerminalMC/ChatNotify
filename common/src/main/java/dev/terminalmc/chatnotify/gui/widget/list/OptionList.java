@@ -19,6 +19,7 @@ package dev.terminalmc.chatnotify.gui.widget.list;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
+import dev.terminalmc.chatnotify.mixin.accessor.AbstractWidgetAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -31,7 +32,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -46,9 +46,8 @@ import java.util.function.Supplier;
  * {@link OptionList#itemHeight}. The actual height of list entries, specified by
  * {@link OptionList#entryHeight}, can be less but should not be more.
  * <p>
- * Note: If you want multiple widgets to appear side-by-side, you must
- * add them all to a single {@link Entry}'s list of widgets, which are all rendered at the same list
- * level.
+ * Note: If you want multiple widgets to appear side-by-side, you must add them all to a single
+ * {@link Entry}'s list of widgets, which are all rendered at the same list level.
  */
 public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
 
@@ -76,12 +75,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             OptionScreen screen,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpacing
     ) {
-        super(mc, width, height, y, entryHeight + entrySpacing);
+        super(mc, width, height, top, bottom, entryHeight + entrySpacing);
         this.mc = mc;
         this.screen = screen;
         this.entryWidth = entryWidth;
@@ -165,8 +165,8 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
      * observable performance benefit.
      */
     @Override
-    public void updateSizeAndPosition(int width, int height, int y) {
-        super.updateSizeAndPosition(width, height, y);
+    public void updateSize(int width, int height, int top, int bottom) {
+        super.updateSize(width, height, top, bottom);
         updateElementBounds();
         init();
     }
@@ -182,11 +182,6 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         return width / 2 + rowWidth / 2;
     }
 
-    @Override
-    protected boolean isValidMouseClick(int button) {
-        return button == 0 || button == 1;
-    }
-
     /**
      * Base implementation of {@link Entry}, with common entries.
      */
@@ -196,16 +191,9 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         public static final int SPACE_SMALL = OptionScreen.ELEMENT_SPACING_NARROW;
         public static final int SPACE_TINY = OptionScreen.ELEMENT_SPACING_FINE;
 
-        public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/options_button"),
-                ResourceLocation.fromNamespaceAndPath(
-                        ChatNotify.MOD_ID,
-                        "widget/options_button_disabled"
-                ),
-                ResourceLocation.fromNamespaceAndPath(
-                        ChatNotify.MOD_ID,
-                        "widget/options_button_highlighted"
-                )
+        public static final ResourceLocation OPTIONS_ICON = new ResourceLocation(
+                ChatNotify.MOD_ID,
+                "textures/gui/sprites/widget/options_button.png"
         );
 
         public final List<AbstractWidget> elements;
@@ -280,7 +268,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 if (tooltip != null)
                     widget.setTooltip(tooltip);
                 if (tooltipDelay >= 0)
-                    widget.setTooltipDelay(Duration.ofMillis(tooltipDelay));
+                    widget.setTooltipDelay(tooltipDelay);
 
                 elements.add(widget);
             }
@@ -308,14 +296,15 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 if (tooltip != null)
                     button.setTooltip(tooltip);
                 if (tooltipDelay >= 0)
-                    button.setTooltipDelay(Duration.ofMillis(tooltipDelay));
+                    button.setTooltipDelay(tooltipDelay);
 
                 elements.add(button);
             }
 
             public void setBounds(int x, int width, int height) {
                 button.setPosition(x, 0);
-                button.setSize(width, height);
+                button.setWidth(width);
+                ((AbstractWidgetAccessor) button).chatnotify$setHeight(height);
             }
         }
 
@@ -336,7 +325,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 if (tooltip != null)
                     silentButton.setTooltip(tooltip);
                 if (tooltipDelay >= 0)
-                    silentButton.setTooltipDelay(Duration.ofMillis(tooltipDelay));
+                    silentButton.setTooltipDelay(tooltipDelay);
 
                 elements.add(silentButton);
             }
