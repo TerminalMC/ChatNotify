@@ -20,7 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -40,6 +41,7 @@ public class NotificationToast implements Toast {
 
     private final int lineHeight;
     private final List<FormattedCharSequence> messageLines;
+    private Toast.Visibility wantedVisibility;
     private final int displayTime;
 
     public NotificationToast(Component message, int displayTime) {
@@ -49,15 +51,22 @@ public class NotificationToast implements Toast {
     }
 
     @Override
-    public @NotNull Visibility render(
-            @NotNull GuiGraphics graphics,
-            @NotNull ToastComponent component,
-            long elapsedTime
-    ) {
-        Font font = component.getMinecraft().font;
+    public @NotNull Visibility getWantedVisibility() {
+        return wantedVisibility;
+    }
+
+    @Override
+    public void update(@NotNull ToastManager manager, long elapsedTime) {
+        this.wantedVisibility =
+                elapsedTime < displayTime * manager.getNotificationDisplayTimeMultiplier()
+                        ? Visibility.SHOW : Visibility.HIDE;
+    }
+
+    @Override
+    public void render(@NotNull GuiGraphics graphics, @NotNull Font font, long elapsedTime) {
         if (messageLines.size() <= 1) {
             // Message fits in a single line, render a single sprite
-            graphics.blitSprite(BACKGROUND_SPRITE, 0, 0, WIDTH, height());
+            graphics.blitSprite(RenderType::guiTextured, BACKGROUND_SPRITE, 0, 0, WIDTH, height());
         } else {
             // Message requires multiple lines, stretch vertically by rendering
             // multiple sprites
@@ -110,10 +119,6 @@ public class NotificationToast implements Toast {
                 );
             }
         }
-
-        return elapsedTime < displayTime * component.getNotificationDisplayTimeMultiplier()
-                ? Visibility.SHOW
-                : Visibility.HIDE;
     }
 
     private void renderBackgroundRow(
@@ -127,12 +132,24 @@ public class NotificationToast implements Toast {
         int uRemainder = Math.min(60, width - uWidth);
 
         // Left border
-        graphics.blitSprite(BACKGROUND_SPRITE, WIDTH, HEIGHT, 0, vOffset, 0, y, uWidth, vHeight);
+        graphics.blitSprite(
+                RenderType::guiTextured,
+                BACKGROUND_SPRITE,
+                WIDTH,
+                HEIGHT,
+                0,
+                vOffset,
+                0,
+                y,
+                uWidth,
+                vHeight
+        );
 
         // Middle background
         int offset = 64;
         for (int x = uWidth; x < width - uRemainder; x += offset) {
             graphics.blitSprite(
+                    RenderType::guiTextured,
                     BACKGROUND_SPRITE,
                     WIDTH,
                     HEIGHT,
@@ -147,6 +164,7 @@ public class NotificationToast implements Toast {
 
         // Right border
         graphics.blitSprite(
+                RenderType::guiTextured,
                 BACKGROUND_SPRITE,
                 WIDTH,
                 HEIGHT,
