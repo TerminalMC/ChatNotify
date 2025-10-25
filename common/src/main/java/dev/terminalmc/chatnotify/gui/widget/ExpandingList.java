@@ -53,7 +53,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
      * @param y           the y position of the list widget.
      * @param width       the full width of the list widget.
      * @param maxHeight   the maximum allowable height of the list widget.
-     * @param itemHeight  the space to allocate for each list entry.
+     * @param defaultEntryHeight  the space to allocate for each list entry.
      * @param entryHeight the actual height of each list entry.
      * @param xMargin     the space between the side of each entry and the edge of the list widget.
      */
@@ -62,11 +62,11 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
             int y,
             int width,
             int maxHeight,
-            int itemHeight,
+            int defaultEntryHeight,
             int entryHeight,
             int xMargin
     ) {
-        super(Minecraft.getInstance(), width, 0, y, itemHeight);
+        super(Minecraft.getInstance(), width, 0, y, defaultEntryHeight);
         super.setX(x);
         this.maxHeight = maxHeight;
         this.entryWidth = width - SCROLLBAR_WIDTH - (xMargin * 2);
@@ -74,11 +74,15 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
         this.entryX = x + xMargin;
     }
 
+    protected Entry getEntry(int index) {
+        return this.children().get(index);
+    }
+
     /**
      * Scrolls the list as required to make the {@link Entry} at {@code index} visible.
      */
     public void ensureVisible(int index) {
-        ensureVisible(getEntry(index));
+        scrollToEntry(getEntry(index));
     }
 
     public boolean isEmpty() {
@@ -104,7 +108,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     public void replaceWidgets(Iterable<AbstractWidget> widgets) {
         clearWidgets();
         widgets.forEach(this::addWidget);
-        setHeight(Math.min(itemHeight * children().size() + VERTICAL_BUFFER, maxHeight));
+        setHeight(Math.min(defaultEntryHeight * children().size() + VERTICAL_BUFFER, maxHeight));
     }
 
     /**
@@ -120,7 +124,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
      */
     public void addWidget(AbstractWidget widget) {
         addEntry(new Entry(entryX, entryWidth, entryHeight, widget));
-        setHeight(Math.min(itemHeight * children().size() + VERTICAL_BUFFER, maxHeight));
+        setHeight(Math.min(defaultEntryHeight * children().size() + VERTICAL_BUFFER, maxHeight));
     }
 
     @Override
@@ -129,14 +133,9 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
             int mouseX,
             int mouseY,
             float delta,
-            int index,
-            int x,
-            int y,
-            int width,
-            int height
+            ExpandingList.Entry widget
     ) {
-        if (index == highlightIndex) {
-            AbstractWidget widget = getEntry(index).widget;
+        if (highlightIndex != -1 && widget == getEntry(highlightIndex)) {
             graphics.fill(
                     widget.getX(),
                     widget.getY(),
@@ -145,7 +144,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
                     HIGHLIGHT_COLOR
             );
         }
-        super.renderItem(graphics, mouseX, mouseY, delta, index, x, y, width, height);
+        super.renderItem(graphics, mouseX, mouseY, delta, widget);
     }
 
     @Override
@@ -188,19 +187,14 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
         }
 
         @Override
-        public void render(
+        public void renderContent(
                 @NotNull GuiGraphics graphics,
-                int index,
-                int y,
-                int x,
-                int entryWidth,
-                int entryHeight,
                 int mouseX,
                 int mouseY,
                 boolean hovered,
                 float delta
         ) {
-            widget.setY(y);
+            widget.setY(getContentY());
             widget.render(graphics, mouseX, mouseY, delta);
         }
     }

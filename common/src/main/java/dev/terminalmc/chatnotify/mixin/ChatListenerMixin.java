@@ -55,7 +55,7 @@ public class ChatListenerMixin {
             Operation<Void> original
     ) {
         if (Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
-            ChatHeadsWrapper.handleAddedMessage(message, boundChatType, null);
+            ChatHeadsWrapper.handleAddedMessage(message, null);
             message = MessageUtil.processMessage(message);
             if (message != null)
                 original.call(message, boundChatType);
@@ -77,7 +77,7 @@ public class ChatListenerMixin {
     ) {
         // Ignore if it's an overlay message to avoid conflict with the action bar interceptor
         if (!isOverlay && Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
-            ChatHeadsWrapper.handleAddedMessage(message, null, null);
+            ChatHeadsWrapper.handleAddedMessage(message, null);
             message = MessageUtil.processMessage(message);
             if (message != null)
                 original.call(message, isOverlay);
@@ -106,7 +106,6 @@ public class ChatListenerMixin {
         if (Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(
                     message,
-                    bound,
                     ((Ownable) message).chatheads$getOwner()
             );
             message = MessageUtil.processMessage(message);

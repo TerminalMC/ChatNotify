@@ -16,11 +16,7 @@
 
 package dev.terminalmc.chatnotify.mixin.accessor;
 
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -40,7 +36,7 @@ public interface StyleAccessor {
             @Nullable ClickEvent clickEvent,
             @Nullable HoverEvent hoverEvent,
             @Nullable String insertion,
-            @Nullable ResourceLocation font
+            @Nullable FontDescription font
     ) {
         throw new AssertionError();
     }
