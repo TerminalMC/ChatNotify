@@ -187,7 +187,7 @@ public class ClientPacketListenerMixin {
         if (Minecraft.getInstance().player == null)
             return;
         if (action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)
-                && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())
+                && playerInfo.getProfile().id().equals(Minecraft.getInstance().player.getUUID())
                 && entry.displayName() != null) {
             Config.get().setDisplayName(FormatUtil.stripCodes(entry.displayName().getString()));
         }

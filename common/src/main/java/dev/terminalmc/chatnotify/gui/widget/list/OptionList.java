@@ -26,6 +26,8 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +45,7 @@ import java.util.function.Supplier;
  * <p>
  * Contains list of {@link Entry} objects, which are drawn onto the screen top-down in the order
  * that they are stored, with each entry being allocated a standard amount of space specified by
- * {@link OptionList#itemHeight}. The actual height of list entries, specified by
+ * {@link OptionList#defaultEntryHeight}. The actual height of list entries, specified by
  * {@link OptionList#entryHeight}, can be less but should not be more.
  * <p>
  * Note: If you want multiple widgets to appear side-by-side, you must
@@ -88,6 +90,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         this.entryHeight = entryHeight;
         this.entrySpacing = entrySpacing;
         updateElementBounds();
+    }
+
+    /**
+     * @return the entry at the specified index.
+     */
+    protected Entry getEntry(int index) {
+        return children().get(index);
     }
 
     /**
@@ -136,19 +145,9 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         return screen;
     }
 
-    public void addEntry(int index, Entry entry) {
-        children().add(index, entry);
-    }
-
     public void addSpacedEntry(Entry entry) {
         super.addEntry(entry);
         super.addEntry(new Entry.Space(entry));
-    }
-
-    @SuppressWarnings("unused")
-    public void addSpacedEntry(int index, Entry entry) {
-        addEntry(index, entry);
-        addEntry(index + 1, new Entry.Space(entry));
     }
 
     /**
@@ -183,8 +182,8 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     }
 
     @Override
-    protected boolean isValidClickButton(int button) {
-        return button == 0 || button == 1;
+    protected boolean isValidClickButton(MouseButtonInfo info) {
+        return info.button() == 0 || info.button() == 1;
     }
 
     /**
@@ -225,20 +224,15 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         @Override
-        public void render(
+        public void renderContent(
                 @NotNull GuiGraphics graphics,
-                int index,
-                int y,
-                int x,
-                int entryWidth,
-                int entryHeight,
                 int mouseX,
                 int mouseY,
                 boolean hovered,
                 float delta
         ) {
             elements.forEach((widget) -> {
-                widget.setY(y);
+                widget.setY(getContentY());
                 widget.render(graphics, mouseX, mouseY, delta);
             });
         }
@@ -258,11 +252,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 super();
 
                 AbstractStringWidget widget;
-                if (Minecraft.getInstance().font.width(message.getString()) <= width) {
+                int widgetWidth = Minecraft.getInstance().font.width(message.getString());
+                if (widgetWidth <= width) {
                     widget = new StringWidget(
-                            x,
+                            x + (width / 2) - (widgetWidth / 2),
                             0,
-                            width,
+                            widgetWidth,
                             height,
                             message,
                             Minecraft.getInstance().font
@@ -403,19 +398,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
 
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                return entry.mouseClicked(mouseX, mouseY, button);
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                return entry.mouseClicked(event, doubleClick);
             }
 
             @Override
-            public boolean mouseDragged(
-                    double mouseX,
-                    double mouseY,
-                    int button,
-                    double deltaX,
-                    double deltaY
-            ) {
-                return entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+                return entry.mouseDragged(event, deltaX, deltaY);
             }
 
             public void setFocused(GuiEventListener listener) {
