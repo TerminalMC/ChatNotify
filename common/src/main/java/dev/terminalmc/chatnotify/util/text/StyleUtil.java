@@ -232,6 +232,8 @@ public class StyleUtil {
                     msg.append(Component.literal(part3));
             }
             index += str.length();
+        } else {
+            index += msg.getString().length();
         }
 
         // Recurse for original siblings and re-attach

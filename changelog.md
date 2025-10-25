@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.1
+
+- Fixed an issue causing style effects to shift in messages with non-text data
+
 ## 2.6.0
 
 - Added a subtitle custom message option (WehrWolff)
