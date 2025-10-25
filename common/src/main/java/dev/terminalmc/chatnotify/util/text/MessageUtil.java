@@ -139,7 +139,7 @@ public class MessageUtil {
             if (debug)
                 ChatNotify.LOG.warn("Owner check using ChatHeads");
             if (Minecraft.getInstance().player != null) {
-                UUID id = ownerInfo.getProfile().getId();
+                UUID id = ownerInfo.getProfile().id();
                 if (id.equals(Minecraft.getInstance().player.getUUID())) {
                     if (debug)
                         ChatNotify.LOG.warn("Matched user's UUID");
@@ -605,7 +605,7 @@ public class MessageUtil {
         if (notif.typedMsgEnabled && Minecraft.getInstance().screen == null) {
             Component displayMsg =
                     notif.typedMsg.isBlank() ? msg : convertMsg(notif.typedMsg, matcher, msg);
-            Minecraft.getInstance().setScreen(new ChatScreen(displayMsg.getString()));
+            Minecraft.getInstance().setScreen(new ChatScreen(displayMsg.getString(), false));
         }
     }
 

@@ -26,6 +26,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -418,28 +419,22 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     // Scrolling
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        updateScrollingState(mouseX, mouseY, button);
-        if (!isMouseOver(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        updateScrollingState(event);
+        if (!isMouseOver(event.x(), event.y())) {
             return false;
         } else {
-            return scrolling || super.mouseClicked(mouseX, mouseY, button);
+            return scrolling || super.mouseClicked(event, doubleClick);
         }
 
     }
 
     @Override
-    public boolean mouseDragged(
-            double mouseX,
-            double mouseY,
-            int button,
-            double dragX,
-            double dragY
-    ) {
-        if (button == 0 && scrolling) {
-            if (mouseX < getX()) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (event.button() == 0 && scrolling) {
+            if (event.x() < getX()) {
                 setScrollAmount(0.0F);
-            } else if (mouseX > getRight()) {
+            } else if (event.x() > getRight()) {
                 setScrollAmount(getMaxScroll());
             } else {
                 double maxScroll = Math.max(1, getMaxScroll());
@@ -455,7 +450,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             }
             return true;
         } else {
-            return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+            return super.mouseDragged(event, dragX, dragY);
         }
     }
 
@@ -466,10 +461,10 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         return true;
     }
 
-    protected void updateScrollingState(double mouseX, double mouseY, int button) {
+    protected void updateScrollingState(MouseButtonEvent event) {
         scrolling =
-                button == 0 && mouseY >= scrollBarX() && mouseY < (scrollBarX()
-                        + SCROLLBAR_HEIGHT) && mouseX >= getX() && mouseX < getRight();
+                event.button() == 0 && event.y() >= scrollBarX() && event.y() < (scrollBarX()
+                        + SCROLLBAR_HEIGHT) && event.x() >= getX() && event.x() < getRight();
     }
 
     protected int scrollBarX() {

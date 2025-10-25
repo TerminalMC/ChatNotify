@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget;
 
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,12 +64,12 @@ public class ConfirmButton extends Button {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers input) {
         if (!hasBeenPressed) {
             hasBeenPressed = true;
             super.setMessage(confirmMessage);
         } else {
-            super.onPress();
+            super.onPress(input);
         }
     }
 }

@@ -27,7 +27,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -188,8 +189,8 @@ public class TextField extends EditBox {
     // Chained clicks and click-drag
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (super.mouseClicked(event, doubleClick)) {
             long time = Util.getMillis();
             if (lastClickTime + CLICK_CHAIN_TIME > time) {
                 switch (++chainedClicks) {
@@ -228,7 +229,7 @@ public class TextField extends EditBox {
             lastClickTime = time;
 
             // Reset drag origin
-            dragOriginX = mouseX;
+            dragOriginX = event.x();
             dragOriginPos = getCursorPosition();
 
             return true;
@@ -237,22 +238,16 @@ public class TextField extends EditBox {
     }
 
     @Override
-    public boolean mouseDragged(
-            double mouseX,
-            double mouseY,
-            int button,
-            double dragX,
-            double dragY
-    ) {
-        if (button != 0)
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (event.button() != 0)
             return false;
         String str = getValue();
 
-        if (mouseX < dragOriginX) { // Dragging left
+        if (event.x() < dragOriginX) { // Dragging left
             String subLeft = str.substring(0, dragOriginPos);
             int offsetChars = font.plainSubstrByWidth(
                     subLeft,
-                    Mth.floor(dragOriginX - mouseX),
+                    Mth.floor(dragOriginX - event.x()),
                     true
             ).length();
             moveCursorTo(dragOriginPos - offsetChars, true);
@@ -260,7 +255,7 @@ public class TextField extends EditBox {
             String subRight = str.substring(dragOriginPos);
             int offsetChars = font.plainSubstrByWidth(
                     subRight,
-                    Mth.floor(mouseX - dragOriginX),
+                    Mth.floor(event.x() - dragOriginX),
                     false
             ).length();
             moveCursorTo(dragOriginPos + offsetChars, true);
@@ -285,12 +280,12 @@ public class TextField extends EditBox {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!super.keyPressed(keyCode, scanCode, modifiers)) {
-            if (isUndo(keyCode)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (!super.keyPressed(event)) {
+            if (isUndo(event)) {
                 undo();
                 return true;
-            } else if (isRedo(keyCode)) {
+            } else if (isRedo(event)) {
                 redo();
                 return true;
             }
@@ -522,18 +517,18 @@ public class TextField extends EditBox {
 
     // Utility methods
 
-    public static boolean isUndo(int keyCode) {
-        return keyCode == InputConstants.KEY_Z
-                && Screen.hasControlDown()
-                && !Screen.hasShiftDown()
-                && !Screen.hasAltDown();
+    public static boolean isUndo(KeyEvent event) {
+        return event.key() == InputConstants.KEY_Z
+                && event.hasControlDown()
+                && !event.hasShiftDown()
+                && !event.hasAltDown();
     }
 
-    public static boolean isRedo(int keyCode) {
-        return keyCode == InputConstants.KEY_Y
-                && Screen.hasControlDown()
-                && !Screen.hasShiftDown()
-                && !Screen.hasAltDown();
+    public static boolean isRedo(KeyEvent event) {
+        return event.key() == InputConstants.KEY_Y
+                && event.hasControlDown()
+                && !event.hasShiftDown()
+                && !event.hasAltDown();
     }
 
     /**

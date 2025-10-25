@@ -34,6 +34,7 @@ import dev.terminalmc.chatnotify.util.text.StyleUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -84,7 +85,7 @@ public class TriggerEditorList extends OptionList {
         addSpacedEntry(new Entry.TriggerOptions(
                 dynWideEntryX,
                 dynWideEntryWidth,
-                entryHeight + itemHeight,
+                entryHeight + defaultEntryHeight,
                 this,
                 trigger
         ));
@@ -110,7 +111,7 @@ public class TriggerEditorList extends OptionList {
         addSpacedEntry(new Entry.DisplayField(
                 dynWideEntryX,
                 dynWideEntryWidth,
-                entryHeight + itemHeight,
+                entryHeight + defaultEntryHeight,
                 textDisplayField,
                 localized("option", "notif.trigger.editor.display.text")
         ));
@@ -202,11 +203,11 @@ public class TriggerEditorList extends OptionList {
             addEntry(entry);
             int requiredHeight =
                     mc.font.wordWrapHeight(pair.getFirst().getString(), dynWideEntryWidth)
-                            - itemHeight;
+                            - defaultEntryHeight;
             while (requiredHeight > 0) {
                 Entry.Space spaceEntry = new Entry.Space(entry);
                 addEntry(spaceEntry);
-                requiredHeight -= itemHeight;
+                requiredHeight -= defaultEntryHeight;
             }
         });
 
@@ -327,7 +328,6 @@ public class TriggerEditorList extends OptionList {
                         Component.literal(Unicode.INFO.str),
                         Minecraft.getInstance().font
                 );
-                infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option",
                         "notif.trigger.style_target.tooltip"
@@ -501,7 +501,7 @@ public class TriggerEditorList extends OptionList {
             }
 
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                 list.setTextDisplayValue(FormatUtil.stripCodes(msg.getString()));
                 list.setKeyDisplayValue(msg.getContents() instanceof TranslatableContents tc
                         ? tc.getKey()
