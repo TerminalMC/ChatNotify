@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.2
+
+- Fixed format codes being replaced by regex capture groups in custom messages
+
 ## 2.6.1
 
 - Fixed an issue causing style effects to shift in messages with non-text data

@@ -454,7 +454,7 @@ public class MessageUtil {
             Component msg
     ) {
         // Replace $ with section sign
-        msgString = msgString.replaceAll(Matcher.quoteReplacement("$"), Unicode.SECTION.str);
+        msgString = msgString.replaceAll(Pattern.quote("$"), Unicode.SECTION.str);
 
         // Substitute capturing groups
         if (matcher != null && matcher.find(0)) {
@@ -463,7 +463,7 @@ public class MessageUtil {
             for (int i = 0; i <= matcher.groupCount(); i++) {
                 String replacement = matcher.group(i) == null ? "" : matcher.group(i);
                 msgString = msgString.replaceAll(
-                        Matcher.quoteReplacement(Unicode.SECTION.str + "(" + i + ")"),
+                        Pattern.quote(Unicode.SECTION.str + "(" + i + ")"),
                         replacement
                 );
             }
