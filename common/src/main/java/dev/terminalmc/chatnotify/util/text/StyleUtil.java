@@ -210,7 +210,7 @@ public class StyleUtil {
             if (debug)
                 ChatNotify.LOG.warn("PlainTextContents");
             String str = contents.text();
-            if (index + str.length() >= start && index < end) {
+            if (index + str.length() > start && index < end) {
                 // Target substring overlaps with current substring, so restyle
                 // by splitting into 3 components; before, target, and after
                 Style oldStyle = msg.getStyle();
@@ -304,16 +304,17 @@ public class StyleUtil {
             msg = Component.empty().withStyle(oldStyle);
 
             String str = contents.text();
-            if (index + str.length() >= start && index < end) {
+            if (index + str.length() > start && index < end) {
                 // Target substring overlaps with current substring,
                 // so add the included section with its original style
                 int localStart = Math.max(0, start - index);
                 int localEnd = Math.min(str.length(), end - index);
 
-                str = str.substring(localStart, localEnd);
-                msg.append(Component.literal(str));
+                msg.append(Component.literal(str.substring(localStart, localEnd)));
             }
             index += str.length();
+        } else {
+            index += msg.getString().length();
         }
 
         // Recurse for original siblings and re-attach

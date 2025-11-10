@@ -3,6 +3,7 @@
 ## 2.6.2
 
 - Fixed format codes being replaced by regex capture groups in custom messages
+- Fixed custom message capture group replacement
 
 ## 2.6.1
 
