@@ -16,7 +16,7 @@
 
 package dev.terminalmc.chatnotify;
 
-import dev.terminalmc.chatnotify.command.ChatNotifyCommand;
+import dev.terminalmc.chatnotify.command.Commands;
 import dev.terminalmc.chatnotify.gui.screen.RootScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -64,7 +64,7 @@ public class ChatNotifyNeoForge {
          */
         @SubscribeEvent
         public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
-            ChatNotifyCommand.register(event.getDispatcher());
+            Commands.register(event.getDispatcher(), event.getBuildContext());
         }
     }
 }

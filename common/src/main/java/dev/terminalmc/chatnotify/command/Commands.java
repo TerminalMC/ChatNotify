@@ -22,19 +22,24 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.gui.screen.RootScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
 
-public class ChatNotifyCommand {
+import static net.minecraft.commands.Commands.literal;
 
-    private ChatNotifyCommand() {
+public class Commands {
+
+    private Commands() {
         throw new UnsupportedOperationException("This class cannot be instantiated.");
     }
 
-    public static <S> void register(CommandDispatcher<S> dispatcher) {
-        dispatcher.register(LiteralArgumentBuilder.<S>literal(ChatNotify.MOD_ID).executes((ctx) -> {
-            Minecraft mc = Minecraft.getInstance();
-            mc.tell(() -> mc.setScreen(new RootScreen(mc.screen)));
-
-            return Command.SINGLE_SUCCESS;
-        }));
+    public static <S> void register(CommandDispatcher<S> dispatcher, CommandBuildContext buildCtx) {
+        Minecraft mc = Minecraft.getInstance();
+        //noinspection unchecked
+        dispatcher.register((LiteralArgumentBuilder<S>) literal(ChatNotify.MOD_ID)
+                .executes((ctx) -> {
+                    mc.tell(() -> mc.setScreen(new RootScreen(mc.screen)));
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
     }
 }
