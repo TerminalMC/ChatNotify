@@ -22,7 +22,6 @@ import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
@@ -31,8 +30,9 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -189,7 +189,7 @@ public class TextField extends EditBox {
     // Chained clicks and click-drag
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) {
             long time = Util.getMillis();
             if (lastClickTime + CLICK_CHAIN_TIME > time) {
@@ -280,7 +280,7 @@ public class TextField extends EditBox {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
         if (!super.keyPressed(event)) {
             if (isUndo(event)) {
                 undo();
@@ -350,7 +350,7 @@ public class TextField extends EditBox {
                     .getSoundManager()
                     .getAvailableSounds()
                     .stream()
-                    .map(ResourceLocation::toString)
+                    .map(Identifier::toString)
                     .toList());
 
             @Override

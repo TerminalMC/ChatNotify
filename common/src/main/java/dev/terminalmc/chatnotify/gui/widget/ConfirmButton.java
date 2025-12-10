@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A {@link Button} that must be pressed twice to complete an action.
  */
-public class ConfirmButton extends Button {
+public class ConfirmButton extends Button.Plain {
 
     private Component message;
     private Component confirmMessage;
@@ -64,7 +64,7 @@ public class ConfirmButton extends Button {
     }
 
     @Override
-    public void onPress(InputWithModifiers input) {
+    public void onPress(@NotNull InputWithModifiers input) {
         if (!hasBeenPressed) {
             hasBeenPressed = true;
             super.setMessage(confirmMessage);
