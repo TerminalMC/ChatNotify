@@ -36,7 +36,7 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -409,11 +409,11 @@ public class MessageUtil {
      */
     private static boolean playSound(Notification notif) {
         if (notif.sound.isEnabled() && notif.sound.getVolume() > 0) {
-            ResourceLocation location = notif.sound.getResourceLocation();
+            Identifier location = notif.sound.getIdentifier();
             if (location != null) {
                 Runnable action = () -> Minecraft.getInstance().getSoundManager().play(
                         new SimpleSoundInstance(
-                                notif.sound.getResourceLocation(),
+                                notif.sound.getIdentifier(),
                                 Config.get().soundSource,
                                 notif.sound.getVolume(),
                                 notif.sound.getPitch(),

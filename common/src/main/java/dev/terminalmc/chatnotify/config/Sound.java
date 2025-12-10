@@ -18,7 +18,7 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.config.util.JsonUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -36,7 +36,7 @@ public class Sound {
     private static final boolean enabledDefault = true;
 
     /**
-     * The string from which to get the sound {@link ResourceLocation}.
+     * The string from which to get the sound {@link Identifier}.
      */
     private String id;
     private static final String idDefault = "block.note_block.bell";
@@ -103,15 +103,15 @@ public class Sound {
     }
 
     /**
-     * @return the sound {@link ResourceLocation} string.
+     * @return the sound {@link Identifier} string.
      */
     public String getId() {
         return id;
     }
 
     /**
-     * Sets the sound {@link ResourceLocation} string to the specified value if it represents a
-     * valid {@link ResourceLocation}.
+     * Sets the sound {@link Identifier} string to the specified value if it represents a
+     * valid {@link Identifier}.
      */
     public void setId(String id) {
         if (validId(id)) {
@@ -120,10 +120,10 @@ public class Sound {
     }
 
     /**
-     * @return the sound {@link ResourceLocation}.
+     * @return the sound {@link Identifier}.
      */
-    public @Nullable ResourceLocation getResourceLocation() {
-        return ResourceLocation.tryParse(id);
+    public @Nullable Identifier getIdentifier() {
+        return Identifier.tryParse(id);
     }
 
     public float getVolume() {
@@ -181,10 +181,10 @@ public class Sound {
     }
 
     /**
-     * @return {@code true} if {@code id} represents a valid {@link ResourceLocation}.
+     * @return {@code true} if {@code id} represents a valid {@link Identifier}.
      */
     public static boolean validId(String id) {
-        return ResourceLocation.tryParse(id) != null;
+        return Identifier.tryParse(id) != null;
     }
 
     // Deserialization

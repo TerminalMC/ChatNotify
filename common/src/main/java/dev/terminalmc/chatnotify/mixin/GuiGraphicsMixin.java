@@ -33,7 +33,7 @@ public abstract class GuiGraphicsMixin implements IGuiGraphics {
 
     @Shadow
     @Final
-    private GuiRenderState guiRenderState;
+    GuiRenderState guiRenderState;
 
     @Shadow
     @Final

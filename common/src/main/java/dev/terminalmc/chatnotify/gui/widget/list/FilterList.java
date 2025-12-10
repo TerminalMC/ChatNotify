@@ -43,6 +43,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -233,10 +234,10 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 if (hasStatus) {
                     elements.add(CycleButton.booleanBuilder(
                                     CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                    CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                    CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                    list.statusSupplier.get()
                             )
                             .displayOnlyValue()
-                            .withInitialValue(list.statusSupplier.get())
                             .create(
                                     movingX,
                                     0,
@@ -333,11 +334,10 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 elements.add(dragButton);
 
                 // Type button
-                CycleButton<Trigger.Type> typeButton =
-                        CycleButton.<Trigger.Type>builder((type) -> Component.literal(type.icon))
+                CycleButton<Trigger.@NotNull Type> typeButton =
+                        CycleButton.builder((type) -> Component.literal(type.icon), trigger.type)
                                 .withValues(Trigger.Type.values())
                                 .displayOnlyValue()
-                                .withInitialValue(trigger.type)
                                 .withTooltip((type) -> Tooltip.create(localized(
                                         "option",
                                         "notif.trigger.type." + type + ".tooltip"
@@ -486,11 +486,13 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 movingX += list.tinyWidgetWidth;
 
                 // Type button
-                CycleButton<StyleTarget.Type> typeButton =
-                        CycleButton.<StyleTarget.Type>builder((type) -> Component.literal(type.icon))
+                CycleButton<StyleTarget.@NotNull Type> typeButton =
+                        CycleButton.builder(
+                                        (type) -> Component.literal(type.icon),
+                                        styleTarget.type
+                                )
                                 .withValues(StyleTarget.Type.values())
                                 .displayOnlyValue()
-                                .withInitialValue(styleTarget.type)
                                 .withTooltip((type) -> Tooltip.create(localized(
                                         "option",
                                         "notif.trigger.style_target.type." + type + ".tooltip"
@@ -568,11 +570,10 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         .build());
 
                 // Type button
-                CycleButton<Response.Type> typeButton =
-                        CycleButton.<Response.Type>builder((type) -> Component.literal(type.icon))
+                CycleButton<Response.@NotNull Type> typeButton =
+                        CycleButton.builder((type) -> Component.literal(type.icon), message.type)
                                 .withValues(Response.Type.values())
                                 .displayOnlyValue()
-                                .withInitialValue(message.type)
                                 .withTooltip((type) -> Tooltip.create(localized(
                                         "option",
                                         "notif.response.type." + type.name() + ".tooltip"
@@ -835,11 +836,13 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
 
                 if (singleTrig) {
                     // Type button
-                    CycleButton<Trigger.Type> typeButton =
-                            CycleButton.<Trigger.Type>builder((type) -> Component.literal(type.icon))
+                    CycleButton<Trigger.@NotNull Type> typeButton =
+                            CycleButton.builder(
+                                            (type) -> Component.literal(type.icon),
+                                            trigger.type
+                                    )
                                     .withValues(Trigger.Type.values())
                                     .displayOnlyValue()
-                                    .withInitialValue(trigger.type)
                                     .withTooltip((type) -> Tooltip.create(localized(
                                             "option",
                                             "notif.trigger.type." + type + ".tooltip"
@@ -1058,20 +1061,23 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
 
                 // On/off button
                 elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
-                ).displayOnlyValue().withInitialValue(notif.enabled).create(
-                        x + width - statusButtonWidth,
-                        0,
-                        statusButtonWidth,
-                        height,
-                        Component.empty(),
-                        (button, status) -> {
-                            notif.enabled = status;
-                            // Update trigger duplicate indicators
-                            list.refreshSubList();
-                        }
-                ));
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                notif.enabled
+                        )
+                        .displayOnlyValue()
+                        .create(
+                                x + width - statusButtonWidth,
+                                0,
+                                statusButtonWidth,
+                                height,
+                                Component.empty(),
+                                (button, status) -> {
+                                    notif.enabled = status;
+                                    // Update trigger duplicate indicators
+                                    list.refreshSubList();
+                                }
+                        ));
 
                 if (index != 0) {
                     // Delete button (right-side extension)
