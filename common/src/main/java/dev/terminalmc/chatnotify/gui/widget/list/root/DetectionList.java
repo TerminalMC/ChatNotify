@@ -112,12 +112,14 @@ public class DetectionList extends OptionList {
             ChatDetection(int x, int width, int height) {
                 super();
 
-                elements.add(CycleButton.<ChatDetectionMode>builder((mode) -> localized(
-                                "option",
-                                "detection.message.chat.mode.status." + mode.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (mode) -> localized(
+                                        "option",
+                                        "detection.message.chat.mode.status." + mode.name()
+                                ),
+                                Config.get().detectionMode
+                        )
                         .withValues(ChatDetectionMode.values())
-                        .withInitialValue(Config.get().detectionMode)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "detection.message.chat.mode.status." + status.name() + ".tooltip"
@@ -138,12 +140,14 @@ public class DetectionList extends OptionList {
             ActionBarDetection(int x, int width, int height) {
                 super();
 
-                elements.add(CycleButton.<CommonDetectionMode>builder((mode) -> localized(
-                                "option",
-                                "detection.message.common.mode.status." + mode.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (mode) -> localized(
+                                        "option",
+                                        "detection.message.common.mode.status." + mode.name()
+                                ),
+                                Config.get().actionBarDetectionMode
+                        )
                         .withValues(CommonDetectionMode.values())
-                        .withInitialValue(Config.get().actionBarDetectionMode)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "detection.message.common.mode.status." + status.name()
@@ -165,12 +169,14 @@ public class DetectionList extends OptionList {
             TitleDetection(int x, int width, int height) {
                 super();
 
-                elements.add(CycleButton.<Config.CommonDetectionMode>builder((mode) -> localized(
-                                "option",
-                                "detection.message.common.mode.status." + mode.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (mode) -> localized(
+                                        "option",
+                                        "detection.message.common.mode.status." + mode.name()
+                                ),
+                                Config.get().titleDetectionMode
+                        )
                         .withValues(Config.CommonDetectionMode.values())
-                        .withInitialValue(Config.get().titleDetectionMode)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "detection.message.common.mode.status." + status.name()
@@ -192,12 +198,14 @@ public class DetectionList extends OptionList {
             SubtitleDetection(int x, int width, int height) {
                 super();
 
-                elements.add(CycleButton.<Config.CommonDetectionMode>builder((mode) -> localized(
-                                "option",
-                                "detection.message.common.mode.status." + mode.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (mode) -> localized(
+                                        "option",
+                                        "detection.message.common.mode.status." + mode.name()
+                                ),
+                                Config.get().subtitleDetectionMode
+                        )
                         .withValues(Config.CommonDetectionMode.values())
-                        .withInitialValue(Config.get().subtitleDetectionMode)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "detection.message.common.mode.status." + status.name()
@@ -221,9 +229,9 @@ public class DetectionList extends OptionList {
 
                 elements.add(CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                Config.get().checkOwnMessages
                         )
-                        .withInitialValue(Config.get().checkOwnMessages)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "detection.self_notify.tooltip"
@@ -244,12 +252,14 @@ public class DetectionList extends OptionList {
             SenderDetection(int x, int width, int height) {
                 super();
 
-                elements.add(CycleButton.<Config.SenderDetectionMode>builder((status) -> localized(
-                                "option",
-                                "detection.sender.mode.status." + status.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (status) -> localized(
+                                        "option",
+                                        "detection.sender.mode.status." + status.name()
+                                ),
+                                Config.get().senderDetectionMode
+                        )
                         .withValues(Config.SenderDetectionMode.values())
-                        .withInitialValue(Config.get().senderDetectionMode)
                         .withTooltip((mode) -> Tooltip.create(localized(
                                 "option",
                                 "detection.sender.mode.status." + mode.name() + ".tooltip"
