@@ -134,7 +134,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
     }
 
     @Override
-    public void resize(@NotNull Minecraft mc, int width, int height) {
+    public void resize(int width, int height) {
         this.width = width;
         this.height = height;
         init();
@@ -190,7 +190,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
     @Override
     public void onClose() {
         if (lastScreen instanceof OptionScreen screen) {
-            screen.resize(Minecraft.getInstance(), width, height);
+            screen.resize(width, height);
         }
         super.onClose();
     }
@@ -308,7 +308,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
         if (overlay != null) {
             if (event.key() == InputConstants.KEY_ESCAPE) {
                 overlay.onClose();
@@ -323,7 +323,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
     }
 
     @Override
-    public boolean charTyped(CharacterEvent event) {
+    public boolean charTyped(@NotNull CharacterEvent event) {
         if (overlay != null) {
             overlay.charTyped(event);
             return true;

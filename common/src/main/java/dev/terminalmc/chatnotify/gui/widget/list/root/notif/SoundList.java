@@ -35,7 +35,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
@@ -256,7 +256,7 @@ public class SoundList extends OptionList {
     }
 
     private void playNotifSound() {
-        ResourceLocation location = sound.getResourceLocation();
+        Identifier location = sound.getIdentifier();
         if (location != null) {
             if (lastSound != null)
                 mc.getSoundManager().stop(lastSound);
@@ -313,7 +313,7 @@ public class SoundList extends OptionList {
                                     .getSoundManager()
                                     .getAvailableSounds()
                                     .stream()
-                                    .map(ResourceLocation::toString)
+                                    .map(Identifier::toString)
                                     .sorted()
                                     .toList()
                     ).withSoundDropType());
@@ -327,10 +327,10 @@ public class SoundList extends OptionList {
                 // Status button
                 elements.add(CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                sound.isEnabled()
                         )
                         .displayOnlyValue()
-                        .withInitialValue(sound.isEnabled())
                         .create(
                                 x + width - statusButtonWidth,
                                 0,
@@ -352,10 +352,12 @@ public class SoundList extends OptionList {
                 super();
                 int mainButtonWidth = width - list.smallWidgetWidth - 1;
 
-                elements.add(CycleButton.<net.minecraft.sounds.SoundSource>builder(source -> Component.translatable(
-                                "soundCategory." + source.getName()))
+                elements.add(CycleButton.builder(
+                                source -> Component.translatable(
+                                        "soundCategory." + source.getName()),
+                                Config.get().soundSource
+                        )
                         .withValues(net.minecraft.sounds.SoundSource.values())
-                        .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "notif.sound.source.tooltip"

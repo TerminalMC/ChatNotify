@@ -34,7 +34,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -208,7 +208,7 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
         // Only textField can handle key presses
         if (textField.isFocused()) {
             if (!dropdown.isEmpty()) {
@@ -247,7 +247,7 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    public boolean charTyped(CharacterEvent event) {
+    public boolean charTyped(@NotNull CharacterEvent event) {
         if (textField.isFocused()) {
             return textField.charTyped(event);
         }
@@ -282,7 +282,7 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+    public boolean mouseDragged(@NotNull MouseButtonEvent event, double deltaX, double deltaY) {
         if (textField.isFocused() && mouseOnWidget(textField, event.x(), event.y())) {
             return textField.mouseDragged(event, deltaX, deltaY);
         } else {
@@ -361,7 +361,7 @@ public class DropdownTextField extends OverlayWidget {
         }
 
         @Override
-        public void onClick(MouseButtonEvent event, boolean doubleClick) {
+        public void onClick(@NotNull MouseButtonEvent event, boolean doubleClick) {
             consumer.accept(getMessage().getString());
         }
     }
@@ -399,7 +399,7 @@ public class DropdownTextField extends OverlayWidget {
             if (lastSound != null)
                 soundManager.stop(lastSound);
             lastSound = new SimpleSoundInstance(
-                    ResourceLocation.parse(getMessage().getString()),
+                    Identifier.parse(getMessage().getString()),
                     SoundSource.MASTER,
                     1.0F,
                     1.0F,

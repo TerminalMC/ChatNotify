@@ -56,12 +56,14 @@ public class ControlList extends OptionList {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
-                elements.add(CycleButton.<Config.SendMode>builder((status) -> localized(
-                                "option",
-                                "control.send_mode.status." + status.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (status) -> localized(
+                                        "option",
+                                        "control.send_mode.status." + status.name()
+                                ),
+                                Config.get().sendMode
+                        )
                         .withValues(Config.SendMode.values())
-                        .withInitialValue(Config.get().sendMode)
                         .withTooltip((mode) -> Tooltip.create(localized(
                                 "option",
                                 "control.send_mode.status." + mode.name() + ".tooltip"
@@ -77,12 +79,14 @@ public class ControlList extends OptionList {
                                 (button, status) -> Config.get().sendMode = status
                         ));
 
-                elements.add(CycleButton.<Config.DebugMode>builder((mode) -> localized(
-                                "option",
-                                "control.debug_mode.status." + mode.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (mode) -> localized(
+                                        "option",
+                                        "control.debug_mode.status." + mode.name()
+                                ),
+                                Config.get().debugMode
+                        )
                         .withValues(Config.DebugMode.values())
-                        .withInitialValue(Config.get().debugMode)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "control.debug_mode.status." + status.name() + ".tooltip"
@@ -104,12 +108,14 @@ public class ControlList extends OptionList {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
-                elements.add(CycleButton.<Config.NotifMode>builder((status) -> localized(
-                                "option",
-                                "control.notif_mode.status." + status.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (status) -> localized(
+                                        "option",
+                                        "control.notif_mode.status." + status.name()
+                                ),
+                                Config.get().notifMode
+                        )
                         .withValues(Config.NotifMode.values())
-                        .withInitialValue(Config.get().notifMode)
                         .withTooltip((mode) -> Tooltip.create(localized(
                                 "option",
                                 "control.notif_mode.status." + mode.name() + ".tooltip"
@@ -123,12 +129,13 @@ public class ControlList extends OptionList {
                                 (button, status) -> Config.get().notifMode = status
                         ));
 
-                elements.add(CycleButton.<Config.RestyleMode>builder((status) -> localized(
-                                "option",
-                                "control.restyle_mode.status." + status.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (status) -> localized(
+                                        "option",
+                                        "control.restyle_mode.status." + status.name()
+                                ), Config.get().restyleMode
+                        )
                         .withValues(Config.RestyleMode.values())
-                        .withInitialValue(Config.get().restyleMode)
                         .withTooltip((mode) -> Tooltip.create(localized(
                                 "option",
                                 "control.restyle_mode.status." + mode.name() + ".tooltip"

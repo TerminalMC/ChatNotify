@@ -29,7 +29,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,27 +46,27 @@ import java.util.List;
  */
 public class HorizontalList<E extends AbstractWidget> extends AbstractContainerWidget {
 
-    private static final ResourceLocation LEFT_SEPARATOR =
-            ResourceLocation.fromNamespaceAndPath(
+    private static final Identifier LEFT_SEPARATOR =
+            Identifier.fromNamespaceAndPath(
                     ChatNotify.MOD_ID,
                     "textures/gui/left_separator.png"
             );
-    private static final ResourceLocation RIGHT_SEPARATOR =
-            ResourceLocation.fromNamespaceAndPath(
+    private static final Identifier RIGHT_SEPARATOR =
+            Identifier.fromNamespaceAndPath(
                     ChatNotify.MOD_ID,
                     "textures/gui/right_separator.png"
             );
-    private static final ResourceLocation MENU_LIST_BACKGROUND =
-            ResourceLocation.withDefaultNamespace(
+    private static final Identifier MENU_LIST_BACKGROUND =
+            Identifier.withDefaultNamespace(
                     "textures/gui/menu_list_background.png"
             );
-    private static final ResourceLocation SCROLLER_SPRITE =
-            ResourceLocation.fromNamespaceAndPath(
+    private static final Identifier SCROLLER_SPRITE =
+            Identifier.fromNamespaceAndPath(
                     ChatNotify.MOD_ID,
                     "widget/scroller_horizontal"
             );
-    private static final ResourceLocation SCROLLER_BACKGROUND_SPRITE =
-            ResourceLocation.fromNamespaceAndPath(
+    private static final Identifier SCROLLER_BACKGROUND_SPRITE =
+            Identifier.fromNamespaceAndPath(
                     ChatNotify.MOD_ID,
                     "widget/scroller_background_horizontal"
             );
@@ -419,7 +419,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     // Scrolling
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
         updateScrollingState(event);
         if (!isMouseOver(event.x(), event.y())) {
             return false;
