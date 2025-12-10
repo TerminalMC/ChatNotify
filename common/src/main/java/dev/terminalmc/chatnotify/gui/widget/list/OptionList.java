@@ -29,7 +29,7 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +52,7 @@ import java.util.function.Supplier;
  * add them all to a single {@link Entry}'s list of widgets, which are all rendered at the same list
  * level.
  */
-public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
+public abstract class OptionList extends ContainerObjectSelectionList<OptionList.@NotNull Entry> {
 
     protected final Minecraft mc;
     protected final OptionScreen screen;
@@ -189,19 +189,19 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     /**
      * Base implementation of {@link Entry}, with common entries.
      */
-    public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
+    public abstract static class Entry extends ContainerObjectSelectionList.Entry<@NotNull Entry> {
 
         public static final int SPACE = OptionScreen.ELEMENT_SPACING;
         public static final int SPACE_SMALL = OptionScreen.ELEMENT_SPACING_NARROW;
         public static final int SPACE_TINY = OptionScreen.ELEMENT_SPACING_FINE;
 
         public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/options_button"),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/options_button"),
+                Identifier.fromNamespaceAndPath(
                         ChatNotify.MOD_ID,
                         "widget/options_button_disabled"
                 ),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(
                         ChatNotify.MOD_ID,
                         "widget/options_button_highlighted"
                 )
@@ -398,12 +398,16 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
 
             @Override
-            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
                 return entry.mouseClicked(event, doubleClick);
             }
 
             @Override
-            public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+            public boolean mouseDragged(
+                    @NotNull MouseButtonEvent event,
+                    double deltaX,
+                    double deltaY
+            ) {
                 return entry.mouseDragged(event, deltaX, deltaY);
             }
 

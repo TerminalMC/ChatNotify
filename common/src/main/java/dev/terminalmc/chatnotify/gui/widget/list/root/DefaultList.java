@@ -34,7 +34,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
 import java.awt.*;
@@ -190,7 +190,7 @@ public class DefaultList extends OptionList {
                                                     .getSoundManager()
                                                     .getAvailableSounds()
                                                     .stream()
-                                                    .map(ResourceLocation::toString)
+                                                    .map(Identifier::toString)
                                                     .sorted()
                                                     .toList()
                                     ).withSoundDropType());
@@ -207,10 +207,12 @@ public class DefaultList extends OptionList {
             SoundSource(int x, int width, int height, DefaultList list) {
                 super();
 
-                elements.add(CycleButton.<net.minecraft.sounds.SoundSource>builder(source -> Component.translatable(
-                                "soundCategory." + source.getName()))
+                elements.add(CycleButton.builder(
+                                source -> Component.translatable(
+                                        "soundCategory." + source.getName()),
+                                Config.get().soundSource
+                        )
                         .withValues(net.minecraft.sounds.SoundSource.values())
-                        .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "notif.sound.source.tooltip"
