@@ -22,6 +22,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -31,7 +32,7 @@ import org.lwjgl.glfw.GLFW;
  * {@link net.minecraft.client.gui.components.ContainerObjectSelectionList}, the parent element must
  * also be modified to accept right clicks.
  */
-public class RightClickableButton extends Button {
+public class RightClickableButton extends Button.Plain {
 
     protected final OnPress onRightPress;
 
@@ -53,7 +54,7 @@ public class RightClickableButton extends Button {
     }
 
     @Override
-    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+    public void onClick(@NotNull MouseButtonEvent event, boolean doubleClick) {
         if (GLFW.glfwGetMouseButton(
                 Minecraft.getInstance().getWindow().handle(),
                 InputConstants.MOUSE_BUTTON_RIGHT
@@ -65,7 +66,7 @@ public class RightClickableButton extends Button {
     }
 
     @Override
-    protected boolean isValidClickButton(MouseButtonInfo info) {
+    protected boolean isValidClickButton(@NotNull MouseButtonInfo info) {
         return super.isValidClickButton(info) || info.button() == InputConstants.MOUSE_BUTTON_RIGHT;
     }
 }

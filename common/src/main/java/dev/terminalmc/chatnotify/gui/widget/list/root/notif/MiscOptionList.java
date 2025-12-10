@@ -343,12 +343,14 @@ public class MiscOptionList extends OptionList {
             Controls(int x, int width, int height, Notification notif) {
                 super();
 
-                elements.add(CycleButton.<Notification.CheckOwnMode>builder((status) -> localized(
-                                "option",
-                                "notif.misc.control.self_notify.status." + status.name()
-                        ))
+                elements.add(CycleButton.builder(
+                                (status) -> localized(
+                                        "option",
+                                        "notif.misc.control.self_notify.status." + status.name()
+                                ),
+                                notif.checkOwnMode
+                        )
                         .withValues(Notification.CheckOwnMode.values())
-                        .withInitialValue(notif.checkOwnMode)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "notif.misc.control.self_notify.status." + status.name()
@@ -393,16 +395,19 @@ public class MiscOptionList extends OptionList {
 
                 // Status button
                 elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
-                ).displayOnlyValue().withInitialValue(statusSupplier.get()).create(
-                        x + width - statusButtonWidth,
-                        0,
-                        statusButtonWidth,
-                        height,
-                        Component.empty(),
-                        (button, status) -> statusConsumer.accept(status)
-                ));
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                statusSupplier.get()
+                        )
+                        .displayOnlyValue()
+                        .create(
+                                x + width - statusButtonWidth,
+                                0,
+                                statusButtonWidth,
+                                height,
+                                Component.empty(),
+                                (button, status) -> statusConsumer.accept(status)
+                        ));
             }
         }
 
@@ -491,9 +496,9 @@ public class MiscOptionList extends OptionList {
 
                 elements.add(CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                statusSupplier.get()
                         )
-                        .withInitialValue(statusSupplier.get())
                         .withTooltip((b) -> b
                                 ? Tooltip.create(tooltipOn)
                                 : Tooltip.create(tooltipOff))

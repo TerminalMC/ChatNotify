@@ -35,6 +35,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.ARGB;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Duration;
@@ -169,10 +170,10 @@ public class FormatList extends OptionList {
                 // Status button
                 elements.add(CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                statusSupplier.get()
                         )
                         .displayOnlyValue()
-                        .withInitialValue(statusSupplier.get())
                         .create(
                                 x + width - statusButtonWidth,
                                 0,
@@ -199,13 +200,15 @@ public class FormatList extends OptionList {
             private void createFirst(int x, int width, int height, Notification notif) {
                 int buttonWidth = (width - SPACE * 2) / 3;
 
-                CycleButton<TextStyle.FormatMode> boldButton =
-                        CycleButton.<TextStyle.FormatMode>builder((state) -> getMessage(
-                                        state,
-                                        ChatFormatting.BOLD
-                                ))
+                CycleButton<TextStyle.@NotNull FormatMode> boldButton =
+                        CycleButton.builder(
+                                        (state) -> getMessage(
+                                                state,
+                                                ChatFormatting.BOLD
+                                        ),
+                                        notif.textStyle.bold
+                                )
                                 .withValues(TextStyle.FormatMode.values())
-                                .withInitialValue(notif.textStyle.bold)
                                 .withTooltip(this::getTooltip)
                                 .create(
                                         x,
@@ -218,13 +221,15 @@ public class FormatList extends OptionList {
                 boldButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(boldButton);
 
-                CycleButton<TextStyle.FormatMode> italicButton =
-                        CycleButton.<TextStyle.FormatMode>builder((state) -> getMessage(
-                                        state,
-                                        ChatFormatting.ITALIC
-                                ))
+                CycleButton<TextStyle.@NotNull FormatMode> italicButton =
+                        CycleButton.builder(
+                                        (state) -> getMessage(
+                                                state,
+                                                ChatFormatting.ITALIC
+                                        ),
+                                        notif.textStyle.italic
+                                )
                                 .withValues(TextStyle.FormatMode.values())
-                                .withInitialValue(notif.textStyle.italic)
                                 .withTooltip(this::getTooltip)
                                 .create(
                                         x + width / 2 - buttonWidth / 2,
@@ -237,13 +242,15 @@ public class FormatList extends OptionList {
                 italicButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(italicButton);
 
-                CycleButton<TextStyle.FormatMode> underlineButton =
-                        CycleButton.<TextStyle.FormatMode>builder((state) -> getMessage(
-                                        state,
-                                        ChatFormatting.UNDERLINE
-                                ))
+                CycleButton<TextStyle.@NotNull FormatMode> underlineButton =
+                        CycleButton.builder(
+                                        (state) -> getMessage(
+                                                state,
+                                                ChatFormatting.UNDERLINE
+                                        ),
+                                        notif.textStyle.underlined
+                                )
                                 .withValues(TextStyle.FormatMode.values())
-                                .withInitialValue(notif.textStyle.underlined)
                                 .withTooltip(this::getTooltip)
                                 .create(
                                         x + width - buttonWidth,
@@ -261,13 +268,14 @@ public class FormatList extends OptionList {
             private void createSecond(int x, int width, int height, Notification notif) {
                 int buttonWidth = (width - SPACE) / 2;
 
-                CycleButton<TextStyle.FormatMode> strikethroughButton =
-                        CycleButton.<TextStyle.FormatMode>builder((state) -> getMessage(
-                                        state,
-                                        ChatFormatting.STRIKETHROUGH
-                                ))
+                CycleButton<TextStyle.@NotNull FormatMode> strikethroughButton =
+                        CycleButton.builder(
+                                        (state) -> getMessage(
+                                                state,
+                                                ChatFormatting.STRIKETHROUGH
+                                        ), notif.textStyle.strikethrough
+                                )
                                 .withValues(TextStyle.FormatMode.values())
-                                .withInitialValue(notif.textStyle.strikethrough)
                                 .withTooltip(this::getTooltip)
                                 .create(
                                         x,
@@ -280,13 +288,15 @@ public class FormatList extends OptionList {
                 strikethroughButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(strikethroughButton);
 
-                CycleButton<TextStyle.FormatMode> obfuscateButton =
-                        CycleButton.<TextStyle.FormatMode>builder((state) -> getMessage(
-                                        state,
-                                        ChatFormatting.OBFUSCATED
-                                ))
+                CycleButton<TextStyle.@NotNull FormatMode> obfuscateButton =
+                        CycleButton.builder(
+                                        (state) -> getMessage(
+                                                state,
+                                                ChatFormatting.OBFUSCATED
+                                        ),
+                                        notif.textStyle.obfuscated
+                                )
                                 .withValues(TextStyle.FormatMode.values())
-                                .withInitialValue(notif.textStyle.obfuscated)
                                 .withTooltip(this::getTooltip)
                                 .create(
                                         x + width - buttonWidth,
