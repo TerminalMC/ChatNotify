@@ -23,7 +23,7 @@ import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,8 +31,8 @@ import java.util.List;
 
 public class NotificationToast implements Toast {
 
-    private static final ResourceLocation BACKGROUND_SPRITE =
-            ResourceLocation.withDefaultNamespace("toast/advancement");
+    private static final Identifier BACKGROUND_SPRITE =
+            Identifier.withDefaultNamespace("toast/advancement");
     private static final int WIDTH = 160;
     private static final int HEIGHT = 32;
     private static final int X_MARGIN = 10;

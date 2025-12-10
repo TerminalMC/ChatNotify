@@ -42,6 +42,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -238,7 +239,7 @@ public class TriggerEditorList extends OptionList {
             );
             addEntry(entry);
             int requiredHeight =
-                    mc.font.wordWrapHeight(pair.getFirst().getString(), dynWideEntryWidth)
+                    mc.font.wordWrapHeight(pair.getFirst(), dynWideEntryWidth)
                             - defaultEntryHeight;
             while (requiredHeight > 0) {
                 Entry.Space spaceEntry = new Entry.Space(entry);
@@ -272,11 +273,10 @@ public class TriggerEditorList extends OptionList {
                 int movingX = x;
 
                 // Type button
-                CycleButton<Trigger.Type> typeButton =
-                        CycleButton.<Trigger.Type>builder((type) -> Component.literal(type.icon))
+                CycleButton<Trigger.@NotNull Type> typeButton =
+                        CycleButton.builder((type) -> Component.literal(type.icon), trigger.type)
                                 .withValues(Trigger.Type.values())
                                 .displayOnlyValue()
-                                .withInitialValue(trigger.type)
                                 .withTooltip((type) -> Tooltip.create(localized(
                                         "option",
                                         "notif.trigger.type." + type + ".tooltip"
@@ -375,11 +375,13 @@ public class TriggerEditorList extends OptionList {
                 movingX += list.tinyWidgetWidth;
 
                 // Type button
-                CycleButton<StyleTarget.Type> typeButton =
-                        CycleButton.<StyleTarget.Type>builder((type) -> Component.literal(type.icon))
+                CycleButton<StyleTarget.@NotNull Type> typeButton =
+                        CycleButton.builder(
+                                        (type) -> Component.literal(type.icon),
+                                        styleTarget.type
+                                )
                                 .withValues(StyleTarget.Type.values())
                                 .displayOnlyValue()
-                                .withInitialValue(styleTarget.type)
                                 .withTooltip((type) -> Tooltip.create(localized(
                                         "option",
                                         "notif.trigger.style_target.type." + type + ".tooltip"
@@ -440,35 +442,39 @@ public class TriggerEditorList extends OptionList {
                 int movingX = x;
 
                 elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
-                ).withInitialValue(list.filter).create(
-                        movingX,
-                        0,
-                        buttonWidth,
-                        height,
-                        localized("option", "notif.trigger.editor.filter"),
-                        (button, status) -> {
-                            list.filter = status;
-                            list.init();
-                        }
-                ));
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                list.filter
+                        )
+                        .create(
+                                movingX,
+                                0,
+                                buttonWidth,
+                                height,
+                                localized("option", "notif.trigger.editor.filter"),
+                                (button, status) -> {
+                                    list.filter = status;
+                                    list.init();
+                                }
+                        ));
                 movingX += buttonWidth + SPACE;
 
                 elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
-                ).withInitialValue(list.restyle).create(
-                        movingX,
-                        0,
-                        buttonWidth,
-                        height,
-                        localized("option", "notif.trigger.editor.restyle"),
-                        (button, status) -> {
-                            list.restyle = status;
-                            list.init();
-                        }
-                ));
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                list.restyle
+                        )
+                        .create(
+                                movingX,
+                                0,
+                                buttonWidth,
+                                height,
+                                localized("option", "notif.trigger.editor.restyle"),
+                                (button, status) -> {
+                                    list.restyle = status;
+                                    list.init();
+                                }
+                        ));
                 movingX = x + width - buttonWidth;
 
                 elements.add(Button.builder(
@@ -541,7 +547,7 @@ public class TriggerEditorList extends OptionList {
             }
 
             @Override
-            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
                 list.setTextDisplayValue(FormatUtil.stripCodes(msg.getString()));
 
                 List<String> keys = new ArrayList<>();
