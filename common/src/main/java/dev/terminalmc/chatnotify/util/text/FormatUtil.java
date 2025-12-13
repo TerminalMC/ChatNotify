@@ -41,7 +41,7 @@ public class FormatUtil {
     private static final Pattern COLOR_CODE_PATTERN =
             Pattern.compile(Pattern.quote(Unicode.SECTION.str) + ".?");
     private static final String PLACEHOLDER_PATTERN_STRING =
-            "%(\\d+\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
+            "%(?:(\\d+)\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(PLACEHOLDER_PATTERN_STRING);
 
     private FormatUtil() {
@@ -134,11 +134,11 @@ public class FormatUtil {
             // PLACEHOLDER_PATTERN.split(string) cannot be used as that doesn't
             // split between consecutive occurrences of the pattern.
 
-            // Some translation strings require args to be in a different order,
-            // so we re-order the array here
-            Object[] unorderedArgs = contents.getArgs();
-            Object[] args = new Object[unorderedArgs.length];
-            int argIdx = 0;
+            // Some translation strings reorder or reuse args, so we create a
+            // complete sequence array here
+            Object[] originalArgs = contents.getArgs();
+            List<Object> argsList = new ArrayList<>();
+            int nonIndexedCounter = 0;
 
             List<String> split = new ArrayList<>();
             Matcher m = PLACEHOLDER_PATTERN.matcher(string);
@@ -149,21 +149,24 @@ public class FormatUtil {
                 previousEnd = m.end();
                 // Add relevant arg
                 if (m.group(1) == null) {
-                    args[argIdx] = unorderedArgs[argIdx];
+                    // Non-indexed placeholder
+                    argsList.add(originalArgs[nonIndexedCounter]);
+                    nonIndexedCounter++;
                 } else {
-                    int num = Integer.parseInt(m.group(1).substring(0, m.group(1).length() - 1));
-                    if (num < 1 || num > unorderedArgs.length) {
+                    // Indexed placeholder
+                    int argIdx = Integer.parseInt(m.group(1));
+                    if (argIdx < 1 || argIdx > originalArgs.length) {
                         ChatNotify.LOG.warn(
                                 "Translation specifies arg number {} out of range for length {}",
-                                num,
-                                unorderedArgs.length
+                                argIdx,
+                                originalArgs.length
                         );
-                        num = argIdx + 1;
+                        argIdx = nonIndexedCounter + 1;
                     }
-                    args[argIdx] = unorderedArgs[num - 1];
+                    argsList.add(originalArgs[argIdx - 1]);
                 }
-                argIdx++;
             }
+            Object[] args = argsList.toArray();
 
             //noinspection StatementWithEmptyBody
             if (previousEnd == 0) {
