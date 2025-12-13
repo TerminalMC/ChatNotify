@@ -58,6 +58,11 @@ public class Notification implements StringSupplier {
      */
     public transient boolean editing = false;
 
+    /**
+     * The time, in ticks, remaining until this notification is eligible for triggering.
+     */
+    public transient long countdown = 0;
+
     // Options
 
     /**
@@ -83,6 +88,13 @@ public class Notification implements StringSupplier {
         ON,
         OFF,
     }
+
+    /**
+     * The time, in ticks, for which this instance should be ineligible for activation after being
+     * activated.
+     */
+    public int cooldown;
+    public static final int cooldownDefault = 0;
 
     /**
      * Whether this instance allows use of inclusion triggers.
@@ -227,6 +239,7 @@ public class Notification implements StringSupplier {
     Notification(
             boolean enabled,
             CheckOwnMode checkOwnMode,
+            int cooldown,
             boolean inclusionEnabled,
             boolean exclusionEnabled,
             boolean responseEnabled,
@@ -260,6 +273,7 @@ public class Notification implements StringSupplier {
     ) {
         this.enabled = enabled;
         this.checkOwnMode = checkOwnMode;
+        this.cooldown = cooldown;
         this.inclusionEnabled = inclusionEnabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
@@ -300,6 +314,7 @@ public class Notification implements StringSupplier {
         return new Notification(
                 enabledDefault,
                 CheckOwnMode.values()[0],
+                cooldownDefault,
                 inclusionEnabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
@@ -340,6 +355,7 @@ public class Notification implements StringSupplier {
         return new Notification(
                 enabledDefault,
                 CheckOwnMode.values()[0],
+                cooldownDefault,
                 inclusionEnabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
@@ -378,7 +394,7 @@ public class Notification implements StringSupplier {
      * user if {@code ownMsg} is {@code true}).
      */
     public boolean canBeTriggered(boolean ownMsg) {
-        if (enabled && !editing) {
+        if (enabled && countdown <= 0 && !editing) {
             if (ownMsg) {
                 return switch (checkOwnMode) {
                     case DEFER -> Config.get().checkOwnMessages;
@@ -543,6 +559,13 @@ public class Notification implements StringSupplier {
                     "checkOwnMode",
                     CheckOwnMode.class,
                     CheckOwnMode.values()[0],
+                    silent
+            );
+
+            int cooldown = JsonUtil.getOrDefault(
+                    obj,
+                    "cooldown",
+                    cooldownDefault,
                     silent
             );
 
@@ -774,6 +797,7 @@ public class Notification implements StringSupplier {
             return new Notification(
                     enabled,
                     checkOwnMode,
+                    cooldown,
                     inclusionEnabled,
                     exclusionEnabled,
                     responseEnabled,

@@ -61,6 +61,7 @@ public class MiscOptionList extends OptionList {
     @Override
     protected void addEntries() {
         Minecraft mc = Minecraft.getInstance();
+        resetLabelWidth();
 
         addEntry(new OptionList.Entry.Text(
                 entryX,
@@ -71,6 +72,20 @@ public class MiscOptionList extends OptionList {
                 -1
         ));
         addEntry(new Entry.Controls(entryX, entryWidth, entryHeight, notif));
+
+        registerLabel(localized("options", "notif.misc.control.cooldown"));
+        addEntry(new Entry.CustomLabeledMessageReset(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.cooldown,
+                (s) -> notif.cooldown = Integer.parseInt(s.strip()),
+                Notification.cooldownDefault,
+                localized("option", "notif.misc.control.cooldown"),
+                localized("option", "notif.misc.control.cooldown")
+                        .append(".\n")
+                        .append(localized("option", "notif.misc.control.cooldown.tooltip"))
+        ));
 
         addEntry(new OptionList.Entry.Text(
                 entryX,
@@ -189,7 +204,6 @@ public class MiscOptionList extends OptionList {
         ));
 
         // register all label texts, so that they are properly aligned
-        resetLabelWidth();
         registerLabel(localized("options", "notif.misc.timing.delay"));
         registerLabel(localized("option", "notif.misc.timing.title_fade_in"));
         registerLabel(localized("option", "notif.misc.timing.title_stay"));

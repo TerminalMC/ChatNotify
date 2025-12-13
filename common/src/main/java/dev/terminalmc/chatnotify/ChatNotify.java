@@ -83,6 +83,12 @@ public class ChatNotify {
         ResponseUtil.tickResponses(mc);
         TimingUtil.tickActions();
 
+        // Cooldowns
+        for (Notification notif : Config.get().getNotifs()) {
+            if (notif.countdown > 0)
+                notif.countdown -= 1;
+        }
+
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;

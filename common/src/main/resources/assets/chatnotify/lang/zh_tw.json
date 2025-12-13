@@ -112,6 +112,8 @@
   "option.chatnotify.notif.list.tooltip": "傳入訊息將會啟動第一個啟用且觸發條件相符的通知。",
   "option.chatnotify.notif.misc": "進階選項",
   "option.chatnotify.notif.misc.control": "Advanced Controls",
+  "option.chatnotify.notif.misc.control.cooldown": "Notification cooldown",
+  "option.chatnotify.notif.misc.control.cooldown.tooltip": "Time in ticks the notification should be disabled after being activated.",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER": "Defer",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER.tooltip": "Global option will be used.",
   "option.chatnotify.notif.misc.control.self_notify.status.OFF": "Override - OFF",

@@ -112,6 +112,8 @@
   "option.chatnotify.notif.list.tooltip": "A notification will be activated when an incoming chat message matches one of the notification's triggers.",
   "option.chatnotify.notif.misc": "Misc",
   "option.chatnotify.notif.misc.control": "Misc Controls",
+  "option.chatnotify.notif.misc.control.cooldown": "Notification cooldown",
+  "option.chatnotify.notif.misc.control.cooldown.tooltip": "Time in ticks the notification should be disabled after being activated.",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER": "Defer",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER.tooltip": "Global option will be used.",
   "option.chatnotify.notif.misc.control.self_notify.status.OFF": "Override - OFF",

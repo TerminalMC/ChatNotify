@@ -304,6 +304,9 @@ public class MessageUtil {
                 // Trigger notification
                 anyTriggered = true;
 
+                // Start countdown
+                notif.countdown = notif.cooldown;
+
                 // Play sound
                 if (!anySoundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
                     anySoundPlayed = playSound(notif);

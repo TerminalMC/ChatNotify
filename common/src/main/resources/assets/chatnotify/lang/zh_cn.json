@@ -112,6 +112,8 @@
   "option.chatnotify.notif.list.tooltip": "传入消息将激活第一个启用且与触发器匹配的通知",
   "option.chatnotify.notif.misc": "高级选项",
   "option.chatnotify.notif.misc.control": "高级控制",
+  "option.chatnotify.notif.misc.control.cooldown": "Notification cooldown",
+  "option.chatnotify.notif.misc.control.cooldown.tooltip": "Time in ticks the notification should be disabled after being activated.",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER": "推迟",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER.tooltip": "将使用全局选项",
   "option.chatnotify.notif.misc.control.self_notify.status.OFF": "覆盖 - 关闭",

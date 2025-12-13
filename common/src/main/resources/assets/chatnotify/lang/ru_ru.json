@@ -112,6 +112,8 @@
   "option.chatnotify.notif.list.tooltip": "Уведомление будет активировано, если входящее сообщение в чате соответствует одному из триггеров уведомления.",
   "option.chatnotify.notif.misc": "Дополнительные параметры",
   "option.chatnotify.notif.misc.control": "Дополнительные элементы управления",
+  "option.chatnotify.notif.misc.control.cooldown": "Время между уведомлениями",
+  "option.chatnotify.notif.misc.control.cooldown.tooltip": "Продолжительность (в тиках) между последовательными активациями этого уведомления.",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER": "Отложить",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER.tooltip": "Будет использована глобальная настройка.",
   "option.chatnotify.notif.misc.control.self_notify.status.OFF": "Переопределить - ВЫКЛ",

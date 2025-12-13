@@ -3,6 +3,7 @@
 ## 2.6.3
 
 - Fixed message parsing breaking on translation strings with indexed placeholders
+- Added a cooldown option for notifications
 
 ## 2.6.2
 
