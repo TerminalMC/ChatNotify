@@ -272,10 +272,12 @@ public class TriggerEditorList extends OptionList {
                     triggerField.regexValidator();
                 triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
-                    if (list.children().size() > 4) {
-                        list.children().removeIf((entry) -> entry instanceof MessageEntry
+                    List<OptionList.Entry> children = new ArrayList<>(list.children());
+                    if (children.size() > 4) {
+                        children.removeIf((entry) -> entry instanceof MessageEntry
                                 || entry instanceof Text
-                                || (entry instanceof Space && list.children().indexOf(entry) > 4));
+                                || (entry instanceof Space && children.indexOf(entry) > 4));
+                        list.replaceEntries(children);
                         list.addChatMessages(list.recentChat);
                     }
                 });
@@ -369,9 +371,11 @@ public class TriggerEditorList extends OptionList {
                 stringField.setValue(styleTarget.string);
                 stringField.setResponder((string) -> {
                     styleTarget.string = string.strip();
-                    list.children().removeIf((entry) -> entry instanceof MessageEntry
+                    List<OptionList.Entry> children = new ArrayList<>(list.children());
+                    children.removeIf((entry) -> entry instanceof MessageEntry
                             || entry instanceof Text
-                            || (entry instanceof Space && list.children().indexOf(entry) > 4));
+                            || (entry instanceof Space && children.indexOf(entry) > 4));
+                    list.replaceEntries(children);
                     list.addChatMessages(list.recentChat);
                 });
                 stringField.setHint(localized("option", "notif.trigger.style_target.field.hint"));

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.4
+
+- Fixed a trigger editor crash on 1.21.10+
+
 ## 2.6.3
 
 - Fixed message parsing breaking on translation strings with indexed placeholders
