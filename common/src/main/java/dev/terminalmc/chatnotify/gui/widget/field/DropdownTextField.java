@@ -27,7 +27,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -199,7 +201,6 @@ public class DropdownTextField extends OverlayWidget {
             for (String suggestion : dropdownValues) {
                 if (suggestion.contains(str) && !suggestion.equals(str)) {
                     StringWidget widget = dropWidgetProvider.apply(suggestion);
-                    widget.alignLeft();
                     dropdown.addWidget(widget);
                 }
             }
@@ -207,26 +208,26 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         // Only textField can handle key presses
         if (textField.isFocused()) {
             if (!dropdown.isEmpty()) {
-                if (keyCode == InputConstants.KEY_TAB) {
-                    if (Screen.hasShiftDown()) {
+                if (event.key() == InputConstants.KEY_TAB) {
+                    if (event.hasShiftDown()) {
                         tabUp();
                     } else {
                         tabDown();
                     }
                     return true;
-                } else if (keyCode == InputConstants.KEY_UP) {
+                } else if (event.key() == InputConstants.KEY_UP) {
                     tabUp();
                     return true;
-                } else if (keyCode == InputConstants.KEY_DOWN) {
+                } else if (event.key() == InputConstants.KEY_DOWN) {
                     tabDown();
                     return true;
                 }
             }
-            return textField.keyPressed(keyCode, scanCode, modifiers);
+            return textField.keyPressed(event);
         }
         return false;
     }
@@ -246,53 +247,47 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (textField.isFocused()) {
-            return textField.charTyped(chr, modifiers);
+            return textField.charTyped(event);
         }
         return false;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (mouseOnWidget(this, mouseX, mouseY)) {
-            if (mouseOnWidget(textField, mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (mouseOnWidget(this, event.x(), event.y())) {
+            if (mouseOnWidget(textField, event.x(), event.y())) {
                 if (!textField.isFocused()) {
                     textField.setFocused(true);
                 } else {
-                    textField.mouseClicked(mouseX, mouseY, button);
+                    textField.mouseClicked(event, doubleClick);
                 }
-            } else if (textField.isFocused() && mouseOnWidget(dropdown, mouseX, mouseY)) {
-                dropdown.mouseClicked(mouseX, mouseY, button);
+            } else if (textField.isFocused() && mouseOnWidget(dropdown, event.x(), event.y())) {
+                dropdown.mouseClicked(event, doubleClick);
             } else {
                 textField.setFocused(false);
-                if (button == InputConstants.MOUSE_BUTTON_LEFT) {
-                    if (mouseOnWidget(cancelButton, mouseX, mouseY)) {
-                        cancelButton.mouseClicked(mouseX, mouseY, button);
-                    } else if (mouseOnWidget(confirmButton, mouseX, mouseY)) {
-                        confirmButton.mouseClicked(mouseX, mouseY, button);
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+                    if (mouseOnWidget(cancelButton, event.x(), event.y())) {
+                        cancelButton.mouseClicked(event, doubleClick);
+                    } else if (mouseOnWidget(confirmButton, event.x(), event.y())) {
+                        confirmButton.mouseClicked(event, doubleClick);
                     }
                 }
             }
         } else {
-            cancelButton.onPress();
+            cancelButton.onPress(event);
         }
         return true;
     }
 
     @Override
-    public boolean mouseDragged(
-            double mouseX,
-            double mouseY,
-            int button,
-            double deltaX,
-            double deltaY
-    ) {
-        if (textField.isFocused() && mouseOnWidget(textField, mouseX, mouseY)) {
-            return textField.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (textField.isFocused() && mouseOnWidget(textField, event.x(), event.y())) {
+            return textField.mouseDragged(event, deltaX, deltaY);
         } else {
             dropdown.setFocused(null);
-            return dropdown.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return dropdown.mouseDragged(event, deltaX, deltaY);
         }
     }
 
@@ -366,7 +361,7 @@ public class DropdownTextField extends OverlayWidget {
         }
 
         @Override
-        public void onClick(double mouseX, double mouseY) {
+        public void onClick(MouseButtonEvent event, boolean doubleClick) {
             consumer.accept(getMessage().getString());
         }
     }

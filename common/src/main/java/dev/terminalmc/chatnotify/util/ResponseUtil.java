@@ -83,7 +83,7 @@ public class ResponseUtil {
                 // Compat mode for mods mixing into handleChatInput
                 Screen oldScreen = mc.screen;
                 if (!(mc.screen instanceof ChatScreen)) {
-                    mc.setScreen(new ChatScreen(""));
+                    mc.setScreen(new ChatScreen("", false));
                 }
                 if (mc.screen instanceof ChatScreen cs) {
                     for (String msg : messages) {
