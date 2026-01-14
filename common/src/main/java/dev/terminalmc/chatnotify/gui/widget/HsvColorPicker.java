@@ -291,9 +291,9 @@ public class HsvColorPicker extends OverlayWidget {
                 updateSvCursor();
             }
             if (hsv[2] < 0.1)
-                hexField.setTextColor(0xFFFFFF); // Keep text visible
+                hexField.setTextColor(0xFFFFFFFF); // Keep text visible
             else
-                hexField.setTextColor(color);
+                hexField.setTextColor((0xFF << 24) | color);
         }
     }
 
@@ -480,14 +480,14 @@ public class HsvColorPicker extends OverlayWidget {
                 newColorLabel,
                 newCFieldTextX,
                 newCFieldTextY,
-                0xFFFFFF
+                0xFFFFFFFF
         );
         graphics.drawString(
                 Minecraft.getInstance().font,
                 oldColorLabel,
                 oldCFieldTextX,
                 oldCFieldTextY,
-                0xFFFFFF
+                0xFFFFFFFF
         );
         hexField.renderWidget(graphics, mouseX, mouseY, delta);
         cancelButton.render(graphics, mouseX, mouseY, delta);
