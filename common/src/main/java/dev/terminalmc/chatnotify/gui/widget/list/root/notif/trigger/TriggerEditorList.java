@@ -16,8 +16,6 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
@@ -31,6 +29,7 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.mixin.accessor.AbstractWidgetAccessor;
 import dev.terminalmc.chatnotify.util.Unicode;
 import dev.terminalmc.chatnotify.util.text.FormatUtil;
 import dev.terminalmc.chatnotify.util.text.MessageUtil;
@@ -38,13 +37,12 @@ import dev.terminalmc.chatnotify.util.text.StyleUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Component.Serializer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,11 +53,6 @@ import java.util.regex.PatternSyntaxException;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class TriggerEditorList extends OptionList {
-
-    public static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(
-            Component.class,
-            new Component.SerializerAdapter(RegistryAccess.EMPTY)
-    ).create();
 
     private final Trigger trigger;
     private final TextStyle textStyle;
@@ -77,30 +70,28 @@ public class TriggerEditorList extends OptionList {
             OptionScreen screen,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpacing,
             Trigger trigger,
             TextStyle textStyle
     ) {
-        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, screen, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
         this.trigger = trigger;
         this.textStyle = textStyle;
-        this.recentChatMaster = ChatNotify.unmodifiedChat.stream()
-                .map(t -> {
-                    try {
-                        return GSON.toJsonTree(t);
-                    } catch (Exception e) {
-                        if (Config.get().debugMode.equals(DebugMode.ALL)) {
-                            ChatNotify.LOG.warn("{}", e.getMessage());
-                        }
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .toList()
-                .reversed();
+        List<Component> unmodifiedChatReversed = ChatNotify.unmodifiedChat.stream().toList();
+        this.recentChatMaster = new ArrayList<>();
+        for (int i = unmodifiedChatReversed.size() - 1; i >= 0; i--) {
+            try {
+                this.recentChatMaster.add(Serializer.toJsonTree(unmodifiedChatReversed.get(i)));
+            } catch (Exception e) {
+                if (Config.get().debugMode.equals(DebugMode.ALL)) {
+                    ChatNotify.LOG.warn("{}", e.getMessage());
+                }
+            }
+        }
         this.recentChat = new ArrayList<>();
     }
 
@@ -110,7 +101,7 @@ public class TriggerEditorList extends OptionList {
         this.recentChat.addAll(this.recentChatMaster.stream()
                 .map(s -> {
                     try {
-                        return GSON.fromJson(s, Component.class);
+                        return Serializer.fromJson(s);
                     } catch (Exception e) {
                         if (Config.get().debugMode.equals(DebugMode.ALL)) {
                             ChatNotify.LOG.warn("{}", e.getMessage());
@@ -271,7 +262,7 @@ public class TriggerEditorList extends OptionList {
         });
 
         // If no message entries, add note
-        if (!(children().getLast() instanceof Entry.MessageEntry)) {
+        if (!(children().get(children().size() - 1) instanceof Entry.MessageEntry)) {
             addEntry(new OptionList.Entry.Text(
                     dynWideEntryX,
                     dynWideEntryWidth,
@@ -315,7 +306,7 @@ public class TriggerEditorList extends OptionList {
                                             list.init();
                                         }
                                 );
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -357,7 +348,7 @@ public class TriggerEditorList extends OptionList {
                             "option",
                             "notif.trigger.style_target.add.tooltip"
                     )));
-                    styleButton.setTooltipDelay(Duration.ofMillis(500));
+                    styleButton.setTooltipDelay(500);
                 } else {
                     styleButton.active = false;
                 }
@@ -392,7 +383,7 @@ public class TriggerEditorList extends OptionList {
                         "option",
                         "notif.trigger.style_target.tooltip"
                 )));
-                infoIcon.setTooltipDelay(Duration.ofMillis(500));
+                infoIcon.setTooltipDelay(500);
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
 
@@ -417,7 +408,7 @@ public class TriggerEditorList extends OptionList {
                                             list.init();
                                         }
                                 );
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -533,7 +524,7 @@ public class TriggerEditorList extends OptionList {
                 elements.add(labelButton);
 
                 widget.setWidth(fieldWidth);
-                widget.setHeight(height);
+                ((AbstractWidgetAccessor) widget).chatnotify$setHeight(height);
                 widget.setX(x + width - fieldWidth);
                 elements.add(widget);
             }

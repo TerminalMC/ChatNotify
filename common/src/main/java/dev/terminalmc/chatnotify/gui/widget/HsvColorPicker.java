@@ -20,7 +20,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
 import dev.terminalmc.chatnotify.util.inject.IGuiGraphics;
-import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -181,7 +180,7 @@ public class HsvColorPicker extends OverlayWidget {
                 hsv[0],
                 hsv[1],
                 hsv[2]
-        ))).chatnotify$formatValue());
+        ) - 0xFF000000)).chatnotify$formatValue());
 
         // Cancel and confirm buttons
         int cancelButtonWidth = interiorWidth - hsvPickerBoxWidth - (hsvPickerBoxWidth / 2);
@@ -272,12 +271,13 @@ public class HsvColorPicker extends OverlayWidget {
     private void updateHexField() {
         updateFromCursor = true;
         int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
-        hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(color)).chatnotify$formatValue());
+        hexField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(
+                color - 0xFF000000)).chatnotify$formatValue());
         updateFromCursor = false;
     }
 
     private void updateColorFromHexField(String s) {
-        TextColor textColor = ColorUtil.parseColor(s);
+        TextColor textColor = TextColor.parseColor(s);
         if (textColor != null) {
             int color = textColor.getValue();
             if (!updateFromCursor) {
