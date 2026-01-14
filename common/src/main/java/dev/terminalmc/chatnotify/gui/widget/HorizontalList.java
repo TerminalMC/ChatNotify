@@ -16,19 +16,18 @@
 
 package dev.terminalmc.chatnotify.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,32 +42,8 @@ import java.util.List;
  * <p>
  * Note: Minimal methods available, more to be added as required.
  */
-public class HorizontalList<E extends AbstractWidget> extends AbstractContainerWidget {
-
-    private static final ResourceLocation LEFT_SEPARATOR =
-            ResourceLocation.fromNamespaceAndPath(
-                    ChatNotify.MOD_ID,
-                    "textures/gui/left_separator.png"
-            );
-    private static final ResourceLocation RIGHT_SEPARATOR =
-            ResourceLocation.fromNamespaceAndPath(
-                    ChatNotify.MOD_ID,
-                    "textures/gui/right_separator.png"
-            );
-    private static final ResourceLocation MENU_LIST_BACKGROUND =
-            ResourceLocation.withDefaultNamespace(
-                    "textures/gui/menu_list_background.png"
-            );
-    private static final ResourceLocation SCROLLER_SPRITE =
-            ResourceLocation.fromNamespaceAndPath(
-                    ChatNotify.MOD_ID,
-                    "widget/scroller_horizontal"
-            );
-    private static final ResourceLocation SCROLLER_BACKGROUND_SPRITE =
-            ResourceLocation.fromNamespaceAndPath(
-                    ChatNotify.MOD_ID,
-                    "widget/scroller_background_horizontal"
-            );
+public class HorizontalList<E extends AbstractWidget> extends AbstractContainerEventHandler
+        implements Renderable, NarratableEntry {
 
     private static final int SCROLLBAR_WIDTH = 32;
     private static final int SCROLLBAR_HEIGHT = 6;
@@ -98,11 +73,24 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     private @Nullable E hovered;
     private @Nullable E selected;
 
+    protected int x0;
+    protected int x1;
+    protected int y0;
+    protected int y1;
+    protected int width;
+    protected int height;
+
     public HorizontalList(int x, int y, int width, int height, int spacing, boolean topScrollbar) {
-        super(x, y, width, height, Component.empty());
+        super();
         this.space = spacing;
         this.mc = Minecraft.getInstance();
         this.topScrollbar = topScrollbar;
+        this.x0 = x;
+        this.x1 = x + width;
+        this.y0 = y;
+        this.y1 = y + height;
+        this.width = width;
+        this.height = height;
     }
 
     // Hovered entry
@@ -204,19 +192,43 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
 
     // Bounds
 
-    @Override
+    public int getX() {
+        return x0;
+    }
+
+    public int getY() {
+        return y0;
+    }
+
+    public int getRight() {
+        return x1;
+    }
+
+    public int getBottom() {
+        return y1;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     public void setWidth(int width) {
         setSize(width, getHeight());
     }
 
-    @Override
     public void setHeight(int height) {
         setSize(getWidth(), height);
     }
 
-    @Override
     public void setSize(int width, int height) {
-        super.setSize(Math.max(width, MIN_WIDTH), Math.max(height, MIN_HEIGHT));
+        this.width = Math.max(width, MIN_WIDTH);
+        this.height = Math.max(height, MIN_HEIGHT);
+        this.x1 = x0 + width;
+        this.y1 = y0 + height;
         clampScrollAmount();
     }
 
@@ -225,10 +237,17 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         setPosition(x, y);
     }
 
+    public void setPosition(int x, int y) {
+        this.x0 = x;
+        this.x1 = x + width;
+        this.y0 = y;
+        this.y1 = y + height;
+    }
+
     // Rendering
 
     @Override
-    protected void renderWidget(
+    public void render(
             @NotNull GuiGraphics graphics,
             int mouseX,
             int mouseY,
@@ -245,9 +264,19 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the partially-translucent background texture.
      */
     protected void renderListBackground(GuiGraphics graphics) {
-        RenderSystem.enableBlend();
-        graphics.blit(MENU_LIST_BACKGROUND, getX(), getY(), 0, 0, getWidth(), getHeight(), 32, 32);
-        RenderSystem.disableBlend();
+        graphics.setColor(0.125F, 0.125F, 0.125F, 1.0F);
+        graphics.blit(
+                Screen.BACKGROUND_LOCATION,
+                x0,
+                y0,
+                (float) x1,
+                (float) (y1 + (int) scrollAmount),
+                x1 - x0,
+                y1 - y0,
+                32,
+                32
+        );
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     /**
@@ -270,7 +299,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             };
             child.setPosition(x, y);
             // Render
-            if (child.getRight() > getX() && child.getX() < getRight()) {
+            if (child.getX() + child.getWidth() > getX() && child.getX() < getRight()) {
                 child.render(graphics, mouseX, mouseY, partialTick);
             }
             // Move to next position
@@ -295,16 +324,12 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                     (int) scrollAmount * (getWidth() - scrollerWidth) / getMaxScroll() + getX()
             );
 
-            RenderSystem.enableBlend();
-            graphics.blitSprite(
-                    SCROLLER_BACKGROUND_SPRITE,
-                    getX(),
-                    y,
-                    getWidth(),
-                    SCROLLBAR_HEIGHT
-            );
-            graphics.blitSprite(SCROLLER_SPRITE, scrollerPos, y, scrollerWidth, SCROLLBAR_HEIGHT);
-            RenderSystem.disableBlend();
+            // Background
+            graphics.fill(getX(), y, getRight(), y + 6, -16777216);
+            // Scroll base layer
+            graphics.fill(scrollerPos, y, scrollerPos + scrollerWidth, y + 6, -8355712);
+            // Scroll top layer
+            graphics.fill(scrollerPos, y, scrollerPos + scrollerWidth - 1, y + 6 - 1, -4144960);
         }
     }
 
@@ -319,52 +344,40 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * Renders the list separator textures.
      */
     protected void renderSeparators(GuiGraphics guiGraphics) {
-        RenderSystem.enableBlend();
+        guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
+        guiGraphics.blit(Screen.BACKGROUND_LOCATION, x0 - 2, 0, 0.0F, 0.0F, width, y0 - 2, 32, 32);
         guiGraphics.blit(
-                LEFT_SEPARATOR,
-                getX() - 2,
-                getY() - 1,
+                Screen.BACKGROUND_LOCATION,
+                x0 - 2,
+                y1 + 2,
                 0.0F,
-                0.0F,
-                2,
-                getHeight() + 2,
-                2,
+                (float) y1,
+                width,
+                height - y1,
+                32,
                 32
         );
-        guiGraphics.blit(
-                RIGHT_SEPARATOR,
-                getRight(),
-                getY() - 1,
-                0.0F,
-                0.0F,
-                2,
-                getHeight() + 2,
-                2,
-                32
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.fillGradient(
+                RenderType.guiOverlay(),
+                x0 - 2,
+                y0 - 2,
+                x1 + 2,
+                y0 + 2,
+                -16777216,
+                0,
+                0
         );
-        guiGraphics.blit(
-                Screen.HEADER_SEPARATOR,
-                getX() - 1,
-                getY() - 2,
-                0.0F,
-                0.0F,
-                getWidth() + 2,
-                2,
-                32,
-                2
+        guiGraphics.fillGradient(
+                RenderType.guiOverlay(),
+                x0 - 2,
+                y1 - 2,
+                x1 + 2,
+                y1 + 2,
+                0,
+                -16777216,
+                0
         );
-        guiGraphics.blit(
-                Screen.FOOTER_SEPARATOR,
-                getX() - 1,
-                getBottom(),
-                0.0F,
-                0.0F,
-                getWidth() + 2,
-                2,
-                32,
-                2
-        );
-        RenderSystem.disableBlend();
     }
 
     // Focus and visibility
@@ -388,7 +401,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      */
     protected void ensureVisible(E entry) {
         int leftHang = entry.getX() - getX();
-        int rightHang = entry.getRight() - getRight();
+        int rightHang = entry.getX() + entry.getWidth() - getRight();
         if (leftHang < 0) {
             // Entry is at least partially off the left end
             scroll(leftHang);
@@ -399,6 +412,12 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     }
 
     // Scrolling
+
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return mouseX >= (double) getX() && mouseY >= (double) getY()
+                && mouseX < (double) (getRight()) && mouseY < (double) (getBottom());
+    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -443,9 +462,9 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         int scrollMultiplier = 10;
-        setScrollAmount(scrollAmount - scrollY * scrollMultiplier);
+        setScrollAmount(scrollAmount - delta * scrollMultiplier);
         return true;
     }
 
@@ -499,7 +518,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     }
 
     @SuppressWarnings("unchecked")
-    public void updateWidgetNarration(@NotNull NarrationElementOutput output) {
+    public void updateNarration(@NotNull NarrationElementOutput output) {
         E hovered = getHovered();
         if (hovered != null) {
             hovered.updateNarration(output.nest());

@@ -32,12 +32,13 @@ public class ControlList extends OptionList {
             OptionScreen screen,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpacing
     ) {
-        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, screen, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
     }
 
     @Override
