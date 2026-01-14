@@ -119,7 +119,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
             filterString = "";
             filterPattern = null;
             init();
-            ensureVisible(addButtonEntry);
+            scrollToEntry(addButtonEntry);
         }
         );
     }
@@ -134,7 +134,8 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
     }
 
     protected void refreshSubList() {
-        Iterator<OptionList.Entry> iterator = children().iterator();
+        List<OptionList.Entry> entries = new ArrayList<>(children());
+        Iterator<OptionList.Entry> iterator = entries.iterator();
         while (iterator.hasNext()) {
             OptionList.Entry entry = iterator.next();
             if (entry instanceof Entry.SpacedListEntry) {
@@ -147,9 +148,9 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
             }
         }
         // Get list start index
-        int start = children().indexOf(addButtonEntry);
+        int start = entries.indexOf(addButtonEntry);
         if (start == -1)
-            start = children().size();
+            start = entries.size();
         // Add in reverse order
         List<E> list = listSupplier.get();
         for (int i = list.size() - 1; i >= 0; i--) {
@@ -164,7 +165,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         list.indexOf(e)
                 );
                 if (entry instanceof Entry.SpacedListEntry) {
-                    addEntry(start, new OptionList.Entry.Space(entry));
+                    entries.add(start, new OptionList.Entry.Space(entry));
                 } else if (trailerSupplier != null) {
                     Entry trailer = trailerSupplier.get(
                             dynWideEntryX,
@@ -174,11 +175,12 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                             e
                     );
                     if (trailer != null)
-                        addEntry(start, trailer);
+                        entries.add(start, trailer);
                 }
-                addEntry(start, entry);
+                entries.add(start, entry);
             }
         }
+        replaceEntries(entries);
         tabNameUpdate.run();
         refreshScrollAmount();
     }
@@ -475,7 +477,6 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         Component.literal(Unicode.INFO.str),
                         Minecraft.getInstance().font
                 );
-                infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option",
                         "notif.trigger.style_target.tooltip"

@@ -26,6 +26,9 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -322,45 +325,45 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (hexField.isFocused()) {
-            return hexField.keyPressed(keyCode, scanCode, modifiers);
+            return hexField.keyPressed(event);
         } else {
             return false;
         }
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (hexField.isFocused()) {
-            return hexField.charTyped(chr, modifiers);
+            return hexField.charTyped(event);
         } else {
             return false;
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         hasClickedOnH = false;
         hasClickedOnSv = false;
-        if (mouseOnElement(mouseX, mouseY, getX(), getY(), width, height).isPresent()) {
+        if (mouseOnElement(event.x(), event.y(), getX(), getY(), width, height).isPresent()) {
             // Hex code field
-            if (mouseOnWidget(hexField, mouseX, mouseY)) {
+            if (mouseOnWidget(hexField, event.x(), event.y())) {
                 if (!hexField.isFocused()) {
                     hexField.setFocused(true);
                 } else {
-                    hexField.mouseClicked(mouseX, mouseY, button);
+                    hexField.mouseClicked(event, doubleClick);
                 }
                 return true;
             } else {
                 hexField.setFocused(false);
             }
             // Other elements can only use left clicks
-            if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 // Hue field
                 Optional<double[]> hFieldCursor = mouseOnElement(
-                        mouseX,
-                        mouseY,
+                        event.x(),
+                        event.y(),
                         getX() + hFieldX,
                         getY() + hFieldY,
                         hFieldWidth,
@@ -374,8 +377,8 @@ public class HsvColorPicker extends OverlayWidget {
                 }
                 // Saturation/value field
                 Optional<double[]> svFieldCursor = mouseOnElement(
-                        mouseX,
-                        mouseY,
+                        event.x(),
+                        event.y(),
                         getX() + svFieldX,
                         getY() + svFieldY,
                         svFieldWidth,
@@ -388,12 +391,12 @@ public class HsvColorPicker extends OverlayWidget {
                     updateSvFromCursor(svFieldCursor.get()[0], svFieldCursor.get()[1]);
                     return true;
                 }
-                if (mouseOnWidget(cancelButton, mouseX, mouseY)) {
-                    cancelButton.mouseClicked(mouseX, mouseY, button);
+                if (mouseOnWidget(cancelButton, event.x(), event.y())) {
+                    cancelButton.mouseClicked(event, doubleClick);
                     return true;
                 }
-                if (mouseOnWidget(confirmButton, mouseX, mouseY)) {
-                    confirmButton.mouseClicked(mouseX, mouseY, button);
+                if (mouseOnWidget(confirmButton, event.x(), event.y())) {
+                    confirmButton.mouseClicked(event, doubleClick);
                     return true;
                 }
             }
@@ -404,15 +407,9 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    public boolean mouseDragged(
-            double mouseX,
-            double mouseY,
-            int button,
-            double deltaX,
-            double deltaY
-    ) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         if (hasClickedOnH) {
-            double cursorY = mouseY - getY();
+            double cursorY = event.y() - getY();
             if (cursorY < hFieldY)
                 cursorY = hFieldY;
             else if (cursorY > hFieldY + hFieldHeight)
@@ -421,8 +418,8 @@ public class HsvColorPicker extends OverlayWidget {
             hCursorY = (int) cursorY;
             return true;
         } else if (hasClickedOnSv) {
-            double cursorX = mouseX - getX();
-            double cursorY = mouseY - getY();
+            double cursorX = event.x() - getX();
+            double cursorY = event.y() - getY();
             if (cursorX < svFieldX)
                 cursorX = svFieldX;
             else if (cursorX > svFieldX + svFieldWidth)
@@ -436,7 +433,7 @@ public class HsvColorPicker extends OverlayWidget {
             svCursorY = (int) cursorY;
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
 
     private boolean mouseOnWidget(AbstractWidget widget, double mouseX, double mouseY) {
