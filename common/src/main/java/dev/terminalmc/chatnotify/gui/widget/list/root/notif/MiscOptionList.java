@@ -48,13 +48,14 @@ public class MiscOptionList extends OptionList {
             OptionScreen screen,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpacing,
             Notification notif
     ) {
-        super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, screen, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
         this.notif = notif;
     }
 

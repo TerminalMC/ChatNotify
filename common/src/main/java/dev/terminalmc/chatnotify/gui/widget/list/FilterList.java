@@ -31,22 +31,18 @@ import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
 import dev.terminalmc.chatnotify.util.Unicode;
 import dev.terminalmc.chatnotify.util.functional.StringSupplier;
-import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.time.Duration;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -76,7 +72,8 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
             OptionScreen screen,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpacing,
@@ -97,7 +94,8 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 screen,
                 width,
                 height,
-                y,
+                top,
+                bottom,
                 entryWidth,
                 entryHeight,
                 entrySpacing,
@@ -180,7 +178,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
             }
         }
         tabNameUpdate.run();
-        clampScrollAmount();
+        setScrollAmount(getScrollAmount());
     }
 
     @FunctionalInterface
@@ -351,7 +349,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                                             list.init();
                                         }
                                 );
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -374,7 +372,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         "option",
                         "notif.trigger.open.trigger_editor.tooltip"
                 )));
-                editorButton.setTooltipDelay(Duration.ofMillis(500));
+                editorButton.setTooltipDelay(500);
                 elements.add(editorButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -406,7 +404,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                                 "option",
                                 "notif.trigger.style_target.add.tooltip"
                         )));
-                        styleButton.setTooltipDelay(Duration.ofMillis(500));
+                        styleButton.setTooltipDelay(500);
                     } else {
                         styleButton.active = false;
                     }
@@ -443,7 +441,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 TextField displayField = new TextField(x, 0, width, height);
                 displayField.setValue(trigger.string);
                 displayField.setTooltip(Tooltip.create(tooltip));
-                displayField.setTooltipDelay(Duration.ofMillis(500));
+                displayField.setTooltipDelay(500);
                 displayField.setEditable(false);
                 displayField.active = false;
                 elements.add(displayField);
@@ -480,7 +478,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         "option",
                         "notif.trigger.style_target.tooltip"
                 )));
-                infoIcon.setTooltipDelay(Duration.ofMillis(500));
+                infoIcon.setTooltipDelay(500);
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
 
@@ -505,7 +503,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                                             list.init();
                                         }
                                 );
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
 
@@ -587,7 +585,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                                             list.init();
                                         }
                                 );
-                typeButton.setTooltipDelay(Duration.ofMillis(500));
+                typeButton.setTooltipDelay(500);
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth + fieldSpacing;
 
@@ -600,7 +598,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                         int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                         int wX = x + (width / 2) - (wWidth / 2);
-                        int wY = list.getY();
+                        int wY = list.y0;
                         list.screen.setOverlayWidget(new DropdownTextField(
                                 wX,
                                 wY,
@@ -639,7 +637,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                         int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                         int wX = x + (width / 2) - (wWidth / 2);
-                        int wY = list.getY();
+                        int wY = list.y0;
                         list.screen.setOverlayWidget(new DropdownTextField(
                                 wX,
                                 wY,
@@ -688,7 +686,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         "option",
                         "notif.response.time.tooltip"
                 )));
-                timeField.setTooltipDelay(Duration.ofMillis(500));
+                timeField.setTooltipDelay(500);
                 timeField.setMaxLength(5);
                 timeField.setResponder((s) -> message.delayTicks = Integer.parseInt(s.strip()));
                 timeField.setValue(String.valueOf(message.delayTicks));
@@ -702,7 +700,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         "option",
                         "notif.response.cooldown.tooltip"
                 )));
-                cooldownField.setTooltipDelay(Duration.ofMillis(500));
+                cooldownField.setTooltipDelay(500);
                 cooldownField.setMaxLength(5);
                 cooldownField.setResponder((s) ->
                         message.cooldownTicks = Integer.parseInt(s.strip()));
@@ -740,7 +738,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 Minecraft mc = Minecraft.getInstance();
 
                 @Nullable Trigger trigger =
-                        notif.triggers.size() == 1 ? notif.triggers.getFirst() : null;
+                        notif.triggers.size() == 1 ? notif.triggers.get(0) : null;
                 boolean singleTrig = trigger != null;
 
                 int statusButtonWidth = 24;
@@ -854,7 +852,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                                                 list.init();
                                             }
                                     );
-                    typeButton.setTooltipDelay(Duration.ofMillis(200));
+                    typeButton.setTooltipDelay(200);
                     elements.add(typeButton);
                     movingX += list.tinyWidgetWidth;
 
@@ -878,7 +876,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                             "option",
                             "notif.trigger.open.trigger_editor.tooltip"
                     )));
-                    editorButton.setTooltipDelay(Duration.ofMillis(200));
+                    editorButton.setTooltipDelay(200);
                     elements.add(editorButton);
                     movingX += list.tinyWidgetWidth;
                 }
@@ -918,14 +916,19 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         0,
                         list.smallWidgetWidth,
                         height,
-                        OPTION_SPRITES,
+                        0,
+                        0,
+                        20,
+                        OPTIONS_ICON,
+                        32,
+                        64,
                         (button) -> mc.setScreen(new NotifScreen(mc.screen, notif))
                 );
                 editButton.setTooltip(Tooltip.create(localized(
                         "option",
                         "notif.open.options.tooltip"
                 )));
-                editButton.setTooltipDelay(Duration.ofMillis(200));
+                editButton.setTooltipDelay(200);
                 elements.add(editButton);
                 movingX += list.smallWidgetWidth + SPACE_SMALL;
 
@@ -937,9 +940,9 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         list.tinyWidgetWidth,
                         height,
                         Component.literal(Unicode.PAINT.str)
-                                .withColor(notif.textStyle.doColor
+                                .withStyle(Style.EMPTY.withColor(notif.textStyle.doColor
                                         ? notif.textStyle.color
-                                        : 0xffffff),
+                                        : 0xffffff)),
                         (button) -> {
                             // Open color picker overlay widget
                             int cpHeight = HsvColorPicker.MIN_HEIGHT;
@@ -968,13 +971,13 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 )
                         .append("\n")
                         .append(localized("option", "notif.click_edit"))));
-                colorEditButton.setTooltipDelay(Duration.ofMillis(200));
+                colorEditButton.setTooltipDelay(200);
                 if (showColorField) {
                     TextField colorField = new TextField(movingX, 0, minFieldWidth, height);
                     colorField.hexColorValidator().strict();
                     colorField.setMaxLength(7);
                     colorField.setResponder((val) -> {
-                        TextColor textColor = ColorUtil.parseColor(val);
+                        TextColor textColor = TextColor.parseColor(val);
                         if (textColor != null) {
                             int color = textColor.getValue();
                             notif.textStyle.color = color;
@@ -992,7 +995,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                             // Update status button color
                             colorEditButton.setMessage(colorEditButton.getMessage()
                                     .copy()
-                                    .withColor(color));
+                                    .withStyle(Style.EMPTY.withColor(color)));
                         }
                     });
                     colorField.setValue(((TextColorAccessor) (Object) TextColor.fromRgb(notif.textStyle.color)).chatnotify$formatValue());
@@ -1000,7 +1003,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                             "option",
                             "notif.color.field.tooltip"
                     )));
-                    colorField.setTooltipDelay(Duration.ofMillis(500));
+                    colorField.setTooltipDelay(500);
                     elements.add(colorField);
                     movingX += minFieldWidth;
                 }
@@ -1020,7 +1023,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                             "option",
                             "notif.sound.field.tooltip"
                     )));
-                    soundField.setTooltipDelay(Duration.ofMillis(500));
+                    soundField.setTooltipDelay(500);
                     elements.add(soundField);
                     movingX += soundFieldWidth;
                 }
@@ -1052,7 +1055,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 )
                         .append("\n")
                         .append(localized("option", "notif.click_edit"))));
-                soundEditButton.setTooltipDelay(Duration.ofMillis(200));
+                soundEditButton.setTooltipDelay(200);
                 elements.add(soundEditButton);
 
                 // On/off button
@@ -1100,7 +1103,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 String plusNumFormat = " [+%d]";
                 Pattern plusNumPattern = Pattern.compile(" \\[\\+\\d+]");
 
-                if (notif.triggers.isEmpty() || notif.triggers.getFirst().string.isBlank()) {
+                if (notif.triggers.isEmpty() || notif.triggers.get(0).string.isBlank()) {
                     label = Component.literal("> ")
                             .withStyle(ChatFormatting.YELLOW)
                             .append(localized("option", "notif.label.configure")
@@ -1130,11 +1133,12 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                     // Trim label by deleting triggers from the end until it's
                     // small enough. Not the most efficient, but we're capped.
                     while (font.width(compileLabel(strList)) > maxWidth && (strList.size() != 1
-                            && !(strList.size() == 2 && plusNumPattern.matcher(strList.getLast())
-                            .matches()))) {
+                            && !(strList.size() == 2
+                            && plusNumPattern.matcher(strList.get(strList.size() - 1)).matches()))
+                    ) {
                         // Remove the number (if any) and the last trigger
-                        if (plusNumPattern.matcher(strList.removeLast()).matches()) {
-                            strList.removeLast();
+                        if (plusNumPattern.matcher(strList.remove(strList.size() - 1)).matches()) {
+                            strList.remove(strList.size() - 1);
                         }
                         // Add the new number
                         strList.add(String.format(
@@ -1146,7 +1150,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                     // Only one trigger (and possibly a number indicator)
                     // but if the first trigger is too long we trim it
                     while (font.width(compileLabel(strList)) > maxWidth) {
-                        String str = strList.getFirst();
+                        String str = strList.get(0);
                         if (str.length() < 3)
                             break;
                         strList.set(0, str.substring(0, str.length() - 5) + " ...");
@@ -1154,7 +1158,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
 
                     label = Component.literal(compileLabel(strList));
                     if (notif.textStyle.isEnabled()) {
-                        label.withColor(notif.textStyle.color);
+                        label.withStyle(Style.EMPTY.withColor(notif.textStyle.color));
                     }
                 }
                 return label;

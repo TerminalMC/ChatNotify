@@ -19,11 +19,13 @@ package dev.terminalmc.chatnotify.gui.widget.field;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.gui.widget.ExpandingList;
 import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
+import dev.terminalmc.chatnotify.mixin.accessor.AbstractSelectionListAccessor;
 import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
@@ -297,11 +299,17 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (textField.isFocused() && mouseOnWidget(dropdown, mouseX, mouseY)) {
-            return dropdown.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
+            return dropdown.mouseScrolled(mouseX, mouseY, delta);
         }
         return false;
+    }
+
+    private boolean mouseOnWidget(AbstractSelectionList<?> widget, double mouseX, double mouseY) {
+        AbstractSelectionListAccessor access = (AbstractSelectionListAccessor) widget;
+        return ((access.chatnotify$getX0() <= mouseX && mouseX < access.chatnotify$getX1())
+                && (access.chatnotify$getY0() <= mouseY && mouseY < access.chatnotify$getY1()));
     }
 
     private boolean mouseOnWidget(AbstractWidget widget, double mouseX, double mouseY) {
@@ -316,13 +324,13 @@ public class DropdownTextField extends OverlayWidget {
             int mouseY,
             float delta
     ) {
+        if (textField.isFocused() && !dropdown.isEmpty()) {
+            dropdown.render(graphics, mouseX, mouseY, delta);
+        }
+
         textField.renderWidget(graphics, mouseX, mouseY, delta);
         cancelButton.render(graphics, mouseX, mouseY, delta);
         confirmButton.render(graphics, mouseX, mouseY, delta);
-
-        if (textField.isFocused() && !dropdown.isEmpty()) {
-            dropdown.renderWidget(graphics, mouseX, mouseY, delta);
-        }
     }
 
     @Override
@@ -404,7 +412,7 @@ public class DropdownTextField extends OverlayWidget {
             if (lastSound != null)
                 soundManager.stop(lastSound);
             lastSound = new SimpleSoundInstance(
-                    ResourceLocation.parse(getMessage().getString()),
+                    new ResourceLocation(getMessage().getString()),
                     SoundSource.MASTER,
                     1.0F,
                     1.0F,

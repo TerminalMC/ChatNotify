@@ -67,12 +67,13 @@ public class KeySelectorList extends OptionList {
             OptionScreen screen,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             Trigger trigger
     ) {
-        super(mc, screen, width, height, y, entryWidth, entryHeight, 1);
+        super(mc, screen, width, height, top, bottom, entryWidth, entryHeight, 1);
         this.trigger = trigger;
     }
 

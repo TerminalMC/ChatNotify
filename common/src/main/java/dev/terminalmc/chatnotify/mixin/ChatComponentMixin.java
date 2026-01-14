@@ -87,8 +87,7 @@ public class ChatComponentMixin {
             case HUD_KNOWN_TAGS -> (tag == null
                     || tag.equals(GuiMessageTag.system())
                     || tag.equals(GuiMessageTag.systemSinglePlayer())
-                    || tag.equals(GuiMessageTag.chatNotSecure())
-                    || tag.equals(GuiMessageTag.chatError()));
+                    || tag.equals(GuiMessageTag.chatNotSecure()));
             case HUD -> true;
             case PACKET -> false;
         }) {
