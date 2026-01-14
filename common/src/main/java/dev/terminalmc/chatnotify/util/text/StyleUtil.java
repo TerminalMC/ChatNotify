@@ -23,7 +23,7 @@ import dev.terminalmc.chatnotify.config.Trigger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.Nullable;
 
@@ -238,9 +238,9 @@ public class StyleUtil {
         msg.getSiblings().clear();
 
         // Restyle contents
-        if (msg.getContents() instanceof PlainTextContents contents) {
+        if (msg.getContents() instanceof LiteralContents contents) {
             if (debug)
-                ChatNotify.LOG.warn("PlainTextContents");
+                ChatNotify.LOG.warn("LiteralContents");
             String str = contents.text();
             if (index + str.length() > start && index < end) {
                 // Target substring overlaps with current substring, so restyle
@@ -329,9 +329,9 @@ public class StyleUtil {
         msg.getSiblings().clear();
 
         // Add contents with original style.
-        if (msg.getContents() instanceof PlainTextContents contents) {
+        if (msg.getContents() instanceof LiteralContents contents) {
             if (debug)
-                ChatNotify.LOG.warn("PlainTextContents");
+                ChatNotify.LOG.warn("LiteralContents");
             Style oldStyle = msg.getStyle();
             msg = Component.empty().withStyle(oldStyle);
 
