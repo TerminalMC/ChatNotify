@@ -16,13 +16,11 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.JsonOps;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.config.Config.DebugMode;
 import dev.terminalmc.chatnotify.config.StyleTarget;
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
@@ -38,16 +36,15 @@ import dev.terminalmc.chatnotify.util.text.StyleUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -55,11 +52,6 @@ import java.util.regex.PatternSyntaxException;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class TriggerEditorList extends OptionList {
-
-    public static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(
-            Component.class,
-            new Component.SerializerAdapter(RegistryAccess.EMPTY)
-    ).create();
 
     private final Trigger trigger;
     private final TextStyle textStyle;
@@ -88,17 +80,9 @@ public class TriggerEditorList extends OptionList {
         this.trigger = trigger;
         this.textStyle = textStyle;
         this.recentChatMaster = ChatNotify.unmodifiedChat.stream()
-                .map(t -> {
-                    try {
-                        return GSON.toJsonTree(t);
-                    } catch (Exception e) {
-                        if (Config.get().debugMode.equals(DebugMode.ALL)) {
-                            ChatNotify.LOG.warn("{}", e.getMessage());
-                        }
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
+                .map(t -> ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, t))
+                .filter(d -> d.isSuccess() && d.result().isPresent())
+                .map(d -> d.result().get())
                 .toList()
                 .reversed();
         this.recentChat = new ArrayList<>();
@@ -108,17 +92,9 @@ public class TriggerEditorList extends OptionList {
     protected void init() {
         this.recentChat.clear();
         this.recentChat.addAll(this.recentChatMaster.stream()
-                .map(s -> {
-                    try {
-                        return GSON.fromJson(s, Component.class);
-                    } catch (Exception e) {
-                        if (Config.get().debugMode.equals(DebugMode.ALL)) {
-                            ChatNotify.LOG.warn("{}", e.getMessage());
-                        }
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
+                .map((s) -> ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, s))
+                .filter(d -> d.isSuccess() && d.result().isPresent())
+                .map(d -> d.result().get())
                 .toList());
         super.init();
     }

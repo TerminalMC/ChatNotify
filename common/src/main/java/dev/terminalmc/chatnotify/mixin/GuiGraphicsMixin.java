@@ -16,13 +16,14 @@
 
 package dev.terminalmc.chatnotify.mixin;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.terminalmc.chatnotify.util.ColoredRectangleRenderStateHorizontal;
 import dev.terminalmc.chatnotify.util.inject.IGuiGraphics;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
-import net.minecraft.client.renderer.RenderType;
-import org.joml.Matrix4f;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.renderer.RenderPipelines;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,26 +33,36 @@ public abstract class GuiGraphicsMixin implements IGuiGraphics {
 
     @Shadow
     @Final
-    private BufferSource bufferSource;
+    private GuiRenderState guiRenderState;
 
     @Shadow
     @Final
-    private PoseStack pose;
+    private Matrix3x2fStack pose;
+
+    @Shadow
+    @Final
+    private GuiGraphics.ScissorStack scissorStack;
 
     @Override
     public void chatnotify$fillGradientHorizontal(
-            int x0,
-            int y0,
             int x1,
             int y1,
+            int x2,
+            int y2,
             int colorFrom,
             int colorTo
     ) {
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.gui());
-        Matrix4f matrix4f = pose.last().pose();
-        consumer.addVertex(matrix4f, (float) x0, (float) y0, 0F).setColor(colorFrom);
-        consumer.addVertex(matrix4f, (float) x0, (float) y1, 0F).setColor(colorFrom);
-        consumer.addVertex(matrix4f, (float) x1, (float) y1, 0F).setColor(colorTo);
-        consumer.addVertex(matrix4f, (float) x1, (float) y0, 0F).setColor(colorTo);
+        guiRenderState.submitGuiElement(new ColoredRectangleRenderStateHorizontal(
+                RenderPipelines.GUI,
+                TextureSetup.noTexture(),
+                new Matrix3x2f(pose),
+                x1,
+                y1,
+                x2,
+                y2,
+                colorFrom,
+                colorTo,
+                scissorStack.peek()
+        ));
     }
 }
