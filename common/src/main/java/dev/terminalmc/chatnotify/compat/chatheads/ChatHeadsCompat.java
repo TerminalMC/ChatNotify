@@ -19,7 +19,6 @@ package dev.terminalmc.chatnotify.compat.chatheads;
 import dzwdz.chat_heads.ChatHeads;
 import dzwdz.chat_heads.HeadData;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,9 +43,8 @@ public class ChatHeadsCompat {
      */
     static void handleAddedMessage(
             Component message,
-            @Nullable ChatType.Bound bound,
             @Nullable PlayerInfo playerInfo
     ) {
-        ChatHeads.handleAddedMessage(message, bound, playerInfo);
+        ChatHeads.handleAddedMessage(message, playerInfo);
     }
 }

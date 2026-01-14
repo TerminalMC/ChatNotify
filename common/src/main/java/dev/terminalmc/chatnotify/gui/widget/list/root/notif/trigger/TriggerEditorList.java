@@ -34,6 +34,7 @@ import dev.terminalmc.chatnotify.util.text.StyleUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -84,7 +85,7 @@ public class TriggerEditorList extends OptionList {
         addSpacedEntry(new Entry.TriggerOptions(
                 dynWideEntryX,
                 dynWideEntryWidth,
-                entryHeight + itemHeight,
+                entryHeight + defaultEntryHeight,
                 this,
                 trigger
         ));
@@ -110,7 +111,7 @@ public class TriggerEditorList extends OptionList {
         addSpacedEntry(new Entry.DisplayField(
                 dynWideEntryX,
                 dynWideEntryWidth,
-                entryHeight + itemHeight,
+                entryHeight + defaultEntryHeight,
                 textDisplayField,
                 localized("option", "notif.trigger.editor.display.text")
         ));
@@ -202,11 +203,11 @@ public class TriggerEditorList extends OptionList {
             addEntry(entry);
             int requiredHeight =
                     mc.font.wordWrapHeight(pair.getFirst().getString(), dynWideEntryWidth)
-                            - itemHeight;
+                            - defaultEntryHeight;
             while (requiredHeight > 0) {
                 Entry.Space spaceEntry = new Entry.Space(entry);
                 addEntry(spaceEntry);
-                requiredHeight -= itemHeight;
+                requiredHeight -= defaultEntryHeight;
             }
         });
 
@@ -271,10 +272,12 @@ public class TriggerEditorList extends OptionList {
                     triggerField.regexValidator();
                 triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
-                    if (list.children().size() > 4) {
-                        list.children().removeIf((entry) -> entry instanceof MessageEntry
+                    List<OptionList.Entry> children = new ArrayList<>(list.children());
+                    if (children.size() > 4) {
+                        children.removeIf((entry) -> entry instanceof MessageEntry
                                 || entry instanceof Text
-                                || (entry instanceof Space && list.children().indexOf(entry) > 4));
+                                || (entry instanceof Space && children.indexOf(entry) > 4));
+                        list.replaceEntries(children);
                         list.addChatMessages(list.recentChat);
                     }
                 });
@@ -327,7 +330,6 @@ public class TriggerEditorList extends OptionList {
                         Component.literal(Unicode.INFO.str),
                         Minecraft.getInstance().font
                 );
-                infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option",
                         "notif.trigger.style_target.tooltip"
@@ -369,9 +371,11 @@ public class TriggerEditorList extends OptionList {
                 stringField.setValue(styleTarget.string);
                 stringField.setResponder((string) -> {
                     styleTarget.string = string.strip();
-                    list.children().removeIf((entry) -> entry instanceof MessageEntry
+                    List<OptionList.Entry> children = new ArrayList<>(list.children());
+                    children.removeIf((entry) -> entry instanceof MessageEntry
                             || entry instanceof Text
-                            || (entry instanceof Space && list.children().indexOf(entry) > 4));
+                            || (entry instanceof Space && children.indexOf(entry) > 4));
+                    list.replaceEntries(children);
                     list.addChatMessages(list.recentChat);
                 });
                 stringField.setHint(localized("option", "notif.trigger.style_target.field.hint"));
@@ -501,7 +505,7 @@ public class TriggerEditorList extends OptionList {
             }
 
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                 list.setTextDisplayValue(FormatUtil.stripCodes(msg.getString()));
                 list.setKeyDisplayValue(msg.getContents() instanceof TranslatableContents tc
                         ? tc.getKey()

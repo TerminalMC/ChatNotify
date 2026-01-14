@@ -29,6 +29,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -306,27 +308,27 @@ public abstract class OptionScreen extends OptionsSubScreen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (overlay != null) {
-            if (keyCode == InputConstants.KEY_ESCAPE) {
+            if (event.key() == InputConstants.KEY_ESCAPE) {
                 overlay.onClose();
                 removeOverlay();
             } else {
-                overlay.keyPressed(keyCode, scanCode, modifiers);
+                overlay.keyPressed(event);
             }
             return true;
         } else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(event);
         }
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (overlay != null) {
-            overlay.charTyped(chr, modifiers);
+            overlay.charTyped(event);
             return true;
         } else {
-            return super.charTyped(chr, modifiers);
+            return super.charTyped(event);
         }
     }
 }
