@@ -2,7 +2,8 @@
 
 ## 2.6.6
 
-- Fixed format code translation not resetting format on color change 
+- Fixed format code translation not resetting format on color change
+- Added a command to allow testing format codes
 
 ## 2.6.5
 
