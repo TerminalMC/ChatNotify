@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.6
+
+- Fixed format code translation not resetting format on color change 
+
 ## 2.6.5
 
 - Fixed a sound selector crash on 1.21.10+
