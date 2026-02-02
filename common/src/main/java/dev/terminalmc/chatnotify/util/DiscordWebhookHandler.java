@@ -102,11 +102,14 @@ public class DiscordWebhookHandler {
     private static boolean isValidWebhookUrl(String webhookUrl) {
         try {
             URI uri = URI.create(webhookUrl);
+            String scheme = uri.getScheme();
             String host = uri.getHost();
             String path = uri.getPath();
             
-            // Discord webhook URLs should be https://discord.com/api/webhooks/... or https://discordapp.com/api/webhooks/...
-            return (host != null && (host.equals("discord.com") || host.equals("discordapp.com"))) &&
+            // Discord webhook URLs must use HTTPS for secure transmission
+            // and should be https://discord.com/api/webhooks/... or https://discordapp.com/api/webhooks/...
+            return "https".equals(scheme) &&
+                   (host != null && (host.equals("discord.com") || host.equals("discordapp.com"))) &&
                    path != null && path.startsWith("/api/webhooks/");
         } catch (Exception e) {
             return false;

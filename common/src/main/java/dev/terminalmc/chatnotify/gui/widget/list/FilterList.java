@@ -689,7 +689,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                     MultiLineTextField webhookField =
                             new MultiLineTextField(movingX, 0, webhookFieldWidth, height * 2);
                     webhookField.setCharacterLimit(256);
-                    webhookField.setValue(message.webhookUrl);
+                    webhookField.setValue(message.webhookUrl != null ? message.webhookUrl : "");
                     webhookField.setValueListener((val) -> message.webhookUrl = val.strip());
                     webhookField.setHint(localized("option", "notif.response.discord.webhook_url").copy());
                     elements.add(webhookField);
