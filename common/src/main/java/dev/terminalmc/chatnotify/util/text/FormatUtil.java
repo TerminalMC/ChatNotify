@@ -94,9 +94,9 @@ public class FormatUtil {
         if (debug) {
             ChatNotify.LOG.warn("Converting message to literal");
             ChatNotify.LOG.warn("Text:");
-            ChatNotify.LOG.warn(text.getString());
+            ChatNotify.LOG.warn("{}", text.getString());
             ChatNotify.LOG.warn("Tree:");
-            ChatNotify.LOG.warn(text.toString());
+            ChatNotify.LOG.warn("{}", text.toString());
         }
 
         // Detach siblings
@@ -122,8 +122,8 @@ public class FormatUtil {
             text = Component.literal(string).withStyle(text.getStyle());
             if (debug) {
                 ChatNotify.LOG.warn("Invalid string format:");
-                ChatNotify.LOG.warn(e.getMessage());
-                ChatNotify.LOG.warn(string);
+                ChatNotify.LOG.warn("{}", e.getMessage());
+                ChatNotify.LOG.warn("{}", string);
             }
         }
 
@@ -156,7 +156,7 @@ public class FormatUtil {
                     // Indexed placeholder
                     int argIdx = Integer.parseInt(m.group(1));
                     if (argIdx < 1 || argIdx > originalArgs.length) {
-                        ChatNotify.LOG.warn(
+                        ChatNotify.LOG.warn("{}", 
                                 "Translation specifies arg number {} out of range for length {}",
                                 argIdx,
                                 originalArgs.length
@@ -181,7 +181,7 @@ public class FormatUtil {
 
             if (debug) {
                 ChatNotify.LOG.warn("Format string:");
-                ChatNotify.LOG.warn(string);
+                ChatNotify.LOG.warn("{}", string);
                 ChatNotify.LOG.warn("Size of split array: {}", split.size());
                 ChatNotify.LOG.warn("Size of args array: {}", contents.getArgs().length);
 
@@ -194,7 +194,7 @@ public class FormatUtil {
                     sb.append(s);
                 }
                 sb.append("]");
-                ChatNotify.LOG.warn(sb.toString());
+                ChatNotify.LOG.warn("{}", sb.toString());
             }
 
             if (split.isEmpty()) {
@@ -216,7 +216,7 @@ public class FormatUtil {
                     if (!split.get(i).isEmpty()) {
                         if (debug) {
                             ChatNotify.LOG.warn("Adding translated substring:");
-                            ChatNotify.LOG.warn(split.get(i));
+                            ChatNotify.LOG.warn("{}", split.get(i));
                         }
                         siblings.add(Component.literal(split.get(i)));
                     }
@@ -225,18 +225,18 @@ public class FormatUtil {
                         if (debug) {
                             ChatNotify.LOG.warn("Adding arg component");
                             ChatNotify.LOG.warn("Text:");
-                            ChatNotify.LOG.warn(argComponent.getString());
+                            ChatNotify.LOG.warn("{}", argComponent.getString());
                             ChatNotify.LOG.warn("Tree:");
-                            ChatNotify.LOG.warn(argComponent.toString());
+                            ChatNotify.LOG.warn("{}", argComponent.toString());
                         }
                         siblings.add(argComponent);
                     } else {
                         if (debug) {
                             ChatNotify.LOG.warn("Adding arg object");
                             ChatNotify.LOG.warn("getClass():");
-                            ChatNotify.LOG.warn(args[i].getClass().getName());
+                            ChatNotify.LOG.warn("{}", args[i].getClass().getName());
                             ChatNotify.LOG.warn("toString():");
-                            ChatNotify.LOG.warn(args[i].toString());
+                            ChatNotify.LOG.warn("{}", args[i].toString());
                         }
                         siblings.add(Component.literal(args[i].toString()));
                     }

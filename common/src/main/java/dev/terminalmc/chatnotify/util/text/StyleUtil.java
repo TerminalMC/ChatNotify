@@ -54,9 +54,9 @@ public class StyleUtil {
             if (debug) {
                 ChatNotify.LOG.warn("Converting message prior to initiating restyle");
                 ChatNotify.LOG.warn("Converted text:");
-                ChatNotify.LOG.warn(msg.getString());
+                ChatNotify.LOG.warn("{}", msg.getString());
                 ChatNotify.LOG.warn("Converted tree:");
-                ChatNotify.LOG.warn(msg.toString());
+                ChatNotify.LOG.warn("{}", msg.toString());
             }
 
             // Restyle, using style string if possible
@@ -104,6 +104,7 @@ public class StyleUtil {
             if (!restyled) {
                 if (debug) {
                     ChatNotify.LOG.warn(
+                            "{}",
                             "Style target '{}' (type {})",
                             trig.styleTarget.string,
                             trig.styleTarget.type
@@ -194,6 +195,7 @@ public class StyleUtil {
     ) {
         if (debug)
             ChatNotify.LOG.warn(
+                    "{}",
                     "recursiveRestyle('{}', {}, {}, {})",
                     msg.getString(),
                     start,
@@ -285,6 +287,7 @@ public class StyleUtil {
     ) {
         if (debug)
             ChatNotify.LOG.warn(
+                    "{}",
                     "recursiveStyledSubstring('{}', {}, {}, {})",
                     msg.getString(),
                     start,

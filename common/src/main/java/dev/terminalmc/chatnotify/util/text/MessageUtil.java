@@ -79,9 +79,9 @@ public class MessageUtil {
         if (debug) {
             ChatNotify.LOG.warn("Processing new message");
             ChatNotify.LOG.warn("Original text:");
-            ChatNotify.LOG.warn(msg.getString());
+            ChatNotify.LOG.warn("{}", msg.getString());
             ChatNotify.LOG.warn("Original tree:");
-            ChatNotify.LOG.warn(msg.toString());
+            ChatNotify.LOG.warn("{}", msg.toString());
         }
 
         // Remove format codes from string before searching
@@ -100,9 +100,9 @@ public class MessageUtil {
                 ChatNotify.LOG.warn("null");
             } else {
                 ChatNotify.LOG.warn("Final text:");
-                ChatNotify.LOG.warn(msg.getString());
+                ChatNotify.LOG.warn("{}", msg.getString());
                 ChatNotify.LOG.warn("Final tree:");
-                ChatNotify.LOG.warn(msg.toString());
+                ChatNotify.LOG.warn("{}", msg.toString());
             }
         }
 
@@ -173,7 +173,7 @@ public class MessageUtil {
                 }
                 if (recentStart != -1) {
                     if (debug)
-                        ChatNotify.LOG.warn(
+                        ChatNotify.LOG.warn("{}", 
                                 "Matched recent message '{}' at index {}",
                                 recentMessages.get(i).getSecond(),
                                 recentStart
@@ -184,7 +184,7 @@ public class MessageUtil {
                         Matcher triggerMatcher = normalSearch(prefix, t.string);
                         if (triggerMatcher.find()) {
                             if (debug)
-                                ChatNotify.LOG.warn(
+                                ChatNotify.LOG.warn("{}", 
                                         "Matched trigger '{}' at index {}",
                                         t.string,
                                         triggerMatcher.start()
