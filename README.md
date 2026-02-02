@@ -27,8 +27,8 @@ Plays a ping sound when your name is mentioned, with options to create custom al
 - Adjust sound volume and pitch per-notification.
 - Customize message highlighting with a color picker and format controls.
 - Use regex patterns, inclusion and exclusion triggers for fine-grained control.
-- Add automatic response messages or trigger [CommandKeys](https://modrinth.com/project/commandkeys)
-  macros.
+- Add automatic response messages, trigger [CommandKeys](https://modrinth.com/project/commandkeys)
+  macros, or send notifications to Discord webhooks.
 
 <img src="https://raw.githubusercontent.com/TerminalMC/ChatNotify/HEAD/assets/images/chat_cropped.png" width="500px">
 
@@ -133,7 +133,17 @@ match the message.
 
 #### Response
 
-Response messages will be sent in chat when the notification is activated.
+Response messages can be sent when the notification is activated. ChatNotify supports multiple response types:
+
+- **Normal**: Sends a message directly in chat
+- **Regex**: Uses regex capture groups from the trigger in the response message
+- **CommandKeys**: Triggers [CommandKeys](https://modrinth.com/project/commandkeys) macros
+- **Discord**: Sends a message to a Discord webhook (useful for monitoring chat events remotely)
+
+For Discord webhooks, you'll need to:
+1. Create a webhook in your Discord server (Server Settings > Integrations > Webhooks)
+2. Copy the webhook URL
+3. Select "Discord" as the response type and paste the webhook URL
 
 Use with caution, as you can easily make a notification send a response which triggers the
 notification again in a loop, which will spam chat and then crash the game.
