@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class Response implements StringSupplier {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
     public final int version = VERSION;
 
     /**
@@ -67,6 +67,12 @@ public class Response implements StringSupplier {
     public static final int cooldownTicksDefault = 0;
 
     /**
+     * The Discord webhook URL (only used when type is DISCORD).
+     */
+    public String webhookUrl;
+    public static final String webhookUrlDefault = "";
+
+    /**
      * Controls how {@link Response#string} is processed.
      */
     public Type type;
@@ -83,7 +89,11 @@ public class Response implements StringSupplier {
         /**
          * Convert into a pair of keys for use by the CommandKeys mod.
          */
-        COMMANDKEYS("K");
+        COMMANDKEYS("K"),
+        /**
+         * Send as a Discord webhook message.
+         */
+        DISCORD("🪝");
 
         public final String icon;
 
@@ -100,17 +110,19 @@ public class Response implements StringSupplier {
         string = stringDefault;
         delayTicks = delayTicksDefault;
         type = Type.values()[0];
+        webhookUrl = webhookUrlDefault;
     }
 
     /**
      * Not validated.
      */
-    Response(boolean enabled, String string, Type type, int delayTicks, int cooldownTicks) {
+    Response(boolean enabled, String string, Type type, int delayTicks, int cooldownTicks, String webhookUrl) {
         this.enabled = enabled;
         this.string = string;
         this.type = type;
         this.delayTicks = delayTicks;
         this.cooldownTicks = cooldownTicks;
+        this.webhookUrl = webhookUrl;
     }
 
     @Override
@@ -179,7 +191,14 @@ public class Response implements StringSupplier {
                     silent
             );
 
-            return new Response(enabled, string, type, delayTicks, cooldownTicks).validate();
+            String webhookUrl = JsonUtil.getOrDefault(
+                    obj,
+                    "webhookUrl",
+                    webhookUrlDefault,
+                    silent
+            );
+
+            return new Response(enabled, string, type, delayTicks, cooldownTicks, webhookUrl).validate();
         }
     }
 }

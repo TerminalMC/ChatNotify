@@ -60,6 +60,8 @@ public class ResponseUtil {
                     if (res.sendingString != null && !res.sendingString.isBlank()) {
                         if (res.type.equals(Response.Type.COMMANDKEYS)) {
                             CommandKeysWrapper.trySend(res.sendingString);
+                        } else if (res.type.equals(Response.Type.DISCORD)) {
+                            DiscordWebhookHandler.sendAsync(res.webhookUrl, res.sendingString);
                         } else {
                             sending.add(res.sendingString);
                         }
