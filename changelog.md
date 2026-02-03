@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.6.7
 
 - Added Discord webhook support for notification responses
 

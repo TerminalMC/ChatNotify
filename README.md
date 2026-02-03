@@ -143,7 +143,8 @@ Response messages can be sent when the notification is activated. ChatNotify sup
 For Discord webhooks, you'll need to:
 1. Create a webhook in your Discord server (Server Settings > Integrations > Webhooks)
 2. Copy the webhook URL
-3. Select "Discord" as the response type and paste the webhook URL
+3. In ChatNotify, open Detection > Sender Detection and enable Discord Webhook
+4. Paste the webhook URL into the Webhook URL field
 
 Use with caution, as you can easily make a notification send a response which triggers the
 notification again in a loop, which will spam chat and then crash the game.

@@ -31,6 +31,8 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
+import java.time.Duration;
+
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class DetectionList extends OptionList {
@@ -75,6 +77,7 @@ public class DetectionList extends OptionList {
 
         addEntry(new Entry.SelfNotify(dynEntryX, dynEntryWidth, entryHeight));
         addEntry(new Entry.SenderDetection(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.DiscordWebhook(dynEntryX, dynEntryWidth, entryHeight));
 
         addEntry(new OptionList.Entry.Text(
                 entryX,
@@ -261,6 +264,53 @@ public class DetectionList extends OptionList {
                                 height,
                                 localized("option", "detection.sender.mode"),
                                 (button, status) -> Config.get().senderDetectionMode = status
+                        ));
+            }
+        }
+
+        private static class DiscordWebhook extends Entry {
+
+            DiscordWebhook(int x, int width, int height) {
+                super();
+
+                int toggleWidth = Math.min(120, (width - SPACE) / 3);
+                TextField webhookField = new TextField(
+                        x + toggleWidth + SPACE,
+                        0,
+                        width - toggleWidth - SPACE,
+                        height
+                );
+                webhookField.setMaxLength(256);
+                webhookField.setValue(Config.get().discordWebhookUrl);
+                webhookField.setTooltip(Tooltip.create(localized(
+                        "option",
+                        "detection.discord_webhook.url.tooltip"
+                )));
+                webhookField.setTooltipDelay(Duration.ofMillis(500));
+                webhookField.setResponder((val) -> Config.get().discordWebhookUrl = val.strip());
+                webhookField.setHint(localized("option", "detection.discord_webhook.url").copy());
+                webhookField.active = Config.get().discordWebhookEnabled;
+                elements.add(webhookField);
+
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                        )
+                        .withInitialValue(Config.get().discordWebhookEnabled)
+                        .withTooltip((status) -> Tooltip.create(localized(
+                                "option",
+                                "detection.discord_webhook.tooltip"
+                        )))
+                        .create(
+                                x,
+                                0,
+                                toggleWidth,
+                                height,
+                                localized("option", "detection.discord_webhook"),
+                                (button, status) -> {
+                                    Config.get().discordWebhookEnabled = status;
+                                    webhookField.active = status;
+                                }
                         ));
             }
         }

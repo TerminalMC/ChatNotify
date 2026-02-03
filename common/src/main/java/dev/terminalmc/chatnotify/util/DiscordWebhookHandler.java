@@ -18,8 +18,10 @@ package dev.terminalmc.chatnotify.util;
 
 import com.google.gson.JsonObject;
 import dev.terminalmc.chatnotify.ChatNotify;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -44,8 +46,9 @@ public class DiscordWebhookHandler {
      *
      * @param webhookUrl the Discord webhook URL
      * @param content    the message content to send
+     * @param triggerMessage the original message that triggered the notification
      */
-    public static void sendAsync(String webhookUrl, String content) {
+    public static void sendAsync(String webhookUrl, String content, @Nullable Component triggerMessage) {
         if (webhookUrl == null || webhookUrl.isBlank()) {
             ChatNotify.LOG.warn("Discord webhook URL is empty, skipping webhook send");
             return;
@@ -62,9 +65,37 @@ public class DiscordWebhookHandler {
             return;
         }
 
-        // Build JSON payload
+        // Build JSON payload with embed
+        JsonObject embed = new JsonObject();
+        embed.addProperty("title", "Chat triggered");
+        
+        // Use the trigger message content if available, otherwise use the response content
+        String description = triggerMessage != null 
+                ? triggerMessage.getString() 
+                : content;
+        embed.addProperty("description", description);
+        embed.addProperty("color", 3303592); // #3268a8
+        
+        JsonObject footer = new JsonObject();
+        // Get server/world name
+        Minecraft mc = Minecraft.getInstance();
+        String serverName = "Minecraft";
+        if (mc.level != null) {
+            if (mc.getCurrentServer() != null) {
+                // Multiplayer - use server name
+                serverName = mc.getCurrentServer().name;
+            } else if (mc.getSingleplayerServer() != null) {
+                // Singleplayer - use world name
+                serverName = mc.getSingleplayerServer().getWorldData().getLevelSettings().levelName();
+            }
+        }
+        footer.addProperty("text", serverName);
+        embed.add("footer", footer);
+        
         JsonObject payload = new JsonObject();
-        payload.addProperty("content", content);
+        com.google.gson.JsonArray embeds = new com.google.gson.JsonArray();
+        embeds.add(embed);
+        payload.add("embeds", embeds);
 
         String jsonPayload = payload.toString();
 

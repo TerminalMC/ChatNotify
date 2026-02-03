@@ -314,7 +314,7 @@ public class MessageUtil {
 
                 // Send response messages
                 Matcher subsMatcher = trig.type == Trigger.Type.REGEX ? matcher : null;
-                sendResponses(notif, subsMatcher);
+                sendResponses(notif, subsMatcher, msg);
 
                 // Restyle
                 msg = StyleUtil.restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAll);
@@ -633,10 +633,22 @@ public class MessageUtil {
      * @param notif the Notification.
      */
     private static void sendResponses(Notification notif, @Nullable Matcher matcher) {
+        sendResponses(notif, matcher, null);
+    }
+
+    /**
+     * Sends all response messages of the specified notification, if the relevant control is
+     * enabled.
+     *
+     * @param notif the Notification.
+     * @param triggerMessage the original message that triggered the notification
+     */
+    private static void sendResponses(Notification notif, @Nullable Matcher matcher, @Nullable Component triggerMessage) {
         if (notif.responseEnabled) {
             int totalDelay = 0;
             for (Response msg : notif.responses) {
                 msg.sendingString = msg.string;
+                msg.triggerMessage = triggerMessage;
                 if (msg.type.equals(Response.Type.REGEX) && matcher != null && matcher.find(0)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {

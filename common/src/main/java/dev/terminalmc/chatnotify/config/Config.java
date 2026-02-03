@@ -61,7 +61,7 @@ import java.util.function.Supplier;
  */
 public class Config {
 
-    public static final int VERSION = 9;
+    public static final int VERSION = 10;
     public final int version = VERSION;
     private static final Path CONFIG_DIR = Services.PLATFORM.getConfigDir();
     public static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
@@ -199,6 +199,18 @@ public class Config {
     public static final Supplier<List<String>> prefixesDefault =
             () -> new ArrayList<>(List.of("/shout", "/me", "!"));
 
+    /**
+     * Whether Discord webhook responses are enabled.
+     */
+    public boolean discordWebhookEnabled;
+    public static final boolean discordWebhookEnabledDefault = false;
+
+    /**
+     * The global Discord webhook URL for all notifications.
+     */
+    public String discordWebhookUrl;
+    public static final String discordWebhookUrlDefault = "";
+
     // Notifications
 
     /**
@@ -228,6 +240,8 @@ public class Config {
                 SenderDetectionMode.values()[0],
                 checkOwnMessagesDefault,
                 prefixesDefault.get(),
+                discordWebhookEnabledDefault,
+                discordWebhookUrlDefault,
                 notificationsDefault.get()
         );
     }
@@ -250,6 +264,8 @@ public class Config {
             SenderDetectionMode senderDetectionMode,
             boolean checkOwnMessages,
             List<String> prefixes,
+            boolean discordWebhookEnabled,
+            String discordWebhookUrl,
             List<Notification> notifications
     ) {
         this.debugMode = debugMode;
@@ -266,6 +282,8 @@ public class Config {
         this.senderDetectionMode = senderDetectionMode;
         this.checkOwnMessages = checkOwnMessages;
         this.prefixes = prefixes;
+        this.discordWebhookEnabled = discordWebhookEnabled;
+        this.discordWebhookUrl = discordWebhookUrl;
         this.notifications = notifications;
     }
 
@@ -634,6 +652,20 @@ public class Config {
                     silent
             );
 
+                boolean discordWebhookEnabled = JsonUtil.getOrDefault(
+                    obj,
+                    "discordWebhookEnabled",
+                    discordWebhookEnabledDefault,
+                    silent
+                );
+
+            String discordWebhookUrl = JsonUtil.getOrDefault(
+                    obj,
+                    "discordWebhookUrl",
+                    discordWebhookUrlDefault,
+                    silent
+            );
+
             List<Notification> notifications = JsonUtil.getOrDefault(
                     ctx,
                     obj,
@@ -658,6 +690,8 @@ public class Config {
                     senderDetectionMode,
                     checkOwnMessages,
                     prefixes,
+                    discordWebhookEnabled,
+                    discordWebhookUrl,
                     notifications
             ).validate();
         }
