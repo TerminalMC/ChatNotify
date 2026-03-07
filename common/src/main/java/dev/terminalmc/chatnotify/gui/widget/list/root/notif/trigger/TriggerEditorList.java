@@ -16,6 +16,8 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
@@ -34,6 +36,7 @@ import dev.terminalmc.chatnotify.util.text.StyleUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -50,15 +53,21 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class TriggerEditorList extends OptionList {
 
+    public static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(
+            Component.class,
+            new Component.SerializerAdapter(RegistryAccess.EMPTY)
+    ).create();
+
     private final Trigger trigger;
     private final TextStyle textStyle;
+    private final List<String> recentChatMaster;
     private final List<Component> recentChat;
     private boolean filter;
     private boolean restyle;
     private MultiLineTextField textDisplayField;
     private String displayText = "";
-    private TextField keyDisplayField;
-    private String displayKey = "";
+    private MultiLineTextField keyDisplayField;
+    private String displayKeys = "";
 
     public TriggerEditorList(
             Minecraft mc,
@@ -75,7 +84,20 @@ public class TriggerEditorList extends OptionList {
         super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
         this.trigger = trigger;
         this.textStyle = textStyle;
-        this.recentChat = ChatNotify.unmodifiedChat.stream().toList().reversed();
+        this.recentChatMaster = ChatNotify.unmodifiedChat.stream()
+                .map(GSON::toJson)
+                .toList()
+                .reversed();
+        this.recentChat = new ArrayList<>();
+    }
+
+    @Override
+    protected void init() {
+        this.recentChat.clear();
+        this.recentChat.addAll(this.recentChatMaster.stream()
+                .map((s) -> GSON.fromJson(s, Component.class))
+                .toList());
+        super.init();
     }
 
     @Override
@@ -116,13 +138,17 @@ public class TriggerEditorList extends OptionList {
         ));
 
         // Key display field
-        keyDisplayField = new TextField(dynWideEntryX, 0, dynWideEntryWidth, entryHeight);
-        keyDisplayField.setMaxLength(256);
-        keyDisplayField.setValue(displayKey);
-        addEntry(new Entry.DisplayField(
+        keyDisplayField = new MultiLineTextField(
+                dynWideEntryX,
+                0,
+                dynWideEntryWidth,
+                entryHeight
+        );
+        keyDisplayField.setValue(displayKeys);
+        addSpacedEntry(new Entry.DisplayField(
                 dynWideEntryX,
                 dynWideEntryWidth,
-                entryHeight,
+                entryHeight + itemHeight,
                 keyDisplayField,
                 localized("option", "notif.trigger.editor.display.key")
         ));
@@ -141,9 +167,9 @@ public class TriggerEditorList extends OptionList {
         textDisplayField.setValue(displayText);
     }
 
-    private void setKeyDisplayValue(String key) {
-        displayKey = key;
-        keyDisplayField.setValue(displayKey);
+    private void setKeyDisplayValue(String keys) {
+        displayKeys = keys;
+        keyDisplayField.setValue(displayKeys);
     }
 
     // Chat message list
@@ -157,6 +183,7 @@ public class TriggerEditorList extends OptionList {
         for (Component msg : recentChat) {
             Component restyledMsg = msg.copy();
             Matcher matcher = null;
+            Component keyMatch = null;
             String msgStr = FormatUtil.stripCodes(msg.getString());
             boolean hit = switch (trigger.type) {
                 case NORMAL -> {
@@ -171,7 +198,10 @@ public class TriggerEditorList extends OptionList {
                         yield false;
                     }
                 }
-                case KEY -> MessageUtil.keySearch(msg, trigger.string);
+                case KEY -> {
+                    keyMatch = MessageUtil.keySearch(msg, trigger.string);
+                    yield keyMatch != null;
+                }
             };
             if (filter && !hit)
                 continue;
@@ -184,8 +214,15 @@ public class TriggerEditorList extends OptionList {
                         trigger.styleTarget.tryParseIndexes();
                     }
                 }
-                restyledMsg =
-                        StyleUtil.restyle(msg, msgStr, trigger, matcher, textStyle, restyleAll);
+                restyledMsg = StyleUtil.restyle(
+                        msg,
+                        msgStr,
+                        trigger,
+                        matcher,
+                        keyMatch,
+                        textStyle,
+                        restyleAll
+                );
             }
             displayChat.add(new Pair<>(msg, restyledMsg));
         }
@@ -271,10 +308,10 @@ public class TriggerEditorList extends OptionList {
                     triggerField.regexValidator();
                 triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
-                    if (list.children().size() > 4) {
+                    if (list.children().size() > 5) {
                         list.children().removeIf((entry) -> entry instanceof MessageEntry
                                 || entry instanceof Text
-                                || (entry instanceof Space && list.children().indexOf(entry) > 4));
+                                || (entry instanceof Space && list.children().indexOf(entry) > 5));
                         list.addChatMessages(list.recentChat);
                     }
                 });
@@ -503,11 +540,25 @@ public class TriggerEditorList extends OptionList {
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 list.setTextDisplayValue(FormatUtil.stripCodes(msg.getString()));
-                list.setKeyDisplayValue(msg.getContents() instanceof TranslatableContents tc
-                        ? tc.getKey()
-                        : localized("option", "notif.trigger.editor.display.key.none").getString());
+
+                List<String> keys = new ArrayList<>();
+                getKeys(msg, keys);
+                list.setKeyDisplayValue(keys.isEmpty()
+                        ? localized("option", "notif.trigger.editor.display.key.none").getString()
+                        : String.join("\n", keys));
+
                 list.setScrollAmount(0);
                 return true;
+            }
+
+            private static void getKeys(Component msg, List<String> keys) {
+                if (msg.getContents() instanceof TranslatableContents tc) {
+                    keys.add(tc.getKey());
+                }
+
+                for (Component sibling : msg.getSiblings()) {
+                    getKeys(sibling, keys);
+                }
             }
         }
     }

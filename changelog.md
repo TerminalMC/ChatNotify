@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.7
+
+- Added detection for non-root translation keys
+
 ## 2.6.6
 
 - Fixed format code translation not resetting format on color change

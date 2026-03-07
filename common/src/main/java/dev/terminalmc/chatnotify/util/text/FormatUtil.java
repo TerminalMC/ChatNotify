@@ -156,7 +156,7 @@ public class FormatUtil {
                     // Indexed placeholder
                     int argIdx = Integer.parseInt(m.group(1));
                     if (argIdx < 1 || argIdx > originalArgs.length) {
-                        ChatNotify.LOG.warn("{}", 
+                        ChatNotify.LOG.warn(
                                 "Translation specifies arg number {} out of range for length {}",
                                 argIdx,
                                 originalArgs.length
