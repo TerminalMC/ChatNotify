@@ -74,7 +74,7 @@ public class MessageUtil {
         // Save message for trigger editor
         if (ChatNotify.unmodifiedChat.size() > 30)
             ChatNotify.unmodifiedChat.poll();
-        ChatNotify.unmodifiedChat.add(msg);
+        ChatNotify.unmodifiedChat.add(msg.copy());
 
         if (debug) {
             ChatNotify.LOG.warn("Processing new message");
@@ -247,6 +247,7 @@ public class MessageUtil {
                 if (trig.string.isBlank())
                     continue;
                 Matcher matcher = null;
+                Component keyMatch = null;
                 boolean hit = switch (trig.type) {
                     case NORMAL -> {
                         if (normalSearch(cleanOwnedStr, trig.string).find()) {
@@ -261,7 +262,10 @@ public class MessageUtil {
                         matcher = trig.pattern.matcher(cleanStr);
                         yield matcher.find();
                     }
-                    case KEY -> keySearch(msg, trig.string);
+                    case KEY -> {
+                        keyMatch = keySearch(msg, trig.string);
+                        yield keyMatch != null;
+                    }
                 };
                 if (!hit)
                     continue;
@@ -276,7 +280,7 @@ public class MessageUtil {
                             case NORMAL -> normalSearch(cleanOwnedStr, inTrig.string).find();
                             case REGEX -> inTrig.pattern == null
                                     || inTrig.pattern.matcher(cleanStr).find();
-                            case KEY -> keySearch(msg, inTrig.string);
+                            case KEY -> keySearch(msg, inTrig.string) != null;
                         });
                         if (inMiss)
                             break;
@@ -295,7 +299,7 @@ public class MessageUtil {
                             case NORMAL -> normalSearch(cleanOwnedStr, exTrig.string).find();
                             case REGEX -> exTrig.pattern != null
                                     && exTrig.pattern.matcher(cleanStr).find();
-                            case KEY -> keySearch(msg, exTrig.string);
+                            case KEY -> keySearch(msg, exTrig.string) != null;
                         };
                         if (exHit)
                             break;
@@ -320,7 +324,15 @@ public class MessageUtil {
                 sendResponses(notif, subsMatcher);
 
                 // Restyle
-                msg = StyleUtil.restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAll);
+                msg = StyleUtil.restyle(
+                        msg,
+                        cleanStr,
+                        trig,
+                        matcher,
+                        keyMatch,
+                        notif.textStyle,
+                        restyleAll
+                );
 
                 // Send custom messages, after restyle in case of forwarding
                 // the entire message. Reset match by subsMatcher.find(0)
@@ -377,13 +389,19 @@ public class MessageUtil {
      * @param key the key (or partial key) to search for.
      * @return {@code true} if the key matches the message, {@code false} otherwise.
      */
-    public static boolean keySearch(Component msg, String key) {
+    public static @Nullable Component keySearch(Component msg, String key) {
         if (key.equals(".")) {
-            return true;
-        } else if (msg.getContents() instanceof TranslatableContents tc) {
-            return tc.getKey().contains(key);
+            return msg;
+        } else if (msg.getContents() instanceof TranslatableContents tc && tc.getKey().contains(key)) {
+            return msg;
+        } else {
+            for (Component sibling : msg.getSiblings()) {
+                Component keyMatch = keySearch(sibling, key);
+                if (keyMatch != null)
+                    return keyMatch;
+            }
         }
-        return false;
+        return null;
     }
 
     /**

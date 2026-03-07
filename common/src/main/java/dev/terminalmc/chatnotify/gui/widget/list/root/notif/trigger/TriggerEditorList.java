@@ -63,8 +63,8 @@ public class TriggerEditorList extends OptionList {
     private boolean restyle;
     private MultiLineTextField textDisplayField;
     private String displayText = "";
-    private TextField keyDisplayField;
-    private String displayKey = "";
+    private MultiLineTextField keyDisplayField;
+    private String displayKeys = "";
 
     public TriggerEditorList(
             Minecraft mc,
@@ -139,13 +139,17 @@ public class TriggerEditorList extends OptionList {
         ));
 
         // Key display field
-        keyDisplayField = new TextField(dynWideEntryX, 0, dynWideEntryWidth, entryHeight);
-        keyDisplayField.setMaxLength(256);
-        keyDisplayField.setValue(displayKey);
-        addEntry(new Entry.DisplayField(
+        keyDisplayField = new MultiLineTextField(
+                dynWideEntryX,
+                0,
+                dynWideEntryWidth,
+                entryHeight
+        );
+        keyDisplayField.setValue(displayKeys);
+        addSpacedEntry(new Entry.DisplayField(
                 dynWideEntryX,
                 dynWideEntryWidth,
-                entryHeight,
+                entryHeight + defaultEntryHeight,
                 keyDisplayField,
                 localized("option", "notif.trigger.editor.display.key")
         ));
@@ -164,9 +168,9 @@ public class TriggerEditorList extends OptionList {
         textDisplayField.setValue(displayText);
     }
 
-    private void setKeyDisplayValue(String key) {
-        displayKey = key;
-        keyDisplayField.setValue(displayKey);
+    private void setKeyDisplayValue(String keys) {
+        displayKeys = keys;
+        keyDisplayField.setValue(displayKeys);
     }
 
     // Chat message list
@@ -180,6 +184,7 @@ public class TriggerEditorList extends OptionList {
         for (Component msg : recentChat) {
             Component restyledMsg = msg.copy();
             Matcher matcher = null;
+            Component keyMatch = null;
             String msgStr = FormatUtil.stripCodes(msg.getString());
             boolean hit = switch (trigger.type) {
                 case NORMAL -> {
@@ -194,7 +199,10 @@ public class TriggerEditorList extends OptionList {
                         yield false;
                     }
                 }
-                case KEY -> MessageUtil.keySearch(msg, trigger.string);
+                case KEY -> {
+                    keyMatch = MessageUtil.keySearch(msg, trigger.string);
+                    yield keyMatch != null;
+                }
             };
             if (filter && !hit)
                 continue;
@@ -207,8 +215,15 @@ public class TriggerEditorList extends OptionList {
                         trigger.styleTarget.tryParseIndexes();
                     }
                 }
-                restyledMsg =
-                        StyleUtil.restyle(msg, msgStr, trigger, matcher, textStyle, restyleAll);
+                restyledMsg = StyleUtil.restyle(
+                        msg,
+                        msgStr,
+                        trigger,
+                        matcher,
+                        keyMatch,
+                        textStyle,
+                        restyleAll
+                );
             }
             displayChat.add(new Pair<>(msg, restyledMsg));
         }
@@ -294,10 +309,10 @@ public class TriggerEditorList extends OptionList {
                 triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
                     List<OptionList.Entry> children = new ArrayList<>(list.children());
-                    if (children.size() > 4) {
+                    if (children.size() > 5) {
                         children.removeIf((entry) -> entry instanceof MessageEntry
                                 || entry instanceof Text
-                                || (entry instanceof Space && children.indexOf(entry) > 4));
+                                || (entry instanceof Space && children.indexOf(entry) > 5));
                         list.replaceEntries(children);
                         list.addChatMessages(list.recentChat);
                     }
@@ -534,11 +549,25 @@ public class TriggerEditorList extends OptionList {
             @Override
             public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
                 list.setTextDisplayValue(FormatUtil.stripCodes(msg.getString()));
-                list.setKeyDisplayValue(msg.getContents() instanceof TranslatableContents tc
-                        ? tc.getKey()
-                        : localized("option", "notif.trigger.editor.display.key.none").getString());
+
+                List<String> keys = new ArrayList<>();
+                getKeys(msg, keys);
+                list.setKeyDisplayValue(keys.isEmpty()
+                        ? localized("option", "notif.trigger.editor.display.key.none").getString()
+                        : String.join("\n", keys));
+
                 list.setScrollAmount(0);
                 return true;
+            }
+
+            private static void getKeys(Component msg, List<String> keys) {
+                if (msg.getContents() instanceof TranslatableContents tc) {
+                    keys.add(tc.getKey());
+                }
+
+                for (Component sibling : msg.getSiblings()) {
+                    getKeys(sibling, keys);
+                }
             }
         }
     }

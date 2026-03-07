@@ -24,6 +24,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,8 @@ public class StyleUtil {
             Component msg,
             String cleanStr,
             Trigger trig,
-            Matcher matcher,
+            @Nullable Matcher matcher,
+            @Nullable Component keyMatch,
             TextStyle textStyle,
             boolean restyleAllInstances
     ) {
@@ -50,13 +53,13 @@ public class StyleUtil {
             return msg;
         try {
             // Convert message into a format suitable for recursive processing
-            msg = FormatUtil.convertToStyledLiteral(msg.copy());
+            Component converted = FormatUtil.convertToStyledLiteral(msg.copy());
             if (debug) {
                 ChatNotify.LOG.warn("Converting message prior to initiating restyle");
                 ChatNotify.LOG.warn("Converted text:");
-                ChatNotify.LOG.warn("{}", msg.getString());
+                ChatNotify.LOG.warn("{}", converted.getString());
                 ChatNotify.LOG.warn("Converted tree:");
-                ChatNotify.LOG.warn("{}", msg.toString());
+                ChatNotify.LOG.warn("{}", converted.toString());
             }
 
             // Restyle, using style string if possible
@@ -68,8 +71,9 @@ public class StyleUtil {
                         if (m.find()) {
                             restyled = true;
                             do {
-                                msg = restyleLeaves(msg, textStyle, m.start(), m.end());
+                                converted = restyleLeaves(converted, textStyle, m.start(), m.end());
                             } while (restyleAllInstances && m.find());
+                            msg = converted;
                         }
                     }
                     case REGEX -> {
@@ -78,18 +82,22 @@ public class StyleUtil {
                             if (m.find()) {
                                 restyled = true;
                                 do {
-                                    msg = restyleLeaves(msg, textStyle, m.start(), m.end());
+                                    converted =
+                                            restyleLeaves(converted, textStyle, m.start(), m.end());
                                 } while (restyleAllInstances && m.find());
+                                msg = converted;
                             }
                         }
                     }
                     case CAPTURING -> {
+                        if (matcher == null)
+                            break;
                         if (trig.type == Trigger.Type.REGEX && matcher.groupCount() >= 1) {
                             for (int i = 1; i <= matcher.groupCount(); i++) {
                                 if (trig.styleTarget.groupIndexes.contains(i)) {
                                     restyled = true;
                                     msg = restyleLeaves(
-                                            msg,
+                                            converted,
                                             textStyle,
                                             matcher.start(i),
                                             matcher.end(i)
@@ -112,9 +120,11 @@ public class StyleUtil {
                 }
                 switch (trig.type) {
                     case NORMAL -> {
+                        if (matcher == null)
+                            break;
                         do {
                             msg = restyleLeaves(
-                                    msg,
+                                    converted,
                                     textStyle,
                                     matcher.start() + matcher.group(1).length(),
                                     matcher.end() - matcher.group(2).length()
@@ -122,11 +132,22 @@ public class StyleUtil {
                         } while (restyleAllInstances && matcher.find());
                     }
                     case REGEX -> {
+                        if (matcher == null)
+                            break;
                         do {
-                            msg = restyleLeaves(msg, textStyle, matcher.start(), matcher.end());
+                            msg = restyleLeaves(
+                                    converted,
+                                    textStyle,
+                                    matcher.start(),
+                                    matcher.end()
+                            );
                         } while (restyleAllInstances && matcher.find());
                     }
-                    case KEY -> msg = restyleRoot(msg, textStyle);
+                    case KEY -> {
+                        if (keyMatch == null)
+                            break;
+                        msg = restyleKey(msg, keyMatch, textStyle);
+                    }
                 }
             }
         } catch (IllegalArgumentException e) {
@@ -148,14 +169,25 @@ public class StyleUtil {
     }
 
     /**
-     * Overwrites the existing root style of the message with the specified style.
+     * Overwrites the existing style of the message with the specified style at all levels.
      *
      * @param msg   the message to restyle.
      * @param style the {@link TextStyle} to apply.
      * @return the restyled message.
      */
-    private static Component restyleRoot(Component msg, TextStyle style) {
-        return msg.copy().setStyle(applyStyle(msg.getStyle(), style));
+    private static Component restyleAll(Component msg, TextStyle style) {
+        MutableComponent copy = msg.copy();
+        copy.setStyle(applyStyle(msg.getStyle(), style));
+        if (copy.getContents() instanceof TranslatableContents tc) {
+            Object[] args = tc.getArgs();
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] instanceof Component c) {
+                    args[i] = restyleAll(c, style);
+                }
+            }
+        }
+        copy.getSiblings().replaceAll((sibling) -> restyleAll(sibling, style));
+        return copy;
     }
 
     /**
@@ -328,6 +360,29 @@ public class StyleUtil {
             index += str.length();
         }
 
+        return msg;
+    }
+
+    /**
+     * Performs a depth-first traversal of the message, searching for the {@code keyMatch} object.
+     * <p>
+     * If found, the object and all its children (if any) are restyled.
+     *
+     * @param msg       the message to search.
+     * @param keyMatch  the object to search for.
+     * @param textStyle the style to use in restyling.
+     * @return the message, restyled if the object was found.
+     */
+    public static Component restyleKey(
+            Component msg,
+            Component keyMatch,
+            TextStyle textStyle
+    ) {
+        if (keyMatch == msg) {
+            return restyleAll(msg, textStyle);
+        } else {
+            msg.getSiblings().replaceAll((sibling) -> restyleKey(sibling, keyMatch, textStyle));
+        }
         return msg;
     }
 
