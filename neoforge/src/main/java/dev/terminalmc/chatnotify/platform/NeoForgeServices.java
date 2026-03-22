@@ -16,13 +16,13 @@
 
 package dev.terminalmc.chatnotify.platform;
 
-import dev.terminalmc.chatnotify.platform.services.IPlatformServices;
+import dev.terminalmc.chatnotify.platform.services.PlatformServices;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
 
-public class NeoForgeServices implements IPlatformServices {
+public class NeoForgeServices implements PlatformServices {
 
     @Override
     public boolean isDevEnv() {

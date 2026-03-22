@@ -10,7 +10,7 @@
     "ChatComponentMixin",
     "ChatListenerMixin",
     "ClientPacketListenerMixin",
-    "GuiGraphicsMixin",
+    "GuiGraphicsExtractorMixin",
     "GuiMixin",
     "MultiLineEditBoxMixin",
     "OptionInstanceMixin",

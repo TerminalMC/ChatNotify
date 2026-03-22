@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.config;
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.util.JsonUtil;
-import dev.terminalmc.chatnotify.platform.Services;
+import dev.terminalmc.chatnotify.platform.services.PlatformServices;
 import dev.terminalmc.chatnotify.util.ResponseUtil;
 import dev.terminalmc.chatnotify.util.TimingUtil;
 import net.minecraft.sounds.SoundSource;
@@ -63,7 +63,7 @@ public class Config {
 
     public static final int VERSION = 9;
     public final int version = VERSION;
-    private static final Path CONFIG_DIR = Services.PLATFORM.getConfigDir();
+    private static final Path CONFIG_DIR = PlatformServices.getInstance().getConfigDir();
     public static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     public static final String UNREADABLE_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
     public static final String OLD_FILE_NAME = ChatNotify.MOD_ID + ".old.json";

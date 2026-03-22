@@ -77,7 +77,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
         value = ClientPacketListener.class,
         priority = 792
 )
-public class ClientPacketListenerMixin {
+public abstract class ClientPacketListenerMixin {
 
     /**
      * Packet-level interceptor for action bar messages.

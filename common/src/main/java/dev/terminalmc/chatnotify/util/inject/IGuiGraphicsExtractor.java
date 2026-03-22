@@ -16,7 +16,7 @@
 
 package dev.terminalmc.chatnotify.util.inject;
 
-public interface IGuiGraphics {
+public interface IGuiGraphicsExtractor {
 
     void chatnotify$fillGradientHorizontal(
             int x0,

@@ -18,8 +18,9 @@ package dev.terminalmc.chatnotify.gui.widget;
 
 import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractContainerWidget;
+import net.minecraft.client.gui.components.AbstractScrollArea;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -100,7 +101,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     private @Nullable E selected;
 
     public HorizontalList(int x, int y, int width, int height, int spacing, boolean topScrollbar) {
-        super(x, y, width, height, Component.empty());
+        super(x, y, width, height, Component.empty(), AbstractScrollArea.defaultSettings(10));
         this.space = spacing;
         this.mc = Minecraft.getInstance();
         this.topScrollbar = topScrollbar;
@@ -229,8 +230,8 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     // Rendering
 
     @Override
-    protected void renderWidget(
-            @NotNull GuiGraphics graphics,
+    protected void extractWidgetRenderState(
+            @NotNull GuiGraphicsExtractor graphics,
             int mouseX,
             int mouseY,
             float partialTick
@@ -245,7 +246,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     /**
      * Renders the partially-translucent background texture.
      */
-    protected void renderListBackground(GuiGraphics graphics) {
+    protected void renderListBackground(GuiGraphicsExtractor graphics) {
         graphics.blit(
                 RenderPipelines.GUI_TEXTURED,
                 MENU_LIST_BACKGROUND,
@@ -265,7 +266,12 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
      * {@link HorizontalList#topScrollbar} and {@link HorizontalList#scrollAmount}, and renders
      * those that are visible.
      */
-    protected void renderChildren(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void renderChildren(
+            GuiGraphicsExtractor graphics,
+            int mouseX,
+            int mouseY,
+            float partialTick
+    ) {
         graphics.enableScissor(getX(), getY(), getRight(), getBottom());
         int x = getX() - (int) scrollAmount;
         int topOffset = topScrollbar ? SCROLLBAR_HEIGHT : 0;
@@ -281,7 +287,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             child.setPosition(x, y);
             // Render
             if (child.getRight() > getX() && child.getX() < getRight()) {
-                child.render(graphics, mouseX, mouseY, partialTick);
+                child.extractRenderState(graphics, mouseX, mouseY, partialTick);
             }
             // Move to next position
             x += child.getWidth() + space;
@@ -292,7 +298,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     /**
      * Renders the scrollbar, if required.
      */
-    protected void renderScrollbar(@NotNull GuiGraphics graphics) {
+    protected void renderScrollbar(@NotNull GuiGraphicsExtractor graphics) {
         if (scrollbarVisible()) {
             int y = scrollBarX();
 
@@ -334,8 +340,8 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     /**
      * Renders the list separator textures.
      */
-    protected void renderSeparators(GuiGraphics guiGraphics) {
-        guiGraphics.blit(
+    protected void renderSeparators(GuiGraphicsExtractor GuiGraphicsExtractor) {
+        GuiGraphicsExtractor.blit(
                 RenderPipelines.GUI_TEXTURED,
                 LEFT_SEPARATOR,
                 getX() - 2,
@@ -347,7 +353,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 2,
                 32
         );
-        guiGraphics.blit(
+        GuiGraphicsExtractor.blit(
                 RenderPipelines.GUI_TEXTURED,
                 RIGHT_SEPARATOR,
                 getRight(),
@@ -359,7 +365,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 2,
                 32
         );
-        guiGraphics.blit(
+        GuiGraphicsExtractor.blit(
                 RenderPipelines.GUI_TEXTURED,
                 Screen.HEADER_SEPARATOR,
                 getX() - 1,
@@ -371,7 +377,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 32,
                 2
         );
-        guiGraphics.blit(
+        GuiGraphicsExtractor.blit(
                 RenderPipelines.GUI_TEXTURED,
                 Screen.FOOTER_SEPARATOR,
                 getX() - 1,

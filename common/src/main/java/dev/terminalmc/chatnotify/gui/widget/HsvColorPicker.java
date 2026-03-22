@@ -19,11 +19,11 @@ package dev.terminalmc.chatnotify.gui.widget;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.mixin.accessor.TextColorAccessor;
-import dev.terminalmc.chatnotify.util.inject.IGuiGraphics;
+import dev.terminalmc.chatnotify.util.inject.IGuiGraphicsExtractor;
 import dev.terminalmc.chatnotify.util.text.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.CharacterEvent;
@@ -35,6 +35,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 import java.util.Optional;
@@ -325,7 +326,7 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(@NonNull KeyEvent event) {
         if (hexField.isFocused()) {
             return hexField.keyPressed(event);
         } else {
@@ -334,7 +335,7 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    public boolean charTyped(CharacterEvent event) {
+    public boolean charTyped(@NonNull CharacterEvent event) {
         if (hexField.isFocused()) {
             return hexField.charTyped(event);
         } else {
@@ -407,7 +408,7 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+    public boolean mouseDragged(@NonNull MouseButtonEvent event, double deltaX, double deltaY) {
         if (hasClickedOnH) {
             double cursorY = event.y() - getY();
             if (cursorY < hFieldY)
@@ -465,33 +466,33 @@ public class HsvColorPicker extends OverlayWidget {
     }
 
     @Override
-    protected void renderWidget(
-            @NotNull GuiGraphics graphics,
+    protected void extractWidgetRenderState(
+            @NotNull GuiGraphicsExtractor graphics,
             int mouseX,
             int mouseY,
             float delta
     ) {
         drawColorPicker(graphics);
-        graphics.drawString(
+        graphics.text(
                 Minecraft.getInstance().font,
                 newColorLabel,
                 newCFieldTextX,
                 newCFieldTextY,
                 0xFFFFFFFF
         );
-        graphics.drawString(
+        graphics.text(
                 Minecraft.getInstance().font,
                 oldColorLabel,
                 oldCFieldTextX,
                 oldCFieldTextY,
                 0xFFFFFFFF
         );
-        hexField.renderWidget(graphics, mouseX, mouseY, delta);
-        cancelButton.render(graphics, mouseX, mouseY, delta);
-        confirmButton.render(graphics, mouseX, mouseY, delta);
+        hexField.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
+        cancelButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        confirmButton.extractRenderState(graphics, mouseX, mouseY, delta);
     }
 
-    private void drawColorPicker(@NotNull GuiGraphics graphics) {
+    private void drawColorPicker(@NotNull GuiGraphicsExtractor graphics) {
         int left = getX();
         int top = getY();
         int right = left + width;
@@ -542,7 +543,7 @@ public class HsvColorPicker extends OverlayWidget {
 
         // SV field hue fill; transparent left to solid right
         int rgb = Color.HSBtoRGB(getHFromCursor(), 1, 1);
-        ((IGuiGraphics) graphics).chatnotify$fillGradientHorizontal(
+        ((IGuiGraphicsExtractor) graphics).chatnotify$fillGradientHorizontal(
                 svL, svT, svR, svB, rgb & 0xFFFFFF, (0xFF << 24) | rgb);
 
         // SV field black fill; transparent top to solid bottom

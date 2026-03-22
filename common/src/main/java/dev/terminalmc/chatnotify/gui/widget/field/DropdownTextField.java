@@ -23,7 +23,7 @@ import dev.terminalmc.chatnotify.util.Unicode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
@@ -305,18 +305,18 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     @Override
-    protected void renderWidget(
-            @NotNull GuiGraphics graphics,
+    protected void extractWidgetRenderState(
+            @NotNull GuiGraphicsExtractor graphics,
             int mouseX,
             int mouseY,
             float delta
     ) {
-        textField.renderWidget(graphics, mouseX, mouseY, delta);
-        cancelButton.render(graphics, mouseX, mouseY, delta);
-        confirmButton.render(graphics, mouseX, mouseY, delta);
+        textField.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
+        cancelButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        confirmButton.extractRenderState(graphics, mouseX, mouseY, delta);
 
         if (textField.isFocused() && !dropdown.isEmpty()) {
-            dropdown.renderWidget(graphics, mouseX, mouseY, delta);
+            dropdown.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
         }
     }
 

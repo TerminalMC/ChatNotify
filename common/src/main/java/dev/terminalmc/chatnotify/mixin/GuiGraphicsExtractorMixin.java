@@ -17,23 +17,23 @@
 package dev.terminalmc.chatnotify.mixin;
 
 import dev.terminalmc.chatnotify.util.ColoredRectangleRenderStateHorizontal;
-import dev.terminalmc.chatnotify.util.inject.IGuiGraphics;
-import net.minecraft.client.gui.GuiGraphics;
+import dev.terminalmc.chatnotify.util.inject.IGuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(GuiGraphics.class)
-public abstract class GuiGraphicsMixin implements IGuiGraphics {
+@Mixin(GuiGraphicsExtractor.class)
+public abstract class GuiGraphicsExtractorMixin implements IGuiGraphicsExtractor {
 
     @Shadow
     @Final
-    GuiRenderState guiRenderState;
+    private GuiRenderState guiRenderState;
 
     @Shadow
     @Final
@@ -41,7 +41,7 @@ public abstract class GuiGraphicsMixin implements IGuiGraphics {
 
     @Shadow
     @Final
-    private GuiGraphics.ScissorStack scissorStack;
+    private GuiGraphicsExtractor.ScissorStack scissorStack;
 
     @Override
     public void chatnotify$fillGradientHorizontal(
@@ -52,7 +52,7 @@ public abstract class GuiGraphicsMixin implements IGuiGraphics {
             int colorFrom,
             int colorTo
     ) {
-        guiRenderState.submitGuiElement(new ColoredRectangleRenderStateHorizontal(
+        guiRenderState.addGuiElement(new ColoredRectangleRenderStateHorizontal(
                 RenderPipelines.GUI,
                 TextureSetup.noTexture(),
                 new Matrix3x2f(pose),

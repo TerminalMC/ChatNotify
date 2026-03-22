@@ -21,7 +21,7 @@ import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -224,8 +224,8 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         @Override
-        public void renderContent(
-                @NotNull GuiGraphics graphics,
+        public void extractContent(
+                @NotNull GuiGraphicsExtractor graphics,
                 int mouseX,
                 int mouseY,
                 boolean hovered,
@@ -233,7 +233,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         ) {
             elements.forEach((widget) -> {
                 widget.setY(getContentY());
-                widget.render(graphics, mouseX, mouseY, delta);
+                widget.extractRenderState(graphics, mouseX, mouseY, delta);
             });
         }
 

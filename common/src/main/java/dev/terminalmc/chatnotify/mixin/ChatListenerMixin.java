@@ -41,7 +41,7 @@ import java.time.Instant;
         value = ChatListener.class,
         priority = 792
 )
-public class ChatListenerMixin {
+public abstract class ChatListenerMixin {
 
     /**
      * Packet-level interceptor for chat messages.

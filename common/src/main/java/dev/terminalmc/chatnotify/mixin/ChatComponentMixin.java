@@ -20,12 +20,13 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.util.text.MessageUtil;
-import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.chat.ChatListener;
+import net.minecraft.client.multiplayer.chat.GuiMessageSource;
+import net.minecraft.client.multiplayer.chat.GuiMessageTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import org.jetbrains.annotations.Nullable;
@@ -59,23 +60,24 @@ import org.spongepowered.asm.mixin.Unique;
         value = ChatComponent.class,
         priority = 792
 )
-public class ChatComponentMixin {
+public abstract class ChatComponentMixin {
 
     /**
      * HUD-level interceptor for chat messages.
      *
      * @see ChatListenerMixin
      */
-    @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V")
+    @WrapMethod(method = "addMessage")
     private void wrapAddMessage(
             Component message,
-            MessageSignature headerSignature,
+            MessageSignature signature,
+            GuiMessageSource source,
             GuiMessageTag tag,
             Operation<Void> original
     ) {
         message = chatnotify$replaceMessage(message, tag);
         if (message != null)
-            original.call(message, headerSignature, tag);
+            original.call(message, signature, source, tag);
     }
 
     @Unique

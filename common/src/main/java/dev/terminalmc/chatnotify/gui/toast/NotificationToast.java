@@ -18,7 +18,7 @@ package dev.terminalmc.chatnotify.gui.toast;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -63,7 +63,11 @@ public class NotificationToast implements Toast {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics graphics, @NotNull Font font, long elapsedTime) {
+    public void extractRenderState(
+            @NotNull GuiGraphicsExtractor graphics,
+            @NotNull Font font,
+            long elapsedTime
+    ) {
         if (messageLines.size() <= 1) {
             // Message fits in a single line, render a single sprite
             graphics.blitSprite(
@@ -105,7 +109,7 @@ public class NotificationToast implements Toast {
 
         if (messageLines.size() == 1) {
             // Single line, center vertically
-            graphics.drawString(
+            graphics.text(
                     font,
                     messageLines.getFirst(),
                     X_MARGIN,
@@ -116,7 +120,7 @@ public class NotificationToast implements Toast {
         } else {
             // Multiple lines, justify to top margin
             for (int j = 0; j < messageLines.size(); j++) {
-                graphics.drawString(
+                graphics.text(
                         font,
                         messageLines.get(j),
                         X_MARGIN,
@@ -129,7 +133,7 @@ public class NotificationToast implements Toast {
     }
 
     private void renderBackgroundRow(
-            GuiGraphics graphics,
+            GuiGraphicsExtractor graphics,
             int width,
             int vOffset,
             int y,

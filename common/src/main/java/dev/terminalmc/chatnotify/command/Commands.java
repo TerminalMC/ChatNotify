@@ -87,7 +87,7 @@ public class Commands {
                                             Unicode.SECTION.str
                                     ));
 
-                                    mc.gui.getChat().addMessage(text);
+                                    mc.gui.getChat().addClientSystemMessage(text);
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )

@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
         value = Gui.class,
         priority = 792
 )
-public class GuiMixin {
+public abstract class GuiMixin {
 
     /**
      * HUD-level interceptor for action bar messages.

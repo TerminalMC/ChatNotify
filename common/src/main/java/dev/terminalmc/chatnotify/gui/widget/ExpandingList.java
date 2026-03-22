@@ -17,7 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -128,8 +128,8 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
     }
 
     @Override
-    protected void renderItem(
-            @NotNull GuiGraphics graphics,
+    protected void extractItem(
+            @NotNull GuiGraphicsExtractor graphics,
             int mouseX,
             int mouseY,
             float delta,
@@ -144,7 +144,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
                     HIGHLIGHT_COLOR
             );
         }
-        super.renderItem(graphics, mouseX, mouseY, delta, widget);
+        super.extractItem(graphics, mouseX, mouseY, delta, widget);
     }
 
     @Override
@@ -187,15 +187,15 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
         }
 
         @Override
-        public void renderContent(
-                @NotNull GuiGraphics graphics,
+        public void extractContent(
+                @NotNull GuiGraphicsExtractor graphics,
                 int mouseX,
                 int mouseY,
                 boolean hovered,
                 float delta
         ) {
             widget.setY(getContentY());
-            widget.render(graphics, mouseX, mouseY, delta);
+            widget.extractRenderState(graphics, mouseX, mouseY, delta);
         }
     }
 }

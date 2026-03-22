@@ -16,12 +16,12 @@
 
 package dev.terminalmc.chatnotify.platform;
 
-import dev.terminalmc.chatnotify.platform.services.IPlatformServices;
+import dev.terminalmc.chatnotify.platform.services.PlatformServices;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Path;
 
-public class FabricServices implements IPlatformServices {
+public class FabricServices implements PlatformServices {
 
     @Override
     public boolean isDevEnv() {
