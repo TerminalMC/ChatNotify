@@ -16,8 +16,8 @@
 
 package dev.terminalmc.chatnotify.compat.chatheads;
 
-//import dzwdz.chat_heads.ChatHeads;
-//import dzwdz.chat_heads.HeadData;
+import dzwdz.chat_heads.ChatHeads;
+import dzwdz.chat_heads.HeadData;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -31,12 +31,11 @@ public class ChatHeadsCompat {
      * @return the most recently saved message ownership data from ChatHeads, if any exists.
      */
     static @Nullable PlayerInfo getPlayerInfo() {
-        return null;
-//        if (ChatHeads.lastSenderData == HeadData.EMPTY) {
-//            return null;
-//        } else {
-//            return ChatHeads.lastSenderData.playerInfo();
-//        }
+        if (ChatHeads.lastSenderData == HeadData.EMPTY) {
+            return null;
+        } else {
+            return ChatHeads.lastSenderData.playerInfo();
+        }
     }
 
     /**
@@ -46,6 +45,6 @@ public class ChatHeadsCompat {
             Component message,
             @Nullable PlayerInfo playerInfo
     ) {
-//        ChatHeads.handleAddedMessage(message, playerInfo);
+        ChatHeads.handleAddedMessage(message, playerInfo);
     }
 }
