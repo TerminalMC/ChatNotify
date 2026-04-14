@@ -1,6 +1,3 @@
-Voici le JSON complet traduit en français, en conservant exactement la même structure et les mêmes clés :
-
-json
 {
   "common.chatnotify.count": "(%s)",
   "common.chatnotify.new": "Nouveau",
