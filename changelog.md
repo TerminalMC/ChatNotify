@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.1
+
+- Updated Russian translation (rfin0)
+- Added French translation (Spipi1)
+
 ## 3.0.0
 
 - Re-enabled ChatHeads compat
