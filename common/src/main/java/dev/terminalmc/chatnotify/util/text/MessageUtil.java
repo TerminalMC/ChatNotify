@@ -143,6 +143,9 @@ public class MessageUtil {
                 if (id.equals(Minecraft.getInstance().player.getUUID())) {
                     if (debug)
                         ChatNotify.LOG.warn("Matched user's UUID");
+                    // Remove ChatHeads text
+                    cleanStr = cleanStr.replace("[" + ownerInfo.getProfile().name() + " head]", "");
+                    // Continue check
                     for (Trigger t : Config.get().getUserNotif().triggers) {
                         Matcher matcher = normalSearch(cleanStr, t.string);
                         if (matcher.find()) {
@@ -173,7 +176,7 @@ public class MessageUtil {
                 }
                 if (recentStart != -1) {
                     if (debug)
-                        ChatNotify.LOG.warn("{}", 
+                        ChatNotify.LOG.warn(
                                 "Matched recent message '{}' at index {}",
                                 recentMessages.get(i).getSecond(),
                                 recentStart
@@ -184,7 +187,7 @@ public class MessageUtil {
                         Matcher triggerMatcher = normalSearch(prefix, t.string);
                         if (triggerMatcher.find()) {
                             if (debug)
-                                ChatNotify.LOG.warn("{}", 
+                                ChatNotify.LOG.warn(
                                         "Matched trigger '{}' at index {}",
                                         t.string,
                                         triggerMatcher.start()

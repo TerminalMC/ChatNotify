@@ -4,6 +4,7 @@
 
 - Updated Russian translation (rfin0)
 - Added French translation (Spipi1)
+- Fixed a compat issue with ChatHeads causing all sent messages to trigger notifications
 
 ## 3.0.0
 

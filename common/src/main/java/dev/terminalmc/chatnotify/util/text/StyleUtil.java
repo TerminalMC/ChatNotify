@@ -104,7 +104,6 @@ public class StyleUtil {
             if (!restyled) {
                 if (debug) {
                     ChatNotify.LOG.warn(
-                            "{}",
                             "Style target '{}' (type {})",
                             trig.styleTarget.string,
                             trig.styleTarget.type
@@ -195,7 +194,6 @@ public class StyleUtil {
     ) {
         if (debug)
             ChatNotify.LOG.warn(
-                    "{}",
                     "recursiveRestyle('{}', {}, {}, {})",
                     msg.getString(),
                     start,
@@ -287,7 +285,6 @@ public class StyleUtil {
     ) {
         if (debug)
             ChatNotify.LOG.warn(
-                    "{}",
                     "recursiveStyledSubstring('{}', {}, {}, {})",
                     msg.getString(),
                     start,
