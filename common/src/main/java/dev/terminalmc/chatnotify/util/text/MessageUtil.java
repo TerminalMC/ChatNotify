@@ -143,6 +143,12 @@ public class MessageUtil {
                 if (id.equals(Minecraft.getInstance().player.getUUID())) {
                     if (debug)
                         ChatNotify.LOG.warn("Matched user's UUID");
+                    // Remove ChatHeads text
+                    cleanStr = cleanStr.replace(
+                            "[" + ownerInfo.getProfile().getName() + " head]",
+                            ""
+                    );
+                    // Continue check
                     for (Trigger t : Config.get().getUserNotif().triggers) {
                         Matcher matcher = normalSearch(cleanStr, t.string);
                         if (matcher.find()) {
