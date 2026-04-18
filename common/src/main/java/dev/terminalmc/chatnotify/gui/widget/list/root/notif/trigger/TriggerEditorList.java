@@ -18,9 +18,11 @@ package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.config.Config.DebugMode;
 import dev.terminalmc.chatnotify.config.StyleTarget;
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
@@ -45,6 +47,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -60,7 +63,7 @@ public class TriggerEditorList extends OptionList {
 
     private final Trigger trigger;
     private final TextStyle textStyle;
-    private final List<String> recentChatMaster;
+    private final List<JsonElement> recentChatMaster;
     private final List<Component> recentChat;
     private boolean filter;
     private boolean restyle;
@@ -85,7 +88,17 @@ public class TriggerEditorList extends OptionList {
         this.trigger = trigger;
         this.textStyle = textStyle;
         this.recentChatMaster = ChatNotify.unmodifiedChat.stream()
-                .map(GSON::toJson)
+                .map(t -> {
+                    try {
+                        return GSON.toJsonTree(t);
+                    } catch (Exception e) {
+                        if (Config.get().debugMode.equals(DebugMode.ALL)) {
+                            ChatNotify.LOG.warn("{}", e.getMessage());
+                        }
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
                 .toList()
                 .reversed();
         this.recentChat = new ArrayList<>();
@@ -95,7 +108,17 @@ public class TriggerEditorList extends OptionList {
     protected void init() {
         this.recentChat.clear();
         this.recentChat.addAll(this.recentChatMaster.stream()
-                .map((s) -> GSON.fromJson(s, Component.class))
+                .map(s -> {
+                    try {
+                        return GSON.fromJson(s, Component.class);
+                    } catch (Exception e) {
+                        if (Config.get().debugMode.equals(DebugMode.ALL)) {
+                            ChatNotify.LOG.warn("{}", e.getMessage());
+                        }
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
                 .toList());
         super.init();
     }
