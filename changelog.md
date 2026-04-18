@@ -1,11 +1,8 @@
 # Changelog
 
-## 2.6.8
-
-- Fixed a compat issue with ChatHeads causing all sent messages to trigger notifications
-
 ## 2.6.7
 
+- Fixed a compat issue with ChatHeads causing all sent messages to trigger notifications
 - Added detection for non-root translation keys
 
 ## 2.6.6
