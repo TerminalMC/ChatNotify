@@ -36,6 +36,11 @@ on:
         description: Publish to CurseForge
         required: true
         default: true
+      syncModrinthDescription:
+        type: boolean
+        description: Sync Modrinth Description with README.md
+        required: true
+        default: false
       java:
         type: choice
         description: Java Version
@@ -134,6 +139,7 @@ jobs:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           FABRIC_TASK: ${{ inputs.fabric && 'fabric:publishModrinth' || '' }}
           NEOFORGE_TASK: ${{ inputs.neoforge && 'neoforge:publishModrinth' || '' }}
+          SYNC_MODRINTH_DESCRIPTION: ${{ inputs.syncModrinthDescription && 'true' || 'false' }}
         run: ./gradlew $FABRIC_TASK $NEOFORGE_TASK --stacktrace
 
       - name: CurseForge

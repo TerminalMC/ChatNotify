@@ -73,7 +73,9 @@ subprojects {
                         && !env.has("MODRINTH_TOKEN")
                         && !env.has("CURSEFORGE_TOKEN")
                 // GitHub configuration
+                //noinspection GroovyAssignabilityCheck
                 github {
+                    //noinspection GroovyAssignabilityCheck
                     parent project(":").tasks.named("publishGithub")
                     accessToken = env.safe("GITHUB_TOKEN")
                     if (build_sources_jar == "true") additionalFiles.from(sourcesJar.archiveFile)
@@ -81,6 +83,7 @@ subprojects {
                     return void
                 }
                 // Modrinth configuration
+                //noinspection GroovyAssignabilityCheck
                 modrinth {
                     accessToken = env.safe("MODRINTH_TOKEN")
                     projectId = prop.safe("mod_modrinth_id")
@@ -113,7 +116,7 @@ subprojects {
                         }
                     }
                     // Sync Modrinth description with README
-                    if (prop.has("mod_github_repo")) {
+                    if (prop.has("mod_github_repo") && env.safe("SYNC_MODRINTH_DESCRIPTION").toBoolean()) {
                         projectDescription = rootProject.file("README.md").text.replaceAll(
                                 "src=\"\\./",
                                 "src=\"https://raw.githubusercontent.com/${prop.get("mod_github_repo")}/HEAD/"
@@ -122,6 +125,7 @@ subprojects {
                     }
                 }
                 // CurseForge configuration
+                //noinspection GroovyAssignabilityCheck
                 curseforge {
                     accessToken = env.safe("CURSEFORGE_TOKEN")
                     projectId = prop.safe("mod_curseforge_id")
@@ -197,11 +201,12 @@ subprojects {
  */
 publishMods {
     final env = new EnvUtil(providers)
-    final prop = new PropUtil(project)
+    final prop = new PropUtil(project as Project)
     version = "${mod_version}+${minecraft_version}"
     displayName = "v${mod_version}+${minecraft_version}"
-    type = ReleaseType.of(mod_version_type)
+    type = ReleaseType.valueOf(mod_version_type)
     dryRun = !env.has("GITHUB_TOKEN")
+    //noinspection GroovyAssignabilityCheck
     github {
         accessToken = env.safe("GITHUB_TOKEN")
         repository = prop.safe("mod_github_repo")
