@@ -16,7 +16,9 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
+import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.JsonOps;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.StyleTarget;
@@ -37,6 +39,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +57,7 @@ public class TriggerEditorList extends OptionList {
 
     private final Trigger trigger;
     private final TextStyle textStyle;
+    private final List<JsonElement> recentChatMaster;
     private final List<Component> recentChat;
     private boolean filter;
     private boolean restyle;
@@ -77,7 +81,24 @@ public class TriggerEditorList extends OptionList {
         super(mc, screen, width, height, y, entryWidth, entryHeight, entrySpacing);
         this.trigger = trigger;
         this.textStyle = textStyle;
-        this.recentChat = ChatNotify.unmodifiedChat.stream().toList().reversed();
+        this.recentChatMaster = ChatNotify.unmodifiedChat.stream()
+                .map(text -> ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, text))
+                .filter(dataResult -> dataResult.isSuccess() && dataResult.result().isPresent())
+                .map(dataResult -> dataResult.result().get())
+                .toList()
+                .reversed();
+        this.recentChat = new ArrayList<>();
+    }
+
+    @Override
+    protected void init() {
+        this.recentChat.clear();
+        this.recentChat.addAll(this.recentChatMaster.stream()
+                .map((json) -> ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json))
+                .filter(dataResult -> dataResult.isSuccess() && dataResult.result().isPresent())
+                .map(dataResult -> dataResult.result().get())
+                .toList());
+        super.init();
     }
 
     @Override
