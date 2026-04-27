@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.8
+
+- Fixed rendering of list items while dragging to reorder
+- Added support for including `$` in custom messages using `$$`
+
 ## 2.6.7
 
 - Fixed a compat issue with ChatHeads causing all sent messages to trigger notifications

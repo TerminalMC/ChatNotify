@@ -480,8 +480,21 @@ public class MessageUtil {
             @Nullable Matcher matcher,
             Component msg
     ) {
-        // Replace $ with section sign
-        msgString = msgString.replaceAll(Pattern.quote("$"), Unicode.SECTION.str);
+        // Replace $$ with $, and $ with section sign
+        char[] chars = new char[msgString.length()];
+        char[] msgArr = msgString.toCharArray();
+        int j = 0;
+        for (int i = 0; i < msgArr.length; i++) {
+            if (msgArr[i] == '$' && i < msgArr.length - 1 && msgArr[i + 1] == '$') {
+                chars[j++] = '$';
+                i++;
+            } else if (msgArr[i] == '$') {
+                chars[j++] = Unicode.SECTION.chr;
+            } else {
+                chars[j++] = msgArr[i];
+            }
+        }
+        msgString = new String(chars, 0, j);
 
         // Substitute capturing groups
         if (matcher != null && matcher.find(0)) {
