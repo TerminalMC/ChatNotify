@@ -2,6 +2,7 @@
 
 ## 3.2.2
 
+- Fixed rendering of list items while dragging to reorder
 - Added a debug command for parsing logged messages
 - Added detection for non-root translation keys
 - Added support for including `$` in custom messages using `$$`

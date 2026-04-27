@@ -198,21 +198,29 @@ public abstract class DragReorderList extends OptionList {
     ) {
         super.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
         if (dragSourceSlot != -1) {
+            Entry entry = getEntry(dragSourceSlot);
+            int entryY = entry.getY();
+            entry.setY(mouseY);
             super.extractItem(
                     graphics,
                     mouseX,
                     mouseY,
                     delta,
-                    getEntry(dragSourceSlot)
+                    entry
             );
+            entry.setY(entryY);
             if (hasTrailer) {
+                Entry trailer = getEntry(dragSourceSlot + 1);
+                int trailerY = trailer.getY();
+                trailer.setY(mouseY + entryHeight);
                 super.extractItem(
                         graphics,
                         mouseX,
                         mouseY,
                         delta,
-                        getEntry(dragSourceSlot + 1)
+                        trailer
                 );
+                trailer.setY(trailerY);
             }
         }
     }
