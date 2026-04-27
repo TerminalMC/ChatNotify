@@ -65,11 +65,11 @@ public record ColoredRectangleRenderStateHorizontal(
         );
     }
 
-    public void buildVertices(VertexConsumer consumer, float z) {
-        consumer.addVertexWith2DPose(pose(), (float) x0(), (float) y0(), z).setColor(colorFrom());
-        consumer.addVertexWith2DPose(pose(), (float) x0(), (float) y1(), z).setColor(colorFrom());
-        consumer.addVertexWith2DPose(pose(), (float) x1(), (float) y1(), z).setColor(colorTo());
-        consumer.addVertexWith2DPose(pose(), (float) x1(), (float) y0(), z).setColor(colorTo());
+    public void buildVertices(VertexConsumer consumer) {
+        consumer.addVertexWith2DPose(pose(), (float) x0(), (float) y0()).setColor(colorFrom());
+        consumer.addVertexWith2DPose(pose(), (float) x0(), (float) y1()).setColor(colorFrom());
+        consumer.addVertexWith2DPose(pose(), (float) x1(), (float) y1()).setColor(colorTo());
+        consumer.addVertexWith2DPose(pose(), (float) x1(), (float) y0()).setColor(colorTo());
     }
 
     @Nullable

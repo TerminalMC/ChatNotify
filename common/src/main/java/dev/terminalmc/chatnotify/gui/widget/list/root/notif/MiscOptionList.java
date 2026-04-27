@@ -438,7 +438,6 @@ public class MiscOptionList extends OptionList {
                         labelText,
                         Minecraft.getInstance().font
                 );
-                label.alignLeft();
                 if (Minecraft.getInstance().font.width(labelText.getString())
                         / (double) width > MAX_SIZE_RELATIVE)
                     label.setTooltip(Tooltip.create(hint));

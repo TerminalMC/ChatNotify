@@ -21,6 +21,7 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -191,40 +192,40 @@ public abstract class DragReorderList extends OptionList {
     public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.renderWidget(graphics, mouseX, mouseY, delta);
         if (dragSourceSlot != -1) {
+            Entry entry = getEntry(dragSourceSlot);
+            int entryY = entry.getY();
+            entry.setY(mouseY);
             super.renderItem(
                     graphics,
                     mouseX,
                     mouseY,
                     delta,
-                    dragSourceSlot,
-                    mouseX,
-                    mouseY,
-                    entryWidth,
-                    entryHeight
+                    entry
             );
+            entry.setY(entryY);
             if (hasTrailer) {
+                Entry trailer = getEntry(dragSourceSlot + 1);
+                int trailerY = trailer.getY();
+                trailer.setY(mouseY + entryHeight);
                 super.renderItem(
                         graphics,
                         mouseX,
                         mouseY,
                         delta,
-                        dragSourceSlot + 1,
-                        mouseX,
-                        mouseY + itemHeight,
-                        entryWidth,
-                        entryHeight
+                        getEntry(dragSourceSlot + 1)
                 );
+                trailer.setY(trailerY);
             }
         }
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (dragSourceSlot != -1 && button == InputConstants.MOUSE_BUTTON_LEFT) {
-            dropDragged(mouseY);
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (dragSourceSlot != -1 && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            dropDragged(event.y());
             return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     /**
@@ -289,7 +290,7 @@ public abstract class DragReorderList extends OptionList {
 
         @Nullable Entry hoveredEntry = getEntryAtPosition(getX() + (double) getWidth() / 2, mouseY);
         if (hoveredEntry == null) {
-            if (mouseY > getBottom() || mouseY > getY() + itemHeight * children().size()) {
+            if (mouseY > getBottom() || mouseY > getY() + defaultEntryHeight * children().size()) {
                 // If we're off the bottom, snap to list bottom. Now if
                 // hoveredEntry is still null we can assume we're off the top.
                 hoveredEntry = children().get(end);
