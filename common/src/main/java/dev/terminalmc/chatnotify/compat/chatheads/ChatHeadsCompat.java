@@ -16,35 +16,142 @@
 
 package dev.terminalmc.chatnotify.compat.chatheads;
 
-import dzwdz.chat_heads.ChatHeads;
-import dzwdz.chat_heads.HeadData;
+import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class ChatHeadsCompat {
 
+    public static final String MOD_NAME = "ChatHeads";
+
+    public static final String CHAT_HEADS_CLASS = "dzwdz.chat_heads.ChatHeads";
+    public static final String LAST_SENDER_DATA_FIELD = "lastSenderData";
+    public static final String HANDLE_ADDED_MESSAGE_METHOD = "handleAddedMessage";
+    public static final Class<?>[] HANDLE_ADDED_MESSAGE_PARAMS = {
+            Component.class,
+            PlayerInfo.class
+    };
+
+    public static final String HEAD_DATA_CLASS = "dzwdz.chat_heads.HeadData";
+    public static final String PLAYER_INFO_METHOD = "playerInfo";
+    public static final Class<?>[] PLAYER_INFO_PARAMS = {};
+
+    private static boolean hasFailed = false;
+    private static Field lastSenderDataField;
+    private static Method handleAddedMessageMethod;
+    private static Method playerInfoMethod;
     private ChatHeadsCompat() {
     }
+
+    //
+    // Wrappers
+    //
 
     /**
      * @return the most recently saved message ownership data from ChatHeads, if any exists.
      */
-    static @Nullable PlayerInfo getPlayerInfo() {
-        if (ChatHeads.lastSenderData == HeadData.EMPTY) {
+    public static @Nullable PlayerInfo getPlayerInfo() {
+        if (hasFailed)
             return null;
-        } else {
-            return ChatHeads.lastSenderData.playerInfo();
-        }
+        return invokePlayerInfo();
     }
 
     /**
      * Instructs ChatHeads to update its saved message ownership data.
      */
-    static void handleAddedMessage(
+    public static void handleAddedMessage(
             Component message,
             @Nullable PlayerInfo playerInfo
     ) {
-        ChatHeads.handleAddedMessage(message, playerInfo);
+        if (hasFailed)
+            return;
+        invokeHandleAddedMessage(message, playerInfo);
+    }
+
+    //
+    // Reflective invokers
+    //
+
+    public static void invokeHandleAddedMessage(
+            Component message,
+            @Nullable PlayerInfo playerInfo
+    ) {
+        try {
+            if (handleAddedMessageMethod == null) {
+                // Load class and find method
+                Class<?> chatHeadsClass = Class.forName(
+                        CHAT_HEADS_CLASS,
+                        false,
+                        Thread.currentThread().getContextClassLoader()
+                );
+                handleAddedMessageMethod = chatHeadsClass.getMethod(
+                        HANDLE_ADDED_MESSAGE_METHOD,
+                        HANDLE_ADDED_MESSAGE_PARAMS
+                );
+            }
+
+            // Invoke static
+            handleAddedMessageMethod.invoke(null, message, playerInfo);
+            return;
+
+        } catch (Exception e) {
+            ChatNotify.LOG.info(
+                    "Error accessing {} - compat is now disabled: {}",
+                    MOD_NAME,
+                    e.getMessage()
+            );
+        }
+        hasFailed = true;
+    }
+
+    public static @Nullable PlayerInfo invokePlayerInfo() {
+        try {
+            if (playerInfoMethod == null) {
+                // Load class and find method
+                Class<?> headDataClass = Class.forName(
+                        HEAD_DATA_CLASS,
+                        false,
+                        Thread.currentThread().getContextClassLoader()
+                );
+                playerInfoMethod = headDataClass.getMethod(
+                        PLAYER_INFO_METHOD,
+                        PLAYER_INFO_PARAMS
+                );
+            }
+            if (lastSenderDataField == null) {
+                // Load class and find field
+                Class<?> chatHeadsClass = Class.forName(
+                        CHAT_HEADS_CLASS,
+                        false,
+                        Thread.currentThread().getContextClassLoader()
+                );
+                lastSenderDataField = chatHeadsClass.getField(
+                        LAST_SENDER_DATA_FIELD
+                );
+            }
+
+            // Invoke static
+            Object result = playerInfoMethod.invoke(lastSenderDataField.get(null));
+            if (result == null) {
+                return null;
+            } else if (result instanceof PlayerInfo playerInfo) {
+                return playerInfo;
+            } else {
+                throw new ClassCastException();
+            }
+
+        } catch (Exception e) {
+            ChatNotify.LOG.info(
+                    "Error accessing {} - compat is now disabled: {}",
+                    MOD_NAME,
+                    e.getMessage()
+            );
+        }
+        hasFailed = true;
+        return null;
     }
 }

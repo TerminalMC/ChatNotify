@@ -17,21 +17,41 @@
 package dev.terminalmc.chatnotify.compat.commandkeys;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
-import dev.terminalmc.commandkeys.util.KeybindUtil;
+
+import java.lang.reflect.Method;
 
 public class CommandKeysCompat {
 
     public static final String DUAL_KEY_PATTERN_STRING = "^[a-z0-9.]+-[a-z0-9.]++$";
 
+    public static final String MOD_NAME = "CommandKeys";
+
+    public static final String KEYBIND_UTIL_CLASS = "dev.terminalmc.commandkeys.util.KeybindUtil";
+    public static final String HANDLE_KEYS_METHOD = "handleKeys";
+    public static final Class<?>[] HANDLE_KEYS_PARAMS = {
+            InputConstants.Key.class,
+            InputConstants.Key.class
+    };
+
+    private static boolean hasFailed = false;
+    private static Method handleKeysMethod;
+
     private CommandKeysCompat() {
     }
+
+    //
+    // Wrappers
+    //
 
     /**
      * Parses the specified string into two {@link InputConstants.Key} instances, and passes them to
      * CommandKeys' keypress handler.
      */
-    static void send(String str) {
+    public static void send(String str) {
+        if (hasFailed)
+            return;
         if (!str.matches(DUAL_KEY_PATTERN_STRING))
             return;
         String[] splitStr = str.split("-");
@@ -43,6 +63,39 @@ public class CommandKeysCompat {
         if (key == null || limitKey == null)
             return;
 
-        KeybindUtil.handleKeys(key, limitKey);
+        invokeHandleKeys(key, limitKey);
+    }
+
+    //
+    // Reflective invokers
+    //
+
+    public static void invokeHandleKeys(InputConstants.Key key, InputConstants.Key limitKey) {
+        try {
+            if (handleKeysMethod == null) {
+                // Load class and find method
+                Class<?> KeybindUtilClass = Class.forName(
+                        KEYBIND_UTIL_CLASS,
+                        false,
+                        Thread.currentThread().getContextClassLoader()
+                );
+                handleKeysMethod = KeybindUtilClass.getMethod(
+                        HANDLE_KEYS_METHOD,
+                        HANDLE_KEYS_PARAMS
+                );
+            }
+
+            // Invoke static
+            handleKeysMethod.invoke(null, key, limitKey);
+            return;
+
+        } catch (Exception e) {
+            ChatNotify.LOG.info(
+                    "Error accessing {} - compat is now disabled: {}",
+                    MOD_NAME,
+                    e.getMessage()
+            );
+        }
+        hasFailed = true;
     }
 }

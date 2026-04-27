@@ -16,7 +16,7 @@
 
 package dev.terminalmc.chatnotify.util;
 
-import dev.terminalmc.chatnotify.compat.commandkeys.CommandKeysWrapper;
+import dev.terminalmc.chatnotify.compat.commandkeys.CommandKeysCompat;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Response;
 import net.minecraft.client.Minecraft;
@@ -59,7 +59,7 @@ public class ResponseUtil {
                     res.cooldown = res.cooldownTicks;
                     if (res.sendingString != null && !res.sendingString.isBlank()) {
                         if (res.type.equals(Response.Type.COMMANDKEYS)) {
-                            CommandKeysWrapper.trySend(res.sendingString);
+                            CommandKeysCompat.send(res.sendingString);
                         } else {
                             sending.add(res.sendingString);
                         }

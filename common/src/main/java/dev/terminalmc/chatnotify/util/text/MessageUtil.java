@@ -17,7 +17,7 @@
 package dev.terminalmc.chatnotify.util.text;
 
 import dev.terminalmc.chatnotify.ChatNotify;
-import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
+import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsCompat;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Response;
@@ -132,7 +132,7 @@ public class MessageUtil {
         String cleanOwnedStr = cleanStr;
         if (Config.get().senderDetectionMode == COMBINED) {
             // Ask ChatHeads who the message owner is
-            ownerInfo = ChatHeadsWrapper.getPlayerInfo();
+            ownerInfo = ChatHeadsCompat.getPlayerInfo();
         }
         if (ownerInfo != null) {
             // Use info from ChatHeads

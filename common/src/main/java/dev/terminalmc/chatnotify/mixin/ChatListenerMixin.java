@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.authlib.GameProfile;
-import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
+import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsCompat;
 import dev.terminalmc.chatnotify.compat.chatheads.Ownable;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Config.ChatDetectionMode;
@@ -55,7 +55,7 @@ public abstract class ChatListenerMixin {
             Operation<Void> original
     ) {
         if (Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
-            ChatHeadsWrapper.handleAddedMessage(message, null);
+            ChatHeadsCompat.handleAddedMessage(message, null);
             message = MessageUtil.processMessage(message);
             if (message != null)
                 original.call(message, boundChatType);
@@ -77,7 +77,7 @@ public abstract class ChatListenerMixin {
     ) {
         // Ignore if it's an overlay message to avoid conflict with the action bar interceptor
         if (!isOverlay && Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
-            ChatHeadsWrapper.handleAddedMessage(message, null);
+            ChatHeadsCompat.handleAddedMessage(message, null);
             message = MessageUtil.processMessage(message);
             if (message != null)
                 original.call(message, isOverlay);
@@ -104,7 +104,7 @@ public abstract class ChatListenerMixin {
             Operation<Boolean> original
     ) {
         if (Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
-            ChatHeadsWrapper.handleAddedMessage(
+            ChatHeadsCompat.handleAddedMessage(
                     message,
                     ((Ownable) message).chatheads$getOwner()
             );

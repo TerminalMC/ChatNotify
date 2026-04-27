@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.2
+
+- Replaced compile-time compat deps with reflective access
+
 ## 3.2.1
 
 - Updated Russian translation (rfin0)
