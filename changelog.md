@@ -2,6 +2,7 @@
 
 ## 3.2.2
 
+- Added support for including `$` in custom messages using `$$`
 - Replaced compile-time compat deps with reflective access
 
 ## 3.2.1
