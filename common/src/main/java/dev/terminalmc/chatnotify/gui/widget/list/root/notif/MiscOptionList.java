@@ -87,6 +87,18 @@ public class MiscOptionList extends OptionList {
                         .append(localized("option", "notif.misc.control.cooldown.tooltip"))
         ));
 
+        registerLabel(localized("options", "notif.misc.control.restartCooldownOnTrigger"));
+        addEntry(new Entry.CustomCycler(
+                dynWideEntryX,
+                dynWideEntryWidth,
+                entryHeight,
+                () -> notif.restartCooldownOnTrigger,
+                (v) -> notif.restartCooldownOnTrigger = v,
+                localized("option", "notif.misc.control.restartCooldownOnTrigger"),
+                localized("option", "notif.misc.control.restartCooldownOnTrigger.tooltip"),
+                localized("option", "notif.misc.control.restartCooldownOnTrigger.tooltip")
+        ));
+
         addEntry(new OptionList.Entry.Text(
                 entryX,
                 entryWidth,

@@ -114,6 +114,8 @@
   "option.chatnotify.notif.misc.control": "Дополнительные элементы управления",
   "option.chatnotify.notif.misc.control.cooldown": "Время между уведомлениями",
   "option.chatnotify.notif.misc.control.cooldown.tooltip": "Продолжительность (в тиках) между последовательными активациями этого уведомления.",
+  "option.chatnotify.notif.misc.control.restartCooldownOnTrigger": "Restart cooldown on trigger attempt",
+  "option.chatnotify.notif.misc.control.restartCooldownOnTrigger.tooltip": "Whether to restart the cooldown timer when the notification would be triggered if not on cooldown.",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER": "Отложить",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER.tooltip": "Будет использована глобальная настройка.",
   "option.chatnotify.notif.misc.control.self_notify.status.OFF": "Переопределить - ВЫКЛ",

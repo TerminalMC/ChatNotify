@@ -114,6 +114,8 @@
   "option.chatnotify.notif.misc.control": "Misc Controls",
   "option.chatnotify.notif.misc.control.cooldown": "Notification cooldown",
   "option.chatnotify.notif.misc.control.cooldown.tooltip": "Time in ticks the notification should be disabled after being activated.",
+  "option.chatnotify.notif.misc.control.restartCooldownOnTrigger": "Restart cooldown on trigger attempt",
+  "option.chatnotify.notif.misc.control.restartCooldownOnTrigger.tooltip": "Whether to restart the cooldown timer when the notification would be triggered if not on cooldown.",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER": "Defer",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER.tooltip": "Global option will be used.",
   "option.chatnotify.notif.misc.control.self_notify.status.OFF": "Override - OFF",

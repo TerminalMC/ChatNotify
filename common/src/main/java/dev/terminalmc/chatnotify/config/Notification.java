@@ -97,6 +97,13 @@ public class Notification implements StringSupplier {
     public static final int cooldownDefault = 0;
 
     /**
+     * Whether the cooldown clock should be restarted when the notification would be triggered if it
+     * was not currently on cooldown.
+     */
+    public boolean restartCooldownOnTrigger;
+    public static final boolean restartCooldownOnTriggerDefault = false;
+
+    /**
      * Whether this instance allows use of inclusion triggers.
      */
     public boolean inclusionEnabled;
@@ -240,6 +247,7 @@ public class Notification implements StringSupplier {
             boolean enabled,
             CheckOwnMode checkOwnMode,
             int cooldown,
+            boolean restartCooldownOnTrigger,
             boolean inclusionEnabled,
             boolean exclusionEnabled,
             boolean responseEnabled,
@@ -274,6 +282,7 @@ public class Notification implements StringSupplier {
         this.enabled = enabled;
         this.checkOwnMode = checkOwnMode;
         this.cooldown = cooldown;
+        this.restartCooldownOnTrigger = restartCooldownOnTrigger;
         this.inclusionEnabled = inclusionEnabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
@@ -315,6 +324,7 @@ public class Notification implements StringSupplier {
                 enabledDefault,
                 CheckOwnMode.values()[0],
                 cooldownDefault,
+                restartCooldownOnTriggerDefault,
                 inclusionEnabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
@@ -356,6 +366,7 @@ public class Notification implements StringSupplier {
                 enabledDefault,
                 CheckOwnMode.values()[0],
                 cooldownDefault,
+                restartCooldownOnTriggerDefault,
                 inclusionEnabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
@@ -390,11 +401,14 @@ public class Notification implements StringSupplier {
     }
 
     /**
+     * @implNote does not check {@link Notification#countdown}, since we need to test activation
+     * to determine whether to restart the countdown on trigger attempt while on cooldown.
+     *
      * @return {@code true} if this instance is eligible for triggering (on a message sent by the
      * user if {@code ownMsg} is {@code true}).
      */
     public boolean canBeTriggered(boolean ownMsg) {
-        if (enabled && countdown <= 0 && !editing) {
+        if (enabled && !editing) {
             if (ownMsg) {
                 return switch (checkOwnMode) {
                     case DEFER -> Config.get().checkOwnMessages;
@@ -566,6 +580,13 @@ public class Notification implements StringSupplier {
                     obj,
                     "cooldown",
                     cooldownDefault,
+                    silent
+            );
+
+            boolean restartCooldownOnTrigger = JsonUtil.getOrDefault(
+                    obj,
+                    "restartCooldownOnTrigger",
+                    restartCooldownOnTriggerDefault,
                     silent
             );
 
@@ -798,6 +819,7 @@ public class Notification implements StringSupplier {
                     enabled,
                     checkOwnMode,
                     cooldown,
+                    restartCooldownOnTrigger,
                     inclusionEnabled,
                     exclusionEnabled,
                     responseEnabled,

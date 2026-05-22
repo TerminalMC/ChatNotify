@@ -308,6 +308,14 @@ public class MessageUtil {
                 if (exHit)
                     continue;
 
+                // Finally, check cooldown
+                if (notif.countdown > 0) {
+                    if (notif.restartCooldownOnTrigger) {
+                        notif.countdown = notif.cooldown;
+                    }
+                    continue;
+                }
+
                 // Trigger notification
                 anyTriggered = true;
 

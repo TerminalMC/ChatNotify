@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.3
+
+- Added an option to restart the cooldown timer when a notification would be triggered if not
+  already on cooldown.
+
 ## 3.2.2
 
 - Fixed rendering of list items while dragging to reorder
@@ -139,7 +144,7 @@
 
 ## 2.3.10
 
-- Fixed an issue with saving on ESC introduced in v2.3.9 
+- Fixed an issue with saving on ESC introduced in v2.3.9
 - Fixed username notification not updating after config reload
 - Increased scrollbar margin
 - Improved UI slightly

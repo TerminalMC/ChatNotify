@@ -114,6 +114,8 @@
   "option.chatnotify.notif.misc.control": "Contrôles divers",
   "option.chatnotify.notif.misc.control.cooldown": "Temps de recharge de la notification",
   "option.chatnotify.notif.misc.control.cooldown.tooltip": "Temps en ticks pendant lequel la notification doit être désactivée après avoir été activée.",
+  "option.chatnotify.notif.misc.control.restartCooldownOnTrigger": "Restart cooldown on trigger attempt",
+  "option.chatnotify.notif.misc.control.restartCooldownOnTrigger.tooltip": "Whether to restart the cooldown timer when the notification would be triggered if not on cooldown.",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER": "Différer",
   "option.chatnotify.notif.misc.control.self_notify.status.DEFER.tooltip": "L'option globale sera utilisée.",
   "option.chatnotify.notif.misc.control.self_notify.status.OFF": "Remplacement - DÉSACTIVÉ",
