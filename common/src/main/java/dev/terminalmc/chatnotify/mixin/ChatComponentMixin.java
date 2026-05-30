@@ -102,7 +102,7 @@ public abstract class ChatComponentMixin {
 
     @WrapMethod(method = "getHeight()I")
     private int wrapGetHeight(Operation<Integer> original) {
-        if (Minecraft.getInstance().screen instanceof ChatScreen cs) {
+        if (Minecraft.getInstance().gui.screen() instanceof ChatScreen cs) {
             return Math.min(cs.height - 50, original.call());
         }
         return original.call();

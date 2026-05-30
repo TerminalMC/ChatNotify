@@ -125,14 +125,14 @@ public class RootScreen extends OptionScreen {
     }
 
     private void onCancel() {
-        Minecraft.getInstance().setScreen(new ConfirmScreen(
+        Minecraft.getInstance().gui.setScreen(new ConfirmScreen(
                 (confirm) -> {
                     if (confirm) {
                         Config.reload();
-                        Minecraft.getInstance().setScreen(this);
+                        Minecraft.getInstance().gui.setScreen(this);
                         onClose();
                     } else {
-                        Minecraft.getInstance().setScreen(this);
+                        Minecraft.getInstance().gui.setScreen(this);
                     }
                 },
                 localized("option", "root.exit_without_saving"),

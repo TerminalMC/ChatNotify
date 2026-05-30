@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.0-beta.1
+
+- Updated to mc26.2-pre.2
+- Mod versioning scheme now resets `minor` on increment of either `major` or `mc`
+
 ## 3.2.4
 
 - Fixed an issue causing regex inclusion triggers to always match

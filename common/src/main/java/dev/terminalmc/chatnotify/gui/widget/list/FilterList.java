@@ -360,8 +360,8 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                 // Trigger editor button
                 Button editorButton = Button.builder(
                                 Component.literal(Unicode.EDIT.str),
-                                (button) -> mc.setScreen(new TriggerScreen(
-                                        mc.screen,
+                                (button) -> mc.gui.setScreen(new TriggerScreen(
+                                        mc.gui.screen(),
                                         trigger,
                                         textStyle,
                                         () -> {
@@ -866,8 +866,8 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                     Button editorButton = Button.builder(
                                     Component.literal(Unicode.EDIT.str), (button) -> {
                                         notif.editing = true;
-                                        mc.setScreen(new TriggerScreen(
-                                                mc.screen,
+                                        mc.gui.setScreen(new TriggerScreen(
+                                                mc.gui.screen(),
                                                 trigger,
                                                 notif.textStyle,
                                                 () -> notif.editing = false,
@@ -907,7 +907,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                             0,
                             triggerFieldWidth,
                             height,
-                            () -> mc.setScreen(new NotifScreen(mc.screen, notif))
+                            () -> mc.gui.setScreen(new NotifScreen(mc.gui.screen(), notif))
                     );
                     triggerField.setMaxLength(240);
                     triggerField.setValue(createLabel(notif, triggerFieldWidth - 10).getString());
@@ -923,7 +923,7 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                         list.smallWidgetWidth,
                         height,
                         OPTION_SPRITES,
-                        (button) -> mc.setScreen(new NotifScreen(mc.screen, notif))
+                        (button) -> mc.gui.setScreen(new NotifScreen(mc.gui.screen(), notif))
                 );
                 editButton.setTooltip(Tooltip.create(localized(
                         "option",
@@ -1037,8 +1037,8 @@ public class FilterList<E extends StringSupplier> extends DragReorderList {
                                 .withStyle(notif.sound.isEnabled()
                                         ? ChatFormatting.WHITE
                                         : ChatFormatting.RED),
-                        (button) -> mc.setScreen(new NotifScreen(
-                                mc.screen,
+                        (button) -> mc.gui.setScreen(new NotifScreen(
+                                mc.gui.screen(),
                                 notif,
                                 NotifScreen.TabKey.SOUND.key
                         )),

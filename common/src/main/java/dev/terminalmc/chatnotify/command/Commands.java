@@ -72,7 +72,7 @@ public class Commands {
         //noinspection unchecked
         dispatcher.register((LiteralArgumentBuilder<S>) literal(ChatNotify.MOD_ID)
                 .executes((ctx) -> {
-                    mc.schedule(() -> mc.setScreen(new RootScreen(mc.screen)));
+                    mc.schedule(() -> mc.gui.setScreen(new RootScreen(mc.gui.screen())));
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(literal("debug")
@@ -94,7 +94,8 @@ public class Commands {
                                                             Unicode.SECTION.str
                                                     ));
 
-                                    mc.gui.getChat().addClientSystemMessage(text);
+                                                    mc.gui.hud.getChat()
+                                                            .addClientSystemMessage(text);
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )
@@ -111,7 +112,8 @@ public class Commands {
                                                     Component text =
                                                             DebugParseUtil.parseMutableComponent(string);
 
-                                                    mc.gui.getChat().addClientSystemMessage(text);
+                                                    mc.gui.hud.getChat()
+                                                            .addClientSystemMessage(text);
                                                     return Command.SINGLE_SUCCESS;
                                                 })
                                         )
@@ -139,7 +141,7 @@ public class Commands {
             List<String> lines = Files.readAllLines(Path.of(path));
             for (String line : lines) {
                 Component text = DebugParseUtil.parseMutableComponent(line.strip());
-                mc.gui.getChat().addClientSystemMessage(text);
+                mc.gui.hud.getChat().addClientSystemMessage(text);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
