@@ -197,7 +197,7 @@ public class Config {
      */
     public final List<String> prefixes;
     public static final Supplier<List<String>> prefixesDefault =
-            () -> new ArrayList<>(List.of("/shout", "/me", "!"));
+            () -> new ArrayList<>(List.of("/shout", "/say", "/me", "!"));
 
     // Notifications
 

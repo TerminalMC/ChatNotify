@@ -3,6 +3,7 @@
 ## 2.6.9
 
 - Fixed an issue causing regex inclusion triggers to always match
+- Added `/say` to the default list of detection prefixes
 
 ## 2.6.8
 
