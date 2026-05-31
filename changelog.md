@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.4
+
+- Fixed an issue causing regex inclusion triggers to always match
+
 ## 3.2.3
 
 - Added an option to restart the cooldown timer when a notification would be triggered if not
