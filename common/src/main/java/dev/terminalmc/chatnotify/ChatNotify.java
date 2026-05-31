@@ -72,6 +72,10 @@ public class ChatNotify {
                     trig.styleTarget.tryParseIndexes();
                 }
             }
+            for (Trigger trig : notif.inclusionTriggers) {
+                if (trig.type == Trigger.Type.REGEX)
+                    trig.tryCompilePattern();
+            }
             for (Trigger trig : notif.exclusionTriggers) {
                 if (trig.type == Trigger.Type.REGEX)
                     trig.tryCompilePattern();

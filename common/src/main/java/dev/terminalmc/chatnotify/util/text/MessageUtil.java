@@ -281,8 +281,8 @@ public class MessageUtil {
                             continue;
                         inMiss = (!switch (inTrig.type) {
                             case NORMAL -> normalSearch(cleanOwnedStr, inTrig.string).find();
-                            case REGEX -> inTrig.pattern == null
-                                    || inTrig.pattern.matcher(cleanStr).find();
+                            case REGEX -> inTrig.pattern != null
+                                    && inTrig.pattern.matcher(cleanStr).find();
                             case KEY -> keySearch(msg, inTrig.string) != null;
                         });
                         if (inMiss)

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.9
+
+- Fixed an issue causing regex inclusion triggers to always match
+
 ## 2.6.8
 
 - Fixed rendering of list items while dragging to reorder
