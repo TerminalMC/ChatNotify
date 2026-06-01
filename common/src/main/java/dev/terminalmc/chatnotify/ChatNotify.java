@@ -21,7 +21,7 @@ import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.StyleTarget;
 import dev.terminalmc.chatnotify.config.Trigger;
-import dev.terminalmc.chatnotify.util.ModLogger;
+import dev.terminalmc.chatnotify.util.Logging;
 import dev.terminalmc.chatnotify.util.ResponseUtil;
 import dev.terminalmc.chatnotify.util.TimingUtil;
 import dev.terminalmc.chatnotify.util.text.FormatUtil;
@@ -30,6 +30,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -42,7 +43,7 @@ public class ChatNotify {
 
     public static final String MOD_ID = "chatnotify";
     public static final String MOD_NAME = "ChatNotify";
-    public static final ModLogger LOG = new ModLogger(MOD_NAME);
+    public static final Logger LOG = Logging.getLogger(MOD_ID);
     public static boolean hasResetConfig = false;
 
     /**
@@ -56,10 +57,20 @@ public class ChatNotify {
      */
     public static final Queue<Component> unmodifiedChat = new LinkedList<>();
 
+    private ChatNotify() {
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
+    }
+
+    /**
+     * Client initialization.
+     */
     public static void init() {
         Config.getAndSave();
     }
 
+    /**
+     * Config save listener.
+     */
     public static void onConfigSaved(Config config) {
         // Compile regex triggers
         for (Notification notif : config.getNotifs()) {
@@ -83,6 +94,9 @@ public class ChatNotify {
         }
     }
 
+    /**
+     * Client after-tick event listener.
+     */
     public static void afterClientTick(Minecraft mc) {
         ResponseUtil.tickResponses(mc);
         TimingUtil.tickActions();

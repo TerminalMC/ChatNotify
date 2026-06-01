@@ -26,11 +26,11 @@ public class ChatNotifyFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Register client commands
+        ClientCommandRegistrationCallback.EVENT.register(Commands::register);
+
         // Register client after-tick event
         ClientTickEvents.END_CLIENT_TICK.register(ChatNotify::afterClientTick);
-
-        // Register all commands
-        ClientCommandRegistrationCallback.EVENT.register(Commands::register);
 
         // Initialize client
         ChatNotify.init();

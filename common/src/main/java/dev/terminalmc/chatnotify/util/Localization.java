@@ -20,7 +20,12 @@ import dev.terminalmc.chatnotify.ChatNotify;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-public final class Localization {
+@SuppressWarnings("unused")
+public class Localization {
+
+    private Localization() {
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
+    }
 
     public static String translationKey(String path) {
         return ChatNotify.MOD_ID + "." + path;

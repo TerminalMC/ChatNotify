@@ -212,7 +212,7 @@ public class Config {
     /**
      * Initializes default configuration.
      */
-    public Config() {
+    private Config() {
         this(
                 DebugMode.values()[0],
                 NotifMode.values()[0],
@@ -235,7 +235,7 @@ public class Config {
     /**
      * Not validated.
      */
-    Config(
+    private Config(
             DebugMode debugMode,
             NotifMode notifMode,
             RestyleMode restyleMode,

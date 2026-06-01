@@ -52,19 +52,19 @@ public class ChatNotifyNeoForge {
     static class ClientEventHandler {
 
         /**
+         * Registers all client commands.
+         */
+        @SubscribeEvent
+        public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+            Commands.register(event.getDispatcher(), event.getBuildContext());
+        }
+
+        /**
          * Registers client after-tick event.
          */
         @SubscribeEvent
         public static void clientTickEvent(ClientTickEvent.Post event) {
             ChatNotify.afterClientTick(Minecraft.getInstance());
-        }
-
-        /**
-         * Registers all commands.
-         */
-        @SubscribeEvent
-        public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
-            Commands.register(event.getDispatcher(), event.getBuildContext());
         }
     }
 }
