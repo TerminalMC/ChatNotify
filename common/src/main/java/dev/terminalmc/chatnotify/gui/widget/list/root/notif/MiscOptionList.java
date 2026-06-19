@@ -330,13 +330,13 @@ public class MiscOptionList extends OptionList {
                 localized("option", "notif.misc.reset.button"),
                 Tooltip.create(localized("option", "notif.misc.reset.tooltip")),
                 -1,
-                (button) -> mc.setScreen(new ConfirmScreen(
+                (button) -> mc.gui.setScreen(new ConfirmScreen(
                         (value) -> {
                             if (value) {
                                 Config.resetAndSave();
-                                mc.setScreen(null);
+                                mc.gui.setScreen(null);
                             } else {
-                                mc.setScreen(screen);
+                                mc.gui.setScreen(screen);
                                 init();
                             }
                         },

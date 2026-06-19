@@ -21,16 +21,16 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Config.CommonDetectionMode;
 import dev.terminalmc.chatnotify.util.text.MessageUtil;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 
 @SuppressWarnings("JavadocReference")
 @Mixin(
-        value = Gui.class,
+        value = Hud.class,
         priority = 792
 )
-public abstract class GuiMixin {
+public abstract class HudMixin {
 
     /**
      * HUD-level interceptor for action bar messages.
