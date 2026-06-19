@@ -377,7 +377,7 @@ public class SoundList extends OptionList {
 
                 elements.add(Button.builder(
                                 Component.literal(Unicode.SOUND.str),
-                                (button) -> Minecraft.getInstance()
+                                (button) -> Minecraft.getInstance().gui
                                         .setScreen(new SoundOptionsScreen(
                                                 list.screen,
                                                 Minecraft.getInstance().options

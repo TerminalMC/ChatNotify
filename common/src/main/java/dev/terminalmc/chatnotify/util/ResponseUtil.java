@@ -81,16 +81,16 @@ public class ResponseUtil {
         switch (Config.get().sendMode) {
             case SCREEN -> {
                 // Compat mode for mods mixing into handleChatInput
-                Screen oldScreen = mc.screen;
-                if (!(mc.screen instanceof ChatScreen)) {
-                    mc.setScreen(new ChatScreen("", false));
+                Screen oldScreen = mc.gui.screen();
+                if (!(mc.gui.screen() instanceof ChatScreen)) {
+                    mc.gui.setScreen(new ChatScreen("", false));
                 }
-                if (mc.screen instanceof ChatScreen cs) {
+                if (mc.gui.screen() instanceof ChatScreen cs) {
                     for (String msg : messages) {
                         cs.handleChatInput(msg, false);
                     }
                 }
-                mc.setScreen(oldScreen);
+                mc.gui.setScreen(oldScreen);
             }
             case PACKET -> {
                 for (String msg : messages) {

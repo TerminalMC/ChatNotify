@@ -108,9 +108,9 @@ public class ChatNotify {
         }
 
         // Config reset warning toast
-        if (hasResetConfig && mc.screen instanceof TitleScreen) {
+        if (hasResetConfig && mc.gui.screen() instanceof TitleScreen) {
             hasResetConfig = false;
-            mc.getToastManager().addToast(new SystemToast(
+            mc.gui.toastManager().addToast(new SystemToast(
                     new SystemToast.SystemToastId(15000L),
                     localized("toast", "reset.title"),
                     localized(

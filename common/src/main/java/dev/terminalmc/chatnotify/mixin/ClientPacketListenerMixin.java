@@ -25,7 +25,7 @@ import dev.terminalmc.chatnotify.config.Config.CommonDetectionMode;
 import dev.terminalmc.chatnotify.util.text.FormatUtil;
 import dev.terminalmc.chatnotify.util.text.MessageUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -82,71 +82,71 @@ public abstract class ClientPacketListenerMixin {
     /**
      * Packet-level interceptor for action bar messages.
      *
-     * @see GuiMixin#wrapSetOverlayMessage
+     * @see HudMixin#wrapSetOverlayMessage
      */
     @WrapOperation(
             method = "setActionBarText",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/Gui;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V"
+                    target = "Lnet/minecraft/client/gui/Hud;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V"
             )
     )
     private void wrapSetOverlayMessage(
-            Gui instance,
+            Hud instance,
             Component message,
-            boolean animateColor,
+            boolean animate,
             Operation<Void> original
     ) {
         if (Config.get().actionBarDetectionMode.equals(CommonDetectionMode.PACKET)) {
             message = MessageUtil.processMessage(message);
             if (message != null)
-                original.call(instance, message, animateColor);
+                original.call(instance, message, animate);
         } else {
-            original.call(instance, message, animateColor);
+            original.call(instance, message, animate);
         }
     }
 
     /**
      * Packet-level interceptor for title messages.
      *
-     * @see GuiMixin#wrapSetTitle
+     * @see HudMixin#wrapSetTitle
      */
     @WrapOperation(
             method = "setTitleText",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/Gui;setTitle(Lnet/minecraft/network/chat/Component;)V"
+                    target = "Lnet/minecraft/client/gui/Hud;setTitle(Lnet/minecraft/network/chat/Component;)V"
             )
     )
-    private void wrapSetTitle(Gui instance, Component message, Operation<Void> original) {
+    private void wrapSetTitle(Hud instance, Component title, Operation<Void> original) {
         if (Config.get().titleDetectionMode.equals(CommonDetectionMode.PACKET)) {
-            message = MessageUtil.processMessage(message);
-            if (message != null)
-                original.call(instance, message);
+            title = MessageUtil.processMessage(title);
+            if (title != null)
+                original.call(instance, title);
         } else {
-            original.call(instance, message);
+            original.call(instance, title);
         }
     }
 
     /**
      * Packet-level interceptor for subtitle messages.
      *
-     * @see GuiMixin#wrapSetSubtitle
+     * @see HudMixin#wrapSetSubtitle
      */
     @WrapOperation(
             method = "setSubtitleText",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/Gui;setSubtitle(Lnet/minecraft/network/chat/Component;)V"
+                    target = "Lnet/minecraft/client/gui/Hud;setSubtitle(Lnet/minecraft/network/chat/Component;)V"
             )
     )
-    private void wrapSetSubtitle(Gui instance, Component message, Operation<Void> original) {
+    private void wrapSetSubtitle(Hud instance, Component subtitle, Operation<Void> original) {
         if (Config.get().subtitleDetectionMode.equals(CommonDetectionMode.PACKET)) {
-            message = MessageUtil.processMessage(message);
-            if (message != null)
-                original.call(instance, message);
+            subtitle = MessageUtil.processMessage(subtitle);
+            if (subtitle != null)
+                original.call(instance, subtitle);
         } else {
-            original.call(instance, message);
+            original.call(instance, subtitle);
         }
     }
 

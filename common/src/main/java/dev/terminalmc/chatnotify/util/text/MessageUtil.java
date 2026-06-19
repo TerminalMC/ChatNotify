@@ -23,7 +23,7 @@ import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Response;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.toast.NotificationToast;
-import dev.terminalmc.chatnotify.mixin.accessor.GuiAccessor;
+import dev.terminalmc.chatnotify.mixin.accessor.HudAccessor;
 import dev.terminalmc.chatnotify.util.ResponseUtil;
 import dev.terminalmc.chatnotify.util.TimingUtil;
 import dev.terminalmc.chatnotify.util.Unicode;
@@ -580,8 +580,8 @@ public class MessageUtil {
                     ? msg
                     : convertMsg(notif.statusBarMsg, matcher, msg);
             Gui gui = Minecraft.getInstance().gui;
-            gui.setOverlayMessage(displayMsg, false);
-            ((GuiAccessor) gui).chatnotify$setOverlayMessageTime(notif.statusBarStay);
+            gui.hud.setOverlayMessage(displayMsg, false);
+            ((HudAccessor) gui).chatnotify$setOverlayMessageTime(notif.statusBarStay);
         }
     }
 
@@ -603,15 +603,15 @@ public class MessageUtil {
                     ? msg
                     : convertMsg(notif.subtitleMsg, matcher, msg);
 
-            Minecraft.getInstance().gui.setTimes(
+            Minecraft.getInstance().gui.hud.setTimes(
                     notif.titleFadeIn,
                     notif.titleStay,
                     notif.titleFadeOut
             );
-            Minecraft.getInstance().gui.setTitle(displayMsg);
+            Minecraft.getInstance().gui.hud.setTitle(displayMsg);
 
             if (notif.subtitleMsgEnabled)
-                Minecraft.getInstance().gui.setSubtitle(subDisplayMsg);
+                Minecraft.getInstance().gui.hud.setSubtitle(subDisplayMsg);
         }
     }
 
@@ -630,7 +630,8 @@ public class MessageUtil {
                     : convertMsg(notif.toastMsg, matcher, msg);
             // Convert from ticks to milliseconds
             Minecraft.getInstance()
-                    .getToastManager()
+                    .gui
+                    .toastManager()
                     .addToast(new NotificationToast(displayMsg, notif.toastStay * 50));
         }
     }
@@ -644,10 +645,10 @@ public class MessageUtil {
      *                otherwise.
      */
     private static void typeTypedMsg(Notification notif, Component msg, Matcher matcher) {
-        if (notif.typedMsgEnabled && Minecraft.getInstance().screen == null) {
+        if (notif.typedMsgEnabled && Minecraft.getInstance().gui.screen() == null) {
             Component displayMsg =
                     notif.typedMsg.isBlank() ? msg : convertMsg(notif.typedMsg, matcher, msg);
-            Minecraft.getInstance().setScreen(new ChatScreen(displayMsg.getString(), false));
+            Minecraft.getInstance().gui.setScreen(new ChatScreen(displayMsg.getString(), false));
         }
     }
 
