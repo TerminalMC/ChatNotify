@@ -58,6 +58,10 @@ public class SoundList extends OptionList {
             "block.note_block.iron_xylophone",
             "block.note_block.pling",
             "block.note_block.snare",
+            "block.note_block.trumpet",
+            "block.note_block.trumpet_exposed",
+            "block.note_block.trumpet_oxidized",
+            "block.note_block.trumpet_weathered",
             "block.note_block.xylophone",
     };
     public static final String[] POWER_SOUNDS = new String[]{
