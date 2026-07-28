@@ -222,7 +222,7 @@
   "sound.chatnotify.group.explosion": "Звуки взрыва",
   "sound.chatnotify.group.illager": "Звуки разбойников",
   "sound.chatnotify.group.misc": "Разные звуки",
-  "sound.chatnotify.group.noteblock": "Звуки блока заметок",
+  "sound.chatnotify.group.noteblock": "Звуки нотного блока",
   "sound.chatnotify.group.power": "Звуки энергии/портала",
   "sound.chatnotify.id.block.amethyst_block.hit": "Аметист 1",
   "sound.chatnotify.id.block.amethyst_cluster.place": "Аметист 2",
