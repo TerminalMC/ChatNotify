@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.102.6
+
+- Added trumpet sounds (rfin0)
+
 ## 3.102.5
 
 - Reset `mc` version counter to 1 at mc1.0.0
