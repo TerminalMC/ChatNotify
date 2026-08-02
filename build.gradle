@@ -35,7 +35,7 @@ subprojects {
     apply(plugin: "net.neoforged.licenser")
     final licenseDir = "src/main/resources/assets/${mod_id}/license/"
     license {
-        include("**/*.java") // Java files only
+        include("**/*.java")
         // Apply main license header
         header = rootProject.project("common").file("${licenseDir}HEADER.txt")
         properties {
@@ -134,8 +134,12 @@ subprojects {
                     minecraftVersions.addAll(prop.safeList("mc_versions_${sp.name}").findAll {
                         !it.contains("-")
                     })
-                    client = prop.safeList("curseforge_environments").contains("client")
-                    server = prop.safeList("curseforge_environments").contains("server")
+                    final envs = prop.list("curseforge_environments")
+                    if (!envs.contains("client") && !envs.contains("server")) {
+                        throw new Exception("Property [curseforge_environments] must contain at least one of [client, server]")
+                    }
+                    client = envs.contains("client")
+                    server = envs.contains("server")
                     changelog = cLog
                     prop.safeList("${sp.name}_deps").each { dep ->
                         try {
