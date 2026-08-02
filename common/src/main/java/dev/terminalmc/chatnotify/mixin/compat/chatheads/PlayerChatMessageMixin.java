@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.compat.chatheads;
+package dev.terminalmc.chatnotify.mixin.compat.chatheads;
 
+import dev.terminalmc.chatnotify.compat.chatheads.Ownable;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.PlayerChatMessage;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
 
-/**
- * Mimics {@link dzwdz.chat_heads.mixininterface.Ownable} to allow access without classloading
- * ChatHeads.
- */
-public interface Ownable {
+@Mixin(PlayerChatMessage.class)
+public abstract class PlayerChatMessageMixin implements Ownable {
 
-    @Nullable PlayerInfo chatheads$getOwner();
+    @Override
+    public @Nullable PlayerInfo chatheads$getOwner() {
+        return null;
+    }
 
-    void chatheads$setOwner(PlayerInfo playerInfo);
+    @Override
+    public void chatheads$setOwner(@Nullable PlayerInfo playerInfo) {
+        // no-op
+    }
 }

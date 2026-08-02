@@ -106,7 +106,7 @@ public abstract class ChatListenerMixin {
         if (Config.get().detectionMode.equals(ChatDetectionMode.PACKET)) {
             ChatHeadsCompat.handleAddedMessage(
                     message,
-                    ((Ownable) message).chatheads$getOwner()
+                    ((Ownable) (Object) playerChatMessage).chatheads$getOwner()
             );
             message = MessageUtil.processMessage(message);
             if (message != null)

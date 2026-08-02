@@ -3,6 +3,7 @@
 ## 3.102.6
 
 - Added trumpet sounds (rfin0)
+- Fixed a network crash when using packet detection
 
 ## 3.102.5
 

@@ -24,7 +24,8 @@
     "accessor.ScreenAccessor",
     "accessor.StringViewAccessor",
     "accessor.StyleAccessor",
-    "accessor.TextColorAccessor"
+    "accessor.TextColorAccessor",
+    "compat.chatheads.PlayerChatMessageMixin"
   ],
   "server": [
   ],
