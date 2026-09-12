@@ -17,13 +17,11 @@
 package dev.terminalmc.chatnotify.gui.widget;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * A {@link Button} that accepts right as well as left clicks.
@@ -55,10 +53,7 @@ public class RightClickableButton extends Button.Plain {
 
     @Override
     public void onClick(@NotNull MouseButtonEvent event, boolean doubleClick) {
-        if (GLFW.glfwGetMouseButton(
-                Minecraft.getInstance().getWindow().handle(),
-                InputConstants.MOUSE_BUTTON_RIGHT
-        ) == 1) {
+        if (event.isRight()) {
             onRightPress();
         } else {
             onPress(event);
