@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.103.2
+
+- Fixed a compatibility issue with ChatHeads
+
 ## 3.103.1
 
 - Added trumpet sounds (rfin0)

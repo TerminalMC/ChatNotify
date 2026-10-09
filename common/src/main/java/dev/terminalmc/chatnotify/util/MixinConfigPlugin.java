@@ -16,6 +16,7 @@
 
 package dev.terminalmc.chatnotify.util;
 
+import dev.terminalmc.chatnotify.platform.services.PlatformServices;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -36,9 +37,9 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-//        if (mixinClassName.contains("mixin.somesubpackage")) {
-//            return PlatformServices.getInstance().isModLoaded("somemodid");
-//        }
+        if (mixinClassName.contains("compat.chatheads")) {
+            return !PlatformServices.getInstance().isModLoaded("chat_heads");
+        }
         return true;
     }
 
