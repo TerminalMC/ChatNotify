@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.104.1
+
+- Fixed a compatibility issue with ChatHeads
+
 ## 3.104.0
 
 - Updated to mc26.3
