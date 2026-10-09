@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.102.7
+
+- Fixed a compatibility issue with ChatHeads
+
 ## 3.102.6
 
 - Added trumpet sounds (rfin0)
